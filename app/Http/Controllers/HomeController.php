@@ -23,43 +23,45 @@ class HomeController extends Controller
     }
 
     // Phương thức Dashboard của Applicant
-    public function applicantDashboard()
+    public function applicantDashboard(Request $request)
     {
-        $jobs = JobPost::with(['company', 'hashtags', 'detail'])->get();
+        // ✅ Phân trang jobs - 12 items/page
+        $jobs = JobPost::with(['company', 'hashtags', 'detail'])
+            ->where('status', 'active') // Chỉ lấy job đang active
+            ->orderBy('created_at', 'desc')
+            ->paginate(12);
 
-        // ✅ Lấy thông tin applicant và các dữ liệu liên quan
-        $applicant = null;
-        $hocvan = collect();
-        $kinhnghiem = collect();
-        $kynang = collect();
+        // ✅ Thống kê
+        $stats = [
+            'total_jobs' => JobPost::where('status', 'active')->count(),
+            'total_companies' => JobPost::distinct('companies_id')->count('companies_id'),
+            'total_applicants' => 15000, // Hoặc lấy từ DB
+            'satisfaction_rate' => 98,
+        ];
 
-        if (Auth::check() && Auth::user()->applicant) {
-            $applicant = Auth::user()->applicant;
+        // ✅ Top 12 công ty (theo số lượng job)
+        $topCompanies = JobPost::with('company')
+            ->select('companies_id', DB::raw('COUNT(*) as job_count'))
+            ->where('status', 'active')
+            ->groupBy('companies_id')
+            ->orderBy('job_count', 'desc')
+            ->limit(12)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'company' => $item->company,
+                    'job_count' => $item->job_count,
+                ];
+            });
 
-            // Lấy học vấn
-            $hocvan = HocVan::where('applicant_id', $applicant->id_uv)
-                ->orderBy('tu_ngay', 'desc')
-                ->get();
+        // ✅ Blog posts (nếu có bảng blogs)
+        // $blogs = Blog::latest()->take(6)->get();
 
-            // Lấy kinh nghiệm
-            $kinhnghiem = KinhNghiem::where('applicant_id', $applicant->id_uv)
-                ->orderBy('tu_ngay', 'desc')
-                ->get();
-
-            // Lấy kỹ năng
-            $kynang = DB::table('ky_nang')
-                ->where('applicant_id', $applicant->id_uv)
-                ->get();
-        }
-
-        // Trả về view với đầy đủ dữ liệu
         return view('applicant.homeapp', [
             'jobs' => $jobs,
-            'showLogin' => false,
-            'applicant' => $applicant,
-            'hocvan' => $hocvan,
-            'kinhnghiem' => $kinhnghiem,
-            'kynang' => $kynang,
+            'stats' => $stats,
+            'topCompanies' => $topCompanies,
+            // 'blogs' => $blogs,
         ]);
     }
 }

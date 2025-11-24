@@ -643,6 +643,7 @@
                         </div>
                     </div>
                     <!-- Section Kỹ năng -->
+                    <!-- Section Kỹ năng -->
                     <div class="card shadow-sm border-0 rounded-3 mb-3">
                         <div class="card-body d-flex justify-content-between align-items-start">
                             <div class="flex-grow-1">
@@ -653,12 +654,22 @@
                                     <h5 class="fw-bold mb-0">Kỹ năng</h5>
                                 </div>
                                 @if(isset($kynang) && count($kynang) > 0)
-                                <div>
+                                <div class="mt-3">
                                     @foreach($kynang as $kn)
-                                    <span class="badge bg-primary fs-6 me-1 mb-2">
-                                        <strong>{{ $kn->ten_ky_nang }}</strong>
-                                        ({{ $kn->nam_kinh_nghiem == 0 ? '<1 năm' : $kn->nam_kinh_nghiem . ' năm' }})
-                                    </span>
+                                    <div class="d-inline-flex align-items-center badge bg-primary text-white me-2 mb-2 p-2 fs-6">
+                                        <div class="me-2">
+                                            <strong>{{ $kn->ten_ky_nang }}</strong>
+                                            <span class="opacity-75">
+                                                ({{ $kn->nam_kinh_nghiem == 0 ? '<1 năm' : $kn->nam_kinh_nghiem . ' năm' }})
+                                            </span>
+                                        </div>
+                                        <button type="button"
+                                            class="btn btn-sm btn-link text-white p-0 deleteKyNangBtn"
+                                            data-id="{{ $kn->id }}"
+                                            title="Xóa">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    </div>
                                     @endforeach
                                 </div>
                                 @else
@@ -1805,6 +1816,7 @@
                     </div>
 
                     <!-- Modal Thêm Kỹ Năng -->
+                    <!-- Modal Thêm Kỹ Năng -->
                     <div class="modal fade" id="addKyNangModal" tabindex="-1" aria-labelledby="addKyNangModalLabel" aria-hidden="true">
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content rounded-3 shadow">
@@ -1815,44 +1827,94 @@
                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
 
-                                <form action="{{ route('applicant.storeKyNang') }}" method="POST">
+                                <form id="kyNangForm" action="{{ route('applicant.storeKyNang') }}" method="POST">
                                     @csrf
                                     <div class="modal-body">
+                                        <p class="text-muted mb-3">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            Thêm các kỹ năng bạn sở hữu và năm kinh nghiệm của bạn
+                                        </p>
 
-                                        <!-- Nhập kỹ năng (autocomplete) -->
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Tên kỹ năng</label>
-                                            <input type="text" name="ten_ky_nang[]" class="form-control skill-input" placeholder="Nhập kỹ năng...">
-                                            <div class="form-text">Ví dụ: Java, PHP, HTML, CSS...</div>
+                                        <!-- Danh sách kỹ năng đã chọn (hiển thị tạm thời) -->
+                                        <div id="selectedSkills" class="mb-3"></div>
+
+                                        <!-- Form nhập kỹ năng mới -->
+                                        <div class="border rounded p-3 bg-light">
+                                            <div class="row">
+                                                <!-- Tìm kỹ năng -->
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label fw-bold">Tên kỹ năng <span class="text-danger">*</span></label>
+                                                    <input type="text" id="skillInput" class="form-control" list="skillSuggestions" placeholder="Nhập kỹ năng...">
+                                                    <datalist id="skillSuggestions">
+                                                        <option value="Java">
+                                                        <option value="PHP">
+                                                        <option value="Python">
+                                                        <option value="JavaScript">
+                                                        <option value="HTML">
+                                                        <option value="CSS">
+                                                        <option value="Laravel">
+                                                        <option value="React">
+                                                        <option value="Vue.js">
+                                                        <option value="Node.js">
+                                                        <option value="SQL">
+                                                        <option value="MySQL">
+                                                        <option value="MongoDB">
+                                                        <option value="Git">
+                                                        <option value="Docker">
+                                                        <option value="AWS">
+                                                        <option value="Azure">
+                                                        <option value="Angular">
+                                                        <option value="TypeScript">
+                                                        <option value="C++">
+                                                        <option value="C#">
+                                                        <option value=".NET">
+                                                        <option value="Spring Boot">
+                                                        <option value="Django">
+                                                        <option value="Flask">
+                                                        <option value="Express.js">
+                                                        <option value="REST API">
+                                                        <option value="GraphQL">
+                                                        <option value="Redis">
+                                                        <option value="PostgreSQL">
+                                                        <option value="Elasticsearch">
+                                                    </datalist>
+                                                    <div class="form-text">Ví dụ: Java, PHP, HTML, CSS...</div>
+                                                </div>
+
+                                                <!-- Chọn năm kinh nghiệm -->
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label fw-bold">Năm kinh nghiệm <span class="text-danger">*</span></label>
+                                                    <select id="experienceSelect" class="form-select">
+                                                        <option value="">-- Chọn năm kinh nghiệm --</option>
+                                                        <option value="0">&lt; 1 năm</option>
+                                                        @for($i = 1; $i <= 10; $i++)
+                                                            <option value="{{ $i }}">{{ $i }} năm</option>
+                                                            @endfor
+                                                            <option value="10+">10+ năm</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <!-- Nút thêm kỹ năng vào danh sách -->
+                                            <button type="button" class="btn btn-primary btn-sm" id="addSkillBtn">
+                                                <i class="bi bi-plus-lg"></i> Thêm
+                                            </button>
                                         </div>
 
-                                        <!-- Năm kinh nghiệm -->
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Năm kinh nghiệm</label>
-                                            <select name="nam_kinh_nghiem[]" class="form-select">
-                                                <option value="<1"> &lt; 1 năm </option>
-                                                @for($i=1; $i<=10; $i++)
-                                                    <option value="{{ $i }}">{{ $i }} năm</option>
-                                                    @endfor
-                                            </select>
-                                        </div>
-
-                                        <!-- Nút thêm nhiều kỹ năng -->
-                                        <div id="moreSkills"></div>
-                                        <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="addMoreSkill">
-                                            <i class="bi bi-plus-lg"></i> Thêm kỹ năng khác
-                                        </button>
-
+                                        <!-- Hidden inputs cho form submit -->
+                                        <div id="hiddenSkillInputs"></div>
                                     </div>
+
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                                        <button type="submit" class="btn btn-danger">Lưu</button>
+                                        <button type="submit" class="btn btn-danger" id="submitKyNangBtn" disabled>
+                                            <i class="bi bi-check-lg"></i> Lưu
+                                        </button>
                                     </div>
                                 </form>
                             </div>
                         </div>
                     </div>
-
                     <!-- Modal Thêm/Sửa Dự Án Nổi Bật -->
                     <div class="modal fade" id="addDuAnModal" tabindex="-1" aria-labelledby="addDuAnModalLabel" aria-hidden="true">
                         <div class="modal-dialog modal-xl">
@@ -2715,24 +2777,227 @@
         });
 
         // ============ XỬ LÝ KỸ NĂNG ============
+        // ============ XỬ LÝ KỸ NĂNG - THÊM VÀO DANH SÁCH TẠM THỜI ============
 
-        document.getElementById('addMoreSkill').addEventListener('click', function() {
-            const skillBlock = `
-        <div class="skill-item border rounded p-3 mb-3">
-            <label class="form-label fw-bold">Tên kỹ năng</label>
-            <input type="text" name="ten_ky_nang[]" class="form-control skill-input" placeholder="Nhập kỹ năng...">
+        document.addEventListener('DOMContentLoaded', function() {
+            const skillInput = document.getElementById('skillInput');
+            const experienceSelect = document.getElementById('experienceSelect');
+            const addSkillBtn = document.getElementById('addSkillBtn');
+            const selectedSkills = document.getElementById('selectedSkills');
+            const hiddenSkillInputs = document.getElementById('hiddenSkillInputs');
+            const submitBtn = document.getElementById('submitKyNangBtn');
 
-            <label class="form-label fw-bold mt-2">Năm kinh nghiệm</label>
-            <select name="nam_kinh_nghiem[]" class="form-select">
-                <option value="<1">&lt; 1 năm</option>
-                ${[...Array(10).keys()].map(i => `<option value="${i+1}">${i+1} năm</option>`).join('')}
-            </select>
-            <button type="button" class="btn btn-sm btn-outline-danger mt-2 remove-skill">Xóa</button>
-        </div>
-    `;
-            document.getElementById('moreSkills').insertAdjacentHTML('beforeend', skillBlock);
+            let skills = [];
+
+            // ========== THÊM KỸ NĂNG VÀO DANH SÁCH TẠM THỜI ==========
+            if (addSkillBtn) {
+                addSkillBtn.addEventListener('click', function() {
+                    const skill = skillInput.value.trim();
+                    const experience = experienceSelect.value;
+
+                    // Validate input
+                    if (!skill || !experience) {
+                        alert('Vui lòng nhập đầy đủ tên kỹ năng và năm kinh nghiệm!');
+                        return;
+                    }
+
+                    // Kiểm tra trùng lặp (không phân biệt hoa thường)
+                    const exists = skills.find(item => item.skill.toLowerCase() === skill.toLowerCase());
+                    if (exists) {
+                        alert('Kỹ năng này đã được thêm!');
+                        return;
+                    }
+
+                    // Thêm vào mảng
+                    skills.push({
+                        skill,
+                        experience
+                    });
+
+                    // Render lại danh sách
+                    renderSkills();
+
+                    // Clear input và focus
+                    skillInput.value = '';
+                    experienceSelect.value = '';
+                    skillInput.focus();
+
+                    // Enable nút submit
+                    if (submitBtn) submitBtn.disabled = false;
+                });
+            }
+
+            // ========== RENDER DANH SÁCH KỸ NĂNG ĐÃ CHỌN ==========
+            function renderSkills() {
+                // Nếu không có kỹ năng nào
+                if (skills.length === 0) {
+                    if (selectedSkills) selectedSkills.innerHTML = '';
+                    if (hiddenSkillInputs) hiddenSkillInputs.innerHTML = '';
+                    if (submitBtn) submitBtn.disabled = true;
+                    return;
+                }
+
+                // Render phần hiển thị
+                if (selectedSkills) {
+                    selectedSkills.innerHTML = `
+                <div class="alert alert-success">
+                    <strong><i class="bi bi-check-circle me-1"></i>Kỹ năng đã chọn (${skills.length}):</strong>
+                </div>
+            `;
+
+                    skills.forEach((item, index) => {
+                        const expText = item.experience == 0 ? '<1 năm' :
+                            item.experience == '10+' ? '10+ năm' :
+                            `${item.experience} năm`;
+
+                        selectedSkills.innerHTML += `
+                    <div class="d-inline-flex align-items-center badge bg-primary text-white me-2 mb-2 p-2 fs-6">
+                        <div class="me-2">
+                            <strong>${item.skill}</strong>
+                            <span class="opacity-75"> (${expText})</span>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-link text-white p-0 removeSkillBtn" 
+                                data-index="${index}" title="Xóa">
+                            <i class="bi bi-x-circle"></i>
+                        </button>
+                    </div>
+                `;
+                    });
+                }
+
+                // Render hidden inputs cho form submit
+                if (hiddenSkillInputs) {
+                    hiddenSkillInputs.innerHTML = '';
+                    skills.forEach((item) => {
+                        hiddenSkillInputs.innerHTML += `
+                    <input type="hidden" name="ten_ky_nang[]" value="${item.skill}">
+                    <input type="hidden" name="nam_kinh_nghiem[]" value="${item.experience}">
+                `;
+                    });
+                }
+
+                // Gắn event cho nút xóa trong danh sách tạm
+                document.querySelectorAll('.removeSkillBtn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.dataset.index);
+                        skills.splice(index, 1);
+                        renderSkills();
+                    });
+                });
+            }
+
+            // ========== RESET KHI ĐÓNG MODAL ==========
+            const modalElement = document.getElementById('addKyNangModal');
+            if (modalElement) {
+                modalElement.addEventListener('hidden.bs.modal', function() {
+                    skills = [];
+                    renderSkills();
+                    if (skillInput) skillInput.value = '';
+                    if (experienceSelect) experienceSelect.value = '';
+                });
+            }
+
+            // ========== HỖ TRỢ PHÍM ENTER ĐỂ THÊM NHANH ==========
+            if (skillInput) {
+                skillInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addSkillBtn.click();
+                    }
+                });
+            }
+
+            if (experienceSelect) {
+                experienceSelect.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addSkillBtn.click();
+                    }
+                });
+            }
         });
+        // ========== XỬ LÝ XÓA KỸ NĂNG ĐÃ LƯU - EVENT DELEGATION ==========
 
+        document.body.addEventListener('click', function(e) {
+            // Tìm nút xóa kỹ năng
+            const deleteBtn = e.target.closest('.deleteKyNangBtn');
+
+            if (deleteBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const id = deleteBtn.dataset.id;
+
+                // Validate ID
+                if (!id) {
+                    console.error('Không tìm thấy ID kỹ năng');
+                    alert('Lỗi: Không xác định được kỹ năng cần xóa!');
+                    return;
+                }
+
+                // Lấy CSRF token
+                const csrfMeta = document.querySelector('meta[name="csrf-token"]');
+
+                if (!csrfMeta) {
+                    console.error('❌ KHÔNG TÌM THẤY meta tag csrf-token trong HTML!');
+                    alert('Lỗi hệ thống: Không tìm thấy CSRF token. Vui lòng reload trang!');
+                    return;
+                }
+
+                const csrfToken = csrfMeta.content;
+
+                if (!csrfToken) {
+                    console.error('❌ CSRF token rỗng!');
+                    alert('Lỗi: CSRF token không hợp lệ. Vui lòng reload trang!');
+                    return;
+                }
+
+                console.log('✅ CSRF Token:', csrfToken);
+                console.log('Đang gửi yêu cầu xóa kỹ năng ID:', id);
+
+                // Xác nhận xóa
+                if (confirm('Bạn có chắc muốn xóa kỹ năng này?')) {
+                    // Disable button và hiển thị loading
+                    deleteBtn.disabled = true;
+                    const originalHTML = deleteBtn.innerHTML;
+                    deleteBtn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
+
+                    // Gửi request xóa
+                    fetch(`/applicant/ky-nang/${id}/delete`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': csrfToken,
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(res => {
+                            console.log('Response status:', res.status);
+                            if (!res.ok) {
+                                throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+                            }
+                            return res.json();
+                        })
+                        .then(data => {
+                            console.log('Response data:', data);
+                            if (data.success) {
+                                alert('Đã xóa kỹ năng thành công!');
+                                location.reload();
+                            } else {
+                                alert(data.message || 'Có lỗi xảy ra khi xóa!');
+                                deleteBtn.disabled = false;
+                                deleteBtn.innerHTML = originalHTML;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Lỗi khi xóa:', error);
+                            alert('Không thể xóa kỹ năng!\nLỗi: ' + error.message);
+                            deleteBtn.disabled = false;
+                            deleteBtn.innerHTML = originalHTML;
+                        });
+                }
+            }
+        });
         // Xóa skill block
         document.addEventListener('click', function(e) {
             if (e.target.classList.contains('remove-skill')) {

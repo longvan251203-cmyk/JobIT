@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ApplicantController;
@@ -63,22 +64,9 @@ Route::prefix('applicant')->middleware(['auth'])->group(function () {
     Route::post('/hocvan/store', [ApplicantController::class, 'storeHocVan'])
         ->name('applicant.hocvan.store');
 
-    // Kinh nghiệm làm việc
 
-    // Thêm vào phần Applicant routes trong web.php
-    Route::middleware(['auth'])->group(function () {
-        // Kinh nghiệm làm việc - CRUD đầy đủ
-        Route::post('/kinhnghiem/store', [ApplicantController::class, 'storeKinhnghiem'])->name('kinhnghiem.store');
-        // web.php
-        Route::get('/kinhnghiem/{id}/edit', [ApplicantController::class, 'editKinhnghiem'])
-            ->name('kinhnghiem.edit');
-        Route::post('/kinhnghiem/{id}/update', [ApplicantController::class, 'updateKinhnghiem'])->name('kinhnghiem.update');
-        Route::delete('/kinhnghiem/{id}/delete', [ApplicantController::class, 'deleteKinhnghiem'])->name('kinhnghiem.delete');
-    });
 
-    // Kỹ năng
-    Route::post('/kynang/store', [ApplicantController::class, 'storeKyNang'])
-        ->name('applicant.storeKyNang');
+
 
     // Xóa avatar
     Route::get('/delete-avatar', [ApplicantController::class, 'deleteAvatar'])
@@ -247,3 +235,65 @@ Route::post('/giaithuong/store', [ApplicantController::class, 'storeGiaiThuong']
 Route::get('/giaithuong/{id}/edit', [ApplicantController::class, 'editGiaiThuong'])->name('giaithuong.edit');
 Route::post('/giaithuong/{id}/update', [ApplicantController::class, 'updateGiaiThuong'])->name('giaithuong.update');
 Route::delete('/giaithuong/{id}', [ApplicantController::class, 'deleteGiaiThuong'])->name('giaithuong.delete');
+// ============ KỸ NĂNG - ĐẶT Ở CUỐI FILE, NGOÀI TẤT CẢ CÁC GROUP ============
+Route::middleware(['auth'])->group(function () {
+    // Lưu kỹ năng mới
+    Route::post('/applicant/ky-nang/store', [ApplicantController::class, 'storeKyNang'])
+        ->name('applicant.storeKyNang');
+
+    // Xóa kỹ năng - RETURN JSON
+    Route::post('/applicant/ky-nang/{id}/delete', [ApplicantController::class, 'deleteKyNang'])
+        ->name('applicant.deleteKyNang');
+});
+// Thêm vào phần Applicant routes trong web.php
+Route::middleware(['auth'])->group(function () {
+    // Kinh nghiệm làm việc - CRUD đầy đủ
+    Route::post('/kinhnghiem/store', [ApplicantController::class, 'storeKinhnghiem'])->name('kinhnghiem.store');
+    // web.php
+    Route::get('/kinhnghiem/{id}/edit', [ApplicantController::class, 'editKinhnghiem'])
+        ->name('kinhnghiem.edit');
+    Route::post('/kinhnghiem/{id}/update', [ApplicantController::class, 'updateKinhnghiem'])->name('kinhnghiem.update');
+    Route::delete('/kinhnghiem/{id}/delete', [ApplicantController::class, 'deleteKinhnghiem'])->name('kinhnghiem.delete');
+});
+// ==================== EMPLOYER - QUẢN LÝ ỨNG VIÊN ====================
+Route::middleware(['auth'])->group(function () {
+    // Danh sách ứng viên theo công việc
+    Route::get('/job/{job_id}/applicants', [ApplicationController::class, 'jobApplicants'])
+        ->name('job.applicants');
+
+    // ✅ Xem CV
+    Route::get('/application/{id}/view-cv', [ApplicationController::class, 'viewCV'])
+        ->name('application.viewCV');
+
+    // ✅ Gửi lời mời phỏng vấn
+    Route::post('/application/{id}/send-interview', [ApplicationController::class, 'sendInterviewInvitation'])
+        ->name('application.sendInterview');
+
+    // ✅ Từ chối ứng viên
+    Route::post('/application/{id}/reject', [ApplicationController::class, 'rejectApplication'])
+        ->name('application.reject');
+
+    // ✅ Cập nhật trạng thái
+    Route::post('/application/{id}/update-status', [ApplicationController::class, 'updateStatus'])
+        ->name('application.updateStatus');
+
+    // Thêm ghi chú
+    Route::post('/application/{id}/add-note', [ApplicationController::class, 'addNote'])
+        ->name('application.addNote');
+
+    // Download CV
+    Route::get('/application/{id}/download-cv', [ApplicationController::class, 'downloadCV'])
+        ->name('application.downloadCV');
+    // ✅ ROUTE MỚI - GỬI EMAIL KẾT QUẢ PHỎNG VẤN
+    Route::post('/application/{id}/send-result-email', [ApplicationController::class, 'sendResultEmail']);
+});
+// Route Dashboard
+Route::get('/applicant-dashboard', [HomeController::class, 'applicantDashboard'])
+    ->name('applicant.dashboard')
+    ->middleware('auth');
+// Kiểm tra trạng thái ứng tuyển
+Route::get('/api/jobs/{id}/check-application', [JobController::class, 'checkApplicationStatus']);
+
+// Lấy danh sách job đã ứng tuyển
+Route::get('/api/applied-jobs', [JobController::class, 'getAppliedJobIds']);
+Route::get('/api/jobs', [JobController::class, 'getJobsPaginated']);

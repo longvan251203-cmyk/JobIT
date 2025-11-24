@@ -9,114 +9,213 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .animate-fadeIn {
-            animation: fadeIn 0.3s ease-out;
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f8f9fa;
         }
 
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 9999px;
-            font-size: 0.75rem;
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .page-header {
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            font-size: 14px;
+            color: #6b7280;
+        }
+
+        /* Statistics */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        /* Table */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f9fafb;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        th {
+            padding: 16px;
+            text-align: left;
+            font-size: 13px;
             font-weight: 600;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #f3f4f6;
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+        }
+
+        /* Avatar */
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        /* Status badges */
+        .status-badge {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
         }
 
         .status-chua_xem {
-            background: #f3f4f6;
-            color: #6b7280;
+            background: #fef3c7;
+            color: #d97706;
         }
 
         .status-da_xem {
             background: #dbeafe;
-            color: #1e40af;
+            color: #2563eb;
         }
 
         .status-phong_van {
-            background: #fef3c7;
-            color: #b45309;
+            background: #dbeafe;
+            color: #2563eb;
         }
 
         .status-duoc_chon {
             background: #d1fae5;
-            color: #065f46;
+            color: #059669;
         }
 
         .status-tu_choi {
             background: #fee2e2;
-            color: #991b1b;
+            color: #dc2626;
         }
 
-        .filter-btn {
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
             padding: 8px 16px;
             border-radius: 8px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            border: 2px solid #e5e7eb;
-            background: white;
-            color: #6b7280;
+            font-size: 13px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .filter-btn:hover {
-            border-color: #9333ea;
-            color: #9333ea;
-        }
-
-        .filter-btn.active {
-            background: linear-gradient(135deg, #9333ea 0%, #3b82f6 100%);
-            color: white;
-            border-color: transparent;
-        }
-
-        .applicant-card {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 20px;
-            transition: all 0.3s;
-        }
-
-        .applicant-card:hover {
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .avatar-circle {
-            width: 56px;
-            height: 56px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid #f3f4f6;
-        }
-
-        .action-btn {
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: all 0.2s;
-            border: 1px solid;
-            cursor: pointer;
+            border: none;
             display: inline-flex;
             align-items: center;
-            gap: 4px;
+            gap: 6px;
+            transition: all 0.2s;
         }
 
+        .btn-primary {
+            background: #6366f1;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4f46e5;
+        }
+
+        .btn-success {
+            background: #8b5cf6;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #7c3aed;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #6366f1;
+            border: 2px solid #6366f1;
+        }
+
+        .btn-secondary:hover {
+            background: #eef2ff;
+        }
+
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -128,494 +227,480 @@
             z-index: 1000;
             align-items: center;
             justify-content: center;
+            animation: fadeIn 0.2s;
         }
 
-        .modal.show {
+        .modal.active {
             display: flex;
         }
 
         .modal-content {
             background: white;
             border-radius: 16px;
-            max-width: 900px;
             width: 90%;
+            max-width: 600px;
             max-height: 90vh;
             overflow-y: auto;
-            animation: fadeIn 0.3s ease-out;
+            animation: slideUp 0.3s;
         }
 
-        .star {
-            transition: color 0.2s;
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        .star.active {
-            color: #fbbf24 !important;
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .modal-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: #f3f4f6;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: #e5e7eb;
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        /* Form elements */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-radio-group {
+            display: flex;
+            gap: 16px;
+        }
+
+        .form-radio-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .form-radio-label:hover {
+            border-color: #3b82f6;
+        }
+
+        .form-radio-label input[type="radio"] {
+            accent-color: #3b82f6;
+        }
+
+        .form-radio-label input[type="radio"]:checked+span {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Loading */
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
 
-<body class="bg-gradient-to-br from-gray-50 via-purple-50 to-blue-50">
-
-    <!-- Header -->
-    <header class="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
-        <div class="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
-            <div class="flex items-center gap-4">
-                <a href="{{ route('employer.dashboard') }}" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                    <i class="bi bi-arrow-left text-xl"></i>
-                </a>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="page-header">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
                 <div>
-                    <h1 class="text-xl font-bold text-gray-800">Danh sách ứng viên</h1>
-                    <p class="text-sm text-gray-600">{{ $job->title }}</p>
+                    <h1 class="page-title">Danh sách ứng viên</h1>
+                    <p class="page-subtitle">{{ $job->title }}</p>
                 </div>
-            </div>
-
-            <div class="flex items-center gap-3">
-                <button onclick="exportAllApplicants()" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all">
-                    <i class="bi bi-download me-2"></i>Xuất báo cáo
-                </button>
-            </div>
-        </div>
-    </header>
-
-    <main class="max-w-7xl mx-auto px-6 py-8">
-
-        <!-- Statistics Cards -->
-        <div class="grid grid-cols-2 md:grid-cols-6 gap-4 mb-8">
-            <div class="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-lg transition-all">
-                <div class="text-2xl font-bold text-gray-800">{{ $statistics['total'] }}</div>
-                <div class="text-sm text-gray-600">Tổng số</div>
-            </div>
-            <div class="bg-white rounded-xl p-4 border border-gray-200 hover:shadow-lg transition-all">
-                <div class="text-2xl font-bold text-gray-500">{{ $statistics['chua_xem'] }}</div>
-                <div class="text-sm text-gray-600">Chưa xem</div>
-            </div>
-            <div class="bg-white rounded-xl p-4 border border-blue-200 hover:shadow-lg transition-all">
-                <div class="text-2xl font-bold text-blue-600">{{ $statistics['da_xem'] }}</div>
-                <div class="text-sm text-gray-600">Đã xem</div>
-            </div>
-            <div class="bg-white rounded-xl p-4 border border-yellow-200 hover:shadow-lg transition-all">
-                <div class="text-2xl font-bold text-yellow-600">{{ $statistics['phong_van'] }}</div>
-                <div class="text-sm text-gray-600">Phỏng vấn</div>
-            </div>
-            <div class="bg-white rounded-xl p-4 border border-green-200 hover:shadow-lg transition-all">
-                <div class="text-2xl font-bold text-green-600">{{ $statistics['duoc_chon'] }}</div>
-                <div class="text-sm text-gray-600">Được chọn</div>
-            </div>
-            <div class="bg-white rounded-xl p-4 border border-red-200 hover:shadow-lg transition-all">
-                <div class="text-2xl font-bold text-red-600">{{ $statistics['tu_choi'] }}</div>
-                <div class="text-sm text-gray-600">Từ chối</div>
+                <a href="{{ route('employer.dashboard') }}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i>
+                    Quay lại
+                </a>
             </div>
         </div>
 
-        <!-- Filter & Search -->
-        <div class="bg-white rounded-xl p-6 mb-6 shadow-sm border border-gray-200">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-3">
-                    <input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"
-                        class="w-5 h-5 text-purple-600 rounded focus:ring-2 focus:ring-purple-500">
-                    <label for="selectAll" class="text-sm font-medium text-gray-700 cursor-pointer">Chọn tất cả</label>
-                </div>
-
-                <div class="flex gap-2">
-                    <button onclick="exportApplicants('excel')" class="px-3 py-2 text-sm bg-green-50 text-green-600 border border-green-200 rounded-lg hover:bg-green-100">
-                        <i class="bi bi-file-excel me-1"></i>Excel
-                    </button>
-                    <button onclick="exportApplicants('csv')" class="px-3 py-2 text-sm bg-blue-50 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-100">
-                        <i class="bi bi-filetype-csv me-1"></i>CSV
-                    </button>
-                    <button onclick="printApplicants()" class="px-3 py-2 text-sm bg-gray-50 text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-100">
-                        <i class="bi bi-printer me-1"></i>In
-                    </button>
-                </div>
+        <!-- Statistics -->
+        <!-- Phần Statistics - FIX trạng thái -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" style="color: #1f2937;">{{ $statistics['total'] }}</div>
+                <div class="stat-label">Tổng số</div>
             </div>
-
-            <div class="flex flex-wrap items-center justify-between gap-4">
-                <div class="flex flex-wrap gap-2">
-                    <button class="filter-btn active" data-status="all">
-                        <i class="bi bi-list-ul me-1"></i>Tất cả
-                    </button>
-                    <button class="filter-btn" data-status="chua_xem">
-                        <i class="bi bi-eye-slash me-1"></i>Chưa xem
-                    </button>
-                    <button class="filter-btn" data-status="da_xem">
-                        <i class="bi bi-eye me-1"></i>Đã xem
-                    </button>
-                    <button class="filter-btn" data-status="phong_van">
-                        <i class="bi bi-calendar-check me-1"></i>Phỏng vấn
-                    </button>
-                    <button class="filter-btn" data-status="duoc_chon">
-                        <i class="bi bi-check-circle me-1"></i>Được chọn
-                    </button>
-                    <button class="filter-btn" data-status="tu_choi">
-                        <i class="bi bi-x-circle me-1"></i>Từ chối
-                    </button>
-                </div>
-
-                <div class="relative">
-                    <input type="text" id="searchInput" placeholder="Tìm kiếm theo tên, email, SĐT..."
-                        class="pl-10 pr-4 py-2 w-80 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                    <i class="bi bi-search absolute left-3 top-3 text-gray-400"></i>
-                </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color: #d97706;">{{ $statistics['cho_xu_ly'] }}</div>
+                <div class="stat-label">Chờ xử lý</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color: #2563eb;">{{ $statistics['dang_phong_van'] }}</div>
+                <div class="stat-label">Đang phỏng vấn</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color: #059669;">{{ $statistics['duoc_chon'] }}</div>
+                <div class="stat-label">Được chọn</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color: #dc2626;">{{ $statistics['khong_phu_hop'] }}</div>
+                <div class="stat-label">Không phù hợp</div>
             </div>
         </div>
 
-        <!-- Bulk Actions Panel -->
-        <div id="bulkActionsPanel" class="hidden bg-white rounded-xl p-4 mb-6 shadow-sm border border-purple-200">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <i class="bi bi-check-circle text-purple-600 text-xl"></i>
-                    <span class="font-semibold">Đã chọn <span id="selectedCount">0</span> ứng viên</span>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="bulkUpdateStatus()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
-                        <i class="bi bi-pencil me-1"></i>Cập nhật trạng thái
-                    </button>
-                    <button onclick="sendBulkEmail()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                        <i class="bi bi-envelope me-1"></i>Gửi email
-                    </button>
-                    <button onclick="clearSelection()" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-                        <i class="bi bi-x-lg me-1"></i>Bỏ chọn
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Applicants List -->
-        <div id="applicantsList" class="space-y-4">
-            @forelse($applications as $application)
-            <div class="applicant-card animate-fadeIn" data-status="{{ $application->trang_thai }}">
-                <div class="flex items-start gap-4">
-                    <!-- Checkbox -->
-                    <input type="checkbox" class="applicant-checkbox mt-4" value="{{ $application->application_id }}"
-                        onchange="toggleApplicant(this)">
-
-                    <!-- Avatar -->
-                    <img src="{{ $application->applicant->avatar ? asset('assets/img/avt/'.$application->applicant->avatar) : asset('assets/img/avt/default-avatar.png') }}"
-                        alt="Avatar" class="avatar-circle">
-
-                    <!-- Info -->
-                    <div class="flex-1">
-                        <div class="flex items-start justify-between mb-2">
-                            <div>
-                                <h3 class="text-lg font-bold text-gray-800">{{ $application->hoten }}</h3>
-                                <p class="text-sm text-gray-600">{{ $application->applicant->chucdanh ?? 'Chưa cập nhật' }}</p>
+        <!-- Table -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 50px;">STT</th>
+                        <th>Ứng viên</th>
+                        <th>Email</th>
+                        <th>Số điện thoại</th>
+                        <th>Trạng thái</th>
+                        <th style="width: 300px;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($applications as $index => $application)
+                    <tr>
+                        <td>{{ $index + 1 }}</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <img src="{{ $application->applicant->avatar ? asset('assets/img/avt/'.$application->applicant->avatar) : asset('assets/img/avt/default-avatar.png') }}"
+                                    alt="Avatar" class="avatar">
+                                <div>
+                                    <div style="font-weight: 600; color: #1a1a1a;">{{ $application->hoten }}</div>
+                                    <div style="font-size: 13px; color: #6b7280;">{{ $application->applicant->chucdanh ?? 'Chưa cập nhật' }}</div>
+                                </div>
                             </div>
-                            <span class="status-badge status-{{ $application->trang_thai }}" id="status-{{ $application->application_id }}">
+                        </td>
+                        <td>
+                            <div style="font-size: 14px; color: #374151;">{{ $application->email }}</div>
+                        </td>
+                        <td>
+                            <div style="font-size: 14px; color: #374151;">{{ $application->sdt }}</div>
+                        </td>
+                        <!-- Phần Status Badge trong table - FIX -->
+                        <td>
+                            <span class="status-badge status-{{ $application->trang_thai }}" id="status-badge-{{ $application->application_id }}">
                                 @switch($application->trang_thai)
-                                @case('chua_xem')
-                                <i class="bi bi-eye-slash"></i> Chưa xem
+                                @case('cho_xu_ly')
+                                <i class="bi bi-clock-history"></i> Chờ xử lý
                                 @break
-                                @case('da_xem')
-                                <i class="bi bi-eye"></i> Đã xem
-                                @break
-                                @case('phong_van')
-                                <i class="bi bi-calendar-check"></i> Phỏng vấn
+                                @case('dang_phong_van')
+                                <i class="bi bi-calendar-check"></i> Đang phỏng vấn
                                 @break
                                 @case('duoc_chon')
                                 <i class="bi bi-check-circle"></i> Được chọn
                                 @break
-                                @case('tu_choi')
-                                <i class="bi bi-x-circle"></i> Từ chối
+                                @case('khong_phu_hop')
+                                <i class="bi bi-x-circle"></i> Không phù hợp
                                 @break
                                 @endswitch
                             </span>
-                        </div>
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-primary" onclick="viewCV('{{ $application->application_id }}')">
+                                    <i class="bi bi-eye"></i>
+                                    Xem CV
+                                </button>
 
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3 text-sm">
-                            <div class="flex items-center gap-2 text-gray-600">
-                                <i class="bi bi-envelope"></i>
-                                <span>{{ $application->email }}</span>
+                                @if($application->trang_thai == 'cho_xu_ly')
+                                <!-- Chờ xử lý: Hiển thị Mời PV và Không phù hợp -->
+                                <button class="btn btn-success" onclick="openInterviewModal('{{ $application->application_id }}', '{{ $application->hoten }}', '{{ $application->email }}')">
+                                    <i class="bi bi-calendar-check"></i>
+                                    Mời PV
+                                </button>
+                                <button class="btn btn-danger" onclick="rejectApplicant('{{ $application->application_id }}')">
+                                    <i class="bi bi-x-circle"></i>
+                                    Không phù hợp
+                                </button>
+                                @elseif($application->trang_thai == 'dang_phong_van')
+                                <!-- Đang phỏng vấn: Hiển thị Chọn đậu và Từ chối -->
+                                <button class="btn btn-success" onclick="approveApplicant('{{ $application->application_id }}', '{{ $application->hoten }}', '{{ $application->email }}')">
+                                    <i class="bi bi-check-circle"></i>
+                                    Chọn đậu
+                                </button>
+                                <button class="btn btn-danger" onclick="rejectApplicant('{{ $application->application_id }}')">
+                                    <i class="bi bi-x-circle"></i>
+                                    Từ chối
+                                </button>
+                                @endif
                             </div>
-                            <div class="flex items-center gap-2 text-gray-600">
-                                <i class="bi bi-telephone"></i>
-                                <span>{{ $application->sdt }}</span>
-                            </div>
-                            <div class="flex items-center gap-2 text-gray-600">
-                                <i class="bi bi-calendar"></i>
-                                <span>{{ $application->ngay_ung_tuyen->format('d/m/Y H:i') }}</span>
-                            </div>
-                            <div class="flex items-center gap-2 text-gray-600">
-                                <i class="bi bi-file-earmark"></i>
-                                <span>{{ $application->cv_type == 'upload' ? 'CV Upload' : 'Hồ sơ' }}</span>
-                            </div>
-                        </div>
+                        </td>
 
-                        <!-- Rating -->
-                        <div class="flex items-center gap-2 mb-3" data-app-id="{{ $application->application_id }}">
-                            <span class="text-sm text-gray-600">Đánh giá:</span>
-                            @for($i = 1; $i <= 5; $i++)
-                                <i class="bi bi-star-fill star text-gray-300 cursor-pointer text-lg hover:text-yellow-400"
-                                data-rating="{{ $i }}"
-                                onclick="rateApplicant({{ $application->application_id }}, {{ $i }})"></i>
-                                @endfor
-                        </div>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 60px 20px;">
+                            <i class="bi bi-inbox" style="font-size: 48px; color: #d1d5db;"></i>
+                            <p style="color: #6b7280; margin-top: 12px;">Chưa có ứng viên nào ứng tuyển</p>
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- 2️⃣ THÊM MODAL PHẢN HỒI PHỎNG VẤN -->
+    <div id="resultModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="bi bi-check-circle"></i>
+                    Xác nhận kết quả phỏng vấn
+                </h3>
+                <button class="modal-close" onclick="closeModal('resultModal')">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="resultAppId">
+                <input type="hidden" id="resultEmail">
+                <input type="hidden" id="resultName">
 
-                        @if($application->thu_gioi_thieu)
-                        <div class="bg-gray-50 rounded-lg p-3 mb-3">
-                            <p class="text-sm text-gray-700 line-clamp-2">{{ $application->thu_gioi_thieu }}</p>
-                        </div>
-                        @endif
+                <div class="form-group">
+                    <label class="form-label">Ứng viên</label>
+                    <div id="resultCandidateName" style="padding: 12px; background: #f9fafb; border-radius: 8px; font-weight: 600;"></div>
+                </div>
 
-                        <!-- Actions -->
-                        <div class="flex flex-wrap gap-2">
-                            <button class="action-btn bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100 btn-view-cv"
-                                data-app-id="{{ $application->application_id }}">
-                                <i class="bi bi-eye"></i>Xem CV
-                            </button>
+                <div class="form-group">
+                    <label class="form-label">Ghi chú (tùy chọn)</label>
+                    <textarea id="resultNote" class="form-textarea" placeholder="VD: Kỹ năng tốt, kinh nghiệm phù hợp..."></textarea>
+                </div>
 
-                            @if($application->cv_type == 'upload')
-                            <a href="{{ route('application.downloadCV', $application->application_id) }}"
-                                class="action-btn bg-green-50 text-green-600 border-green-200 hover:bg-green-100">
-                                <i class="bi bi-download"></i>Tải CV
-                            </a>
-                            @endif
-
-                            <button class="action-btn bg-yellow-50 text-yellow-600 border-yellow-200 hover:bg-yellow-100 btn-schedule-interview"
-                                data-app-id="{{ $application->application_id }}">
-                                <i class="bi bi-calendar-check"></i>Lịch PV
-                            </button>
-
-                            <button class="action-btn bg-purple-50 text-purple-600 border-purple-200 hover:bg-purple-100 btn-change-status"
-                                data-app-id="{{ $application->application_id }}"
-                                data-current-status="{{ $application->trang_thai }}">
-                                <i class="bi bi-pencil"></i>Đổi trạng thái
-                            </button>
-
-                            <button class="action-btn bg-orange-50 text-orange-600 border-orange-200 hover:bg-orange-100 btn-add-note"
-                                data-app-id="{{ $application->application_id }}"
-                                data-note="{{ e($application->ghi_chu ?? '') }}">
-                                <i class="bi bi-sticky"></i>Ghi chú
-                            </button>
-
-                            <a href="mailto:{{ $application->email }}"
-                                class="action-btn bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100">
-                                <i class="bi bi-envelope"></i>Email
-                            </a>
-
-                            <a href="tel:{{ $application->sdt }}"
-                                class="action-btn bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100">
-                                <i class="bi bi-telephone"></i>Gọi
-                            </a>
-
-                            @if($application->trang_thai != 'duoc_chon')
-                            <button class="action-btn bg-green-50 text-green-600 border-green-200 hover:bg-green-100 btn-quick-action"
-                                data-app-id="{{ $application->application_id }}"
-                                data-action="accept">
-                                <i class="bi bi-check-circle"></i>Chấp nhận
-                            </button>
-                            @endif
-
-                            @if($application->trang_thai != 'tu_choi')
-                            <button class="action-btn bg-red-50 text-red-600 border-red-200 hover:bg-red-100 btn-quick-action"
-                                data-app-id="{{ $application->application_id }}"
-                                data-action="reject">
-                                <i class="bi bi-x-circle"></i>Từ chối
-                            </button>
-                            @endif
-                        </div>
-                    </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" id="sendEmailResult" checked>
+                        <span style="margin-left: 8px;">Gửi email thông báo kết quả cho ứng viên</span>
+                    </label>
                 </div>
             </div>
-            @empty
-            <div class="text-center py-16">
-                <i class="bi bi-inbox text-6xl text-gray-300"></i>
-                <p class="text-gray-500 mt-4">Chưa có ứng viên nào ứng tuyển</p>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('resultModal')">
+                    Hủy
+                </button>
+                <button class="btn btn-success" id="resultBtn" onclick="submitResult()">
+                    <i class="bi bi-check-circle"></i>
+                    <span id="resultBtnText">Xác nhận</span>
+                </button>
             </div>
-            @endforelse
         </div>
-
-    </main>
+    </div>
 
     <!-- Modal: View CV -->
     <div id="cvModal" class="modal">
-        <div class="modal-content">
-            <div class="bg-gradient-to-r from-purple-600 to-blue-600 p-6 text-white flex items-center justify-between rounded-t-2xl">
-                <h3 class="text-2xl font-bold">
-                    <i class="bi bi-file-earmark-person me-2"></i>Hồ sơ ứng viên
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="bi bi-file-earmark-person"></i>
+                    Hồ sơ ứng viên
                 </h3>
-                <button onclick="closeCVModal()" class="text-white hover:bg-white/20 rounded-lg p-2 transition-all">
-                    <i class="bi bi-x-lg text-xl"></i>
+                <button class="modal-close" onclick="closeModal('cvModal')">
+                    <i class="bi bi-x-lg"></i>
                 </button>
             </div>
-            <div id="cvContent" class="p-6">
+            <div class="modal-body" id="cvContent">
                 <!-- CV content will be loaded here -->
             </div>
         </div>
     </div>
 
-    <!-- Modal: Change Status -->
-    <div id="statusModal" class="modal">
-        <div class="modal-content max-w-md">
-            <div class="p-6">
-                <h3 class="text-xl font-bold mb-4">Cập nhật trạng thái</h3>
-                <form id="statusForm">
-                    <input type="hidden" id="statusAppId">
-                    <div class="mb-4">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Trạng thái mới</label>
-                        <select id="newStatus" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                            <option value="chua_xem">Chưa xem</option>
-                            <option value="da_xem">Đã xem</option>
-                            <option value="phong_van">Phỏng vấn</option>
-                            <option value="duoc_chon">Được chọn</option>
-                            <option value="tu_choi">Từ chối</option>
-                        </select>
-                    </div>
-                    <div class="mb-4">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Ghi chú (tùy chọn)</label>
-                        <textarea id="statusNote" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></textarea>
-                    </div>
-                    <div class="flex gap-3">
-                        <button type="button" onclick="closeStatusModal()" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-                            Hủy
-                        </button>
-                        <button type="submit" class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
-                            Cập nhật
-                        </button>
-                    </div>
-                </form>
+    <!-- Modal: Interview Invitation -->
+    <div id="interviewModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">
+                    <i class="bi bi-calendar-check"></i>
+                    Mời phỏng vấn
+                </h3>
+                <button class="modal-close" onclick="closeModal('interviewModal')">
+                    <i class="bi bi-x-lg"></i>
+                </button>
             </div>
-        </div>
-    </div>
+            <div class="modal-body">
+                <input type="hidden" id="interviewAppId">
+                <input type="hidden" id="interviewEmail">
 
-    <!-- Modal: Note -->
-    <div id="noteModal" class="modal">
-        <div class="modal-content max-w-md">
-            <div class="p-6">
-                <h3 class="text-xl font-bold mb-4">Thêm ghi chú</h3>
-                <form id="noteForm">
-                    <input type="hidden" id="noteAppId">
-                    <div class="mb-4">
-                        <textarea id="noteContent" rows="5" placeholder="Nhập ghi chú về ứng viên..."
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"></textarea>
+                <div class="form-group">
+                    <label class="form-label">Ứng viên</label>
+                    <div id="interviewCandidateName" style="padding: 12px; background: #f9fafb; border-radius: 8px; font-weight: 600;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Hình thức phỏng vấn</label>
+                    <div class="form-radio-group">
+                        <label class="form-radio-label" style="flex: 1; border-color: #3b82f6;">
+                            <input type="radio" name="interviewType" value="online" checked>
+                            <span>
+                                <i class="bi bi-camera-video"></i>
+                                Online
+                            </span>
+                        </label>
+                        <label class="form-radio-label" style="flex: 1;">
+                            <input type="radio" name="interviewType" value="offline">
+                            <span>
+                                <i class="bi bi-building"></i>
+                                Offline
+                            </span>
+                        </label>
                     </div>
-                    <div class="flex gap-3">
-                        <button type="button" onclick="closeNoteModal()" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-                            Hủy
-                        </button>
-                        <button type="submit" class="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
-                            Lưu ghi chú
-                        </button>
-                    </div>
-                </form>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-calendar"></i>
+                        Ngày phỏng vấn
+                    </label>
+                    <input type="date" id="interviewDate" class="form-input" min="{{ date('Y-m-d') }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <i class="bi bi-clock"></i>
+                        Giờ phỏng vấn
+                    </label>
+                    <input type="time" id="interviewTime" class="form-input" value="09:00" required>
+                </div>
+
+                <div class="form-group" id="locationGroup">
+                    <label class="form-label">
+                        <i class="bi bi-camera-video"></i>
+                        Link meeting
+                    </label>
+                    <input type="text" id="interviewLocation" class="form-input" placeholder="https://meet.google.com/xxx hoặc để trống để tự tạo">
+                    <small style="color: #6b7280; font-size: 12px; display: block; margin-top: 4px;">
+                        💡 Có thể để trống, hệ thống sẽ tự tạo link Google Meet
+                    </small>
+                </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Modal: Bulk Status Update -->
-    <div id="bulkStatusModal" class="modal">
-        <div class="modal-content max-w-md">
-            <div class="p-6">
-                <h3 class="text-xl font-bold mb-4">Cập nhật trạng thái hàng loạt</h3>
-                <form id="bulkStatusForm">
-                    <div class="mb-4">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Trạng thái mới</label>
-                        <select id="bulkNewStatus" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
-                            <option value="chua_xem">Chưa xem</option>
-                            <option value="da_xem">Đã xem</option>
-                            <option value="phong_van">Phỏng vấn</option>
-                            <option value="duoc_chon">Được chọn</option>
-                            <option value="tu_choi">Từ chối</option>
-                        </select>
-                    </div>
-                    <div class="flex gap-3">
-                        <button type="button" onclick="closeBulkStatusModal()" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
-                            Hủy
-                        </button>
-                        <button type="submit" class="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
-                            Cập nhật
-                        </button>
-                    </div>
-                </form>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('interviewModal')">
+                    Hủy
+                </button>
+                <button class="btn btn-success" onclick="sendInterviewInvitation()">
+                    <i class="bi bi-send"></i>
+                    Gửi lời mời
+                </button>
             </div>
         </div>
     </div>
 
     <script>
-        // Global variables
-        let selectedApplicants = new Set();
+        // =====================================
+        // THAY ĐỔI HÌNH THỨC PHỎNG VẤN
+        // =====================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const radioButtons = document.querySelectorAll('input[name="interviewType"]');
+            radioButtons.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const locationGroup = document.getElementById('locationGroup');
+                    const locationInput = document.getElementById('interviewLocation');
+                    const label = locationGroup.querySelector('.form-label');
 
-        // Filter by status
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-
-                const status = this.dataset.status;
-                const cards = document.querySelectorAll('.applicant-card');
-
-                cards.forEach(card => {
-                    if (status === 'all' || card.dataset.status === status) {
-                        card.style.display = 'block';
+                    if (this.value === 'online') {
+                        label.innerHTML = '<i class="bi bi-camera-video"></i> Link meeting';
+                        locationInput.placeholder = 'https://meet.google.com/xxx hoặc để trống để tự tạo';
                     } else {
-                        card.style.display = 'none';
+                        label.innerHTML = '<i class="bi bi-building"></i> Địa điểm phỏng vấn';
+                        locationInput.placeholder = 'VD: Tầng 5, Tòa nhà ABC, 123 Nguyễn Huệ, Q1';
                     }
                 });
             });
         });
 
-        // Search functionality
-        document.getElementById('searchInput').addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const cards = document.querySelectorAll('.applicant-card');
-
-            cards.forEach(card => {
-                const text = card.textContent.toLowerCase();
-                card.style.display = text.includes(searchTerm) ? 'block' : 'none';
-            });
-        });
-
-        // Selection functions
-        function toggleSelectAll(checkbox) {
-            const checkboxes = document.querySelectorAll('.applicant-checkbox');
-            checkboxes.forEach(cb => {
-                cb.checked = checkbox.checked;
-                if (checkbox.checked) {
-                    selectedApplicants.add(parseInt(cb.value));
-                } else {
-                    selectedApplicants.delete(parseInt(cb.value));
-                }
-            });
-            updateBulkActions();
-        }
-
-        function toggleApplicant(checkbox) {
-            const appId = parseInt(checkbox.value);
-            if (checkbox.checked) {
-                selectedApplicants.add(appId);
-            } else {
-                selectedApplicants.delete(appId);
-            }
-            updateBulkActions();
-        }
-
-        function updateBulkActions() {
-            const panel = document.getElementById('bulkActionsPanel');
-            const count = document.getElementById('selectedCount');
-            count.textContent = selectedApplicants.size;
-
-            if (selectedApplicants.size > 0) {
-                panel.classList.remove('hidden');
-            } else {
-                panel.classList.add('hidden');
-            }
-        }
-
-        function clearSelection() {
-            selectedApplicants.clear();
-            document.querySelectorAll('.applicant-checkbox').forEach(cb => cb.checked = false);
-            document.getElementById('selectAll').checked = false;
-            updateBulkActions();
-        }
-
-        // View CV
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.btn-view-cv')) {
-                const btn = e.target.closest('.btn-view-cv');
-                const appId = btn.dataset.appId;
-                viewCV(appId);
-            }
-        });
-
+        // =====================================
+        // XEM CV
+        // =====================================
         async function viewCV(appId) {
             try {
                 const response = await fetch(`/application/${appId}/view-cv`, {
@@ -632,102 +717,93 @@
                     const application = data.application;
 
                     let cvHTML = `
-                <div class="flex gap-6">
+                <div style="display: flex; gap: 24px;">
                     <!-- Left Column -->
-                    <div class="w-1/3 bg-gradient-to-br from-purple-50 to-blue-50 p-6 rounded-xl">
-                        <div class="text-center mb-6">
+                    <div style="width: 280px; background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%); padding: 24px; border-radius: 12px;">
+                        <div style="text-align: center; margin-bottom: 24px;">
                             <img src="${applicant.avatar ? '/assets/img/avt/' + applicant.avatar : '/assets/img/avt/default-avatar.png'}" 
-                                 alt="Avatar" class="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-white shadow-lg">
-                            <h4 class="text-xl font-bold text-gray-800">${application.hoten}</h4>
-                            <p class="text-gray-600">${applicant.chucdanh || 'Chức danh'}</p>
+                                 alt="Avatar" style="width: 120px; height: 120px; border-radius: 50%; margin-bottom: 16px; border: 4px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+                            <h4 style="font-size: 18px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px;">${application.hoten}</h4>
+                            <p style="font-size: 14px; color: #6b7280;">${applicant.chucdanh || 'Chức danh'}</p>
                         </div>
                         
-                        <div class="space-y-3 text-sm">
-                            <div class="flex items-center gap-2 text-gray-700">
-                                <i class="bi bi-envelope"></i>
-                                <span>${application.email}</span>
+                        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <i class="bi bi-envelope" style="color: #3b82f6;"></i>
+                                <span style="color: #374151; word-break: break-word;">${application.email}</span>
                             </div>
-                            <div class="flex items-center gap-2 text-gray-700">
-                                <i class="bi bi-telephone"></i>
-                                <span>${application.sdt}</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <i class="bi bi-telephone" style="color: #3b82f6;"></i>
+                                <span style="color: #374151;">${application.sdt}</span>
                             </div>
                             ${application.diachi ? `
-                            <div class="flex items-center gap-2 text-gray-700">
-                                <i class="bi bi-geo-alt"></i>
-                                <span>${application.diachi}</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <i class="bi bi-geo-alt" style="color: #3b82f6;"></i>
+                                <span style="color: #374151;">${application.diachi}</span>
                             </div>` : ''}
                             ${applicant.ngaysinh ? `
-                            <div class="flex items-center gap-2 text-gray-700">
-                                <i class="bi bi-calendar"></i>
-                                <span>${new Date(applicant.ngaysinh).toLocaleDateString('vi-VN')}</span>
-                            </div>` : ''}
-                            ${applicant.gioitinh_uv ? `
-                            <div class="flex items-center gap-2 text-gray-700">
-                                <i class="bi bi-gender-ambiguous"></i>
-                                <span>${applicant.gioitinh_uv}</span>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <i class="bi bi-calendar" style="color: #3b82f6;"></i>
+                                <span style="color: #374151;">${new Date(applicant.ngaysinh).toLocaleDateString('vi-VN')}</span>
                             </div>` : ''}
                         </div>
                     </div>
                     
                     <!-- Right Column -->
-                    <div class="flex-1">
+                    <div style="flex: 1;">
                         ${application.thu_gioi_thieu ? `
-                        <div class="mb-6">
-                            <h5 class="text-lg font-bold text-purple-600 mb-3 flex items-center gap-2">
-                                <i class="bi bi-person-lines-fill"></i>Thư giới thiệu
+                        <div style="margin-bottom: 24px;">
+                            <h5 style="font-size: 16px; font-weight: 700; color: #1a1a1a; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                <i class="bi bi-person-lines-fill" style="color: #3b82f6;"></i>
+                                Thư giới thiệu
                             </h5>
-                            <p class="text-gray-700 whitespace-pre-line">${application.thu_gioi_thieu}</p>
-                        </div>` : ''}
-                        
-                        ${applicant.gioithieu ? `
-                        <div class="mb-6">
-                            <h5 class="text-lg font-bold text-purple-600 mb-3 flex items-center gap-2">
-                                <i class="bi bi-person"></i>Giới thiệu bản thân
-                            </h5>
-                            <div class="text-gray-700">${applicant.gioithieu}</div>
+                            <p style="color: #374151; line-height: 1.6; white-space: pre-line;">${application.thu_gioi_thieu}</p>
                         </div>` : ''}
                         
                         ${applicant.kinhnghiem && applicant.kinhnghiem.length > 0 ? `
-                        <div class="mb-6">
-                            <h5 class="text-lg font-bold text-purple-600 mb-3 flex items-center gap-2">
-                                <i class="bi bi-briefcase"></i>Kinh nghiệm làm việc
+                        <div style="margin-bottom: 24px;">
+                            <h5 style="font-size: 16px; font-weight: 700; color: #1a1a1a; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                <i class="bi bi-briefcase" style="color: #3b82f6;"></i>
+                                Kinh nghiệm làm việc
                             </h5>
-                            <div class="space-y-4">
+                            <div style="display: flex; flex-direction: column; gap: 16px;">
                                 ${applicant.kinhnghiem.map(item => `
-                                    <div class="border-l-4 border-purple-400 pl-4">
-                                        <h6 class="font-bold text-gray-800">${item.chucdanh}</h6>
-                                        <p class="text-sm text-gray-600">${item.congty}</p>
-                                        <p class="text-xs text-gray-500">${new Date(item.tu_ngay).toLocaleDateString('vi-VN')} - ${item.den_ngay ? new Date(item.den_ngay).toLocaleDateString('vi-VN') : 'Hiện tại'}</p>
-                                        ${item.mota ? `<p class="text-sm text-gray-700 mt-2">${item.mota}</p>` : ''}
+                                    <div style="border-left: 3px solid #3b82f6; padding-left: 16px;">
+                                        <h6 style="font-weight: 700; color: #1a1a1a; margin-bottom: 4px;">${item.chucdanh}</h6>
+                                        <p style="font-size: 14px; color: #6b7280; margin-bottom: 2px;">${item.congty}</p>
+                                        <p style="font-size: 12px; color: #9ca3af;">${new Date(item.tu_ngay).toLocaleDateString('vi-VN')} - ${item.den_ngay ? new Date(item.den_ngay).toLocaleDateString('vi-VN') : 'Hiện tại'}</p>
+                                        ${item.mota ? `<p style="font-size: 14px; color: #374151; margin-top: 8px;">${item.mota}</p>` : ''}
                                     </div>
                                 `).join('')}
                             </div>
                         </div>` : ''}
                         
                         ${applicant.hocvan && applicant.hocvan.length > 0 ? `
-                        <div class="mb-6">
-                            <h5 class="text-lg font-bold text-purple-600 mb-3 flex items-center gap-2">
-                                <i class="bi bi-mortarboard"></i>Học vấn
+                        <div style="margin-bottom: 24px;">
+                            <h5 style="font-size: 16px; font-weight: 700; color: #1a1a1a; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                <i class="bi bi-mortarboard" style="color: #3b82f6;"></i>
+                                Học vấn
                             </h5>
-                            <div class="space-y-3">
+                            <div style="display: flex; flex-direction: column; gap: 12px;">
                                 ${applicant.hocvan.map(item => `
-                                    <div class="border-l-4 border-blue-400 pl-4">
-                                        <h6 class="font-bold text-gray-800">${item.truong}</h6>
-                                        <p class="text-sm text-gray-600">${item.nganh} - ${item.trinhdo}</p>
-                                        <p class="text-xs text-gray-500">${new Date(item.tu_ngay).getFullYear()} - ${item.den_ngay ? new Date(item.den_ngay).getFullYear() : 'Hiện tại'}</p>
+                                    <div style="border-left: 3px solid #10b981; padding-left: 16px;">
+                                        <h6 style="font-weight: 700; color: #1a1a1a; margin-bottom: 4px;">${item.truong}</h6>
+                                        <p style="font-size: 14px; color: #6b7280; margin-bottom: 2px;">${item.nganh} - ${item.trinhdo}</p>
+                                        <p style="font-size: 12px; color: #9ca3af;">${new Date(item.tu_ngay).getFullYear()} - ${item.den_ngay ? new Date(item.den_ngay).getFullYear() : 'Hiện tại'}</p>
                                     </div>
                                 `).join('')}
                             </div>
                         </div>` : ''}
                         
                         ${applicant.kynang && applicant.kynang.length > 0 ? `
-                        <div class="mb-6">
-                            <h5 class="text-lg font-bold text-purple-600 mb-3 flex items-center gap-2">
-                                <i class="bi bi-star"></i>Kỹ năng
+                        <div style="margin-bottom: 24px;">
+                            <h5 style="font-size: 16px; font-weight: 700; color: #1a1a1a; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                <i class="bi bi-star" style="color: #3b82f6;"></i>
+                                Kỹ năng
                             </h5>
-                            <div class="flex flex-wrap gap-2">
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                                 ${applicant.kynang.map(item => `
-                                    <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm">
+                                    <span style="padding: 6px 12px; background: #dbeafe; color: #1e40af; border-radius: 16px; font-size: 13px; font-weight: 600;">
                                         ${item.ten_ky_nang}${item.nam_kinh_nghiem ? ` - ${item.nam_kinh_nghiem} năm` : ''}
                                     </span>
                                 `).join('')}
@@ -738,15 +814,7 @@
             `;
 
                     document.getElementById('cvContent').innerHTML = cvHTML;
-                    document.getElementById('cvModal').classList.add('show');
-
-                    // Update status badge if changed from chua_xem to da_xem
-                    const badge = document.getElementById(`status-${appId}`);
-                    if (badge && badge.classList.contains('status-chua_xem')) {
-                        badge.className = 'status-badge status-da_xem';
-                        badge.innerHTML = '<i class="bi bi-eye"></i> Đã xem';
-                        badge.closest('.applicant-card').dataset.status = 'da_xem';
-                    }
+                    openModal('cvModal');
                 } else {
                     alert('Không thể tải CV');
                 }
@@ -756,282 +824,110 @@
             }
         }
 
-        function closeCVModal() {
-            document.getElementById('cvModal').classList.remove('show');
+        // =====================================
+        // MỞ MODAL PHỎNG VẤN
+        // =====================================
+        function openInterviewModal(appId, candidateName, candidateEmail) {
+            document.getElementById('interviewAppId').value = appId;
+            document.getElementById('interviewEmail').value = candidateEmail;
+            document.getElementById('interviewCandidateName').textContent = candidateName;
+            document.getElementById('interviewDate').value = '';
+            document.getElementById('interviewTime').value = '09:00';
+            document.getElementById('interviewLocation').value = '';
+            openModal('interviewModal');
         }
 
-        // Change Status Modal
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.btn-change-status')) {
-                const btn = e.target.closest('.btn-change-status');
-                const appId = btn.dataset.appId;
-                const currentStatus = btn.dataset.currentStatus;
-                openStatusModal(appId, currentStatus);
-            }
-        });
+        // ✅ FIXED - Gửi lời mời phỏng vấn (Không còn alert trùng)
+        async function sendInterviewInvitation() {
+            const appId = document.getElementById('interviewAppId').value;
+            const email = document.getElementById('interviewEmail').value;
+            const date = document.getElementById('interviewDate').value;
+            const time = document.getElementById('interviewTime').value;
+            const location = document.getElementById('interviewLocation').value;
+            const type = document.querySelector('input[name="interviewType"]:checked').value;
 
-        function openStatusModal(appId, currentStatus) {
-            document.getElementById('statusAppId').value = appId;
-            document.getElementById('newStatus').value = currentStatus;
-            document.getElementById('statusNote').value = '';
-            document.getElementById('statusModal').classList.add('show');
-        }
-
-        function closeStatusModal() {
-            document.getElementById('statusModal').classList.remove('show');
-        }
-
-        document.getElementById('statusForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const appId = document.getElementById('statusAppId').value;
-            const status = document.getElementById('newStatus').value;
-            const note = document.getElementById('statusNote').value;
-
-            try {
-                const response = await fetch(`/application/${appId}/update-status`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        status,
-                        note
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    // Update status badge
-                    const badge = document.getElementById(`status-${appId}`);
-                    badge.className = `status-badge status-${status}`;
-
-                    let icon, text;
-                    switch (status) {
-                        case 'chua_xem':
-                            icon = 'eye-slash';
-                            text = 'Chưa xem';
-                            break;
-                        case 'da_xem':
-                            icon = 'eye';
-                            text = 'Đã xem';
-                            break;
-                        case 'phong_van':
-                            icon = 'calendar-check';
-                            text = 'Phỏng vấn';
-                            break;
-                        case 'duoc_chon':
-                            icon = 'check-circle';
-                            text = 'Được chọn';
-                            break;
-                        case 'tu_choi':
-                            icon = 'x-circle';
-                            text = 'Từ chối';
-                            break;
-                    }
-                    badge.innerHTML = `<i class="bi bi-${icon}"></i> ${text}`;
-
-                    // Update card data-status
-                    badge.closest('.applicant-card').dataset.status = status;
-
-                    closeStatusModal();
-                    alert('✅ Cập nhật trạng thái thành công!');
-
-                    // Reload to update statistics
-                    setTimeout(() => location.reload(), 1000);
-                } else {
-                    alert('❌ ' + data.message);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('❌ Có lỗi xảy ra');
-            }
-        });
-
-        // Note Modal
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.btn-add-note')) {
-                const btn = e.target.closest('.btn-add-note');
-                const appId = btn.dataset.appId;
-                const currentNote = btn.dataset.note || '';
-                openNoteModal(appId, currentNote);
-            }
-        });
-
-        function openNoteModal(appId, currentNote) {
-            document.getElementById('noteAppId').value = appId;
-            document.getElementById('noteContent').value = currentNote;
-            document.getElementById('noteModal').classList.add('show');
-        }
-
-        function closeNoteModal() {
-            document.getElementById('noteModal').classList.remove('show');
-        }
-
-        document.getElementById('noteForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const appId = document.getElementById('noteAppId').value;
-            const note = document.getElementById('noteContent').value;
-
-            try {
-                const response = await fetch(`/application/${appId}/add-note`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        note
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    closeNoteModal();
-                    alert('✅ Đã lưu ghi chú!');
-                } else {
-                    alert('❌ ' + data.message);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('❌ Có lỗi xảy ra');
-            }
-        });
-
-        // Rating function
-        function rateApplicant(appId, rating) {
-            const container = document.querySelector(`[data-app-id="${appId}"]`);
-            const stars = container.querySelectorAll('.star');
-
-            stars.forEach((star, index) => {
-                if (index < rating) {
-                    star.classList.remove('text-gray-300');
-                    star.classList.add('active', 'text-yellow-400');
-                } else {
-                    star.classList.remove('active', 'text-yellow-400');
-                    star.classList.add('text-gray-300');
-                }
-            });
-
-            // TODO: Save rating to backend
-            console.log(`Rated applicant ${appId} with ${rating} stars`);
-        }
-
-        // Quick actions
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.btn-quick-action')) {
-                const btn = e.target.closest('.btn-quick-action');
-                const appId = btn.dataset.appId;
-                const action = btn.dataset.action;
-
-                if (action === 'accept') {
-                    quickAccept(appId);
-                } else if (action === 'reject') {
-                    quickReject(appId);
-                }
-            }
-        });
-
-        async function quickAccept(appId) {
-            if (!confirm('Bạn có chắc muốn chấp nhận ứng viên này?')) return;
-
-            try {
-                const response = await fetch(`/application/${appId}/update-status`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        status: 'duoc_chon'
-                    })
-                });
-
-                const data = await response.json();
-                if (data.success) {
-                    alert('✅ Đã chấp nhận ứng viên!');
-                    location.reload();
-                } else {
-                    alert('❌ ' + data.message);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('❌ Có lỗi xảy ra');
-            }
-        }
-
-        async function quickReject(appId) {
-            if (!confirm('Bạn có chắc muốn từ chối ứng viên này?')) return;
-
-            try {
-                const response = await fetch(`/application/${appId}/update-status`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        status: 'tu_choi'
-                    })
-                });
-
-                const data = await response.json();
-                if (data.success) {
-                    alert('✅ Đã từ chối ứng viên!');
-                    location.reload();
-                } else {
-                    alert('❌ ' + data.message);
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('❌ Có lỗi xảy ra');
-            }
-        }
-
-        // Schedule interview
-        document.addEventListener('click', function(e) {
-            if (e.target.closest('.btn-schedule-interview')) {
-                const btn = e.target.closest('.btn-schedule-interview');
-                const appId = btn.dataset.appId;
-                scheduleInterview(appId);
-            }
-        });
-
-        function scheduleInterview(appId) {
-            // TODO: Implement interview scheduling
-            alert('Tính năng lịch phỏng vấn đang được phát triển');
-        }
-
-        // Bulk actions
-        function bulkUpdateStatus() {
-            if (selectedApplicants.size === 0) {
-                alert('Vui lòng chọn ít nhất một ứng viên');
+            // Validate
+            if (!date || !time) {
+                alert('Vui lòng chọn ngày và giờ phỏng vấn');
                 return;
             }
-            document.getElementById('bulkStatusModal').classList.add('show');
-        }
 
-        function closeBulkStatusModal() {
-            document.getElementById('bulkStatusModal').classList.remove('show');
-        }
+            if (type === 'offline' && !location) {
+                alert('Vui lòng nhập địa điểm phỏng vấn');
+                return;
+            }
 
-        document.getElementById('bulkStatusForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const status = document.getElementById('bulkNewStatus').value;
-            const appIds = Array.from(selectedApplicants);
+            // Show loading
+            const btn = event.target;
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Đang gửi...';
 
             try {
-                const promises = appIds.map(appId =>
-                    fetch(`/application/${appId}/update-status`, {
+                const response = await fetch(`/application/${appId}/send-interview`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        date: date,
+                        time: time,
+                        location: location || 'Sẽ gửi link sau',
+                        type: type
+                    })
+                });
+
+                // ✅ FIX: Kiểm tra response status trước
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // ✅ Chỉ show 1 thông báo thành công
+                    alert('✅ Đã gửi lời mời phỏng vấn thành công!');
+
+                    // Đóng modal
+                    closeModal('interviewModal');
+
+                    // Reload sau khi đóng modal
+                    setTimeout(() => {
+                        location.reload();
+                    }, 300);
+                } else {
+                    // ✅ Chỉ show 1 thông báo lỗi
+                    alert('❌ ' + (data.message || 'Có lỗi xảy ra'));
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Có lỗi xảy ra khi gửi lời mời. Vui lòng thử lại.');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        }
+
+        // =====================================
+        // TỪ CHỐI ỨNG VIÊN
+        // =====================================
+        async function rejectApplicant(appId) {
+            // Nếu đang ở trạng thái "chờ xử lý" thì xử lý thông thường
+            const row = event.target.closest('tr');
+            const statusBadge = row.querySelector('[id^="status-badge-"]');
+            const currentStatus = statusBadge.className;
+
+            if (currentStatus.includes('cho_xu_ly')) {
+                if (!confirm('Bạn có chắc chắn ứng viên này không phù hợp?')) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/application/${appId}/reject`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1039,74 +935,246 @@
                             'Accept': 'application/json'
                         },
                         body: JSON.stringify({
-                            status
+                            send_email: true
                         })
-                    })
-                );
+                    });
 
-                await Promise.all(promises);
+                    const data = await response.json();
 
-                closeBulkStatusModal();
-                alert(`✅ Đã cập nhật trạng thái cho ${appIds.length} ứng viên!`);
-                location.reload();
-            } catch (error) {
-                console.error('Error:', error);
-                alert('❌ Có lỗi xảy ra');
-            }
-        });
-
-        function sendBulkEmail() {
-            if (selectedApplicants.size === 0) {
-                alert('Vui lòng chọn ít nhất một ứng viên');
-                return;
-            }
-
-            // Get all selected emails
-            const emails = [];
-            selectedApplicants.forEach(appId => {
-                const card = document.querySelector(`input[value="${appId}"]`).closest('.applicant-card');
-                const emailElement = card.querySelector('[class*="bi-envelope"]').nextElementSibling;
-                if (emailElement) {
-                    emails.push(emailElement.textContent.trim());
+                    if (data.success) {
+                        alert('✅ Đã xác nhận từ chối ứng viên');
+                        location.reload();
+                    } else {
+                        alert('❌ ' + (data.message || 'Có lỗi xảy ra'));
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('❌ Có lỗi xảy ra');
                 }
-            });
-
-            // Open email client with all recipients
-            window.location.href = `mailto:${emails.join(',')}`;
+            } else if (currentStatus.includes('dang_phong_van')) {
+                // Đang phỏng vấn: Mở modal để xác nhận
+                const candidateName = row.querySelector('td:nth-child(2)').textContent.trim().split('\n')[0];
+                const email = row.querySelector('td:nth-child(3)').textContent.trim();
+                openResultModal(appId, candidateName, email, 'rejected');
+            }
         }
 
-        // Export functions
-        function exportApplicants(format) {
-            alert(`Đang xuất dữ liệu theo định dạng ${format.toUpperCase()}...`);
-            // TODO: Implement export functionality
+        // =====================================
+        // CẬP NHẬT TRẠNG THÁI
+        // =====================================
+        async function updateStatus(appId, status) {
+            try {
+                const response = await fetch(`/application/${appId}/update-status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: status
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const badge = document.getElementById(`status-badge-${appId}`);
+                    if (badge) {
+                        badge.className = `status-badge status-${status}`;
+
+                        let icon, text;
+                        switch (status) {
+                            case 'cho_xu_ly':
+                                icon = 'clock-history';
+                                text = 'Chờ xử lý';
+                                break;
+                            case 'dang_phong_van':
+                                icon = 'calendar-check';
+                                text = 'Đang phỏng vấn';
+                                break;
+                            case 'duoc_chon':
+                                icon = 'check-circle';
+                                text = 'Được chọn';
+                                break;
+                            case 'khong_phu_hop':
+                                icon = 'x-circle';
+                                text = 'Không phù hợp';
+                                break;
+                        }
+                        badge.innerHTML = `<i class="bi bi-${icon}"></i> ${text}`;
+                    }
+                    return true;
+                }
+                return false;
+            } catch (error) {
+                console.error('Error updating status:', error);
+                return false;
+            }
         }
 
-        function exportAllApplicants() {
-            alert('Đang xuất báo cáo tổng hợp...');
-            // TODO: Implement full report export
+        // =====================================
+        // MODAL HELPERS
+        // =====================================
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            document.body.style.overflow = 'hidden';
         }
 
-        function printApplicants() {
-            window.print();
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.body.style.overflow = '';
         }
 
-        // Close modals when clicking outside
+        // Close modal when clicking outside
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('click', function(e) {
                 if (e.target === this) {
-                    this.classList.remove('show');
+                    closeModal(this.id);
                 }
             });
         });
 
-        // Keyboard shortcuts
+        // Close modal with Escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                document.querySelectorAll('.modal').forEach(modal => {
-                    modal.classList.remove('show');
+                document.querySelectorAll('.modal.active').forEach(modal => {
+                    closeModal(modal.id);
                 });
             }
         });
+
+
+        // / ✅ PHÂN LOẠI HÀM
+        let resultType = null; // 'approved' hoặc 'rejected'
+
+        // ✅ MỞ MODAL PHẢN HỒI PHỎNG VẤN (CHỌN ĐẬU)
+        function openResultModal(appId, candidateName, candidateEmail, type) {
+            resultType = type;
+            document.getElementById('resultAppId').value = appId;
+            document.getElementById('resultEmail').value = candidateEmail;
+            document.getElementById('resultName').value = candidateName;
+            document.getElementById('resultCandidateName').textContent = candidateName;
+            document.getElementById('resultNote').value = '';
+            document.getElementById('sendEmailResult').checked = true;
+
+            // Cập nhật nội dung nút
+            const btn = document.getElementById('resultBtn');
+            const btnText = document.getElementById('resultBtnText');
+            if (type === 'approved') {
+                btn.className = 'btn btn-success';
+                btnText.textContent = 'Xác nhận chọn đậu';
+            } else {
+                btn.className = 'btn btn-danger';
+                btnText.textContent = 'Xác nhận từ chối';
+            }
+
+            openModal('resultModal');
+        }
+
+        // ✅ CHỌN ĐẬU ỨNG VIÊN
+        function approveApplicant(appId, candidateName, candidateEmail) {
+            openResultModal(appId, candidateName, candidateEmail, 'approved');
+        }
+
+        // ✅ GỬI KẾT QUẢ PHỎNG VẤN (CHỌN ĐẬU HOẶC TỪ CHỐI)
+        async function submitResult() {
+            const appId = document.getElementById('resultAppId').value;
+            const email = document.getElementById('resultEmail').value;
+            const note = document.getElementById('resultNote').value;
+            const sendEmail = document.getElementById('sendEmailResult').checked;
+
+            // Xác định status
+            let newStatus = resultType === 'approved' ? 'duoc_chon' : 'khong_phu_hop';
+
+            // Show loading
+            const btn = document.getElementById('resultBtn');
+            const originalHTML = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Đang xử lý...';
+
+            try {
+                // Bước 1: Cập nhật trạng thái
+                const updateResponse = await fetch(`/application/${appId}/update-status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: newStatus
+                    })
+                });
+
+                if (!updateResponse.ok) {
+                    throw new Error(`HTTP error! status: ${updateResponse.status}`);
+                }
+
+                const updateData = await updateResponse.json();
+
+                if (!updateData.success) {
+                    throw new Error(updateData.message || 'Lỗi cập nhật trạng thái');
+                }
+
+                // Bước 2: Thêm ghi chú nếu có
+                if (note.trim()) {
+                    const noteResponse = await fetch(`/application/${appId}/add-note`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            note: `[${resultType === 'approved' ? 'ĐẬU' : 'KHÔNG ĐỦ ĐIỀU KIỆN'}] ${note}`
+                        })
+                    });
+
+                    if (!noteResponse.ok) {
+                        console.warn('Lỗi thêm ghi chú');
+                    }
+                }
+
+                // Bước 3: Gửi email nếu được phép
+                if (sendEmail) {
+                    const emailResponse = await fetch(`/application/${appId}/send-result-email`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            email: email,
+                            type: resultType,
+                            note: note
+                        })
+                    });
+
+                    if (!emailResponse.ok) {
+                        console.warn('Lỗi gửi email');
+                    }
+                }
+
+                // ✅ Thành công
+                const message = resultType === 'approved' ?
+                    '✅ Đã xác nhận chọn đậu ứng viên!' :
+                    '✅ Đã xác nhận từ chối ứng viên!';
+                alert(message);
+
+                closeModal('resultModal');
+                setTimeout(() => {
+                    location.reload();
+                }, 300);
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ ' + (error.message || 'Có lỗi xảy ra'));
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+            }
+        }
     </script>
 </body>
 

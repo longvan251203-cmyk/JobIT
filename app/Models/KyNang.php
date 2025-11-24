@@ -10,12 +10,15 @@ class KyNang extends Model
     use HasFactory;
 
     // Tên bảng trong database
-    protected $table = 'ky_nang'; // Hoặc 'skills' tùy theo tên bảng của bạn
+    protected $table = 'ky_nang';
 
-    protected $primaryKey = 'id_kynang'; // Hoặc tên primary key của bạn
+    // Primary key
+    protected $primaryKey = 'id';
 
+    // Timestamps
     public $timestamps = true;
 
+    // Cho phép mass assignment
     protected $fillable = [
         'applicant_id',
         'ten_ky_nang',        // Tên kỹ năng
@@ -23,13 +26,30 @@ class KyNang extends Model
         'mo_ta',              // Mô tả chi tiết
     ];
 
+    // Casting
     protected $casts = [
         'nam_kinh_nghiem' => 'integer',
     ];
 
-    // Relationship với Applicant
+    /**
+     * Relationship với Applicant
+     */
     public function applicant()
     {
         return $this->belongsTo(Applicant::class, 'applicant_id', 'id_uv');
+    }
+
+    /**
+     * Accessor - Format hiển thị năm kinh nghiệm
+     */
+    public function getFormattedExperienceAttribute()
+    {
+        if ($this->nam_kinh_nghiem == 0) {
+            return '<1 năm';
+        } elseif ($this->nam_kinh_nghiem >= 10) {
+            return '10+ năm';
+        } else {
+            return $this->nam_kinh_nghiem . ' năm';
+        }
     }
 }

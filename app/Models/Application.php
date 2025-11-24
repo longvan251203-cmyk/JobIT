@@ -25,7 +25,8 @@ class Application extends Model
         'thu_gioi_thieu',
         'trang_thai',
         'ghi_chu',
-        'ngay_ung_tuyen' // THÊM DÒNG NÀY
+        'ngay_ung_tuyen',
+        'rating'
     ];
 
     protected $casts = [
@@ -34,10 +35,16 @@ class Application extends Model
         'updated_at' => 'datetime',
     ];
 
+    // ✅ CÁC TRẠNG THÁI HỢP LỆ
+    const STATUS_CHO_XU_LY = 'cho_xu_ly';
+    const STATUS_DANG_PHONG_VAN = 'dang_phong_van';
+    const STATUS_DUOC_CHON = 'duoc_chon';
+    const STATUS_KHONG_PHU_HOP = 'khong_phu_hop';
+
     // Relationships
     public function job()
     {
-        return $this->belongsTo(JobPost::class, 'job_id', 'job_id'); // SỬA LẠI RELATIONSHIP
+        return $this->belongsTo(JobPost::class, 'job_id', 'job_id');
     }
 
     public function applicant()
@@ -47,7 +54,7 @@ class Application extends Model
 
     public function company()
     {
-        return $this->belongsTo(Company::class, 'company_id', 'id_cty');
+        return $this->belongsTo(Company::class, 'company_id', 'companies_id');
     }
 
     // Scopes
@@ -61,27 +68,29 @@ class Application extends Model
         return $query->orderBy('ngay_ung_tuyen', 'desc');
     }
 
-    // Accessors
+    // Accessor cho status badge
     public function getStatusBadgeAttribute()
     {
         $badges = [
-            'chua_xem' => '<span class="badge bg-secondary">Chưa xem</span>',
-            'da_xem' => '<span class="badge bg-info">Đã xem</span>',
+            'cho_xu_ly' => '<span class="badge bg-warning">Chờ xử lý</span>',
+            'dang_phong_van' => '<span class="badge bg-info">Đang phỏng vấn</span>',
             'duoc_chon' => '<span class="badge bg-success">Được chọn</span>',
-            'tu_choi' => '<span class="badge bg-danger">Từ chối</span>',
-            'phong_van' => '<span class="badge bg-warning">Phỏng vấn</span>',
+            'khong_phu_hop' => '<span class="badge bg-danger">Không phù hợp</span>',
         ];
 
         return $badges[$this->trang_thai] ?? '<span class="badge bg-secondary">N/A</span>';
     }
-    // THÊM VÀO class Applicant
-    public function savedJobs()
-    {
-        return $this->hasMany(SavedJob::class, 'applicant_id', 'id_uv');
-    }
 
-    public function applications()
+    // ✅ Helper method để lấy tên trạng thái
+    public function getStatusNameAttribute()
     {
-        return $this->hasMany(Application::class, 'applicant_id', 'id_uv');
+        $names = [
+            'cho_xu_ly' => 'Chờ xử lý',
+            'dang_phong_van' => 'Đang phỏng vấn',
+            'duoc_chon' => 'Được chọn',
+            'khong_phu_hop' => 'Không phù hợp',
+        ];
+
+        return $names[$this->trang_thai] ?? 'N/A';
     }
 }

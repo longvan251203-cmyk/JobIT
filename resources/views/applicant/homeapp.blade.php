@@ -7,7 +7,6 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="user-authenticated" content="{{ Auth::check() ? 'true' : 'false' }}">
     <title>Tìm Việc IT Chuyên Nghiệp</title>
-
     <!-- Favicons -->
     <link href="assets/img/favicon.png" rel="icon">
     <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
@@ -22,1519 +21,273 @@
 
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', 'Roboto', sans-serif;
-            background-color: #F5F7FA;
-            color: #2D3748;
-            padding-top: 70px;
-        }
-
-        /* ========== HEADER ========== */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: #FFFFFF;
-            border-bottom: 1px solid #E2E8F0;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            z-index: 1000;
-            height: 70px;
-        }
-
-        .header-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 2rem;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            text-decoration: none;
-            flex-shrink: 0;
-        }
-
-        .logo img {
-            width: 40px;
-            height: 40px;
-        }
-
-        .sitename {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #2D3748;
-            margin: 0;
-        }
-
-        .navmenu {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-        }
-
-        .navmenu ul {
-            display: flex;
-            align-items: center;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            gap: 0.25rem;
-        }
-
-        .navmenu a {
-            color: #2D3748;
-            font-weight: 500;
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
-            transition: all 0.2s;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            white-space: nowrap;
-        }
-
-        .navmenu a:hover,
-        .navmenu a.active {
-            color: #3B82F6;
-            background: #EFF6FF;
-        }
-
-        .navmenu .dropdown {
-            position: relative;
-        }
-
-        .navmenu .dropdown>a i {
-            font-size: 0.75rem;
-            transition: transform 0.2s;
-        }
-
-        .navmenu .dropdown:hover>a i {
-            transform: rotate(180deg);
-        }
-
-        .navmenu .dropdown ul {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: #FFFFFF;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            margin-top: 0.5rem;
-            padding: 0.5rem;
-            border-radius: 0.75rem;
-            min-width: 200px;
-            z-index: 100;
-            border: 1px solid #E2E8F0;
-            flex-direction: column;
-        }
-
-        .navmenu .dropdown:hover ul {
-            display: flex;
-        }
-
-        .navmenu .dropdown ul li {
-            width: 100%;
-        }
-
-        .navmenu .dropdown ul li a {
-            padding: 0.6rem 1rem;
-            color: #4A5568;
-            font-weight: 400;
-        }
-
-        .navmenu .dropdown ul li a:hover {
-            background: #EFF6FF;
-            color: #3B82F6;
-        }
-
-        .header-actions {
-            flex-shrink: 0;
-        }
-
-        .btn-login {
-            background: #3B82F6;
-            color: #FFFFFF;
-            padding: 0.6rem 1.5rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.2s;
-            display: inline-block;
-        }
-
-        .btn-login:hover {
-            background: #2563EB;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-
-        /* User Dropdown */
-        .user-dropdown {
-            position: relative;
-        }
-
-        .user-btn {
-            background: #3B82F6;
-            color: #FFFFFF;
-            border: none;
-            border-radius: 0.5rem;
-            padding: 0.5rem 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            font-weight: 500;
-        }
-
-        .user-btn:hover {
-            background: #2563EB;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 2px solid #FFFFFF;
-            object-fit: cover;
-        }
-
-        .user-name {
-            font-size: 0.9rem;
-            max-width: 150px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .user-btn i {
-            font-size: 0.75rem;
-            transition: transform 0.2s;
-        }
-
-        .user-dropdown.active .user-btn i {
-            transform: rotate(180deg);
-        }
-
-        .user-dropdown-menu {
-            display: none;
-            position: absolute;
-            top: calc(100% + 0.5rem);
-            right: 0;
-            background: #FFFFFF;
-            border-radius: 0.75rem;
-            border: 1px solid #E2E8F0;
-            padding: 0.5rem;
-            min-width: 240px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            z-index: 100;
-            list-style: none;
-            margin: 0;
-        }
-
-        .user-dropdown.active .user-dropdown-menu {
-            display: block;
-            animation: fadeInDown 0.2s ease;
-        }
-
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .user-dropdown-menu li a {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            color: #4A5568;
-            text-decoration: none;
-            border-radius: 0.5rem;
-            transition: all 0.2s;
-            font-size: 0.9rem;
-        }
-
-        .user-dropdown-menu li a:hover {
-            background: #EFF6FF;
-            color: #3B82F6;
-        }
-
-        .user-dropdown-menu li a i {
-            font-size: 1.1rem;
-            width: 20px;
-        }
-
-        .user-dropdown-menu .divider {
-            height: 1px;
-            background: #E2E8F0;
-            margin: 0.5rem 0;
-        }
-
-        .user-dropdown-menu .logout-btn {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1rem;
-            color: #EF4444;
-            background: transparent;
-            border: none;
-            border-radius: 0.5rem;
-            transition: all 0.2s;
-            font-size: 0.9rem;
-            cursor: pointer;
-            font-weight: 500;
-            text-align: left;
-        }
-
-        .user-dropdown-menu .logout-btn:hover {
-            background: #FEF2F2;
-            color: #DC2626;
-        }
-
-        .user-dropdown-menu .logout-btn i {
-            font-size: 1.1rem;
-            width: 20px;
-        }
-
-        /* Search Section */
-        .search-section {
-            background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
-            padding: 2.5rem 0;
-        }
-
-        .search-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 1rem;
-        }
-
-        .search-box {
-            background: #FFFFFF;
-            border-radius: 0.75rem;
-            padding: 1rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            display: grid;
-            grid-template-columns: 1fr auto;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .search-input-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            flex: 1;
-        }
-
-        .search-input {
-            flex: 1;
-            border: none;
-            outline: none;
-            font-size: 0.95rem;
-            color: #2D3748;
-            padding: 0.5rem;
-        }
-
-        .search-input::placeholder {
-            color: #A0AEC0;
-        }
-
-        .location-select {
-            border: none;
-            outline: none;
-            font-size: 0.9rem;
-            color: #2D3748;
-            padding: 0.5rem;
-            background: #F7FAFC;
-            border-radius: 0.375rem;
-            cursor: pointer;
-        }
-
-        .search-btn {
-            background: #3B82F6;
-            color: #FFFFFF;
-            border: none;
-            border-radius: 0.5rem;
-            padding: 0.75rem 2rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .search-btn:hover {
-            background: #2563EB;
-        }
-
-        /* Filter Section */
-        .filter-section {
-            background: #FFFFFF;
-            border-bottom: 1px solid #E2E8F0;
-            padding: 1rem 0;
-        }
-
-        .filter-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 1rem;
-            display: flex;
-            gap: 0.75rem;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            background: #FFFFFF;
-            border: 1px solid #E2E8F0;
-            border-radius: 0.5rem;
-            padding: 0.5rem 1rem;
-            font-size: 0.875rem;
-            color: #4A5568;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .filter-btn:hover {
-            border-color: #3B82F6;
-            color: #3B82F6;
-        }
-
-        .filter-btn.active {
-            background: #EFF6FF;
-            border-color: #3B82F6;
-            color: #3B82F6;
-        }
-
-        .all-filters-btn {
-            background: #3B82F6;
-            color: #FFFFFF;
-            border: none;
-        }
-
-        .all-filters-btn:hover {
-            background: #2563EB;
-        }
-
-        /* Main Container */
-        .main-container {
-            max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-
-        .results-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding: 0 0.5rem;
-        }
-
-        .results-count {
-            font-size: 0.95rem;
-            color: #718096;
-        }
-
-        .view-controls {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .sort-select {
-            border: 1px solid #E2E8F0;
-            border-radius: 0.375rem;
-            padding: 0.4rem 0.75rem;
-            font-size: 0.85rem;
-            color: #4A5568;
-            cursor: pointer;
-            outline: none;
-        }
-
-        /* Grid View - Default */
-        .grid-view {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 1.5rem;
-            animation: fadeIn 0.3s ease;
-        }
-
-        /* Job Card Grid - UPDATED */
-        .job-card-grid {
-            background: #FFFFFF;
-            border: 1px solid #E2E8F0;
-            border-radius: 0.75rem;
-            padding: 1.25rem;
-            transition: all 0.3s;
-            cursor: pointer;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            min-height: 380px;
-            /* ✅ Đặt chiều cao tối thiểu cố định */
-        }
-
-        .job-card-grid:hover {
-            border-color: #3B82F6;
-            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.15);
-            transform: translateY(-4px);
-        }
-
-        .job-card-grid-header {
-            display: flex;
-            gap: 0.75rem;
-            margin-bottom: 1rem;
-            min-height: 72px;
-            /* ✅ Chiều cao cố định cho header */
-        }
-
-        .company-logo-grid {
-            width: 56px;
-            height: 56px;
-            border-radius: 0.5rem;
-            overflow: hidden;
-            flex-shrink: 0;
-            background: #F7FAFC;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #E2E8F0;
-        }
-
-        .company-logo-grid img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .job-card-grid-info {
-            flex: 1;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .job-card-grid-title {
-            font-size: 1.05rem;
-            font-weight: 600;
-            color: #2D3748;
-            margin-bottom: 0.5rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            /* ✅ Giới hạn 2 dòng */
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            line-height: 1.4;
-            min-height: 2.8rem;
-            /* ✅ Chiều cao cố định cho 2 dòng */
-        }
-
-        .job-card-grid:hover .job-card-grid-title {
-            color: #3B82F6;
-        }
-
-        .company-name-grid {
-            font-size: 0.9rem;
-            color: #718096;
-            margin-bottom: 0.5rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 1;
-            /* ✅ Giới hạn 1 dòng */
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            min-height: 1.35rem;
-            /* ✅ Chiều cao cố định */
-        }
-
-        /* ✅ Salary Section - Chiều cao cố định */
-        .job-card-grid-salary-section {
-            margin-bottom: 1rem;
-            min-height: 32px;
-            display: flex;
-            align-items: center;
-        }
-
-        .job-card-grid-salary {
-            display: inline-block;
-            background: linear-gradient(135deg, #10B981, #059669);
-            color: #FFFFFF;
-            padding: 0.4rem 0.85rem;
-            border-radius: 0.375rem;
-            font-size: 0.85rem;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .job-card-grid-salary.negotiable {
-            background: linear-gradient(135deg, #6B7280, #4B5563);
-        }
-
-        /* ✅ Meta Section - Chiều cao cố định */
-        /* ✅ Meta Section - Hiển thị ngang hàng */
-        .job-card-grid-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem 1rem;
-            /* gap dọc 0.75rem, gap ngang 1rem */
-            padding: 1rem 0;
-            border-top: 1px solid #F1F5F9;
-            border-bottom: 1px solid #F1F5F9;
-            font-size: 0.85rem;
-            color: #718096;
-            min-height: 70px;
-            /* ✅ Giảm chiều cao */
-            align-items: flex-start;
-        }
-
-        .job-card-grid-meta-item {
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            flex: 0 0 auto;
-            /* ✅ Không co giãn */
-            white-space: nowrap;
-        }
-
-        .job-card-grid-meta-item i {
-            color: #3B82F6;
-            width: 16px;
-            flex-shrink: 0;
-            font-size: 0.95rem;
-        }
-
-        .job-card-grid-meta-item span {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 120px;
-            /* ✅ Giới hạn độ dài text */
-        }
-
-        /* ✅ Tags Section - Chiều cao cố định */
-        /* ✅ Tags Section */
-        .job-card-grid-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.75rem;
-            min-height: 60px;
-            max-height: 60px;
-            overflow: hidden;
-            align-items: flex-start;
-            align-content: flex-start;
-            /* ✅ Căn từ trên xuống */
-        }
-
-        .job-card-grid-tag {
-            background: #EFF6FF;
-            color: #3B82F6;
-            padding: 0.35rem 0.75rem;
-            border-radius: 0.375rem;
-            font-size: 0.75rem;
-            font-weight: 500;
-            white-space: nowrap;
-            line-height: 1.2;
-            flex: 0 0 auto;
-            /* ✅ Không co giãn */
-        }
-
-        .job-card-grid-tags-empty {
-            color: #CBD5E0;
-            font-size: 0.75rem;
-            font-style: italic;
-            display: flex;
-            align-items: center;
-            width: 100%;
-            height: 100%;
-            justify-content: center;
-        }
-
-        /* ✅ Footer - Luôn ở dưới cùng */
-        .job-card-grid-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: auto;
-            padding-top: 0.75rem;
-        }
-
-        .job-card-grid-deadline {
-            font-size: 0.8rem;
-            color: #EF4444;
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-            font-weight: 500;
-        }
-
-        .save-btn-grid {
-            background: transparent;
-            border: none;
-            color: #CBD5E0;
-            cursor: pointer;
-            padding: 0.25rem;
-            transition: all 0.2s;
-            font-size: 1.3rem;
-        }
-
-        .save-btn-grid:hover {
-            color: #EF4444;
-            transform: scale(1.15);
-        }
-
-        .save-btn-grid.saved {
-            color: #EF4444;
-        }
-
-        /* ✅ Empty State cho Tags */
-        .job-card-grid-tags-empty {
-            color: #CBD5E0;
-            font-size: 0.75rem;
-            font-style: italic;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-        }
-
-        /* Detail View - 2 Columns */
-        .detail-view {
-            display: none;
-            grid-template-columns: 450px 1fr;
-            gap: 1.5rem;
-            align-items: start;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .detail-view.active {
-            display: grid;
-        }
-
-        /* Back Button */
-        .back-to-grid {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #3B82F6;
-            font-weight: 600;
-            cursor: pointer;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            transition: all 0.2s;
-            margin-bottom: 1rem;
-            background: #EFF6FF;
-            border: none;
-        }
-
-        .back-to-grid:hover {
-            background: #DBEAFE;
-            transform: translateX(-4px);
-        }
-
-        /* Left Column - Job List */
-        .job-list-column {
-            height: calc(100vh - 250px);
-            overflow-y: auto;
-            padding-right: 0.5rem;
-        }
-
-        .job-list-column::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .job-list-column::-webkit-scrollbar-track {
-            background: #F1F5F9;
-            border-radius: 10px;
-        }
-
-        .job-list-column::-webkit-scrollbar-thumb {
-            background: #CBD5E0;
-            border-radius: 10px;
-        }
-
-        .job-list-column::-webkit-scrollbar-thumb:hover {
-            background: #A0AEC0;
-        }
-
-        /* Job Card Compact */
-        .job-card {
-            background: #FFFFFF;
-            border: 1px solid #E2E8F0;
-            border-radius: 0.75rem;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            transition: all 0.2s;
-            cursor: pointer;
-        }
-
-        .job-card:hover,
-        .job-card.active {
-            border-color: #3B82F6;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-        }
-
-        .job-card.active {
-            background: #F0F9FF;
-        }
-
-        .job-card-header {
-            display: flex;
-            gap: 0.75rem;
-            margin-bottom: 0.75rem;
-        }
-
-        .company-logo-small {
-            width: 48px;
-            height: 48px;
-            border-radius: 0.5rem;
-            overflow: hidden;
-            flex-shrink: 0;
-            background: #F7FAFC;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .company-logo-small img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .job-card-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .job-card-title {
-            font-size: 0.95rem;
-            font-weight: 600;
-            color: #2D3748;
-            margin-bottom: 0.25rem;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .job-card:hover .job-card-title {
-            color: #3B82F6;
-        }
-
-        .company-name-small {
-            font-size: 0.85rem;
-            color: #718096;
-            margin-bottom: 0.5rem;
-        }
-
-        .job-card-salary {
-            display: inline-block;
-            background: #10B981;
-            color: #FFFFFF;
-            padding: 0.2rem 0.6rem;
-            border-radius: 0.25rem;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-
-        .job-card-salary.negotiable {
-            background: #6B7280;
-        }
-
-        .job-card-meta {
-            display: flex;
-            gap: 0.75rem;
-            flex-wrap: wrap;
-            margin-top: 0.5rem;
-            font-size: 0.8rem;
-            color: #718096;
-        }
-
-        .job-card-meta-item {
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        .job-card-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.4rem;
-            margin-top: 0.75rem;
-        }
-
-        .job-card-tag {
-            background: #EFF6FF;
-            color: #3B82F6;
-            padding: 0.25rem 0.6rem;
-            border-radius: 0.3rem;
-            font-size: 0.75rem;
-            font-weight: 500;
-        }
-
-        .job-card-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 0.75rem;
-            padding-top: 0.75rem;
-            border-top: 1px solid #F1F5F9;
-        }
-
-        .job-card-deadline {
-            font-size: 0.75rem;
-            color: #EF4444;
-            display: flex;
-            align-items: center;
-            gap: 0.25rem;
-        }
-
-        .save-btn-small {
-            background: transparent;
-            border: none;
-            color: #CBD5E0;
-            cursor: pointer;
-            padding: 0.25rem;
-            transition: all 0.2s;
-        }
-
-        .save-btn-small:hover {
-            color: #EF4444;
-        }
-
-        .save-btn-small.saved {
-            color: #EF4444;
-        }
-
-        /* Right Column - Job Detail */
-        .job-detail-column {
-            background: #FFFFFF;
-            border: 1px solid #E2E8F0;
-            border-radius: 0.75rem;
-            height: calc(100vh - 250px);
-            overflow-y: auto;
-            position: sticky;
-            top: 90px;
-        }
-
-        .job-detail-column::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .job-detail-column::-webkit-scrollbar-track {
-            background: #F1F5F9;
-            border-radius: 10px;
-        }
-
-        .job-detail-column::-webkit-scrollbar-thumb {
-            background: #CBD5E0;
-            border-radius: 10px;
-        }
-
-        .job-detail-column::-webkit-scrollbar-thumb:hover {
-            background: #A0AEC0;
-        }
-
-        .job-detail-empty {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: #A0AEC0;
-            padding: 2rem;
-            text-align: center;
-        }
-
-        .job-detail-empty i {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-        }
-
-        .job-detail-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid #E2E8F0;
-        }
-
-        .job-detail-company {
-            display: flex;
-            gap: 1rem;
-            align-items: start;
-            margin-bottom: 1.5rem;
-        }
-
-        .company-logo-large {
-            width: 80px;
-            height: 80px;
-            border-radius: 0.75rem;
-            overflow: hidden;
-            flex-shrink: 0;
-            background: #F7FAFC;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 1px solid #E2E8F0;
-        }
-
-        .company-logo-large img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .job-detail-title-section {
-            flex: 1;
-        }
-
-        .job-detail-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #2D3748;
-            margin-bottom: 0.5rem;
-        }
-
-        .job-detail-company-name {
-            font-size: 1.1rem;
-            color: #3B82F6;
-            font-weight: 500;
-            margin-bottom: 0.75rem;
-        }
-
-        .job-detail-salary {
-            display: inline-block;
-            background: #10B981;
-            color: #FFFFFF;
-            padding: 0.4rem 1rem;
-            border-radius: 0.375rem;
-            font-size: 1rem;
-            font-weight: 600;
-        }
-
-        .job-detail-salary.negotiable {
-            background: #6B7280;
-        }
-
-        .job-detail-actions {
-            display: flex;
-            gap: 0.75rem;
-            margin-top: 1.5rem;
-        }
-
-        .btn-apply-now,
-        .apply-btn-large {
-            flex: 1;
-            background: linear-gradient(135deg, #00c853, #00e676);
-            color: #FFFFFF;
-            border: none;
-            border-radius: 0.5rem;
-            padding: 0.875rem 1.5rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 1rem;
-            box-shadow: 0 4px 15px rgba(0, 200, 83, 0.3);
-        }
-
-        .btn-apply-now:hover,
-        .apply-btn-large:hover {
-            background: linear-gradient(135deg, #00e676, #00c853);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 200, 83, 0.4);
-        }
-
-        .save-btn-large {
-            background: #FFFFFF;
-            border: 2px solid #E2E8F0;
-            color: #718096;
-            cursor: pointer;
-            padding: 0.875rem 1rem;
-            border-radius: 0.5rem;
-            transition: all 0.2s;
-        }
-
-        .save-btn-large:hover {
-            border-color: #EF4444;
-            color: #EF4444;
-        }
-
-        .save-btn-large.saved {
-            border-color: #EF4444;
-            color: #EF4444;
-            background: #FEF2F2;
-        }
-
-        .job-detail-content {
-            padding: 1.5rem;
-        }
-
-        .detail-section {
-            margin-bottom: 2rem;
-        }
-
-        .detail-section-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #2D3748;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .detail-section-title i {
-            color: #3B82F6;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-
-        .info-item {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-        }
-
-        .info-label {
-            font-size: 0.85rem;
-            color: #718096;
-            font-weight: 500;
-        }
-
-        .info-value {
-            font-size: 0.95rem;
-            color: #2D3748;
-            font-weight: 500;
-        }
-
-        .job-description {
-            line-height: 1.8;
-            color: #4A5568;
-        }
-
-        .job-description ul,
-        .job-description ol {
-            margin-left: 1.5rem;
-            margin-top: 0.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .job-description li {
-            margin-bottom: 0.5rem;
-        }
-
-        .job-description h4 {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #2D3748;
-            margin-top: 1rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .tags-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .tag-item {
-            background: #EFF6FF;
-            color: #3B82F6;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        /* Animation */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        /* Hidden State */
-        .hidden {
-            display: none !important;
-        }
-
-        /* Modal Styling */
-        .modal-apply-job .modal-dialog {
-            max-height: 90vh;
-            margin: 1.75rem auto;
-        }
-
-        .modal-apply-job .modal-content {
-            border-radius: 24px;
-            border: none;
-            overflow: hidden;
-            max-height: 90vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .modal-apply-job .modal-header {
-            background: linear-gradient(135deg, #4f46e5, #06b6d4);
-            color: white;
-            border: none;
-            padding: 1.5rem;
-            flex-shrink: 0;
-        }
-
-        .modal-apply-job .modal-title {
-            font-weight: 700;
-            font-size: 1.5rem;
-        }
-
-        .modal-apply-job .btn-close {
-            filter: brightness(0) invert(1);
-        }
-
-        .modal-apply-job .modal-body {
-            overflow-y: auto;
-            max-height: calc(90vh - 180px);
-            flex: 1;
-        }
-
-        .modal-apply-job .modal-body::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .modal-apply-job .modal-body::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 10px;
-        }
-
-        .modal-apply-job .modal-body::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
-        }
-
-        .modal-apply-job .modal-body::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
-        }
-
-        .modal-apply-job .modal-footer {
-            flex-shrink: 0;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        /* CV Options */
-        .cv-option-card {
-            border: 2px solid #e5e7eb;
-            border-radius: 16px;
-            padding: 1.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .cv-option-card:hover {
-            border-color: #4f46e5;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .cv-option-card.active {
-            border-color: #4f46e5;
-            background: linear-gradient(135deg, rgba(79, 70, 229, 0.05), rgba(6, 182, 212, 0.05));
-        }
-
-        .cv-option-card input[type="radio"] {
-            position: absolute;
-            opacity: 0;
-        }
-
-        .cv-option-icon {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, #4f46e5, #06b6d4);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .cv-option-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 0.5rem;
-        }
-
-        .cv-option-desc {
-            color: #6b7280;
-            font-size: 0.9rem;
-        }
-
-        /* Upload Area */
-        .upload-area {
-            border: 2px dashed #cbd5e1;
-            border-radius: 12px;
-            padding: 2rem;
-            text-align: center;
-            background: #f8fafc;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-
-        .upload-area:hover {
-            border-color: #4f46e5;
-            background: #f0f9ff;
-        }
-
-        .upload-area.dragover {
-            border-color: #4f46e5;
-            background: #eff6ff;
-        }
-
-        .upload-icon {
-            font-size: 3rem;
-            color: #94a3b8;
-            margin-bottom: 1rem;
-        }
-
-        /* Form Controls */
-        .form-control,
-        .form-select {
-            border-radius: 12px;
-            border: 2px solid #e5e7eb;
-            padding: 0.75rem 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-
-        .form-label {
-            font-weight: 600;
-            color: #374151;
-            margin-bottom: 0.5rem;
-        }
-
-        .required-mark {
-            color: #ef4444;
-        }
-
-        /* Profile Preview Card */
-        .profile-preview-card {
-            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
-            border-radius: 16px;
-            padding: 1.5rem;
-            border: 2px solid #e5e7eb;
-        }
-
-        .profile-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 3px solid white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-
-        .profile-info {
-            margin-left: 1rem;
-        }
-
-        .profile-name {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #1f2937;
-            margin-bottom: 0.25rem;
-        }
-
-        .profile-title {
-            color: #6b7280;
-            font-size: 0.95rem;
-        }
-
-        .profile-contact {
-            display: flex;
-            gap: 1rem;
-            margin-top: 0.75rem;
-            flex-wrap: wrap;
-        }
-
-        .contact-item {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            color: #4b5563;
-            font-size: 0.85rem;
-        }
-
-        .contact-item i {
-            color: #4f46e5;
-        }
-
-        /* Letter Section */
-        .letter-textarea {
-            min-height: 150px;
-            resize: vertical;
-        }
-
-        .char-count {
-            text-align: right;
-            color: #9ca3af;
-            font-size: 0.85rem;
-            margin-top: 0.5rem;
-        }
-
-        /* Buttons */
-        .btn-submit-apply {
-            background: linear-gradient(135deg, #4f46e5, #06b6d4);
-            border: none;
-            padding: 0.75rem 2rem;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .btn-submit-apply:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3);
-        }
-
-        .btn-cancel {
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            padding: 0.75rem 2rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .btn-cancel:hover {
-            border-color: #cbd5e1;
-            background: #f9fafb;
-        }
-
-        /* Animation */
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .content-section {
-            animation: slideInUp 0.4s ease-out;
-        }
-
-        /* Footer */
-        .footer {
-            background: #FFFFFF;
-            border-top: 1px solid #E2E8F0;
-            padding: 2rem 0;
-            margin-top: 3rem;
-        }
-
-        .footer a {
-            color: #718096;
-            transition: color 0.2s;
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            color: #2D3748;
-        }
-
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .grid-view {
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            }
-
-            .detail-view {
-                grid-template-columns: 400px 1fr;
-            }
-        }
-
-        @media (max-width: 992px) {
-            .grid-view {
-                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-                gap: 1rem;
-            }
-
-            .detail-view {
-                grid-template-columns: 1fr;
-            }
-
-            .job-detail-column {
-                position: static;
-                height: auto;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .grid-view {
-                grid-template-columns: 1fr;
-            }
-
-            .search-box {
-                grid-template-columns: 1fr;
-            }
-
-            .search-input-wrapper {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .filter-container {
-                overflow-x: auto;
-                flex-wrap: nowrap;
-            }
-        }
-    </style>
+    <!-- Custom CSS -->
+    <link href="{{ asset('assets/css/homeapp.css') }}" rel="stylesheet">
 </head>
+<style>
+    .btn-apply-now {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        border: none;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .btn-apply-now:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+        background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    }
+
+    .btn-apply-now:active:not(:disabled) {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-apply-now i {
+        transition: transform 0.3s ease;
+    }
+
+    .btn-apply-now:hover:not(:disabled) i {
+        transform: translateX(3px);
+    }
+
+    /* ========================================
+   NÚT ĐÃ ỨNG TUYỂN - APPLIED STATE
+======================================== */
+    .btn-apply-now.applied {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        cursor: not-allowed;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        opacity: 0.9;
+    }
+
+    .btn-apply-now.applied:hover {
+        transform: none;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    }
+
+    .btn-apply-now.applied i {
+        animation: checkPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes checkPulse {
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+    }
+
+    /* ========================================
+   NÚT ỨNG TUYỂN TRONG GRID
+======================================== */
+    .job-card-grid .btn-apply-now {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.95rem;
+    }
+
+    /* ========================================
+   NÚT ỨNG TUYỂN TRONG DETAIL VIEW
+======================================== */
+    .job-detail-actions .btn-apply-now {
+        padding: 0.875rem 2rem;
+        font-size: 1.05rem;
+        min-width: 180px;
+        justify-content: center;
+    }
+
+    /* ========================================
+   LOADING STATE
+======================================== */
+    .btn-apply-now:disabled:not(.applied) {
+        background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%);
+        cursor: wait;
+        opacity: 0.7;
+    }
+
+    .btn-apply-now:disabled:not(.applied) i {
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* ========================================
+   RIPPLE EFFECT KHI CLICK
+======================================== */
+    .btn-apply-now::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.5);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+
+    .btn-apply-now:active:not(:disabled)::before {
+        width: 300px;
+        height: 300px;
+    }
+
+    /* ========================================
+   TOOLTIP KHI ĐÃ ỨNG TUYỂN
+======================================== */
+    .btn-apply-now.applied[title] {
+        position: relative;
+    }
+
+    .btn-apply-now.applied:hover::after {
+        content: attr(title);
+        position: absolute;
+        bottom: 120%;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 0.5rem 1rem;
+        background: #1f2937;
+        color: white;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border-radius: 8px;
+        white-space: nowrap;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        z-index: 1000;
+        animation: tooltipFadeIn 0.3s ease;
+    }
+
+    .btn-apply-now.applied:hover::before {
+        content: '';
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 8px solid transparent;
+        border-top-color: #1f2937;
+        z-index: 1000;
+    }
+
+    @keyframes tooltipFadeIn {
+        from {
+            opacity: 0;
+            transform: translateX(-50%) translateY(5px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    }
+
+    /* ========================================
+   RESPONSIVE
+======================================== */
+    @media (max-width: 768px) {
+        .btn-apply-now {
+            padding: 0.65rem 1.25rem;
+            font-size: 0.95rem;
+        }
+
+        .job-detail-actions .btn-apply-now {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            min-width: 150px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .btn-apply-now {
+            padding: 0.6rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .job-detail-actions .btn-apply-now {
+            width: 100%;
+            min-width: auto;
+        }
+    }
+
+    /* ========================================
+   SUCCESS STATE (ANIMATION SAU KHI ỨNG TUYỂN)
+======================================== */
+    @keyframes successPulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+        }
+
+        50% {
+            box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+        }
+
+        100% {
+            box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+        }
+    }
+
+    .btn-apply-now.applied.success-animation {
+        animation: successPulse 1s ease-out;
+    }
+
+    /* ========================================
+   BADGE "MỚI ỨNG TUYỂN"
+======================================== */
+    .job-card-grid.recently-applied {
+        position: relative;
+    }
+
+    .job-card-grid.recently-applied::before {
+        content: 'Vừa ứng tuyển';
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        z-index: 10;
+        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+        animation: badgeFadeIn 0.5s ease;
+    }
+
+    @keyframes badgeFadeIn {
+        from {
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+</style>
 
 <body>
     <header id="header" class="header">
@@ -1579,6 +332,11 @@
                 @if(!Auth::check())
                 <a class="btn-login" href="{{ route('login') }}">Đăng nhập</a>
                 @else
+                <!-- ✅ Nút Việc Làm Của Tôi -->
+                <a class="btn-my-jobs" href="{{ route('applicant.myJobs') }}">
+                    <i class="bi bi-briefcase-fill"></i>
+                    Việc Làm Của Tôi
+                </a>
                 <div class="user-dropdown">
                     <button class="user-btn" id="userDropdownBtn">
                         <img src="{{ asset('assets/img/user.png') }}" alt="" class="user-avatar">
@@ -1607,7 +365,6 @@
             </div>
         </div>
     </header>
-
     <!-- Search Section -->
     <section class="search-section">
         <div class="search-container">
@@ -1628,7 +385,6 @@
             </div>
         </div>
     </section>
-
     <!-- Filter Section -->
     <section class="filter-section">
         <div class="filter-container">
@@ -1654,180 +410,307 @@
             </button>
         </div>
     </section>
+    <!-- ========== OVERVIEW SECTION ========== tổng quan -->
+    <section class="overview-section">
+        <div class="main-container">
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="overview-card">
+                        <div class="overview-number">{{ $stats['total_jobs'] }}</div>
+                        <div class="overview-label">Công việc IT</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="overview-card">
+                        <div class="overview-number">{{ $stats['total_companies'] }}</div>
+                        <div class="overview-label">Công ty hàng đầu</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="overview-card">
+                        <div class="overview-number">15,000+</div>
+                        <div class="overview-label">Ứng viên đã tìm việc</div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="overview-card">
+                        <div class="overview-number">98%</div>
+                        <div class="overview-label">Tỷ lệ hài lòng</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <!-- Main Container -->
+    <!-- ========== ALL JOBS SECTION ========== -->
     <div class="main-container">
-        <div class="results-header">
-            <div class="results-count">
-                <strong id="jobCountDisplay">{{ isset($jobs) ? $jobs->count() : 0 }}</strong> kết quả
+        <div class="featured-section">
+            <div class="section-title-highlight">
+                <div class="section-subtitle">TẤT CẢ CÔNG VIỆC</div>
+                <h2>{{ $stats['total_jobs'] }}+ cơ hội việc làm IT</h2>
             </div>
-            <div class="view-controls">
-                <select class="sort-select">
-                    <option>Lương (Cao - Thấp)</option>
-                    <option>Ngày Đăng (Mới nhất)</option>
-                    <option>Ngày Đăng (Cũ nhất)</option>
-                </select>
+
+            <!-- ✅ Loading Overlay -->
+            <div class="loading-overlay" id="jobsLoadingOverlay" style="display: none;">
+                <div class="spinner"></div>
+                <p>Đang tải việc làm...</p>
             </div>
-        </div>
 
-        <!-- Grid View - Default -->
-        <!-- Grid View - Default -->
-        <div class="grid-view" id="gridView">
-            @foreach($jobs as $job)
-            <article class="job-card-grid" data-job-id="{{ $job->job_id }}">
-                <!-- Header -->
-                <div class="job-card-grid-header">
-                    <div class="company-logo-grid">
-                        @if($job->company && $job->company->logo)
-                        <img src="{{ asset('assets/img/' . $job->company->logo) }}" alt="Company Logo" />
-                        @else
-                        <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667EEA, #764BA2); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: bold;">
-                            {{ substr($job->company->tencty ?? 'C', 0, 1) }}
-                        </div>
-                        @endif
-                    </div>
-                    <div class="job-card-grid-info">
-                        <h3 class="job-card-grid-title" title="{{ $job->title }}">{{ $job->title }}</h3>
-                        <div class="company-name-grid" title="{{ $job->company->tencty ?? 'Công ty' }}">
-                            {{ $job->company->tencty ?? 'Công ty' }}
-                        </div>
-                    </div>
-                </div>
+            <!-- ✅ Grid View - Default -->
+            <div class="grid-view jobs-grid" id="gridView">
+                @include('applicant.partials.job-cards', ['jobs' => $jobs])
+            </div>
 
-                <!-- Salary -->
-                <div class="job-card-grid-salary-section">
-                    <span class="job-card-grid-salary {{ (!$job->salary_min || !$job->salary_max) ? 'negotiable' : '' }}">
-                        @if($job->salary_min && $job->salary_max)
-                        {{ number_format($job->salary_min, 0, ',', '.') }} - {{ number_format($job->salary_max, 0, ',', '.') }} {{ strtoupper($job->salary_type) }}
-                        @else
-                        Thỏa thuận
-                        @endif
-                    </span>
-                </div>
-
-                <!-- Meta Info - ✅ Hiển thị ngang hàng -->
-                <div class="job-card-grid-meta">
-                    <div class="job-card-grid-meta-item" title="{{ $job->province }}">
-                        <i class="bi bi-geo-alt-fill"></i>
-                        <span>{{ $job->province }}</span>
-                    </div>
-                    <div class="job-card-grid-meta-item" title="{{ ucfirst($job->level) }}">
-                        <i class="bi bi-briefcase-fill"></i>
-                        <span>{{ ucfirst($job->level) }}</span>
-                    </div>
-                    <div class="job-card-grid-meta-item" title="{{ $job->experience }}">
-                        <i class="bi bi-award-fill"></i>
-                        <span>{{ $job->experience }}</span>
-                    </div>
-                </div>
-
-                <!-- Hashtags - ✅ Hiển thị hashtags từ database -->
-                <div class="job-card-grid-tags">
-                    @if($job->hashtags && $job->hashtags->count() > 0)
-                    @foreach($job->hashtags->take(4) as $tag)
-                    <span class="job-card-grid-tag">#{{ $tag->tag_name }}</span>
-                    @endforeach
-                    @else
-                    <span class="job-card-grid-tags-empty">Chưa có kỹ năng</span>
-                    @endif
-                </div>
-
-                <!-- Footer -->
-                <div class="job-card-grid-footer">
-                    <div class="job-card-grid-deadline">
-                        <i class="bi bi-clock-history"></i>
-                        Hạn nộp: {{ \Carbon\Carbon::parse($job->deadline)->format('d/m/Y') }}
-                    </div>
-                    <button class="save-btn-grid" title="Lưu công việc">
-                        <i class="bi bi-heart"></i>
+            <!-- ✅ Detail View - 2 Columns (MỚI THÊM) -->
+            <div class="detail-view" id="detailView">
+                <div>
+                    <button class="back-to-grid" id="backToGrid">
+                        <i class="bi bi-arrow-left"></i>
+                        Quay lại danh sách
                     </button>
-                </div>
-            </article>
-            @endforeach
-        </div>
 
-        <!-- Detail View - 2 Columns -->
-        <div class="detail-view" id="detailView">
-            <div>
-                <button class="back-to-grid" id="backToGrid">
-                    <i class="bi bi-arrow-left"></i>
-                    Quay lại danh sách
-                </button>
-
-                <!-- Left Column - Job List -->
-                <div class="job-list-column" id="jobListColumn">
-                    @foreach($jobs as $job)
-                    <article class="job-card" data-job-id="{{ $job->job_id }}">
-                        <div class="job-card-header">
-                            <div class="company-logo-small">
-                                @if($job->company && $job->company->logo)
-                                <img src="{{ asset('assets/img/' . $job->company->logo) }}" alt="Company Logo" />
-                                @else
-                                <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667EEA, #764BA2); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
-                                    {{ substr($job->company->tencty ?? 'C', 0, 1) }}
-                                </div>
-                                @endif
-                            </div>
-
-                            <div class="job-card-info">
-                                <h3 class="job-card-title">{{ $job->title }}</h3>
-                                <div class="company-name-small">{{ $job->company->tencty ?? 'Công ty' }}</div>
-                                <span class="job-card-salary {{ (!$job->salary_min || !$job->salary_max) ? 'negotiable' : '' }}">
-                                    @if($job->salary_min && $job->salary_max)
-                                    {{ number_format($job->salary_min, 0, ',', '.') }} - {{ number_format($job->salary_max, 0, ',', '.') }} {{ strtoupper($job->salary_type) }}
+                    <!-- Left Column - Job List -->
+                    <div class="job-list-column" id="jobListColumn">
+                        @foreach($jobs as $job)
+                        <article class="job-card" data-job-id="{{ $job->job_id }}">
+                            <div class="job-card-header">
+                                <div class="company-logo-small">
+                                    @if($job->company && $job->company->logo)
+                                    <img src="{{ asset('assets/img/' . $job->company->logo) }}" alt="Company Logo" />
                                     @else
-                                    Thỏa thuận
+                                    <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667EEA, #764BA2); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                        {{ substr($job->company->tencty ?? 'C', 0, 1) }}
+                                    </div>
                                     @endif
-                                </span>
-                            </div>
-                        </div>
+                                </div>
 
-                        <div class="job-card-meta">
-                            <div class="job-card-meta-item">
-                                <i class="bi bi-geo-alt"></i>
-                                {{ $job->province }}
+                                <div class="job-card-info">
+                                    <h3 class="job-card-title">{{ $job->title }}</h3>
+                                    <div class="company-name-small">{{ $job->company->tencty ?? 'Công ty' }}</div>
+                                    <span class="job-card-salary {{ (!$job->salary_min || !$job->salary_max) ? 'negotiable' : '' }}">
+                                        @if($job->salary_min && $job->salary_max)
+                                        {{ number_format($job->salary_min, 0, ',', '.') }} - {{ number_format($job->salary_max, 0, ',', '.') }} {{ strtoupper($job->salary_type) }}
+                                        @else
+                                        Thỏa thuận
+                                        @endif
+                                    </span>
+                                </div>
                             </div>
-                            <div class="job-card-meta-item">
-                                <i class="bi bi-briefcase"></i>
-                                {{ ucfirst($job->level) }}
-                            </div>
-                            <div class="job-card-meta-item">
-                                <i class="bi bi-award"></i>
-                                {{ $job->experience }}
-                            </div>
-                        </div>
 
-                        @if($job->hashtags && $job->hashtags->count() > 0)
-                        <div class="job-card-tags">
-                            @foreach($job->hashtags->take(3) as $tag)
-                            <span class="job-card-tag">{{ $tag->tag_name }}</span>
-                            @endforeach
-                        </div>
-                        @endif
-
-                        <div class="job-card-footer">
-                            <div class="job-card-deadline">
-                                <i class="bi bi-clock-history"></i>
-                                Hạn nộp: {{ \Carbon\Carbon::parse($job->deadline)->format('d/m/Y') }}
+                            <div class="job-card-meta">
+                                <div class="job-card-meta-item">
+                                    <i class="bi bi-geo-alt"></i>
+                                    {{ $job->province }}
+                                </div>
+                                <div class="job-card-meta-item">
+                                    <i class="bi bi-briefcase"></i>
+                                    {{ ucfirst($job->level) }}
+                                </div>
+                                <div class="job-card-meta-item">
+                                    <i class="bi bi-award"></i>
+                                    {{ $job->experience_label }}
+                                </div>
                             </div>
-                            <button class="save-btn-small" title="Lưu công việc">
-                                <i class="bi bi-heart" style="font-size: 1.1rem;"></i>
-                            </button>
-                        </div>
-                    </article>
-                    @endforeach
+
+                            @if($job->hashtags && $job->hashtags->count() > 0)
+                            <div class="job-card-tags">
+                                @foreach($job->hashtags->take(3) as $tag)
+                                <span class="job-card-tag">{{ $tag->tag_name }}</span>
+                                @endforeach
+                            </div>
+                            @endif
+
+                            <div class="job-card-footer">
+                                <div class="job-card-deadline">
+                                    <i class="bi bi-clock-history"></i>
+                                    Hạn nộp: {{ \Carbon\Carbon::parse($job->deadline)->format('d/m/Y') }}
+                                </div>
+                                <button class="save-btn-small" title="Lưu công việc">
+                                    <i class="bi bi-heart" style="font-size: 1.1rem;"></i>
+                                </button>
+                            </div>
+                        </article>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Right Column - Job Detail -->
+                <div class="job-detail-column" id="jobDetailColumn">
+                    <div class="job-detail-empty">
+                        <i class="bi bi-briefcase"></i>
+                        <p>Chọn một công việc để xem chi tiết</p>
+                    </div>
                 </div>
             </div>
 
-            <!-- Right Column - Job Detail -->
-            <div class="job-detail-column" id="jobDetailColumn">
-                <div class="job-detail-empty">
-                    <i class="bi bi-briefcase"></i>
-                    <p>Chọn một công việc để xem chi tiết</p>
+            <!-- ✅ Custom Pagination -->
+            <div class="pagination-wrapper" id="paginationWrapper">
+                @if($jobs->lastPage() > 1)
+                <nav class="custom-pagination">
+                    <ul class="pagination">
+                        <!-- Previous Button -->
+                        <li class="page-item {{ $jobs->currentPage() == 1 ? 'disabled' : '' }}">
+                            <a class="page-link" href="#" data-page="{{ $jobs->currentPage() - 1 }}" {{ $jobs->currentPage() == 1 ? 'tabindex="-1"' : '' }}>
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+
+                        <!-- Page Numbers -->
+                        @php
+                        $start = max(1, $jobs->currentPage() - 2);
+                        $end = min($jobs->lastPage(), $jobs->currentPage() + 2);
+                        @endphp
+
+                        @if($start > 1)
+                        <li class="page-item">
+                            <a class="page-link" href="#" data-page="1">1</a>
+                        </li>
+                        @if($start > 2)
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        @endif
+                        @endif
+
+                        @for($i = $start; $i <= $end; $i++)
+                            <li class="page-item {{ $i == $jobs->currentPage() ? 'active' : '' }}">
+                            <a class="page-link" href="#" data-page="{{ $i }}">{{ $i }}</a>
+                            </li>
+                            @endfor
+
+                            @if($end < $jobs->lastPage())
+                                @if($end < $jobs->lastPage() - 1)
+                                    <li class="page-item disabled">
+                                        <span class="page-link">...</span>
+                                    </li>
+                                    @endif
+                                    <li class="page-item">
+                                        <a class="page-link" href="#" data-page="{{ $jobs->lastPage() }}">{{ $jobs->lastPage() }}</a>
+                                    </li>
+                                    @endif
+
+                                    <!-- Next Button -->
+                                    <li class="page-item {{ $jobs->currentPage() == $jobs->lastPage() ? 'disabled' : '' }}">
+                                        <a class="page-link" href="#" data-page="{{ $jobs->currentPage() + 1 }}" {{ $jobs->currentPage() == $jobs->lastPage() ? 'tabindex="-1"' : '' }}>
+                                            <i class="bi bi-chevron-right"></i>
+                                        </a>
+                                    </li>
+                    </ul>
+                </nav>
+                @endif
+            </div>
+        </div>
+    </div>
+    <!-- ========== TOP COMPANIES SECTION ========== -->
+    <div class="main-container">
+        <div class="featured-section">
+            <div class="section-title-highlight">
+                <div class="section-subtitle">TOP CÔNG TY</div>
+                <h2>Nhà tuyển dụng hàng đầu</h2>
+            </div>
+
+            <div class="companies-grid">
+                @forelse($topCompanies as $item)
+                <a href="{{ route('company.profile', $item['company']->companies_id) }}" class="company-card">
+                    <div class="company-card-logo">
+                        @if($item['company']->logo)
+                        <img src="{{ asset('assets/img/' . $item['company']->logo) }}" alt="{{ $item['company']->tencty }}">
+                        @else
+                        <div class="default-company-logo">{{ substr($item['company']->tencty, 0, 1) }}</div>
+                        @endif
+                    </div>
+                    <div class="company-card-info">
+                        <h3 class="company-card-name">{{ $item['company']->tencty }}</h3>
+                        <div class="company-card-meta">
+                            <i class="bi bi-briefcase"></i>
+                            <span>{{ $item['job_count'] }} việc làm</span>
+                        </div>
+                        @if($item['company']->diachi)
+                        <div class="company-card-location">
+                            <i class="bi bi-geo-alt"></i>
+                            <span>{{ Str::limit($item['company']->diachi, 40) }}</span>
+                        </div>
+                        @endif
+                    </div>
+                </a>
+                @empty
+                <p class="text-muted text-center col-12">Không có công ty nào</p>
+                @endforelse
+            </div>
+        </div>
+    </div>
+    <!-- ========== BLOG SECTION ========== -->
+    <div class="main-container">
+        <div class="featured-section">
+            <div class="section-title-highlight">
+                <div class="section-subtitle">BLOG</div>
+                <h2>Tin tức & Kiến thức IT</h2>
+                <p style="color: #718096; margin-top: 0.5rem;">Cập nhật xu hướng công nghệ và cơ hội nghề nghiệp</p>
+            </div>
+
+            <div class="row g-4">
+                <!-- Blog Card 1 -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="blog-card">
+                        <div class="blog-image">
+                            <img src="https://via.placeholder.com/400x220/6366F1/FFFFFF?text=AI+Trends" alt="Blog">
+                            <div class="blog-badge">Technology</div>
+                        </div>
+                        <div class="blog-content">
+                            <div class="blog-meta">
+                                <span><i class="bi bi-person"></i> Admin</span>
+                                <span><i class="bi bi-calendar"></i> 15/12/2024</span>
+                            </div>
+                            <h3 class="blog-title">Xu hướng AI và Machine Learning năm 2025</h3>
+                            <p class="blog-excerpt">Khám phá những công nghệ AI mới nhất và cơ hội nghề nghiệp trong lĩnh vực này...</p>
+                            <a href="#" class="btn-read">Đọc thêm <i class="bi bi-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Blog Card 2 -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="blog-card">
+                        <div class="blog-image">
+                            <img src="https://via.placeholder.com/400x220/10B981/FFFFFF?text=Career+Guide" alt="Blog">
+                            <div class="blog-badge">Career</div>
+                        </div>
+                        <div class="blog-content">
+                            <div class="blog-meta">
+                                <span><i class="bi bi-person"></i> Admin</span>
+                                <span><i class="bi bi-calendar"></i> 12/12/2024</span>
+                            </div>
+                            <h3 class="blog-title">10 kỹ năng IT cần thiết cho năm 2025</h3>
+                            <p class="blog-excerpt">Danh sách các kỹ năng lập trình và công nghệ được các nhà tuyển dụng săn đón nhất...</p>
+                            <a href="#" class="btn-read">Đọc thêm <i class="bi bi-arrow-right"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Blog Card 3 -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="blog-card">
+                        <div class="blog-image">
+                            <img src="https://via.placeholder.com/400x220/F59E0B/FFFFFF?text=Interview+Tips" alt="Blog">
+                            <div class="blog-badge">Tips</div>
+                        </div>
+                        <div class="blog-content">
+                            <div class="blog-meta">
+                                <span><i class="bi bi-person"></i> Admin</span>
+                                <span><i class="bi bi-calendar"></i> 10/12/2024</span>
+                            </div>
+                            <h3 class="blog-title">Bí quyết phỏng vấn thành công cho IT</h3>
+                            <p class="blog-excerpt">Những câu hỏi phỏng vấn phổ biến và cách trả lời ấn tượng để chinh phục nhà tuyển dụng...</p>
+                            <a href="#" class="btn-read">Đọc thêm <i class="bi bi-arrow-right"></i></a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+
+
 
     <!-- Modal Ứng Tuyển -->
     <div class="modal fade modal-apply-job" id="applyJobModal" tabindex="-1" aria-labelledby="applyJobModalLabel" aria-hidden="true">
@@ -2011,11 +894,14 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // ========== BIẾN GLOBAL ==========
             const gridView = document.getElementById('gridView');
             const detailView = document.getElementById('detailView');
             const backToGridBtn = document.getElementById('backToGrid');
             const jobDetailColumn = document.getElementById('jobDetailColumn');
             const jobListColumn = document.getElementById('jobListColumn');
+            const loadingOverlay = document.getElementById('jobsLoadingOverlay');
+            const paginationWrapper = document.getElementById('paginationWrapper');
 
             // ========== XỬ LÝ USER DROPDOWN ==========
             const userDropdownBtn = document.getElementById('userDropdownBtn');
@@ -2051,22 +937,14 @@
                     type === 'info' ? 'bi-info-circle-fill' : 'bi-heart-fill';
 
                 toast.style.cssText = `
-                position: fixed;
-                top: 80px;
-                right: 20px;
-                background: ${bgColor};
-                color: white;
-                padding: 1rem 1.5rem;
-                border-radius: 12px;
-                box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-                z-index: 9999;
-                animation: slideIn 0.3s ease;
-                display: flex;
-                align-items: center;
-                gap: 0.75rem;
-                font-weight: 500;
-                min-width: 280px;
-            `;
+            position: fixed; top: 80px; right: 20px;
+            background: ${bgColor}; color: white;
+            padding: 1rem 1.5rem; border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+            z-index: 9999; animation: slideIn 0.3s ease;
+            display: flex; align-items: center; gap: 0.75rem;
+            font-weight: 500; min-width: 280px;
+        `;
 
                 toast.innerHTML = `<i class="bi ${icon}" style="font-size: 1.2rem;"></i><span>${message}</span>`;
                 document.body.appendChild(toast);
@@ -2081,15 +959,15 @@
                 const style = document.createElement('style');
                 style.id = 'toast-animations';
                 style.textContent = `
-                @keyframes slideIn {
-                    from { transform: translateX(400px); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
-                }
-                @keyframes slideOut {
-                    from { transform: translateX(0); opacity: 1; }
-                    to { transform: translateX(400px); opacity: 0; }
-                }
-            `;
+            @keyframes slideIn {
+                from { transform: translateX(400px); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(400px); opacity: 0; }
+            }
+        `;
                 document.head.appendChild(style);
             }
 
@@ -2099,233 +977,104 @@
                 return isLoggedIn && isLoggedIn.content === 'true';
             }
 
-            // ========== SWITCH BETWEEN GRID AND DETAIL VIEW ==========
-            function showGridView() {
-                gridView.classList.remove('hidden');
-                detailView.classList.remove('active');
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
+            // ========== CẬP NHẬT NÚT ỨNG TUYỂN ==========
+            function updateApplyButton(button, hasApplied) {
+                if (!button) return;
+
+                const icon = button.querySelector('i');
+
+                if (hasApplied) {
+                    button.classList.add('applied');
+                    button.disabled = true;
+                    button.title = 'Bạn đã ứng tuyển công việc này';
+
+                    if (icon) {
+                        icon.classList.remove('bi-send-fill');
+                        icon.classList.add('bi-check-circle-fill');
+                    }
+
+                    // ✅ FIX: Xóa toàn bộ text nodes và tạo mới
+                    button.childNodes.forEach(node => {
+                        if (node.nodeType === Node.TEXT_NODE) {
+                            node.remove();
+                        }
+                    });
+                    button.appendChild(document.createTextNode('Đã ứng tuyển'));
+
+                } else {
+                    button.classList.remove('applied');
+                    button.disabled = false;
+                    button.title = 'Ứng tuyển ngay';
+
+                    if (icon) {
+                        icon.classList.remove('bi-check-circle-fill');
+                        icon.classList.add('bi-send-fill');
+                    }
+
+                    // ✅ FIX: Xóa toàn bộ text nodes và tạo mới
+                    button.childNodes.forEach(node => {
+                        if (node.nodeType === Node.TEXT_NODE) {
+                            node.remove();
+                        }
+                    });
+                    button.appendChild(document.createTextNode('Ứng tuyển ngay'));
+                }
             }
 
-            function showDetailView(jobId) {
-                gridView.classList.add('hidden');
-                detailView.classList.add('active');
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
+            // ========== ĐỒNG BỘ NÚT ỨNG TUYỂN ==========
+            function syncApplyButtons(jobId, hasApplied) {
+                // Grid view
+                const gridCard = document.querySelector(`.job-card-grid[data-job-id="${jobId}"]`);
+                if (gridCard) {
+                    const gridBtn = gridCard.querySelector('.btn-apply-now');
+                    if (gridBtn) updateApplyButton(gridBtn, hasApplied);
+                }
 
-                setTimeout(() => {
-                    document.querySelectorAll('.job-card').forEach(card => {
-                        card.classList.remove('active');
-                        if (card.getAttribute('data-job-id') == jobId) {
-                            card.classList.add('active');
-                            card.scrollIntoView({
-                                behavior: 'smooth',
-                                block: 'nearest'
+                // Detail view
+                const detailBtn = document.querySelector(`.btn-apply-now[data-job-id="${jobId}"]`);
+                if (detailBtn) updateApplyButton(detailBtn, hasApplied);
+            }
+
+            // ========== LOAD TRẠNG THÁI ĐÃ ỨNG TUYỂN ==========
+            function loadAppliedJobs() {
+                if (!checkAuth()) return;
+
+                fetch('/api/applied-jobs', {
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.appliedJobIds && data.appliedJobIds.length > 0) {
+                            data.appliedJobIds.forEach(jobId => {
+                                syncApplyButtons(jobId, true);
                             });
                         }
-                    });
-                    loadJobDetail(jobId);
-                }, 0);
-            }
-
-            // ========== CLICK ON GRID CARD ==========
-            function attachGridCardEvents() {
-                document.querySelectorAll('.job-card-grid').forEach(card => {
-                    card.addEventListener('click', function(e) {
-                        if (e.target.closest('.save-btn-grid')) return;
-                        const jobId = this.getAttribute('data-job-id');
-                        showDetailView(jobId);
-                    });
-                });
-            }
-
-            // ========== BACK TO GRID BUTTON ==========
-            backToGridBtn.addEventListener('click', function() {
-                showGridView();
-            });
-
-            // ========== CLICK ON LIST CARD ==========
-            function attachListCardEvents() {
-                document.querySelectorAll('.job-card').forEach(card => {
-                    card.addEventListener('click', function(e) {
-                        if (e.target.closest('.save-btn-small')) return;
-                        document.querySelectorAll('.job-card').forEach(c => c.classList.remove('active'));
-                        this.classList.add('active');
-                        const jobId = this.getAttribute('data-job-id');
-                        loadJobDetail(jobId);
-                    });
-                });
-            }
-
-            // ========== LOAD JOB DETAIL ==========
-            function loadJobDetail(jobId) {
-                jobDetailColumn.innerHTML = `
-                <div class="job-detail-empty">
-                    <i class="bi bi-hourglass-split"></i>
-                    <p>Đang tải thông tin...</p>
-                </div>
-            `;
-
-                fetch(`/api/jobs/${jobId}`)
-                    .then(response => {
-                        if (!response.ok) throw new Error('Network response was not ok');
-                        return response.json();
                     })
-                    .then(job => {
-                        renderJobDetail(job);
+                    .catch(error => console.error('Error loading applied jobs:', error));
+            }
+
+            // ========== KIỂM TRA TRẠNG THÁI ỨNG TUYỂN CHO 1 JOB ==========
+            function checkApplicationStatus(jobId) {
+                if (!checkAuth()) return;
+
+                fetch(`/api/jobs/${jobId}/check-application`, {
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        }
                     })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        jobDetailColumn.innerHTML = `
-                        <div class="job-detail-empty">
-                            <i class="bi bi-exclamation-circle"></i>
-                            <p>Không thể tải thông tin công việc</p>
-                        </div>
-                    `;
-                    });
-            }
-
-            // ========== RENDER JOB DETAIL ==========
-            function renderJobDetail(job) {
-                const formatMoney = (num) => new Intl.NumberFormat('vi-VN').format(num);
-
-                let salaryHtml = '';
-                let salaryClass = '';
-                if (job.salary_min && job.salary_max) {
-                    salaryHtml = `${formatMoney(job.salary_min)} - ${formatMoney(job.salary_max)} ${job.salary_type.toUpperCase()}`;
-                } else {
-                    salaryHtml = 'Thỏa thuận';
-                    salaryClass = 'negotiable';
-                }
-
-                const deadline = new Date(job.deadline).toLocaleDateString('vi-VN');
-
-                const logoHtml = job.company && job.company.logo ?
-                    `<img src="/assets/img/${job.company.logo}" alt="Company Logo">` :
-                    `<div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667EEA, #764BA2); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">${job.company ? job.company.tencty.charAt(0) : 'C'}</div>`;
-
-                const hashtagsHtml = job.hashtags && job.hashtags.length > 0 ?
-                    job.hashtags.map(tag => `<span class="tag-item">${tag.tag_name}</span>`).join('') :
-                    '<p class="text-muted">Không có thông tin</p>';
-
-                jobDetailColumn.innerHTML = `
-                <div class="job-detail-header">
-                    <div class="job-detail-company">
-                        <div class="company-logo-large">${logoHtml}</div>
-                        <div class="job-detail-title-section">
-                            <h2 class="job-detail-title">${job.title}</h2>
-                            <div class="job-detail-company-name">${job.company ? job.company.tencty : 'Công ty'}</div>
-                            <span class="job-detail-salary ${salaryClass}">${salaryHtml}</span>
-                        </div>
-                    </div>
-                    <div class="job-detail-actions">
-                        <button type="button" class="btn-apply-now" data-job-id="${job.job_id}">
-                            <i class="bi bi-send-fill me-2"></i>Ứng tuyển ngay
-                        </button>
-                        <button class="save-btn-large" title="Lưu công việc" data-job-id="${job.job_id}">
-                            <i class="bi bi-heart" style="font-size: 1.2rem;"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="job-detail-content">
-                    <div class="detail-section">
-                        <h3 class="detail-section-title"><i class="bi bi-info-circle-fill"></i> Thông tin chung</h3>
-                        <div class="info-grid">
-                            <div class="info-item">
-                                <div class="info-label"><i class="bi bi-briefcase"></i> Cấp bậc</div>
-                                <div class="info-value">${job.level}</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label"><i class="bi bi-award"></i> Kinh nghiệm</div>
-                                <div class="info-value">${job.experience}</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label"><i class="bi bi-people"></i> Số lượng tuyển</div>
-                                <div class="info-value">${job.recruitment_count || 'Không giới hạn'}</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label"><i class="bi bi-clock-history"></i> Hạn nộp hồ sơ</div>
-                                <div class="info-value" style="color: #EF4444;">${deadline}</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label"><i class="bi bi-laptop"></i> Hình thức làm việc</div>
-                                <div class="info-value">${job.working_type}</div>
-                            </div>
-                            ${job.gender_requirement ? `
-                            <div class="info-item">
-                                <div class="info-label"><i class="bi bi-gender-ambiguous"></i> Yêu cầu giới tính</div>
-                                <div class="info-value">${job.gender_requirement}</div>
-                            </div>` : ''}
-                        </div>
-                    </div>
-                    <div class="detail-section">
-                        <h3 class="detail-section-title"><i class="bi bi-geo-alt-fill"></i> Địa điểm làm việc</h3>
-                        <div class="info-value">${job.province}</div>
-                    </div>
-                    ${job.description ? `
-                    <div class="detail-section">
-                        <h3 class="detail-section-title"><i class="bi bi-file-text-fill"></i> Mô tả công việc</h3>
-                        <div class="job-description">${job.description.replace(/\n/g, '<br>')}</div>
-                    </div>` : ''}
-                    ${job.responsibilities ? `
-                    <div class="detail-section">
-                        <h3 class="detail-section-title"><i class="bi bi-card-checklist"></i> Trách nhiệm công việc</h3>
-                        <div class="job-description">${job.responsibilities.replace(/\n/g, '<br>')}</div>
-                    </div>` : ''}
-                    ${job.requirements ? `
-                    <div class="detail-section">
-                        <h3 class="detail-section-title"><i class="bi bi-list-check"></i> Yêu cầu ứng viên</h3>
-                        <div class="job-description">${job.requirements.replace(/\n/g, '<br>')}</div>
-                    </div>` : ''}
-                    ${job.benefits ? `
-                    <div class="detail-section">
-                        <h3 class="detail-section-title"><i class="bi bi-gift-fill"></i> Quyền lợi</h3>
-                        <div class="job-description">${job.benefits.replace(/\n/g, '<br>')}</div>
-                    </div>` : ''}
-                    ${job.hashtags && job.hashtags.length > 0 ? `
-                    <div class="detail-section">
-                        <h3 class="detail-section-title"><i class="bi bi-code-slash"></i> Kỹ năng yêu cầu</h3>
-                        <div class="tags-list">${hashtagsHtml}</div>
-                    </div>` : ''}
-                </div>
-            `;
-
-                jobDetailColumn.scrollTop = 0;
-                attachDetailButtons();
-            }
-
-            // ========== ATTACH DETAIL BUTTONS ==========
-            function attachDetailButtons() {
-                const saveBtnLarge = document.querySelector('.save-btn-large');
-                const applyBtn = document.querySelector('.btn-apply-now');
-
-                if (saveBtnLarge) {
-                    saveBtnLarge.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        const jobId = this.getAttribute('data-job-id');
-                        const isSaved = this.classList.contains('saved');
-                        handleSaveJob(jobId, isSaved, this);
-                    });
-                }
-
-                if (applyBtn) {
-                    applyBtn.addEventListener('click', function() {
-                        if (!checkAuth()) {
-                            showToast('Vui lòng đăng nhập để ứng tuyển!', 'error');
-                            setTimeout(() => window.location.href = '/login', 1500);
-                            return;
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            syncApplyButtons(jobId, data.applied);
                         }
-                        const modal = document.getElementById('applyJobModal');
-                        if (modal) {
-                            const bsModal = new bootstrap.Modal(modal);
-                            bsModal.show();
-                        }
-                    });
-                }
+                    })
+                    .catch(error => console.error('Error checking application status:', error));
             }
 
             // ========== CẬP NHẬT TRẠNG THÁI NÚT SAVE ==========
@@ -2403,10 +1152,295 @@
                     });
             }
 
-            // ========== ATTACH EVENT CHO NÚT SAVE GRID ==========
+            // ========== LOAD TRẠNG THÁI ĐÃ LƯU ==========
+            function loadSavedJobs() {
+                if (!checkAuth()) return;
+
+                fetch('/api/saved-jobs', {
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.savedJobIds) {
+                            data.savedJobIds.forEach(jobId => {
+                                syncSaveButtons(jobId, true);
+                            });
+                        }
+                    })
+                    .catch(error => console.error('Error loading saved jobs:', error));
+            }
+
+            // ========== SWITCH BETWEEN GRID AND DETAIL VIEW ==========
+            function showGridView() {
+                if (gridView && detailView) {
+                    gridView.classList.remove('hidden');
+                    detailView.classList.remove('active');
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+
+            function showDetailView(jobId) {
+                if (gridView && detailView) {
+                    gridView.classList.add('hidden');
+                    detailView.classList.add('active');
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+
+                    setTimeout(() => {
+                        document.querySelectorAll('.job-card').forEach(card => {
+                            card.classList.remove('active');
+                            if (card.getAttribute('data-job-id') == jobId) {
+                                card.classList.add('active');
+                                card.scrollIntoView({
+                                    behavior: 'smooth',
+                                    block: 'nearest'
+                                });
+                            }
+                        });
+                        loadJobDetail(jobId);
+                    }, 0);
+                }
+            }
+
+            // ========== LOAD JOB DETAIL ==========
+            function loadJobDetail(jobId) {
+                if (!jobDetailColumn) return;
+
+                jobDetailColumn.innerHTML = `
+            <div class="job-detail-empty">
+                <i class="bi bi-hourglass-split"></i>
+                <p>Đang tải thông tin...</p>
+            </div>
+        `;
+
+                fetch(`/api/jobs/${jobId}`)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        return response.json();
+                    })
+                    .then(job => {
+                        renderJobDetail(job);
+                        checkApplicationStatus(jobId);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        jobDetailColumn.innerHTML = `
+                <div class="job-detail-empty">
+                    <i class="bi bi-exclamation-circle"></i>
+                    <p>Không thể tải thông tin công việc</p>
+                </div>
+            `;
+                    });
+            }
+
+            // ========== RENDER JOB DETAIL ==========
+            function renderJobDetail(job) {
+                const formatMoney = (num) => new Intl.NumberFormat('vi-VN').format(num);
+
+                let salaryHtml = '';
+                let salaryClass = '';
+                if (job.salary_min && job.salary_max) {
+                    salaryHtml = `${formatMoney(job.salary_min)} - ${formatMoney(job.salary_max)} ${job.salary_type.toUpperCase()}`;
+                } else {
+                    salaryHtml = 'Thỏa thuận';
+                    salaryClass = 'negotiable';
+                }
+
+                const deadline = new Date(job.deadline).toLocaleDateString('vi-VN');
+
+                const logoHtml = job.company && job.company.logo ?
+                    `<img src="/assets/img/${job.company.logo}" alt="Company Logo">` :
+                    `<div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667EEA, #764BA2); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">${job.company ? job.company.tencty.charAt(0) : 'C'}</div>`;
+
+                const hashtagsHtml = job.hashtags && job.hashtags.length > 0 ?
+                    job.hashtags.map(tag => `<span class="tag-item">${tag.tag_name}</span>`).join('') :
+                    '<p class="text-muted">Không có thông tin</p>';
+
+                jobDetailColumn.innerHTML = `
+            <div class="job-detail-header">
+                <div class="job-detail-company">
+                    <div class="company-logo-large">${logoHtml}</div>
+                    <div class="job-detail-title-section">
+                        <h2 class="job-detail-title">${job.title}</h2>
+                        <div class="job-detail-company-name">${job.company ? job.company.tencty : 'Công ty'}</div>
+                        <span class="job-detail-salary ${salaryClass}">${salaryHtml}</span>
+                    </div>
+                </div>
+                <div class="job-detail-actions">
+                    <button type="button" class="btn-apply-now" data-job-id="${job.job_id}">
+                        <i class="bi bi-send-fill me-2"></i>Ứng tuyển ngay
+                    </button>
+                    <button class="save-btn-large" title="Lưu công việc" data-job-id="${job.job_id}">
+                        <i class="bi bi-heart" style="font-size: 1.2rem;"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="job-detail-content">
+                <div class="detail-section">
+                    <h3 class="detail-section-title"><i class="bi bi-info-circle-fill"></i> Thông tin chung</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label"><i class="bi bi-briefcase"></i> Cấp bậc</div>
+                            <div class="info-value">${job.level}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label"><i class="bi bi-award"></i> Kinh nghiệm </div>
+                            <div class="info-value">${job.experience}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label"><i class="bi bi-people"></i> Số lượng tuyển</div>
+                            <div class="info-value">${job.recruitment_count || 'Không giới hạn'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label"><i class="bi bi-clock-history"></i> Hạn nộp hồ sơ</div>
+                            <div class="info-value" style="color: #EF4444;">${deadline}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label"><i class="bi bi-laptop"></i> Hình thức làm việc</div>
+                            <div class="info-value">${job.working_type}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="detail-section">
+                    <h3 class="detail-section-title"><i class="bi bi-geo-alt-fill"></i> Địa điểm làm việc</h3>
+                    <div class="info-value">${job.province}</div>
+                </div>
+                ${job.description ? `
+                <div class="detail-section">
+                    <h3 class="detail-section-title"><i class="bi bi-file-text-fill"></i> Mô tả công việc</h3>
+                    <div class="job-description">${job.description.replace(/\n/g, '<br>')}</div>
+                </div>` : ''}
+                ${job.requirements ? `
+                <div class="detail-section">
+                    <h3 class="detail-section-title"><i class="bi bi-list-check"></i> Yêu cầu ứng viên</h3>
+                    <div class="job-description">${job.requirements.replace(/\n/g, '<br>')}</div>
+                </div>` : ''}
+                ${job.benefits ? `
+                <div class="detail-section">
+                    <h3 class="detail-section-title"><i class="bi bi-gift-fill"></i> Quyền lợi</h3>
+                    <div class="job-description">${job.benefits.replace(/\n/g, '<br>')}</div>
+                </div>` : ''}
+                ${job.hashtags && job.hashtags.length > 0 ? `
+                <div class="detail-section">
+                    <h3 class="detail-section-title"><i class="bi bi-code-slash"></i> Kỹ năng yêu cầu</h3>
+                    <div class="tags-list">${hashtagsHtml}</div>
+                </div>` : ''}
+            </div>
+        `;
+
+                jobDetailColumn.scrollTop = 0;
+                attachDetailButtons();
+            }
+
+            // ========== ATTACH DETAIL BUTTONS ==========
+            function attachDetailButtons() {
+                const saveBtnLarge = document.querySelector('.save-btn-large');
+                const applyBtn = document.querySelector('.btn-apply-now');
+
+                if (saveBtnLarge) {
+                    saveBtnLarge.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const jobId = this.getAttribute('data-job-id');
+                        const isSaved = this.classList.contains('saved');
+                        handleSaveJob(jobId, isSaved, this);
+                    });
+                }
+
+                if (applyBtn) {
+                    applyBtn.addEventListener('click', function() {
+                        if (this.classList.contains('applied')) {
+                            showToast('Bạn đã ứng tuyển công việc này rồi!', 'info');
+                            return;
+                        }
+
+                        if (!checkAuth()) {
+                            showToast('Vui lòng đăng nhập để ứng tuyển!', 'error');
+                            setTimeout(() => window.location.href = '/login', 1500);
+                            return;
+                        }
+
+                        const jobId = this.getAttribute('data-job-id');
+                        window.currentJobId = jobId;
+
+                        const modal = document.getElementById('applyJobModal');
+                        if (modal) {
+                            const bsModal = new bootstrap.Modal(modal);
+                            bsModal.show();
+                        }
+                    });
+                }
+            }
+
+            // ========== ATTACH GRID CARD EVENTS ==========
+            function attachGridCardEvents() {
+                document.querySelectorAll('.job-card-grid').forEach(card => {
+                    const newCard = card.cloneNode(true);
+                    card.parentNode.replaceChild(newCard, card);
+
+                    newCard.addEventListener('click', function(e) {
+                        if (e.target.closest('.save-btn-grid') || e.target.closest('.btn-apply-now')) return;
+                        const jobId = this.getAttribute('data-job-id');
+                        if (jobId) showDetailView(jobId);
+                    });
+
+                    const applyBtn = newCard.querySelector('.btn-apply-now');
+                    if (applyBtn) {
+                        applyBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+
+                            if (this.classList.contains('applied')) {
+                                showToast('Bạn đã ứng tuyển công việc này rồi!', 'info');
+                                return;
+                            }
+
+                            if (!checkAuth()) {
+                                showToast('Vui lòng đăng nhập để ứng tuyển!', 'error');
+                                setTimeout(() => window.location.href = '/login', 1500);
+                                return;
+                            }
+
+                            const jobId = this.getAttribute('data-job-id');
+                            window.currentJobId = jobId;
+
+                            const modal = document.getElementById('applyJobModal');
+                            if (modal) {
+                                const bsModal = new bootstrap.Modal(modal);
+                                bsModal.show();
+                            }
+                        });
+                    }
+                });
+            }
+
+            // ========== ATTACH LIST CARD EVENTS ==========
+            function attachListCardEvents() {
+                document.querySelectorAll('.job-card').forEach(card => {
+                    card.addEventListener('click', function(e) {
+                        if (e.target.closest('.save-btn-small')) return;
+                        document.querySelectorAll('.job-card').forEach(c => c.classList.remove('active'));
+                        this.classList.add('active');
+                        const jobId = this.getAttribute('data-job-id');
+                        loadJobDetail(jobId);
+                    });
+                });
+            }
+
+            // ========== ATTACH SAVE BUTTON EVENTS ==========
             function attachSaveButtonGrid() {
                 document.querySelectorAll('.save-btn-grid').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
+                    const newBtn = btn.cloneNode(true);
+                    btn.parentNode.replaceChild(newBtn, btn);
+
+                    newBtn.addEventListener('click', function(e) {
                         e.stopPropagation();
                         e.preventDefault();
                         const jobCard = this.closest('.job-card-grid');
@@ -2421,7 +1455,6 @@
                 });
             }
 
-            // ========== ATTACH EVENT CHO NÚT SAVE SMALL ==========
             function attachSaveButtonSmall() {
                 document.querySelectorAll('.save-btn-small').forEach(btn => {
                     btn.addEventListener('click', function(e) {
@@ -2439,39 +1472,24 @@
                 });
             }
 
-            // ========== LOAD TRẠNG THÁI ĐÃ LƯU KHI VÀO TRANG ==========
-            function loadSavedJobs() {
-                if (!checkAuth()) return;
-
-                fetch('/api/saved-jobs', {
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success && data.savedJobIds) {
-                            data.savedJobIds.forEach(jobId => {
-                                const gridCard = document.querySelector(`.job-card-grid[data-job-id="${jobId}"]`);
-                                if (gridCard) {
-                                    const saveBtn = gridCard.querySelector('.save-btn-grid');
-                                    if (saveBtn) updateSaveButton(saveBtn, true);
-                                }
-
-                                const listCard = document.querySelector(`.job-card[data-job-id="${jobId}"]`);
-                                if (listCard) {
-                                    const saveBtn = listCard.querySelector('.save-btn-small');
-                                    if (saveBtn) updateSaveButton(saveBtn, true);
-                                }
-                            });
-                        }
-                    })
-                    .catch(error => console.error('Error loading saved jobs:', error));
+            // ========== ATTACH ALL JOB CARD EVENTS ==========
+            function attachJobCardEvents() {
+                attachGridCardEvents();
+                attachListCardEvents();
+                attachSaveButtonGrid();
+                attachSaveButtonSmall();
+                loadSavedJobs();
+                loadAppliedJobs();
             }
 
-            // ========== Xử lý FILTER BUTTONS ==========
+            // ========== BACK TO GRID BUTTON ==========
+            if (backToGridBtn) {
+                backToGridBtn.addEventListener('click', function() {
+                    showGridView();
+                });
+            }
+
+            // ========== XỬ LÝ FILTER BUTTONS ==========
             const filterBtns = document.querySelectorAll('.filter-btn:not(.all-filters-btn)');
             filterBtns.forEach(btn => {
                 btn.addEventListener('click', function() {
@@ -2479,7 +1497,7 @@
                 });
             });
 
-            // ========== Xử lý MODAL ỨNG TUYỂN ==========
+            // ========== XỬ LÝ MODAL ỨNG TUYỂN ==========
             const uploadOption = document.getElementById('uploadOption');
             const profileOption = document.getElementById('profileOption');
             const uploadSection = document.getElementById('uploadSection');
@@ -2579,7 +1597,7 @@
                 charCount.textContent = letterTextarea.value.length;
             }
 
-            // Form Submit
+            // ========== FORM SUBMIT - ỨNG TUYỂN ==========
             const applyJobForm = document.getElementById('applyJobForm');
             if (applyJobForm) {
                 applyJobForm.addEventListener('submit', function(e) {
@@ -2587,15 +1605,24 @@
 
                     const cvType = document.querySelector('input[name="cv_type"]:checked').value;
                     if (cvType === 'upload' && !cvFileInput.files.length) {
-                        alert('Vui lòng tải lên CV của bạn');
+                        showToast('Vui lòng tải lên CV của bạn', 'error');
                         return;
                     }
 
-                    const activeJobCard = document.querySelector('.job-card.active');
-                    const jobId = activeJobCard ? activeJobCard.getAttribute('data-job-id') : null;
+                    let jobId = window.currentJobId;
 
                     if (!jobId) {
-                        alert('Không xác định được công việc. Vui lòng thử lại!');
+                        const activeCard = document.querySelector('.job-card.active');
+                        jobId = activeCard ? activeCard.getAttribute('data-job-id') : null;
+                    }
+
+                    if (!jobId) {
+                        const applyBtn = document.querySelector('.btn-apply-now');
+                        jobId = applyBtn ? applyBtn.getAttribute('data-job-id') : null;
+                    }
+
+                    if (!jobId) {
+                        showToast('Không xác định được công việc. Vui lòng thử lại!', 'error');
                         return;
                     }
 
@@ -2611,20 +1638,33 @@
                             method: 'POST',
                             body: formData,
                             headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json'
                             }
                         })
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
                                 showToast(data.message, 'success');
+
+                                // ✅ CẬP NHẬT NÚT ỨNG TUYỂN NGAY SAU KHI THÀNH CÔNG
+                                syncApplyButtons(jobId, true);
+
                                 const modal = bootstrap.Modal.getInstance(document.getElementById('applyJobModal'));
                                 if (modal) modal.hide();
+
                                 applyJobForm.reset();
+                                window.currentJobId = null;
+
                                 if (fileNameDisplay) fileNameDisplay.style.display = 'none';
                                 if (uploadArea) uploadArea.style.display = 'block';
                             } else {
-                                showToast(data.message || 'Có lỗi xảy ra. Vui lòng thử lại!', 'error');
+                                if (data.errors) {
+                                    const errorMessages = Object.values(data.errors).flat().join('\n');
+                                    showToast(errorMessages, 'error');
+                                } else {
+                                    showToast(data.message || 'Có lỗi xảy ra. Vui lòng thử lại!', 'error');
+                                }
                             }
                         })
                         .catch(error => {
@@ -2656,14 +1696,117 @@
                 });
             }
 
-            // ========== KHỞI TẠO ==========
-            attachGridCardEvents();
-            attachListCardEvents();
-            attachSaveButtonGrid();
-            attachSaveButtonSmall();
-            loadSavedJobs();
+            // ========== KHỞI TẠO BAN ĐẦU ==========
+            attachJobCardEvents();
+
+            console.log('✅ All features initialized successfully');
+
+            // ========== XỬ LÝ PAGINATION AJAX ==========
+            function handlePagination() {
+                const paginationWrapper = document.getElementById('paginationWrapper');
+
+                if (!paginationWrapper) return;
+
+                // Xử lý click vào các nút pagination
+                paginationWrapper.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    const target = e.target.closest('.page-link');
+                    if (!target) return;
+
+                    const pageItem = target.closest('.page-item');
+                    if (pageItem && pageItem.classList.contains('disabled')) return;
+
+                    const page = parseInt(target.getAttribute('data-page'));
+                    if (!page || page < 1) return;
+
+                    loadJobsByPage(page);
+                });
+            }
+
+            // ========== LOAD JOBS BY PAGE ==========
+            function loadJobsByPage(page) {
+                // Hiển thị loading overlay
+                if (loadingOverlay) {
+                    loadingOverlay.style.display = 'flex';
+                }
+
+                // Scroll to top
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+
+                fetch(`/api/jobs?page=${page}`, {
+                        method: 'GET',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // Cập nhật grid view
+                            if (gridView) {
+                                gridView.innerHTML = data.html;
+                            }
+
+                            // Cập nhật pagination
+                            if (paginationWrapper) {
+                                paginationWrapper.innerHTML = data.pagination;
+                            }
+
+                            // Cập nhật URL (không reload trang)
+                            const newUrl = `${window.location.pathname}?page=${page}`;
+                            window.history.pushState({
+                                page: page
+                            }, '', newUrl);
+
+                            // Re-attach events cho các job cards mới
+                            attachJobCardEvents();
+
+                            console.log(`✅ Loaded page ${page} successfully`);
+                        } else {
+                            showToast('Không thể tải dữ liệu', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading jobs:', error);
+                        showToast('Có lỗi xảy ra khi tải dữ liệu', 'error');
+                    })
+                    .finally(() => {
+                        // Ẩn loading overlay
+                        if (loadingOverlay) {
+                            loadingOverlay.style.display = 'none';
+                        }
+                    });
+            }
+
+            // ========== XỬ LÝ BROWSER BACK/FORWARD ==========
+            window.addEventListener('popstate', function(e) {
+                if (e.state && e.state.page) {
+                    loadJobsByPage(e.state.page);
+                } else {
+                    // Nếu không có state, reload về page 1
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const page = parseInt(urlParams.get('page')) || 1;
+                    loadJobsByPage(page);
+                }
+            });
+
+            // ========== KHỞI TẠO PAGINATION ==========
+            handlePagination();
         });
     </script>
+
+
 </body>
 
 </html>

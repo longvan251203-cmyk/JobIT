@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\KyNang;
 use App\Models\GiaiThuong;
 use App\Models\ChungChi;
 use App\Models\KinhNghiem;
@@ -563,28 +564,99 @@ class ApplicantController extends Controller
     }
 
     // ============ KỸ NĂNG ============
+    /**
+     * Xóa kỹ năng - RETURN JSON cho AJAX
+     */
+    public function deleteKyNang($id)
+    {
+        try {
+            Log::info('=== XÓA KỸ NĂNG ===');
+            Log::info('ID nhận: ' . $id);
 
+            $user = Auth::user();
+
+            if (!$user || !$user->applicant) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy thông tin ứng viên'
+                ], 404);
+            }
+
+            Log::info('Applicant ID: ' . $user->applicant->id_uv);
+
+            // Tìm kỹ năng theo ID
+            $kyNang = KyNang::where('id', $id)
+                ->where('applicant_id', $user->applicant->id_uv)
+                ->first();
+
+            if (!$kyNang) {
+                Log::warning('Không tìm thấy kỹ năng với ID: ' . $id);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy kỹ năng'
+                ], 404);
+            }
+
+            // Xóa
+            $kyNang->delete();
+
+            Log::info('✅ Đã xóa kỹ năng thành công!');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã xóa kỹ năng thành công'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('❌ Lỗi xóa kỹ năng: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+    /**
+     * Lưu kỹ năng mới (nhiều kỹ năng cùng lúc)
+     */
     public function storeKyNang(Request $request)
     {
         $request->validate([
-            'ten_ky_nang' => 'required|array',
-            'nam_kinh_nghiem' => 'nullable|array'
+            'ten_ky_nang' => 'required|array|min:1',
+            'ten_ky_nang.*' => 'required|string|max:100',
+            'nam_kinh_nghiem' => 'required|array|min:1',
+            'nam_kinh_nghiem.*' => 'required'
+        ], [
+            'ten_ky_nang.required' => 'Vui lòng nhập ít nhất một kỹ năng',
+            'ten_ky_nang.*.required' => 'Tên kỹ năng không được để trống',
+            'nam_kinh_nghiem.required' => 'Vui lòng chọn năm kinh nghiệm',
         ]);
 
-        $user = Auth::user();
-        $applicant = $user->applicant;
+        try {
+            $tenKyNang = $request->ten_ky_nang;
+            $namKinhNghiem = $request->nam_kinh_nghiem;
 
-        foreach ($request->ten_ky_nang as $index => $skill) {
-            DB::table('ky_nang')->insert([
-                'applicant_id' => $applicant->id_uv,
-                'ten_ky_nang' => $skill,
-                'nam_kinh_nghiem' => isset($request->nam_kinh_nghiem[$index]) ? $request->nam_kinh_nghiem[$index] : 0,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            // Lưu từng kỹ năng
+            foreach ($tenKyNang as $index => $ten) {
+                // Kiểm tra trùng lặp
+                $exists = KyNang::where('applicant_id', Auth::user()->id_uv)
+                    ->where('ten_ky_nang', $ten)
+                    ->exists();
+
+                if (!$exists) {
+                    KyNang::create([
+                        'applicant_id' => Auth::user()->id_uv,
+                        'ten_ky_nang' => $ten,
+                        'nam_kinh_nghiem' => $namKinhNghiem[$index] ?? 0,
+                        'mo_ta' => null // Có thể thêm mô tả sau
+                    ]);
+                }
+            }
+
+            return redirect()->back()->with('success', 'Đã thêm kỹ năng thành công!');
+        } catch (\Exception $e) {
+            Log::error('Lỗi khi lưu kỹ năng: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Có lỗi xảy ra khi lưu kỹ năng!');
         }
-
-        return redirect()->route('applicant.hoso')->with('success', 'Thêm kỹ năng thành công!');
     }
 
     // ============ AVATAR & CV ============

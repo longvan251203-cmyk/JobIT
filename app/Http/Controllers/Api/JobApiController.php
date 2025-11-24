@@ -9,18 +9,46 @@ use Illuminate\Http\Request;
 class JobApiController extends Controller
 {
     /**
+     * Lấy danh sách jobs với phân trang
+     */
+    public function index(Request $request)
+    {
+        try {
+            $jobs = JobPost::with(['company', 'hashtags', 'detail'])
+                ->where('status', 'active')
+                ->orderBy('created_at', 'desc')
+                ->paginate(12);
+
+            // Trả về HTML của jobs
+            $html = view('applicant.partials.job-cards', ['jobs' => $jobs])->render();
+
+            return response()->json([
+                'success' => true,
+                'html' => $html,
+                'pagination' => [
+                    'current_page' => $jobs->currentPage(),
+                    'last_page' => $jobs->lastPage(),
+                    'total' => $jobs->total(),
+                    'per_page' => $jobs->perPage(),
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Lấy chi tiết job theo ID
      */
     public function show($id)
     {
         try {
-            $job = JobPost::with([
-                'company',
-                'hashtags'
-            ])
+            $job = JobPost::with(['company', 'hashtags'])
                 ->findOrFail($id);
 
-            // Format dữ liệu trả về
             $response = [
                 'job_id' => $job->job_id,
                 'title' => $job->title,
@@ -34,27 +62,17 @@ class JobApiController extends Controller
                 'province' => $job->province,
                 'deadline' => $job->deadline,
                 'gender_requirement' => $job->gender_requirement,
-
-                // Nội dung chi tiết
                 'description' => $job->description,
                 'responsibilities' => $job->responsibilities,
                 'requirements' => $job->requirements,
                 'benefits' => $job->benefits,
                 'working_environment' => $job->working_environment,
                 'contact_method' => $job->contact_method,
-
-                // Thông tin công ty
                 'company' => [
                     'companies_id' => $job->company->companies_id ?? null,
-                    'name' => $job->company->tencty ?? 'Công ty',
-                    'logo' => $job->company->logo ? asset('storage/' . $job->company->logo) : null,
-                    'address' => ($job->company->quan_huyen ? $job->company->quan_huyen . ', ' : '') . ($job->company->tinh_thanh ?? ''),
-                    'website' => $job->company->website_cty ?? null,
-                    'description' => $job->company->mota_cty ?? null,
-                    'quymo' => $job->company->quymo ?? null,
+                    'tencty' => $job->company->tencty ?? 'Công ty',
+                    'logo' => $job->company->logo ?? null,
                 ],
-
-                // Hashtags
                 'hashtags' => $job->hashtags->map(function ($tag) {
                     return [
                         'hashtag_id' => $tag->hashtag_id,

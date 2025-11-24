@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Application;
 use App\Models\JobDetail;
 use App\Models\JobPost;
 use App\Models\JobHashtag;
@@ -606,5 +607,179 @@ class JobController extends Controller
                 'error' => 'Có lỗi xảy ra khi tìm kiếm hashtags'
             ], 500);
         }
+    }
+    public function checkApplicationStatus($id)
+    {
+        try {
+            if (!Auth::check()) {
+                return response()->json([
+                    'success' => true,
+                    'applied' => false
+                ]);
+            }
+
+            $applicant = Auth::user()->applicant;
+
+            if (!$applicant) {
+                return response()->json([
+                    'success' => true,
+                    'applied' => false
+                ]);
+            }
+
+            $application = Application::where('job_id', $id)
+                ->where('applicant_id', $applicant->id_uv)
+                ->first();
+
+            return response()->json([
+                'success' => true,
+                'applied' => $application ? true : false,
+                'application_status' => $application ? $application->trang_thai : null
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error checking application status', [
+                'job_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra'
+            ], 500);
+        }
+    }
+
+    /**
+     * ✅ API: Lấy danh sách ID các job đã ứng tuyển
+     */
+    public function getAppliedJobIds()
+    {
+        try {
+            if (!Auth::check()) {
+                return response()->json([
+                    'success' => true,
+                    'appliedJobIds' => []
+                ]);
+            }
+
+            $applicant = Auth::user()->applicant;
+
+            if (!$applicant) {
+                return response()->json([
+                    'success' => true,
+                    'appliedJobIds' => []
+                ]);
+            }
+
+            $appliedJobIds = Application::where('applicant_id', $applicant->id_uv)
+                ->pluck('job_id')
+                ->toArray();
+
+            return response()->json([
+                'success' => true,
+                'appliedJobIds' => $appliedJobIds
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting applied job IDs', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra'
+            ], 500);
+        }
+    }
+    public function getJobsPaginated(Request $request)
+    {
+        try {
+            $page = $request->input('page', 1);
+            $perPage = 12; // Số job mỗi trang
+
+            $jobs = JobPost::with(['company', 'hashtags'])
+                ->orderBy('created_at', 'desc')
+                ->paginate($perPage, ['*'], 'page', $page);
+
+            // Render HTML cho job cards
+            $html = view('applicant.partials.job-cards', ['jobs' => $jobs])->render();
+
+            // Tạo HTML cho pagination
+            $paginationHtml = $this->buildPaginationHtml($jobs);
+
+            return response()->json([
+                'success' => true,
+                'html' => $html,
+                'pagination' => $paginationHtml,
+                'current_page' => $jobs->currentPage(),
+                'last_page' => $jobs->lastPage(),
+                'total' => $jobs->total()
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting paginated jobs', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi tải dữ liệu'
+            ], 500);
+        }
+    }
+
+    /**
+     * ✅ Helper: Tạo HTML cho pagination
+     */
+    private function buildPaginationHtml($jobs)
+    {
+        if ($jobs->lastPage() <= 1) {
+            return '';
+        }
+
+        $html = '<nav class="custom-pagination"><ul class="pagination">';
+
+        // Previous Button
+        $prevDisabled = $jobs->currentPage() == 1 ? 'disabled' : '';
+        $html .= '<li class="page-item ' . $prevDisabled . '">';
+        $html .= '<a class="page-link" href="#" data-page="' . ($jobs->currentPage() - 1) . '">';
+        $html .= '<i class="bi bi-chevron-left"></i></a></li>';
+
+        // Page Numbers
+        $start = max(1, $jobs->currentPage() - 2);
+        $end = min($jobs->lastPage(), $jobs->currentPage() + 2);
+
+        // First page + ellipsis
+        if ($start > 1) {
+            $html .= '<li class="page-item"><a class="page-link" href="#" data-page="1">1</a></li>';
+            if ($start > 2) {
+                $html .= '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            }
+        }
+
+        // Page numbers
+        for ($i = $start; $i <= $end; $i++) {
+            $active = $i == $jobs->currentPage() ? 'active' : '';
+            $html .= '<li class="page-item ' . $active . '">';
+            $html .= '<a class="page-link" href="#" data-page="' . $i . '">' . $i . '</a></li>';
+        }
+
+        // Ellipsis + last page
+        if ($end < $jobs->lastPage()) {
+            if ($end < $jobs->lastPage() - 1) {
+                $html .= '<li class="page-item disabled"><span class="page-link">...</span></li>';
+            }
+            $html .= '<li class="page-item"><a class="page-link" href="#" data-page="' . $jobs->lastPage() . '">';
+            $html .= $jobs->lastPage() . '</a></li>';
+        }
+
+        // Next Button
+        $nextDisabled = $jobs->currentPage() == $jobs->lastPage() ? 'disabled' : '';
+        $html .= '<li class="page-item ' . $nextDisabled . '">';
+        $html .= '<a class="page-link" href="#" data-page="' . ($jobs->currentPage() + 1) . '">';
+        $html .= '<i class="bi bi-chevron-right"></i></a></li>';
+
+        $html .= '</ul></nav>';
+
+        return $html;
     }
 }

@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Application;
+use App\Models\Applicant;
 use App\Models\JobPost;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -17,9 +20,9 @@ class ApplicationController extends Controller
         try {
             // Validate dữ liệu
             $validator = Validator::make($request->all(), [
-                'job_id' => 'required|exists:job_post,job_id',
+                'job_id' => 'required|exists:job_post,job_id',  // ✅ SỬA: job_post (không có s)
                 'cv_type' => 'required|in:upload,profile',
-                'cv_file' => 'required_if:cv_type,upload|file|mimes:pdf,doc,docx|max:5120', // 5MB
+                'cv_file' => 'required_if:cv_type,upload|file|mimes:pdf,doc,docx|max:5120',
                 'hoten' => 'required|string|max:255',
                 'email' => 'required|email|max:255',
                 'sdt' => 'required|string|max:20',
@@ -80,7 +83,7 @@ class ApplicationController extends Controller
                 'sdt' => $request->sdt,
                 'diachi' => $request->diachi,
                 'thu_gioi_thieu' => $request->thugioithieu,
-                'trang_thai' => 'chua_xem',
+                'trang_thai' => Application::STATUS_CHO_XU_LY,  // ✅ SỬA: dùng giá trị cũ
                 'ngay_ung_tuyen' => now(),
             ]);
 
@@ -90,35 +93,37 @@ class ApplicationController extends Controller
                 'data' => $application
             ]);
         } catch (\Exception $e) {
+            Log::error('❌ Lỗi ứng tuyển: ' . $e->getMessage(), [
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
             ], 500);
         }
     }
+    /**
+     * ✅ HỦY ỨNG TUYỂN (CHO APPLICANT)
+     */
     public function cancel($applicationId)
     {
         try {
-            $application = Application::findOrFail($applicationId);
+            $applicant = Applicant::where('user_id', Auth::id())->first();
 
-            // Kiểm tra quyền
-            if ($application->applicant_id != Auth::user()->applicant->id_uv) {
+            $application = Application::where('application_id', $applicationId)
+                ->where('applicant_id', $applicant->id_uv)
+                ->firstOrFail();
+
+            if ($application->trang_thai !== Application::STATUS_CHO_XU_LY) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Bạn không có quyền hủy đơn ứng tuyển này!'
-                ], 403);
+                    'message' => 'Không thể hủy đơn này'
+                ], 400);
             }
 
-            // Chỉ cho phép hủy nếu chưa xem hoặc đã xem
-            if (!in_array($application->trang_thai, ['chua_xem', 'da_xem'])) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Không thể hủy đơn ứng tuyển ở trạng thái hiện tại!'
-                ], 422);
-            }
-
-            // Xóa file CV nếu có
-            if ($application->cv_file_path && Storage::disk('public')->exists($application->cv_file_path)) {
+            if ($application->cv_file_path) {
                 Storage::disk('public')->delete($application->cv_file_path);
             }
 
@@ -126,142 +131,421 @@ class ApplicationController extends Controller
 
             return response()->json([
                 'success' => true,
-                'message' => 'Đã hủy đơn ứng tuyển thành công!'
+                'message' => 'Đã hủy ứng tuyển'
             ]);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+                'message' => 'Có lỗi xảy ra'
             ], 500);
         }
     }
-    public function jobApplicants($job_id)
+    // ✅ DANH SÁCH ỨNG VIÊN
+    /**
+     * ✅ DANH SÁCH ỨNG VIÊN (EMPLOYER)
+     */
+    public function jobApplicants($jobId)
     {
-        $employer = Auth::user()->employer;
+        try {
+            $job = JobPost::with('company')->findOrFail($jobId);
 
-        if (!$employer || !$employer->company) {
-            return redirect()->route('employer.home')->with('error', 'Vui lòng cập nhật thông tin công ty');
+            if (Auth::user()->user_id != $job->company->user_id) {
+                abort(403);
+            }
+
+            $applications = Application::with(['applicant', 'job'])
+                ->where('job_id', $jobId)
+                ->orderBy('ngay_ung_tuyen', 'desc')
+                ->get();
+
+            $statistics = [
+                'total' => $applications->count(),
+                'cho_xu_ly' => $applications->where('trang_thai', Application::STATUS_CHO_XU_LY)->count(),
+                'dang_phong_van' => $applications->where('trang_thai', Application::STATUS_DANG_PHONG_VAN)->count(),
+                'duoc_chon' => $applications->where('trang_thai', Application::STATUS_DUOC_CHON)->count(),
+                'khong_phu_hop' => $applications->where('trang_thai', Application::STATUS_KHONG_PHU_HOP)->count(),
+            ];
+
+            return view('employer.job-applicants', compact('job', 'applications', 'statistics'));
+        } catch (\Exception $e) {
+            Log::error('Lỗi xem ứng viên: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Có lỗi xảy ra');
         }
-
-        // Lấy thông tin job và kiểm tra quyền sở hữu
-        $job = JobPost::with('detail', 'company')
-            ->where('job_id', $job_id)
-            ->where('companies_id', $employer->company->companies_id)
-            ->firstOrFail();
-
-        // Lấy danh sách ứng viên
-        $applications = Application::with(['applicant.user', 'applicant.kinhnghiem', 'applicant.hocvan', 'applicant.kynang'])
-            ->where('job_id', $job_id)
-            ->orderBy('ngay_ung_tuyen', 'desc')
-            ->get();
-
-        // Thống kê theo trạng thái
-        $statistics = [
-            'total' => $applications->count(),
-            'chua_xem' => $applications->where('trang_thai', 'chua_xem')->count(),
-            'da_xem' => $applications->where('trang_thai', 'da_xem')->count(),
-            'phong_van' => $applications->where('trang_thai', 'phong_van')->count(),
-            'duoc_chon' => $applications->where('trang_thai', 'duoc_chon')->count(),
-            'tu_choi' => $applications->where('trang_thai', 'tu_choi')->count(),
-        ];
-
-        return view('employer.job-applicants', compact('job', 'applications', 'statistics'));
     }
 
-    // Cập nhật trạng thái ứng viên
+    // ✅ CẬP NHẬT TRẠNG THÁI
+    /**
+     * ✅ CẬP NHẬT TRẠNG THÁI
+     */
     public function updateStatus(Request $request, $id)
     {
-        $request->validate([
-            'status' => 'required|in:chua_xem,da_xem,phong_van,duoc_chon,tu_choi',
-            'note' => 'nullable|string|max:1000'
-        ]);
+        try {
+            $validated = $request->validate([
+                'status' => 'required|in:cho_xu_ly,dang_phong_van,duoc_chon,khong_phu_hop'
+            ]);
 
-        $application = Application::findOrFail($id);
+            $application = Application::with('company')->findOrFail($id);
 
-        // Kiểm tra quyền sở hữu
-        $employer = Auth::user()->employer;
-        if ($application->company_id != $employer->company->companies_id) {
-            return response()->json(['success' => false, 'message' => 'Không có quyền truy cập'], 403);
+            if (Auth::user()->user_id != $application->company->user_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không có quyền'
+                ], 403);
+            }
+
+            $application->update([
+                'trang_thai' => $validated['status'],
+                'ghi_chu' => ($application->ghi_chu ?? '') .
+                    "\n[" . now()->format('d/m/Y H:i') . "] Cập nhật: " . $validated['status']
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã cập nhật trạng thái',
+                'data' => [
+                    'new_status' => $validated['status']
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra'
+            ], 500);
         }
-
-        $application->trang_thai = $request->status;
-
-        if ($request->note) {
-            $application->ghi_chu = $request->note;
-        }
-
-        $application->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Cập nhật trạng thái thành công',
-            'badge' => $application->status_badge
-        ]);
     }
 
-    // Xem CV ứng viên
+
+    /**
+     * ✅ XEM CV
+     */
     public function viewCV($id)
     {
-        $application = Application::with(['applicant.kinhnghiem', 'applicant.hocvan', 'applicant.kynang'])
-            ->findOrFail($id);
+        try {
+            $application = Application::with([
+                'applicant.hocvan',
+                'applicant.kinhnghiem',
+                'applicant.kynang',
+                'applicant.ngoaingu',
+                'job',
+                'company'
+            ])->findOrFail($id);
 
-        $employer = Auth::user()->employer;
-        if ($application->company_id != $employer->company->companies_id) {
-            abort(403, 'Không có quyền truy cập');
+            if (Auth::user()->user_id != $application->company->user_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không có quyền'
+                ], 403);
+            }
+
+            return response()->json([
+                'success' => true,
+                'applicant' => $application->applicant,
+                'application' => $application
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra'
+            ], 500);
         }
-
-        // Đánh dấu đã xem
-        if ($application->trang_thai == 'chua_xem') {
-            $application->trang_thai = 'da_xem';
-            $application->save();
-        }
-
-        return response()->json([
-            'success' => true,
-            'applicant' => $application->applicant,
-            'application' => $application
-        ]);
     }
 
-    // Thêm ghi chú
+    /**
+     * ✅ THÊM GHI CHÚ
+     */
     public function addNote(Request $request, $id)
     {
-        $request->validate([
-            'note' => 'required|string|max:1000'
-        ]);
+        try {
+            $validated = $request->validate([
+                'note' => 'required|string|max:1000'
+            ]);
 
-        $application = Application::findOrFail($id);
+            $application = Application::with('company')->findOrFail($id);
 
-        $employer = Auth::user()->employer;
-        if ($application->company_id != $employer->company->companies_id) {
-            return response()->json(['success' => false, 'message' => 'Không có quyền'], 403);
+            if (Auth::user()->user_id != $application->company->user_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không có quyền'
+                ], 403);
+            }
+
+            $newNote = "[" . now()->format('d/m/Y H:i') . "] " . $validated['note'];
+            $application->update([
+                'ghi_chu' => ($application->ghi_chu ?? '') . "\n" . $newNote
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã thêm ghi chú',
+                'note' => $newNote
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra'
+            ], 500);
         }
-
-        $application->ghi_chu = $request->note;
-        $application->save();
-
-        return response()->json(['success' => true, 'message' => 'Đã lưu ghi chú']);
     }
 
-    // Download CV
+    /**
+     * ✅ TẢI CV
+     */
     public function downloadCV($id)
     {
-        $application = Application::with(['applicant'])->findOrFail($id);
+        try {
+            $application = Application::with('company')->findOrFail($id);
 
-        $employer = Auth::user()->employer;
-        if ($application->company_id != $employer->company->companies_id) {
-            abort(403);
+            if (Auth::user()->user_id != $application->company->user_id) {
+                abort(403);
+            }
+
+            if (!$application->cv_file_path) {
+                return redirect()->back()->with('error', 'Không có file CV');
+            }
+
+            $filePath = storage_path('app/public/' . $application->cv_file_path);
+
+            if (!file_exists($filePath)) {
+                return redirect()->back()->with('error', 'File không tồn tại');
+            }
+
+            return response()->download($filePath);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Có lỗi xảy ra');
         }
+    }
+    public function sendResultEmail(Request $request, $id)
+    {
+        try {
+            $validated = $request->validate([
+                'email' => 'required|email',
+                'type' => 'required|in:approved,rejected',
+                'note' => 'nullable|string|max:500'
+            ]);
 
-        if ($application->cv_type == 'upload' && $application->cv_file_path) {
-            return Storage::download($application->cv_file_path);
+            $application = Application::with(['job', 'applicant', 'company'])->findOrFail($id);
+
+            if (Auth::user()->user_id != $application->company->user_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không có quyền'
+                ], 403);
+            }
+
+            $emailData = [
+                'candidate_name' => $application->hoten,
+                'job_title' => $application->job->title,
+                'company_name' => $application->company->ten_cong_ty,
+                'company_email' => $application->company->email ?? '',
+                'company_phone' => $application->company->so_dien_thoai ?? '',
+                'note' => $validated['note'] ?? '',
+                'type' => $validated['type']
+            ];
+
+            if ($validated['type'] === 'approved') {
+                // Email thông báo ĐẬU
+                Mail::send('emails.application-approved', $emailData, function ($message) use ($validated, $application) {
+                    $message->to($validated['email'])
+                        ->subject('🎉 Chúc mừng! Bạn đã được chọn - ' . $application->job->title);
+                });
+            } else {
+                // Email thông báo TỪ CHỐI
+                Mail::send('emails.application-rejected', $emailData, function ($message) use ($validated, $application) {
+                    $message->to($validated['email'])
+                        ->subject('Thông báo kết quả ứng tuyển - ' . $application->job->title);
+                });
+            }
+
+            Log::info('✅ Đã gửi email kết quả phỏng vấn', [
+                'application_id' => $id,
+                'type' => $validated['type'],
+                'email' => $validated['email']
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã gửi email kết quả'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('❌ Lỗi gửi email kết quả: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi: ' . $e->getMessage()
+            ], 500);
         }
-
-        // Nếu dùng profile, tạo PDF từ thông tin
-        $pdf = Pdf::loadView('pdf.applicant-cv', ['applicant' => $application->applicant]);
-        return $pdf->download('CV_' . $application->applicant->hoten_uv . '.pdf');
     }
 
     // Xử lý ứng tuyển (từ applicant)
+    /**
+     * ✅✅✅ GỬI LỜI MỜI PHỎNG VẤN - CHỨC NĂNG CHÍNH ✅✅✅
+     */
+    public function sendInterviewInvitation(Request $request, $id)
+    {
+        try {
+            $validated = $request->validate([
+                'email' => 'required|email',
+                'date' => 'required|date|after_or_equal:today',
+                'time' => 'required',
+                'location' => 'nullable|string',
+                'type' => 'required|in:online,offline'
+            ]);
 
+            $application = Application::with(['job', 'applicant', 'company'])->findOrFail($id);
+
+            if (Auth::user()->user_id != $application->company->user_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không có quyền'
+                ], 403);
+            }
+
+            // Chuẩn bị dữ liệu email
+            $interviewData = [
+                'candidate_name' => $application->hoten,
+                'job_title' => $application->job->title,
+                'company_name' => $application->company->ten_cong_ty,
+                'interview_date' => date('d/m/Y', strtotime($validated['date'])),
+                'interview_time' => $validated['time'],
+                'interview_type' => $validated['type'] === 'online' ? 'Phỏng vấn Online' : 'Phỏng vấn trực tiếp',
+                'location' => $validated['location'] ?? 'Sẽ được thông báo sau',
+                'company_address' => $application->company->dia_chi ?? '',
+                'company_phone' => $application->company->so_dien_thoai ?? '',
+                'company_email' => $application->company->email ?? ''
+            ];
+
+            // Tự động tạo link meeting
+            if ($validated['type'] === 'online' && empty($validated['location'])) {
+                $code = substr(md5($application->job->job_id . $id . time()), 0, 10);
+                $interviewData['location'] = "https://meet.google.com/" .
+                    substr($code, 0, 3) . '-' .
+                    substr($code, 3, 4) . '-' .
+                    substr($code, 7, 3);
+                $interviewData['auto_generated_link'] = true;
+            }
+
+            // GỬI EMAIL
+            Mail::send('emails.interview-invitation', $interviewData, function ($message) use ($validated, $application) {
+                $message->to($validated['email'])
+                    ->subject('🎯 Lời mời phỏng vấn - ' . $application->job->title);
+            });
+
+            // Cập nhật trạng thái
+            $application->update([
+                'trang_thai' => Application::STATUS_DANG_PHONG_VAN,
+                'ghi_chu' => ($application->ghi_chu ?? '') .
+                    "\n[" . now()->format('d/m/Y H:i') . "] Đã gửi lời mời phỏng vấn: " .
+                    $validated['date'] . ' ' . $validated['time']
+            ]);
+
+            Log::info('✅ Đã gửi email phỏng vấn', [
+                'application_id' => $id,
+                'email' => $validated['email']
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã gửi lời mời phỏng vấn thành công!',
+                'data' => [
+                    'new_status' => Application::STATUS_DANG_PHONG_VAN
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('❌ Lỗi gửi email: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * ✅ TỪ CHỐI ỨNG VIÊN
+     */
+    public function rejectApplication(Request $request, $id)
+    {
+        try {
+            $application = Application::with(['job', 'company'])->findOrFail($id);
+
+            if (Auth::user()->user_id != $application->company->user_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không có quyền'
+                ], 403);
+            }
+
+            $application->update([
+                'trang_thai' => Application::STATUS_KHONG_PHU_HOP,
+                'ghi_chu' => ($application->ghi_chu ?? '') .
+                    "\n[" . now()->format('d/m/Y H:i') . "] Đã từ chối"
+            ]);
+
+            // Gửi email từ chối (nếu yêu cầu)
+            if ($request->input('send_email', false)) {
+                try {
+                    Mail::send('emails.rejection', [
+                        'candidate_name' => $application->hoten,
+                        'job_title' => $application->job->title,
+                        'company_name' => $application->company->ten_cong_ty
+                    ], function ($message) use ($application) {
+                        $message->to($application->email)
+                            ->subject('Thông báo kết quả ứng tuyển - ' . $application->job->title);
+                    });
+                } catch (\Exception $e) {
+                    Log::warning('Không gửi được email từ chối: ' . $e->getMessage());
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã cập nhật trạng thái không phù hợp',
+                'data' => [
+                    'new_status' => Application::STATUS_KHONG_PHU_HOP
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra'
+            ], 500);
+        }
+    }
+
+
+    // ✅ Helper: Gửi email mời phỏng vấn
+    private function sendInterviewEmail($application, $data)
+    {
+        try {
+            Mail::send('emails.interview-invitation', [
+                'applicant' => $application->applicant,
+                'job' => $application->job,
+                'company' => $application->company,
+                'date' => $data['date'],
+                'time' => $data['time'],
+                'location' => $data['location'],
+                'type' => $data['type']
+            ], function ($message) use ($data) {
+                $message->to($data['email'])
+                    ->subject('Lời mời phỏng vấn - ' . config('app.name'));
+            });
+        } catch (\Exception $e) {
+            Log::error('Send interview email failed: ' . $e->getMessage());
+        }
+    }
+
+    // ✅ Helper: Gửi email từ chối
+    private function sendRejectionEmail($application)
+    {
+        try {
+            Mail::send('emails.application-rejected', [
+                'applicant' => $application->applicant,
+                'job' => $application->job,
+                'company' => $application->company
+            ], function ($message) use ($application) {
+                $message->to($application->email)
+                    ->subject('Thông báo kết quả ứng tuyển - ' . config('app.name'));
+            });
+        } catch (\Exception $e) {
+            Log::error('Send rejection email failed: ' . $e->getMessage());
+        }
+    }
 }
