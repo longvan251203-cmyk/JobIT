@@ -2,6 +2,329 @@
 <html lang="vi">
 @include('applicant.partials.head')
 <style>
+    /* Thêm vào phần CSS của my-jobs.blade.php */
+    /* Status Filter Pills */
+    /* Modal Styling */
+    /* Fix Modal Scroll - Simple Version */
+    .modal-apply-job .modal-body {
+        max-height: calc(90vh - 200px);
+        overflow-y: auto;
+    }
+
+    .modal-apply-job .modal-content {
+        border-radius: 20px;
+        border: none;
+    }
+
+    .modal-apply-job .modal-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 20px 20px 0 0;
+        padding: 1.5rem;
+    }
+
+    .modal-apply-job .modal-title {
+        font-weight: 700;
+        font-size: 1.25rem;
+    }
+
+    .modal-apply-job .btn-close {
+        filter: brightness(0) invert(1);
+    }
+
+    /* CV Option Cards */
+    .cv-option-card {
+        border: 2px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: block;
+        height: 100%;
+    }
+
+    .cv-option-card input[type="radio"] {
+        display: none;
+    }
+
+    .cv-option-card:hover {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .cv-option-card.active {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.1);
+    }
+
+    .cv-option-icon {
+        font-size: 2.5rem;
+        color: #667eea;
+        margin-bottom: 1rem;
+    }
+
+    .cv-option-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: #1f2937;
+        margin-bottom: 0.5rem;
+    }
+
+    .cv-option-desc {
+        color: #6b7280;
+        font-size: 0.9rem;
+    }
+
+    /* Upload Area */
+    .upload-area {
+        border: 2px dashed #d1d5db;
+        border-radius: 16px;
+        padding: 3rem 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        background: #f9fafb;
+    }
+
+    .upload-area:hover,
+    .upload-area.dragover {
+        border-color: #667eea;
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .upload-icon {
+        font-size: 3rem;
+        color: #667eea;
+        margin-bottom: 1rem;
+    }
+
+    /* Profile Preview */
+    .profile-preview-card {
+        border: 2px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 1.5rem;
+        background: #f9fafb;
+    }
+
+    .profile-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 12px;
+        object-fit: cover;
+        margin-right: 1.5rem;
+    }
+
+    .profile-name {
+        font-weight: 700;
+        font-size: 1.25rem;
+        color: #1f2937;
+        margin-bottom: 0.25rem;
+    }
+
+    .profile-title {
+        color: #667eea;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .profile-contact {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #6b7280;
+        font-size: 0.9rem;
+    }
+
+    .contact-item i {
+        color: #667eea;
+    }
+
+    /* Form Styling */
+    .form-control {
+        border-radius: 10px;
+        border: 2px solid #e5e7eb;
+        padding: 0.75rem 1rem;
+    }
+
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+
+    .letter-textarea {
+        min-height: 150px;
+        resize: vertical;
+    }
+
+    .char-count {
+        text-align: right;
+        color: #6b7280;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+
+    .required-mark {
+        color: #ef4444;
+    }
+
+    /* Buttons */
+    .btn-cancel {
+        background: #f3f4f6;
+        color: #374151;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-cancel:hover {
+        background: #e5e7eb;
+        color: #1f2937;
+    }
+
+    .btn-submit-apply {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .btn-submit-apply:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .btn-apply-now {
+        transition: all 0.3s ease !important;
+    }
+
+    .btn-apply-now:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4) !important;
+        color: white !important;
+    }
+
+    .btn-apply-now:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    .status-filter-pills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        background: white;
+        padding: 1.25rem;
+        border-radius: 16px;
+        box-shadow: var(--card-shadow);
+    }
+
+    .filter-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        background: white;
+        color: #64748b;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+    }
+
+    .filter-pill i {
+        font-size: 1.1rem;
+    }
+
+    .filter-pill:hover {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+        background: rgba(79, 70, 229, 0.05);
+        transform: translateY(-2px);
+    }
+
+    .filter-pill.active {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        border-color: transparent;
+        box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+    }
+
+    .pill-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 24px;
+        height: 24px;
+        padding: 0 0.5rem;
+        background: rgba(79, 70, 229, 0.15);
+        color: var(--primary-color);
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+
+    .filter-pill.active .pill-badge {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+    }
+
+    .filter-pill:hover .pill-badge {
+        background: rgba(79, 70, 229, 0.2);
+    }
+
+    /* Hide/Show jobs based on filter */
+    .job-card-modern {
+        transition: all 0.3s ease;
+    }
+
+    .job-card-modern.hidden {
+        display: none;
+    }
+
+    /* Status Badge - Thêm trạng thái Hết hạn */
+    .status-badge.expired {
+        background: rgba(107, 114, 128, 0.15);
+        color: #6b7280;
+        border: 1px dashed #9ca3af;
+    }
+
+    .status-badge.secondary {
+        background: rgba(148, 163, 184, 0.1);
+        color: #64748b;
+    }
+
+
+
+    /* Alert boxes nhỏ gọn */
+    .alert.p-2 {
+        border-radius: 8px;
+        font-size: 0.85rem;
+        line-height: 1.4;
+    }
+
+    /* Icon trong status badge */
+    .status-badge i {
+        font-size: 1rem;
+    }
+
+    /* Tooltip cho status badge */
+    .status-badge[title] {
+        cursor: help;
+    }
+
     :root {
         --primary-color: #4f46e5;
         --secondary-color: #06b6d4;
@@ -401,6 +724,30 @@
 
     /* Responsive */
     @media (max-width: 768px) {
+        .status-filter-pills {
+            padding: 1rem;
+            gap: 0.5rem;
+        }
+
+        .filter-pill {
+            padding: 0.6rem 1rem;
+            font-size: 0.85rem;
+        }
+
+        .filter-pill span:not(.pill-badge) {
+            display: none;
+        }
+
+        .filter-pill i {
+            margin: 0;
+        }
+
+        .pill-badge {
+            min-width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+        }
+
         .main {
             padding: 1rem 0;
         }
@@ -624,22 +971,70 @@
                     <div class="tab-content" id="myJobsTabContent">
 
                         <!-- Tab Đã ứng tuyển -->
+                        <!-- Tab Đã ứng tuyển -->
                         <div class="tab-pane fade show active" id="applied" role="tabpanel">
+                            <!-- Status Filter Pills -->
+                            @if($applications->count() > 0)
+                            <div class="status-filter-pills mb-4">
+                                <button class="filter-pill active" data-status="all">
+                                    <i class="bi bi-grid-fill"></i>
+                                    <span>Tất cả</span>
+                                    <span class="pill-badge">{{ $applications->count() }}</span>
+                                </button>
+                                <button class="filter-pill" data-status="cho_xu_ly">
+                                    <i class="bi bi-hourglass-split"></i>
+                                    <span>Chờ xử lý</span>
+                                    <span class="pill-badge">{{ $applications->where('trang_thai', 'cho_xu_ly')->count() }}</span>
+                                </button>
+                                <button class="filter-pill" data-status="dang_phong_van">
+                                    <i class="bi bi-calendar-check"></i>
+                                    <span>Mời phỏng vấn</span>
+                                    <span class="pill-badge">{{ $applications->where('trang_thai', 'dang_phong_van')->count() }}</span>
+                                </button>
+                                <button class="filter-pill" data-status="duoc_chon">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    <span>Được chọn</span>
+                                    <span class="pill-badge">{{ $applications->where('trang_thai', 'duoc_chon')->count() }}</span>
+                                </button>
+                                <button class="filter-pill" data-status="khong_phu_hop">
+                                    <i class="bi bi-x-circle-fill"></i>
+                                    <span>Từ chối</span>
+                                    <span class="pill-badge">{{ $applications->where('trang_thai', 'khong_phu_hop')->count() }}</span>
+                                </button>
+
+                            </div>
+                            @endif
+
                             @if($applications->count() > 0)
                             @foreach($applications as $app)
-                            <div class="job-card-modern">
+                            @php
+                            $status = $app->getDisplayStatus();
+                            $isExpired = $app->isJobExpired();
+                            @endphp
+
+                            <div class="job-card-modern {{ $isExpired ? 'expired' : '' }}" data-status="{{ $status['status'] }}">
                                 <div class="row align-items-start">
+                                    <!-- Logo công ty -->
                                     <div class="col-md-2 text-center">
                                         <div class="company-logo-wrapper">
                                             @if($app->job && $app->job->company && $app->job->company->logo)
-                                            <img src="{{ asset('storage/' . $app->job->company->logo) }}" alt="Logo">
+                                            <img src="{{ asset('assets/img/' . $app->job->company->logo) }}" alt="Logo">
                                             @else
-                                            <img src="{{ asset('assets/img/company-logo.png') }}" alt="Logo">
+                                            <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667EEA, #764BA2); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.5rem;">
+                                                {{ substr($app->job->company->tencty ?? 'C', 0, 1) }}
+                                            </div>
                                             @endif
                                         </div>
                                     </div>
+
+                                    <!-- Thông tin công việc -->
                                     <div class="col-md-7">
-                                        <h4 class="job-title">{{ $app->job->title ?? 'Tiêu đề công việc' }}</h4>
+                                        <h4 class="job-title">
+                                            {{ $app->job->title ?? 'Tiêu đề công việc' }}
+                                            @if($isExpired)
+                                            <span class="badge bg-secondary ms-2" style="font-size: 0.7rem;">Hết hạn</span>
+                                            @endif
+                                        </h4>
                                         <p class="company-name">{{ $app->job->company->tencty ?? 'Tên công ty' }}</p>
 
                                         <span class="salary-badge {{ (!$app->job->salary_min || !$app->job->salary_max) ? 'negotiable' : '' }}">
@@ -678,43 +1073,77 @@
                                         <div class="timeline-info">
                                             <div>
                                                 <i class="bi bi-calendar-check"></i>
-                                                <strong>Ứng tuyển:</strong> {{ \Carbon\Carbon::parse($app->ngay_ung_tuyen)->format('d/m/Y H:i') }}
+                                                <strong>Ứng tuyển:</strong>
+                                                {{-- ✅ LẤY GIỜ CHÍNH XÁC VỚI TIMEZONE VIỆT NAM --}}
+                                                {{ \Carbon\Carbon::parse($app->ngay_ung_tuyen)->setTimezone('Asia/Ho_Chi_Minh')->format('d/m/Y H:i') }}
                                             </div>
                                             <div>
                                                 <i class="bi bi-clock-history"></i>
-                                                <strong>Hạn nộp:</strong> {{ \Carbon\Carbon::parse($app->job->deadline)->format('d/m/Y') }}
+                                                <strong>Hạn nộp:</strong>
+                                                {{ \Carbon\Carbon::parse($app->job->deadline)->setTimezone('Asia/Ho_Chi_Minh')->format('d/m/Y') }}
+                                                @php
+                                                $deadlineCarbon = \Carbon\Carbon::parse($app->job->deadline)->setTimezone('Asia/Ho_Chi_Minh');
+                                                $now = \Carbon\Carbon::now('Asia/Ho_Chi_Minh');
+                                                $isExpired = $now->isAfter($deadlineCarbon);
+                                                $daysLeft = (int) ceil($now->diffInDays($deadlineCarbon, false));
+                                                @endphp
+                                                @if($isExpired)
+                                                <span class="text-danger ms-1">(Đã hết hạn)</span>
+                                                @elseif($daysLeft >= 0 && $daysLeft <= 3)
+                                                    <span class="text-warning ms-1">(Còn {{ $daysLeft }} ngày)</span>
+                                                    @endif
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col-md-3 text-end">
-                                        @php
-                                        $statusMap = [
-                                        'chua_xem' => ['class' => 'pending', 'icon' => 'bi-hourglass-split', 'text' => 'Chưa xem'],
-                                        'da_xem' => ['class' => 'viewed', 'icon' => 'bi-eye-fill', 'text' => 'Đã xem'],
-                                        'phong_van' => ['class' => 'interview', 'icon' => 'bi-calendar-check', 'text' => 'Phỏng vấn'],
-                                        'duoc_chon' => ['class' => 'accepted', 'icon' => 'bi-check-circle-fill', 'text' => 'Được chọn'],
-                                        'tu_choi' => ['class' => 'rejected', 'icon' => 'bi-x-circle-fill', 'text' => 'Từ chối'],
-                                        ];
-                                        $status = $statusMap[$app->trang_thai] ?? ['class' => 'pending', 'icon' => 'bi-question-circle', 'text' => 'N/A'];
-                                        @endphp
 
-                                        <div class="status-badge {{ $status['class'] }} mb-3">
+                                    <!-- Trạng thái và Actions -->
+                                    <div class="col-md-3 text-end">
+                                        <!-- Hiển thị trạng thái -->
+                                        <div class="status-badge {{ $status['class'] }} mb-3"
+                                            title="{{ $status['description'] }}">
                                             <i class="bi {{ $status['icon'] }}"></i>
                                             {{ $status['text'] }}
                                         </div>
 
+                                        <!-- Thông báo đặc biệt theo trạng thái -->
+                                        @if($status['status'] === 'dang_phong_van')
+                                        <div class="alert alert-info p-2 mb-3" style="font-size: 0.8rem; text-align: left;">
+                                            <i class="bi bi-envelope-check"></i>
+                                            <strong>Lưu ý:</strong> Kiểm tra email để xem lịch phỏng vấn
+                                        </div>
+                                        @elseif($status['status'] === 'duoc_chon')
+                                        <div class="alert alert-success p-2 mb-3" style="font-size: 0.8rem; text-align: left;">
+                                            <i class="bi bi-check-circle"></i>
+                                            Nhà tuyển dụng sẽ liên hệ sớm
+                                        </div>
+                                        @elseif($status['status'] === 'het_han')
+                                        <div class="alert alert-secondary p-2 mb-3" style="font-size: 0.8rem; text-align: left;">
+                                            <i class="bi bi-info-circle"></i>
+                                            Công việc đã hết hạn nộp
+                                        </div>
+                                        @elseif($status['status'] === 'khong_phu_hop')
+                                        <div class="alert alert-light p-2 mb-3" style="font-size: 0.8rem; text-align: left;">
+                                            <i class="bi bi-lightbulb"></i>
+                                            Đừng nản lòng, tiếp tục tìm việc khác
+                                        </div>
+                                        @endif
+
+                                        <!-- Nút Actions -->
                                         <div class="d-flex flex-column gap-2">
-                                            <a href="{{ route('home') }}#job-{{ $app->job_id }}" class="btn btn-action btn-view">
+                                            <a href="{{ route('home') }}#job-{{ $app->job_id }}"
+                                                class="btn btn-action btn-view">
                                                 <i class="bi bi-eye me-2"></i>Xem chi tiết
                                             </a>
 
-                                            @if(in_array($app->trang_thai, ['chua_xem', 'da_xem']))
+                                            <!-- Chỉ cho hủy nếu chờ xử lý hoặc đang phỏng vấn và chưa hết hạn -->
+                                            @if(in_array($status['status'], ['cho_xu_ly', 'dang_phong_van']))
                                             <button class="btn btn-action btn-cancel cancel-application-btn"
                                                 data-application-id="{{ $app->application_id }}"
                                                 data-job-title="{{ $app->job->title }}">
                                                 <i class="bi bi-x-lg me-2"></i>Hủy ứng tuyển
                                             </button>
                                             @endif
+
                                         </div>
                                     </div>
                                 </div>
@@ -731,24 +1160,37 @@
                             </div>
                             @endif
                         </div>
-
+                        <!-- Tab Đã lưu -->
                         <!-- Tab Đã lưu -->
                         <div class="tab-pane fade" id="saved" role="tabpanel">
                             @if($savedJobs->count() > 0)
                             @foreach($savedJobs as $saved)
+                            @php
+                            $isExpired = \Carbon\Carbon::now()->isAfter(\Carbon\Carbon::parse($saved->job->deadline));
+
+                            // ✅ KIỂM TRA ĐÃ ỨNG TUYỂN CHƯA
+                            $hasApplied = $applications->where('job_id', $saved->job_id)->count() > 0;
+                            @endphp
                             <div class="job-card-modern">
                                 <div class="row align-items-start">
                                     <div class="col-md-2 text-center">
                                         <div class="company-logo-wrapper">
                                             @if($saved->job && $saved->job->company && $saved->job->company->logo)
-                                            <img src="{{ asset('storage/' . $saved->job->company->logo) }}" alt="Logo">
+                                            <img src="{{ asset('assets/img/' . $saved->job->company->logo) }}" alt="Logo">
                                             @else
-                                            <img src="{{ asset('assets/img/company-logo.png') }}" alt="Logo">
+                                            <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667EEA, #764BA2); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.5rem;">
+                                                {{ substr($saved->job->company->tencty ?? 'C', 0, 1) }}
+                                            </div>
                                             @endif
                                         </div>
                                     </div>
                                     <div class="col-md-7">
-                                        <h4 class="job-title">{{ $saved->job->title ?? 'Tiêu đề công việc' }}</h4>
+                                        <h4 class="job-title">
+                                            {{ $saved->job->title ?? 'Tiêu đề công việc' }}
+                                            @if($isExpired)
+                                            <span class="badge bg-secondary ms-2" style="font-size: 0.7rem;">Hết hạn</span>
+                                            @endif
+                                        </h4>
                                         <p class="company-name">{{ $saved->job->company->tencty ?? 'Tên công ty' }}</p>
 
                                         <span class="salary-badge {{ (!$saved->job->salary_min || !$saved->job->salary_max) ? 'negotiable' : '' }}">
@@ -787,19 +1229,67 @@
                                         <div class="timeline-info">
                                             <div>
                                                 <i class="bi bi-heart-fill"></i>
-                                                <strong>Đã lưu:</strong> {{ \Carbon\Carbon::parse($saved->created_at)->format('d/m/Y H:i') }}
+                                                <strong>Đã lưu:</strong>
+                                                {{ \Carbon\Carbon::parse($saved->created_at)->setTimezone('Asia/Ho_Chi_Minh')->format('d/m/Y H:i') }}
                                             </div>
                                             <div>
                                                 <i class="bi bi-clock-history"></i>
-                                                <strong>Hạn nộp:</strong> {{ \Carbon\Carbon::parse($saved->job->deadline)->format('d/m/Y') }}
+                                                <strong>Hạn nộp:</strong>
+                                                {{ \Carbon\Carbon::parse($saved->job->deadline)->setTimezone('Asia/Ho_Chi_Minh')->format('d/m/Y') }}
+                                                @php
+                                                $deadlineCarbon = \Carbon\Carbon::parse($saved->job->deadline)->setTimezone('Asia/Ho_Chi_Minh');
+                                                $now = \Carbon\Carbon::now('Asia/Ho_Chi_Minh');
+                                                $isExpired = $now->isAfter($deadlineCarbon);
+                                                $daysLeft = (int) ceil($now->diffInDays($deadlineCarbon, false));
+                                                @endphp
+                                                @if($isExpired)
+                                                <span class="text-danger ms-1">(Đã hết hạn)</span>
+                                                @elseif($daysLeft >= 0 && $daysLeft <= 3)
+                                                    <span class="text-warning ms-1">(Còn {{ $daysLeft }} ngày)</span>
+                                                    @endif
                                             </div>
                                         </div>
+
+                                        <!-- ✅ THÔNG BÁO HẾT HẠN -->
+                                        @if($isExpired)
+                                        <div class="alert alert-danger p-2 mt-3" style="font-size: 0.8rem; text-align: left;">
+                                            <i class="bi bi-exclamation-circle-fill me-2"></i>
+                                            <strong>Công việc này đã hết hạn nộp hồ sơ!</strong>
+                                        </div>
+                                        @endif
                                     </div>
+
+                                    <!-- Actions -->
                                     <div class="col-md-3 text-end">
                                         <div class="d-flex flex-column gap-2">
                                             <a href="{{ route('home') }}#job-{{ $saved->job_id }}" class="btn btn-action btn-view">
                                                 <i class="bi bi-eye me-2"></i>Xem chi tiết
                                             </a>
+
+                                            <!-- ✅ KIỂM TRA ĐÃ ỨNG TUYỂN RỒI CHỈ -->
+                                            @if($hasApplied)
+                                            <!-- NÚT TRẠNG THÁI: ĐÃ ỨNG TUYỂN -->
+                                            <button class="btn btn-action" disabled
+                                                style="background: #6366f1; color: white; border: none; cursor: not-allowed;">
+                                                <i class="bi bi-check-circle me-2"></i>Đã ứng tuyển
+                                            </button>
+                                            @elseif(!$isExpired)
+                                            <!-- NÚT ỨNG TUYỂN NGAY (chỉ nếu chưa ứng tuyển và chưa hết hạn) -->
+                                            <button class="btn btn-action btn-apply-now"
+                                                style="background: linear-gradient(135deg, #10b981, #34d399); color: white; border: none;"
+                                                data-job-id="{{ $saved->job_id }}"
+                                                data-job-title="{{ $saved->job->title }}"
+                                                title="Ứng tuyển luôn công việc này">
+                                                <i class="bi bi-send-check me-2"></i>Ứng tuyển ngay
+                                            </button>
+                                            @else
+                                            <!-- NÚT DISABLED: HẾT HẠN -->
+                                            <button class="btn btn-action"
+                                                disabled
+                                                style="background: #d1d5db; color: #6b7280; border: none; cursor: not-allowed;">
+                                                <i class="bi bi-x-circle me-2"></i>Hết hạn nộp
+                                            </button>
+                                            @endif
 
                                             <button class="btn btn-action btn-unsave unsave-job-btn"
                                                 data-job-id="{{ $saved->job_id }}"
@@ -829,21 +1319,559 @@
             </div>
         </div>
     </main>
+    <!-- Modal Ứng Tuyển -->
+    <div class="modal fade modal-apply-job" id="applyJobModal" tabindex="-1" aria-labelledby="applyJobModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="applyJobModalLabel">
+                        <i class="bi bi-send-fill me-2"></i>Ứng tuyển công việc
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
 
+                <form id="applyJobForm" action="{{ route('application.store') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body p-4">
+                        <!-- Step 1: Chọn cách ứng tuyển -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">
+                                <i class="bi bi-file-earmark-person me-2 text-primary"></i>Chọn CV để ứng tuyển <span class="required-mark">*</span>
+                            </h6>
+                            <div class="row g-3">
+                                <!-- Option 1: Upload CV -->
+                                <div class="col-md-6">
+                                    <label class="cv-option-card active" id="uploadOption">
+                                        <input type="radio" name="cv_type" value="upload" checked>
+                                        <div class="cv-option-icon">
+                                            <i class="bi bi-cloud-upload"></i>
+                                        </div>
+                                        <div class="cv-option-title">Tải lên CV từ máy tính</div>
+                                        <div class="cv-option-desc">Hỗ trợ định dạng .doc, .docx, .pdf dưới 5MB</div>
+                                    </label>
+                                </div>
+
+                                <!-- Option 2: Use Profile -->
+                                <div class="col-md-6">
+                                    <label class="cv-option-card" id="profileOption">
+                                        <input type="radio" name="cv_type" value="profile">
+                                        <div class="cv-option-icon">
+                                            <i class="bi bi-person-badge"></i>
+                                        </div>
+                                        <div class="cv-option-title">Sử dụng hồ sơ có sẵn</div>
+                                        <div class="cv-option-desc">Dùng thông tin từ hồ sơ đã tạo trên hệ thống</div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upload CV Section -->
+                        <div id="uploadSection" class="content-section mb-4">
+                            <div class="upload-area" id="uploadArea">
+                                <div class="upload-icon">
+                                    <i class="bi bi-cloud-arrow-up"></i>
+                                </div>
+                                <h6 class="fw-bold mb-2">Kéo thả CV vào đây hoặc chọn file</h6>
+                                <p class="text-muted small mb-3">Hỗ trợ .doc, .docx, .pdf (tối đa 5MB)</p>
+                                <input type="file" id="cvFileInput" name="cv_file" accept=".doc,.docx,.pdf" class="d-none">
+                                <button type="button" class="btn btn-outline-primary" id="selectFileBtn">
+                                    <i class="bi bi-folder2-open me-2"></i>Chọn file
+                                </button>
+                            </div>
+                            <div id="fileNameDisplay" class="mt-3 text-center" style="display: none;">
+                                <div class="alert alert-success d-inline-flex align-items-center">
+                                    <i class="bi bi-file-earmark-check me-2"></i>
+                                    <span id="fileName"></span>
+                                    <button type="button" class="btn-close ms-3" id="removeFile"></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Profile Preview Section -->
+                        <div id="profileSection" class="content-section mb-4" style="display: none;">
+                            <div class="profile-preview-card">
+                                <div class="d-flex align-items-start">
+                                    @php
+                                    $applicant = Auth::user()->applicant ?? null;
+                                    @endphp
+                                    <img src="{{ $applicant && $applicant->avatar ? asset('assets/img/avt/'.$applicant->avatar) : asset('assets/img/avt/default-avatar.png') }}"
+                                        alt="Avatar" class="profile-avatar">
+                                    <div class="profile-info flex-grow-1">
+                                        <div class="profile-name">{{ $applicant->hoten_uv ?? 'Họ tên ứng viên' }}</div>
+                                        <div class="profile-title">{{ $applicant->chucdanh ?? 'Chức danh' }}</div>
+                                        <div class="profile-contact">
+                                            <div class="contact-item">
+                                                <i class="bi bi-envelope"></i>
+                                                <span>{{ Auth::user()->email ?? 'Email' }}</span>
+                                            </div>
+                                            <div class="contact-item">
+                                                <i class="bi bi-telephone"></i>
+                                                <span>{{ $applicant->sdt_uv ?? 'Chưa cập nhật' }}</span>
+                                            </div>
+                                            <div class="contact-item">
+                                                <i class="bi bi-geo-alt"></i>
+                                                <span>{{ $applicant->diachi_uv ?? 'Chưa cập nhật' }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <a href="{{ route('applicant.hoso') }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                            <i class="bi bi-pencil me-1"></i>Chỉnh sửa
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <!-- Thông tin bổ sung -->
+                        <h6 class="fw-bold mb-3">
+                            <i class="bi bi-card-text me-2 text-primary"></i>Thông tin bổ sung
+                        </h6>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Họ và tên <span class="required-mark">*</span></label>
+                                <input type="text" name="hoten" class="form-control" placeholder="Họ tên hiển thị với NTD"
+                                    value="{{ $applicant->hoten_uv ?? '' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email <span class="required-mark">*</span></label>
+                                <input type="email" name="email" class="form-control" placeholder="Email hiển thị với NTD"
+                                    value="{{ Auth::user()->email ?? '' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Số điện thoại <span class="required-mark">*</span></label>
+                                <input type="tel" name="sdt" class="form-control" placeholder="Số điện thoại hiển thị với NTD"
+                                    value="{{ $applicant->sdt_uv ?? '' }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Địa chỉ</label>
+                                <input type="text" name="diachi" class="form-control" placeholder="Địa chỉ của bạn"
+                                    value="{{ $applicant->diachi_uv ?? '' }}">
+                            </div>
+                        </div>
+
+                        <!-- Thư giới thiệu -->
+                        <div class="mb-4">
+                            <label class="form-label d-flex align-items-center gap-2">
+                                <i class="bi bi-pencil-square text-success" style="font-size: 1.2rem;"></i>
+                                <span style="font-size: 1.05rem; font-weight: 600; color: #1f2937;">Thư giới thiệu:</span>
+                            </label>
+                            <p class="text-muted mb-3" style="font-size: 0.95rem; line-height: 1.6;">
+                                Một thư giới thiệu ngắn gọn, chỉn chu sẽ giúp bạn trở nên chuyên nghiệp và gây ấn tượng hơn với nhà tuyển dụng.
+                            </p>
+                            <textarea name="thugioithieu" class="form-control letter-textarea" maxlength="2500"
+                                placeholder="Viết giới thiệu ngắn gọn về bản thân (Điểm mạnh, điểm yếu) và nêu rõ mong muốn, lý do bạn muốn ứng tuyển cho vị trí này."
+                                style="border: 2px solid #10b981; border-radius: 12px; min-height: 150px;"></textarea>
+                            <div class="char-count">
+                                <span id="charCount">0</span>/2500 ký tự
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer border-0 p-4">
+                        <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">
+                            <i class="bi bi-x-lg me-2"></i>Hủy
+                        </button>
+                        <button type="submit" class="btn btn-primary btn-submit-apply">
+                            <i class="bi bi-send-fill me-2"></i>Nộp hồ sơ ứng tuyển
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     @include('applicant.partials.footer')
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // ========== XỬ LÝ NÚT ỨNG TUYỂN NGAY ==========
+            // ========== XỬ LÝ NÚT ỨNG TUYỂN NGAY ==========
+            const applyNowButtons = document.querySelectorAll('.btn-apply-now');
 
+            applyNowButtons.forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const jobId = this.dataset.jobId;
+                    const jobTitle = this.dataset.jobTitle;
+
+                    // Lưu jobId vào biến global để form biết
+                    window.currentJobId = jobId;
+
+                    // Mở modal
+                    const modal = new bootstrap.Modal(document.getElementById('applyJobModal'));
+                    modal.show();
+                });
+            });
+
+            // ========== XỬ LÝ MODAL ỨNG TUYỂN ==========
+            const uploadOption = document.getElementById('uploadOption');
+            const profileOption = document.getElementById('profileOption');
+            const uploadSection = document.getElementById('uploadSection');
+            const profileSection = document.getElementById('profileSection');
+            const cvTypeRadios = document.querySelectorAll('input[name="cv_type"]');
+
+            cvTypeRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    document.querySelectorAll('.cv-option-card').forEach(card => {
+                        card.classList.remove('active');
+                    });
+                    this.closest('.cv-option-card').classList.add('active');
+
+                    if (this.value === 'upload') {
+                        uploadSection.style.display = 'block';
+                        profileSection.style.display = 'none';
+                    } else {
+                        uploadSection.style.display = 'none';
+                        profileSection.style.display = 'block';
+                    }
+                });
+            });
+
+            // File Upload
+            const uploadArea = document.getElementById('uploadArea');
+            const cvFileInput = document.getElementById('cvFileInput');
+            const selectFileBtn = document.getElementById('selectFileBtn');
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
+            const fileName = document.getElementById('fileName');
+            const removeFile = document.getElementById('removeFile');
+
+            if (selectFileBtn) {
+                selectFileBtn.addEventListener('click', () => cvFileInput.click());
+            }
+
+            if (cvFileInput) {
+                cvFileInput.addEventListener('change', function(e) {
+                    handleFile(this.files[0]);
+                });
+            }
+
+            if (uploadArea) {
+                uploadArea.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    this.classList.add('dragover');
+                });
+
+                uploadArea.addEventListener('dragleave', function() {
+                    this.classList.remove('dragover');
+                });
+
+                uploadArea.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('dragover');
+                    const file = e.dataTransfer.files[0];
+                    handleFile(file);
+                });
+            }
+
+            function handleFile(file) {
+                if (!file) return;
+
+                const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+                const maxSize = 5 * 1024 * 1024;
+
+                if (!validTypes.includes(file.type)) {
+                    alert('Chỉ chấp nhận file .doc, .docx, .pdf');
+                    return;
+                }
+
+                if (file.size > maxSize) {
+                    alert('File không được vượt quá 5MB');
+                    return;
+                }
+
+                fileName.textContent = file.name;
+                fileNameDisplay.style.display = 'block';
+                uploadArea.style.display = 'none';
+            }
+
+            if (removeFile) {
+                removeFile.addEventListener('click', function() {
+                    cvFileInput.value = '';
+                    fileNameDisplay.style.display = 'none';
+                    uploadArea.style.display = 'block';
+                });
+            }
+
+            // Character Count
+            const letterTextarea = document.querySelector('.letter-textarea');
+            const charCount = document.getElementById('charCount');
+
+            if (letterTextarea) {
+                letterTextarea.addEventListener('input', function() {
+                    charCount.textContent = this.value.length;
+                });
+                charCount.textContent = letterTextarea.value.length;
+            }
+
+            // ========== FORM SUBMIT - ỨNG TUYỂN ==========
+            const applyJobForm = document.getElementById('applyJobForm');
+            if (applyJobForm) {
+                applyJobForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
+                    const cvType = document.querySelector('input[name="cv_type"]:checked').value;
+                    if (cvType === 'upload' && !cvFileInput.files.length) {
+                        alert('Vui lòng tải lên CV của bạn');
+                        return;
+                    }
+
+                    const jobId = window.currentJobId;
+
+                    if (!jobId) {
+                        alert('Không xác định được công việc. Vui lòng thử lại!');
+                        return;
+                    }
+
+                    const formData = new FormData(this);
+                    formData.append('job_id', jobId);
+
+                    const submitBtn = this.querySelector('.btn-submit-apply');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Đang gửi...';
+
+                    fetch('/apply-job', {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                alert('✅ ' + data.message);
+
+                                const modal = bootstrap.Modal.getInstance(document.getElementById('applyJobModal'));
+                                if (modal) modal.hide();
+
+                                // Xóa job card khỏi tab "Đã lưu"
+                                const savedCard = document.querySelector(`#saved .job-card-modern[data-job-id="${jobId}"]`);
+                                if (savedCard) {
+                                    savedCard.remove();
+                                }
+
+                                // Cập nhật badge count
+                                const savedBadge = document.querySelector('#saved-tab .badge');
+                                if (savedBadge) {
+                                    const currentCount = parseInt(savedBadge.textContent);
+                                    savedBadge.textContent = Math.max(0, currentCount - 1);
+                                }
+
+                                // Kiểm tra nếu không còn job nào
+                                const remainingCards = document.querySelectorAll('#saved .job-card-modern');
+                                if (remainingCards.length === 0) {
+                                    document.querySelector('#saved').innerHTML = `
+                            <div class="empty-state">
+                                <i class="bi bi-heart"></i>
+                                <h5>Chưa có công việc đã lưu</h5>
+                                <p>Bạn chưa lưu công việc nào. Hãy lưu những công việc yêu thích để xem sau!</p>
+                                <a href="{{ route('home') }}" class="btn-find-jobs">
+                                    <i class="bi bi-search me-2"></i>Tìm việc ngay
+                                </a>
+                            </div>
+                        `;
+                                }
+
+                                // Reset form
+                                applyJobForm.reset();
+                                window.currentJobId = null;
+                                if (fileNameDisplay) fileNameDisplay.style.display = 'none';
+                                if (uploadArea) uploadArea.style.display = 'block';
+                            } else {
+                                if (data.errors) {
+                                    const errorMessages = Object.values(data.errors).flat().join('\n');
+                                    alert('❌ ' + errorMessages);
+                                } else {
+                                    alert('❌ ' + (data.message || 'Có lỗi xảy ra. Vui lòng thử lại!'));
+                                }
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('❌ Có lỗi xảy ra khi gửi hồ sơ. Vui lòng thử lại!');
+                        })
+                        .finally(() => {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalText;
+                        });
+                });
+            }
+
+            // Reset modal khi đóng
+            const applyModal = document.getElementById('applyJobModal');
+            if (applyModal) {
+                applyModal.addEventListener('hidden.bs.modal', function() {
+                    const form = document.getElementById('applyJobForm');
+                    if (form) form.reset();
+                    if (uploadSection) uploadSection.style.display = 'block';
+                    if (profileSection) profileSection.style.display = 'none';
+                    if (fileNameDisplay) fileNameDisplay.style.display = 'none';
+                    if (uploadArea) uploadArea.style.display = 'block';
+                    document.querySelectorAll('.cv-option-card').forEach(card => {
+                        card.classList.remove('active');
+                    });
+                    if (uploadOption) uploadOption.classList.add('active');
+                    if (charCount) charCount.textContent = '0';
+                });
+            }
+            // ========== XỬ LÝ LỌC THEO TRẠNG THÁI ==========
+            const filterPills = document.querySelectorAll('.filter-pill');
+            const jobCards = document.querySelectorAll('.job-card-modern[data-status]');
+
+            filterPills.forEach(pill => {
+                pill.addEventListener('click', function() {
+                    const selectedStatus = this.dataset.status;
+
+                    // Cập nhật active state
+                    filterPills.forEach(p => p.classList.remove('active'));
+                    this.classList.add('active');
+
+                    // Lọc job cards
+                    jobCards.forEach(card => {
+                        const cardStatus = card.dataset.status;
+
+                        if (selectedStatus === 'all') {
+                            card.classList.remove('hidden');
+                        } else {
+                            if (cardStatus === selectedStatus) {
+                                card.classList.remove('hidden');
+                            } else {
+                                card.classList.add('hidden');
+                            }
+                        }
+                    });
+
+                    // Smooth scroll animation
+                    const visibleCards = document.querySelectorAll('.job-card-modern:not(.hidden)');
+                    visibleCards.forEach((card, index) => {
+                        card.style.animation = 'none';
+                        setTimeout(() => {
+                            card.style.animation = `fadeInUp 0.4s ease ${index * 0.05}s forwards`;
+                        }, 10);
+                    });
+                });
+            });
+
+            // Animation CSS
+            const style = document.createElement('style');
+            style.textContent = `
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+            document.head.appendChild(style);
+            // ========== KIỂM TRA VÀ CẬP NHẬT TRẠNG THÁI HỦY ỨNG TUYỂN ==========
+            const initializeCancelButtons = () => {
+                const cancelButtons = document.querySelectorAll('.cancel-application-btn');
+
+                cancelButtons.forEach(btn => {
+                    const applicationId = btn.dataset.applicationId;
+                    checkCancelEligibility(applicationId, btn);
+                });
+            };
+
+            /**
+             * ✅ KIỂM TRA CÓ THỂ HỦY KHÔNG VÀ CẬP NHẬT TRẠNG THÁI NÚT
+             */
+            const checkCancelEligibility = async (applicationId, btn) => {
+                try {
+                    const response = await fetch(`/application/${applicationId}/can-cancel`, {
+                        method: 'GET',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (!data.success) return;
+
+                    const {
+                        can_cancel,
+                        hours_elapsed,
+                        minutes_remaining,
+                        cancel_deadline,
+                        reason_if_cannot
+                    } = data;
+
+                    // ✅ CẬP NHẬT TRẠNG THÁI NÚT
+                    if (!can_cancel) {
+                        btn.disabled = true;
+                        btn.style.opacity = '0.5';
+                        btn.style.cursor = 'not-allowed';
+                        btn.title = reason_if_cannot || 'Không thể hủy ứng tuyển này';
+
+                        // Cập nhật text nút
+                        if (hours_elapsed > 24) {
+                            btn.innerHTML = '<i class="bi bi-x-lg me-2"></i>Quá hạn hủy';
+                        }
+                    } else {
+                        // ✅ CÒN CÓ THỂ HỦY - HIỂN THỊ THỜI GIÃ CÒN LẠI
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                        btn.style.cursor = 'pointer';
+
+                        // Hiển thị thời gian còn lại trong title
+                        if (minutes_remaining > 0) {
+                            const hoursLeft = Math.floor(minutes_remaining / 60);
+                            const minsLeft = minutes_remaining % 60;
+                            let timeText = '';
+
+                            if (hoursLeft > 0) {
+                                timeText = `${hoursLeft}h ${minsLeft}p`;
+                            } else {
+                                timeText = `${minsLeft}p`;
+                            }
+
+                            btn.title = `Hủy được trong vòng 24h (Còn ${timeText})`;
+                            btn.setAttribute('data-time-remaining', timeText);
+                        }
+                    }
+
+                    // ✅ THÊM DATA ATTRIBUTES CHO THÔNG BÁO
+                    btn.dataset.canCancel = can_cancel;
+                    btn.dataset.hoursElapsed = hours_elapsed;
+                    btn.dataset.cancelDeadline = cancel_deadline;
+
+                } catch (error) {
+                    console.error('Lỗi kiểm tra trạng thái hủy:', error);
+                }
+            };
             // ========== XỬ LÝ HỦY ỨNG TUYỂN ==========
             const cancelButtons = document.querySelectorAll('.cancel-application-btn');
 
             cancelButtons.forEach(btn => {
-                btn.addEventListener('click', function() {
+                btn.addEventListener('click', async function(e) {
                     const applicationId = this.dataset.applicationId;
                     const jobTitle = this.dataset.jobTitle;
+                    const canCancel = this.dataset.canCancel === 'true';
+                    const hoursElapsed = parseInt(this.dataset.hoursElapsed);
+                    const cancelDeadline = this.dataset.cancelDeadline;
 
-                    if (!confirm(`Bạn có chắc muốn hủy đơn ứng tuyển vào vị trí "${jobTitle}"?`)) {
+                    // Nếu không được phép hủy, hiển thị thông báo
+                    if (!canCancel) {
+                        if (hoursElapsed > 24) {
+                            alert(`❌ Quá hạn hủy ứng tuyển!\n\nHạn thời gian hủy ứng tuyển đã hết (24 giờ kể từ khi ứng tuyển).\nHạn kết thúc lúc: ${cancelDeadline}`);
+                        } else {
+                            alert(`❌ Không thể hủy ứng tuyển này.`);
+                        }
+                        return;
+                    }
+
+                    // Xác nhận hủy
+                    if (!confirm(`Bạn có chắc muốn hủy đơn ứng tuyển vào vị trí "${jobTitle}"?\n\n⚠️ Lưu ý: Bạn chỉ có thể hủy trong vòng 24 giờ kể từ khi ứng tuyển.`)) {
                         return;
                     }
 
@@ -852,56 +1880,64 @@
                     this.disabled = true;
                     this.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Đang hủy...';
 
-                    // Gọi API
-                    fetch(`/application/${applicationId}/cancel`, {
+                    try {
+                        const response = await fetch(`/application/${applicationId}/cancel`, {
                             method: 'DELETE',
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                                 'Content-Type': 'application/json'
                             }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                alert(data.message);
-                                // Xóa card khỏi DOM
-                                this.closest('.job-card-modern').remove();
+                        });
 
-                                // Cập nhật số lượng badge
-                                const badge = document.querySelector('#applied-tab .badge');
-                                if (badge) {
-                                    const currentCount = parseInt(badge.textContent);
-                                    badge.textContent = currentCount - 1;
-                                }
+                        const data = await response.json();
 
-                                // Kiểm tra nếu không còn job nào
-                                const remainingCards = document.querySelectorAll('#applied .job-card-modern');
-                                if (remainingCards.length === 0) {
-                                    document.querySelector('#applied').innerHTML = `
-                        <div class="empty-state">
-                            <i class="bi bi-inbox"></i>
-                            <h5>Chưa có công việc nào</h5>
-                            <p>Bạn chưa ứng tuyển công việc nào. Hãy tìm và ứng tuyển ngay!</p>
-                            <a href="{{ route('home') }}" class="btn-find-jobs">
-                                <i class="bi bi-search me-2"></i>Tìm việc ngay
-                            </a>
-                        </div>
-                    `;
-                                }
-                            } else {
-                                alert(data.message || 'Có lỗi xảy ra!');
-                                this.disabled = false;
-                                this.innerHTML = originalHtml;
+                        if (data.success) {
+                            alert('✅ ' + data.message);
+
+                            // Xóa card khỏi DOM
+                            this.closest('.job-card-modern').remove();
+
+                            // Cập nhật số lượng badge
+                            const badge = document.querySelector('#applied-tab .badge');
+                            if (badge) {
+                                const currentCount = parseInt(badge.textContent);
+                                badge.textContent = currentCount - 1;
                             }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
-                            alert('Có lỗi xảy ra khi hủy đơn ứng tuyển!');
+
+                            // Kiểm tra nếu không còn job nào
+                            const remainingCards = document.querySelectorAll('#applied .job-card-modern');
+                            if (remainingCards.length === 0) {
+                                document.querySelector('#applied').innerHTML = `
+                                <div class="empty-state">
+                                    <i class="bi bi-inbox"></i>
+                                    <h5>Chưa có công việc nào</h5>
+                                    <p>Bạn chưa ứng tuyển công việc nào. Hãy tìm và ứng tuyển ngay!</p>
+                                    <a href="{{ route('home') }}" class="btn-find-jobs">
+                                        <i class="bi bi-search me-2"></i>Tìm việc ngay
+                                    </a>
+                                </div>
+                            `;
+                            }
+                        } else {
+                            alert('❌ ' + (data.message || 'Có lỗi xảy ra!'));
                             this.disabled = false;
                             this.innerHTML = originalHtml;
-                        });
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert('❌ Có lỗi xảy ra khi hủy đơn ứng tuyển!');
+                        this.disabled = false;
+                        this.innerHTML = originalHtml;
+                    }
                 });
             });
+            // ✅ Khởi tạo kiểm tra khi trang load
+            initializeCancelButtons();
+
+            // ✅ CẬP NHẬT LẶP LẠI MỖI 1 PHÚT ĐỂ KIỂM TRA THỜI GIAN CÒN LẠI
+            setInterval(() => {
+                initializeCancelButtons();
+            }, 60000); // 60 giây
 
             // ========== XỬ LÝ BỎ LƯU CÔNG VIỆC ==========
             const unsaveButtons = document.querySelectorAll('.unsave-job-btn');
@@ -944,6 +1980,7 @@
 
                                 // Kiểm tra nếu không còn job nào
                                 const remainingCards = document.querySelectorAll('#saved .job-card-modern');
+
                                 if (remainingCards.length === 0) {
                                     document.querySelector('#saved').innerHTML = `
                         <div class="empty-state">

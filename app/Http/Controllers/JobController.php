@@ -89,6 +89,8 @@ class JobController extends Controller
                 'working_type' => 'required|string',
                 'recruitment_count' => 'required|integer|min:1',
                 'province' => 'required|string',
+                'district' => 'required|string',
+                'address_detail' => 'required|string|max:500',
                 'deadline' => 'required|date|after_or_equal:today',
                 'description' => 'required|string|max:2000',
                 'responsibilities' => 'required|string|max:2000',
@@ -125,6 +127,8 @@ class JobController extends Controller
                     'working_type' => $validated['working_type'],
                     'recruitment_count' => $validated['recruitment_count'],
                     'province' => $validated['province'],
+                    'district' => $validated['district'],
+                    'address_detail' => $validated['address_detail'],
                     'deadline' => $validated['deadline'],
                 ]);
 
@@ -300,13 +304,15 @@ class JobController extends Controller
             'job_id' => $job->job_id,
             'title' => $job->title,
             'level' => $job->level,
-            'experience' => $job->experience,
+            'experience' => $job->experience_label,
             'salary_min' => $job->salary_min,
             'salary_max' => $job->salary_max,
             'salary_type' => $job->salary_type,
             'working_type' => $job->working_type,
             'recruitment_count' => $job->recruitment_count,
             'province' => $job->province,
+            'district' => $job->district,
+            'address_detail' => $job->address_detail,
             'deadline' => $job->deadline,
             'gender_requirement' => $job->gender_requirement,
 
@@ -419,6 +425,8 @@ class JobController extends Controller
                 'working_type' => 'required|string',
                 'recruitment_count' => 'required|integer|min:1',
                 'province' => 'required|string',
+                'district' => 'required|string',
+                'address_detail' => 'required|string|max:500',
                 'deadline' => 'required|date',
                 'description' => 'required|string|max:2000',
                 'responsibilities' => 'required|string|max:2000',
@@ -444,6 +452,8 @@ class JobController extends Controller
                     'working_type' => $validated['working_type'],
                     'recruitment_count' => $validated['recruitment_count'],
                     'province' => $validated['province'],
+                    'district' => $validated['district'],
+                    'address_detail' => $validated['address_detail'],
                     'deadline' => $validated['deadline'],
                 ]);
 

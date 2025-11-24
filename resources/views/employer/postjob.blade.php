@@ -8,6 +8,35 @@
     <title>Đăng Tin Tuyển Dụng - JobIT</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Loading state cho select */
+        select.form-control:disabled {
+            background-color: #f7fafc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        select.form-control option:disabled {
+            color: #a0aec0;
+        }
+
+        /* Highlight khi đang load */
+        select.form-control[disabled] {
+            border-color: #667eea;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -816,21 +845,35 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="province">Địa điểm làm việc <span class="required">*</span></label>
+                            <label for="province">Tỉnh/Thành phố <span class="required">*</span></label>
                             <select class="form-control" id="province" name="province" required>
-                                <option value="">-- Chọn tỉnh/thành phố --</option>
-                                <option value="hanoi">Hà Nội</option>
-                                <option value="hcm">Hồ Chí Minh</option>
-                                <option value="danang">Đà Nẵng</option>
-                                <option value="haiphong">Hải Phòng</option>
-                                <option value="cantho">Cần Thơ</option>
-                                <option value="other">Khác</option>
+                                <option value="">-- Đang tải... --</option>
                             </select>
                         </div>
 
                         <div class="form-group">
+                            <label for="district">Quận/Huyện <span class="required">*</span></label>
+                            <select class="form-control" id="district" name="district" required>
+                                <option value="">-- Chọn tỉnh trước --</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="address_detail">Địa chỉ cụ thể <span class="required">*</span></label>
+                        <input type="text" class="form-control" id="address_detail" name="address_detail"
+                            placeholder="VD: 123 Nguyễn Văn Linh, Phường Tân Phú..." required maxlength="500">
+                        <div class="char-counter"><span id="addressCount">0</span>/500 ký tự</div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
                             <label for="deadline">Hạn nộp hồ sơ <span class="required">*</span></label>
                             <input type="date" class="form-control" id="deadline" name="deadline" required>
+                        </div>
+
+                        <div class="form-group">
+                            <!-- Để trống để giữ layout cân đối -->
                         </div>
                     </div>
 
@@ -958,7 +1001,8 @@
             responsibilities: 'respCount',
             requirements: 'reqCount',
             benefits: 'benefitsCount',
-            contact_method: 'contactCount'
+            contact_method: 'contactCount',
+            address_detail: 'addressCount'
         };
 
         for (const inputId in counterMap) {
@@ -1300,6 +1344,111 @@
         function postAnother() {
             window.location.reload();
         }
+    </script>
+    <!-- ========== VIETNAM LOCATION API ========== -->
+    <script>
+        class VietnamLocationAPI {
+            constructor() {
+                this.baseURL = 'https://provinces.open-api.vn/api';
+            }
+
+            async getProvinces() {
+                try {
+                    const response = await fetch(`${this.baseURL}/p/`);
+                    if (!response.ok) throw new Error('Không thể tải danh sách tỉnh');
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error:', error);
+                    return this.getFallbackProvinces();
+                }
+            }
+
+            async getDistricts(provinceCode) {
+                try {
+                    const response = await fetch(`${this.baseURL}/p/${provinceCode}?depth=2`);
+                    if (!response.ok) throw new Error('Không thể tải danh sách quận/huyện');
+                    const data = await response.json();
+                    return data.districts || [];
+                } catch (error) {
+                    console.error('Error:', error);
+                    return [];
+                }
+            }
+
+            getFallbackProvinces() {
+                return [{
+                        code: 1,
+                        name: "Hà Nội"
+                    },
+                    {
+                        code: 79,
+                        name: "TP. Hồ Chí Minh"
+                    },
+                    {
+                        code: 48,
+                        name: "Đà Nẵng"
+                    },
+                    {
+                        code: 31,
+                        name: "Hải Phòng"
+                    },
+                    {
+                        code: 92,
+                        name: "Cần Thơ"
+                    }
+                ];
+            }
+        }
+
+        const locationAPI = new VietnamLocationAPI();
+
+        async function initLocationSelects() {
+            const provinceSelect = document.getElementById('province');
+            const districtSelect = document.getElementById('district');
+
+            if (!provinceSelect) return;
+
+            // Load provinces
+            provinceSelect.innerHTML = '<option value="">Đang tải...</option>';
+            const provinces = await locationAPI.getProvinces();
+
+            provinces.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+
+            provinceSelect.innerHTML = '<option value="">-- Chọn tỉnh/thành phố --</option>';
+            provinces.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.name;
+                option.dataset.code = p.code;
+                option.textContent = p.name;
+                provinceSelect.appendChild(option);
+            });
+
+            // Handle province change
+            provinceSelect.addEventListener('change', async function() {
+                const code = this.options[this.selectedIndex]?.dataset?.code;
+
+                if (!code) {
+                    districtSelect.innerHTML = '<option value="">-- Chọn quận/huyện --</option>';
+                    return;
+                }
+
+                districtSelect.innerHTML = '<option value="">Đang tải...</option>';
+                const districts = await locationAPI.getDistricts(code);
+
+                districts.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+
+                districtSelect.innerHTML = '<option value="">-- Chọn quận/huyện --</option>';
+                districts.forEach(d => {
+                    const option = document.createElement('option');
+                    option.value = d.name;
+                    option.textContent = d.name;
+                    districtSelect.appendChild(option);
+                });
+            });
+        }
+
+        // Khởi tạo khi DOM ready
+        document.addEventListener('DOMContentLoaded', initLocationSelects);
     </script>
 </body>
 

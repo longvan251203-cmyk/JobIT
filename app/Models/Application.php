@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Application extends Model
 {
@@ -68,29 +69,91 @@ class Application extends Model
         return $query->orderBy('ngay_ung_tuyen', 'desc');
     }
 
-    // Accessor cho status badge
-    public function getStatusBadgeAttribute()
+    /**
+     * ✅ KIỂM TRA JOB ĐÃ HẾT HẠN CHƯA
+     */
+    public function isJobExpired()
     {
-        $badges = [
-            'cho_xu_ly' => '<span class="badge bg-warning">Chờ xử lý</span>',
-            'dang_phong_van' => '<span class="badge bg-info">Đang phỏng vấn</span>',
-            'duoc_chon' => '<span class="badge bg-success">Được chọn</span>',
-            'khong_phu_hop' => '<span class="badge bg-danger">Không phù hợp</span>',
-        ];
+        if (!$this->job || !$this->job->deadline) {
+            return false;
+        }
 
-        return $badges[$this->trang_thai] ?? '<span class="badge bg-secondary">N/A</span>';
+        return Carbon::parse($this->job->deadline)->endOfDay()->isPast();
     }
 
-    // ✅ Helper method để lấy tên trạng thái
-    public function getStatusNameAttribute()
+    /**
+     * ✅ LẤY TRẠNG THÁI HIỂN THỊ (BAO GỒM CẢ HẾT HẠN)
+     */
+    public function getDisplayStatus()
     {
-        $names = [
-            'cho_xu_ly' => 'Chờ xử lý',
-            'dang_phong_van' => 'Đang phỏng vấn',
-            'duoc_chon' => 'Được chọn',
-            'khong_phu_hop' => 'Không phù hợp',
+
+
+        // Trạng thái bình thường
+        $statusMap = [
+            'cho_xu_ly' => [
+                'status' => 'cho_xu_ly',
+                'class' => 'pending',
+                'icon' => 'bi-hourglass-split',
+                'text' => 'Chờ xử lý',
+                'description' => 'Hồ sơ đang chờ nhà tuyển dụng xem xét'
+            ],
+            'dang_phong_van' => [
+                'status' => 'dang_phong_van',
+                'class' => 'interview',
+                'icon' => 'bi-calendar-check',
+                'text' => 'Mời phỏng vấn',
+                'description' => 'Bạn đã được mời phỏng vấn'
+            ],
+            'duoc_chon' => [
+                'status' => 'duoc_chon',
+                'class' => 'accepted',
+                'icon' => 'bi-check-circle-fill',
+                'text' => 'Được chọn',
+                'description' => 'Chúc mừng! Bạn đã được tuyển dụng'
+            ],
+            'khong_phu_hop' => [
+                'status' => 'khong_phu_hop',
+                'class' => 'rejected',
+                'icon' => 'bi-x-circle-fill',
+                'text' => 'Từ chối',
+                'description' => 'Hồ sơ chưa phù hợp với vị trí này'
+            ],
         ];
 
-        return $names[$this->trang_thai] ?? 'N/A';
+        return $statusMap[$this->trang_thai] ?? [
+            'status' => 'unknown',
+            'class' => 'secondary',
+            'icon' => 'bi-question-circle',
+            'text' => 'Không xác định',
+            'description' => 'Trạng thái không rõ'
+        ];
+    }
+
+    /**
+     * ✅ LẤY BADGE HTML CHO STATUS
+     */
+    public function getStatusBadgeAttribute()
+    {
+        $status = $this->getDisplayStatus();
+        $badgeMap = [
+            'pending' => 'warning',
+            'interview' => 'info',
+            'accepted' => 'success',
+            'rejected' => 'danger',
+            'expired' => 'secondary',
+            'secondary' => 'secondary'
+        ];
+
+        $badgeClass = $badgeMap[$status['class']] ?? 'secondary';
+
+        return '<span class="badge bg-' . $badgeClass . '">' . $status['text'] . '</span>';
+    }
+
+    /**
+     * ✅ LẤY TÊN TRẠNG THÁI
+     */
+    public function getStatusNameAttribute()
+    {
+        return $this->getDisplayStatus()['text'];
     }
 }

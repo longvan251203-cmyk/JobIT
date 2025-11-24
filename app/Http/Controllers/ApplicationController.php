@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Application;
 use App\Models\Applicant;
 use App\Models\JobPost;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 class ApplicationController extends Controller
@@ -86,6 +88,14 @@ class ApplicationController extends Controller
                 'trang_thai' => Application::STATUS_CHO_XU_LY,  // ✅ SỬA: dùng giá trị cũ
                 'ngay_ung_tuyen' => now(),
             ]);
+            // ✅ TẠO THÔNG BÁO CHO EMPLOYER
+            $employer = $job->company->employer;
+            if ($employer && $employer->user_id) {
+                Notification::createNewApplicationNotification(
+                    $employer->user_id,
+                    $application->load('job')
+                );
+            }
 
             return response()->json([
                 'success' => true,
@@ -116,29 +126,110 @@ class ApplicationController extends Controller
                 ->where('applicant_id', $applicant->id_uv)
                 ->firstOrFail();
 
+            // ✅ ĐIỀU KIỆN 1: Chỉ được hủy khi trạng thái là "chờ xử lý"
             if ($application->trang_thai !== Application::STATUS_CHO_XU_LY) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Không thể hủy đơn này'
+                    'message' => 'Chỉ có thể hủy ứng tuyển ở trạng thái chờ xử lý'
                 ], 400);
             }
 
+            // ✅ ĐIỀU KIỆN 2: Kiểm tra thời gian - chỉ cho phép hủy trong 24 giờ
+            $applicationTime = Carbon::parse($application->ngay_ung_tuyen);
+            $currentTime = Carbon::now();
+            $hoursElapsed = $applicationTime->diffInHours($currentTime);
+
+            if ($hoursElapsed > 24) {
+                $timeExpired = $applicationTime->addHours(24)->format('d/m/Y H:i');
+                return response()->json([
+                    'success' => false,
+                    'message' => "Hạn thời gian hủy ứng tuyển đã hết (24 giờ kể từ ứng tuyển). Thời hạn kết thúc lúc: $timeExpired",
+                    'expired' => true,
+                    'application_time' => $applicationTime->format('d/m/Y H:i'),
+                    'cancel_deadline' => $applicationTime->addHours(24)->format('d/m/Y H:i'),
+                    'hours_elapsed' => $hoursElapsed
+                ], 400);
+            }
+
+            // ✅ Nếu vượt qua tất cả các điều kiện, tiến hành xóa
             if ($application->cv_file_path) {
                 Storage::disk('public')->delete($application->cv_file_path);
             }
 
             $application->delete();
 
+            Log::info('✅ Ứng viên hủy ứng tuyển thành công', [
+                'application_id' => $applicationId,
+                'applicant_id' => $applicant->id_uv,
+                'hours_after_application' => $hoursElapsed
+            ]);
+
             return response()->json([
                 'success' => true,
-                'message' => 'Đã hủy ứng tuyển'
+                'message' => 'Đã hủy ứng tuyển thành công'
             ]);
         } catch (\Exception $e) {
+            Log::error('Lỗi hủy ứng tuyển: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra'
             ], 500);
         }
+    }
+    public function canCancelApplication($applicationId)
+    {
+        try {
+            $applicant = Applicant::where('user_id', Auth::id())->first();
+
+            $application = Application::where('application_id', $applicationId)
+                ->where('applicant_id', $applicant->id_uv)
+                ->firstOrFail();
+
+            $applicationTime = Carbon::parse($application->ngay_ung_tuyen);
+            $currentTime = Carbon::now();
+            $hoursElapsed = $applicationTime->diffInHours($currentTime);
+            $minutesRemaining = $applicationTime->addHours(24)->diffInMinutes($currentTime, false);
+
+            $canCancel = $application->trang_thai === Application::STATUS_CHO_XU_LY && $hoursElapsed <= 24;
+
+            return response()->json([
+                'success' => true,
+                'can_cancel' => $canCancel,
+                'status' => $application->trang_thai,
+                'hours_elapsed' => $hoursElapsed,
+                'application_time' => $applicationTime->format('d/m/Y H:i'),
+                'cancel_deadline' => $applicationTime->addHours(24)->format('d/m/Y H:i'),
+                'minutes_remaining' => max(0, $minutesRemaining),
+                'reason_if_cannot' => !$canCancel ? $this->getCannotCancelReason($application, $hoursElapsed) : null
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy đơn ứng tuyển'
+            ], 404);
+        }
+    }
+
+    /**
+     * ✅ LẤY LÝDO KHÔNG THỂ HỦY
+     */
+    private function getCannotCancelReason($application, $hoursElapsed)
+    {
+        if ($hoursElapsed > 24) {
+            return 'Quá 24 giờ kể từ khi ứng tuyển. Không thể hủy nữa.';
+        }
+
+        if ($application->trang_thai !== Application::STATUS_CHO_XU_LY) {
+            $statusText = match ($application->trang_thai) {
+                'dang_phong_van' => 'đang phỏng vấn',
+                'duoc_chon' => 'được chọn',
+                'khong_phu_hop' => 'bị từ chối',
+                default => 'khác'
+            };
+            return "Ứng tuyển đang ở trạng thái \"$statusText\", không thể hủy.";
+        }
+
+        return 'Không thể hủy ứng tuyển này.';
     }
     // ✅ DANH SÁCH ỨNG VIÊN
     /**

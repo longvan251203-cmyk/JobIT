@@ -894,6 +894,18 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+
+            // ✅ THÊM HÀM NÀY NGAY ĐẦU
+            function getExperienceLabel(code) {
+                const labels = {
+                    'no_experience': 'Không yêu cầu',
+                    'under_1': 'Dưới 1 năm',
+                    '1_2': '1-2 năm',
+                    '2_5': '2-5 năm',
+                    '5_plus': 'Trên 5 năm'
+                };
+                return labels[code] || code;
+            }
             // ========== BIẾN GLOBAL ==========
             const gridView = document.getElementById('gridView');
             const detailView = document.getElementById('detailView');
@@ -1292,10 +1304,10 @@
                             <div class="info-label"><i class="bi bi-briefcase"></i> Cấp bậc</div>
                             <div class="info-value">${job.level}</div>
                         </div>
-                        <div class="info-item">
-                            <div class="info-label"><i class="bi bi-award"></i> Kinh nghiệm </div>
-                            <div class="info-value">${job.experience}</div>
-                        </div>
+                       <div class="info-item">
+    <div class="info-label"><i class="bi bi-award"></i> Kinh nghiệm</div>
+    <div class="info-value">${getExperienceLabel(job.experience)}</div>
+</div>
                         <div class="info-item">
                             <div class="info-label"><i class="bi bi-people"></i> Số lượng tuyển</div>
                             <div class="info-value">${job.recruitment_count || 'Không giới hạn'}</div>

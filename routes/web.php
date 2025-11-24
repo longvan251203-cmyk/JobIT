@@ -7,6 +7,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ApplicantController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\NotificationController;
 
 // ==================== TRANG CHỦ ====================
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -297,3 +298,27 @@ Route::get('/api/jobs/{id}/check-application', [JobController::class, 'checkAppl
 // Lấy danh sách job đã ứng tuyển
 Route::get('/api/applied-jobs', [JobController::class, 'getAppliedJobIds']);
 Route::get('/api/jobs', [JobController::class, 'getJobsPaginated']);
+// ✅ THAY BẰNG đoạn này:
+Route::middleware(['auth'])->prefix('employer')->group(function () {
+    // ✅ NOTIFICATION ROUTES
+    Route::get('/notifications', [NotificationController::class, 'index'])
+        ->name('notifications.index');
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])
+        ->name('notifications.unread');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])
+        ->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])
+        ->name('notifications.readAll');
+    Route::delete('/notifications/{id}', [NotificationController::class, 'delete'])
+        ->name('notifications.delete');
+});
+// ✅ Thêm route kiểm tra có thể hủy không
+Route::middleware('auth')->group(function () {
+    // ... các route khác ...
+
+    // Kiểm tra trạng thái hủy
+    Route::get('/application/{id}/can-cancel', [ApplicationController::class, 'canCancelApplication']);
+
+    // Hủy ứng tuyển
+    Route::delete('/application/{id}/cancel', [ApplicationController::class, 'cancel']);
+});

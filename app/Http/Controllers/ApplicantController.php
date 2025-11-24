@@ -18,7 +18,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\SavedJob;
 use App\Models\Application;
 use Illuminate\Support\Facades\Log;
-
+use App\Models\Notification;
 
 class ApplicantController extends Controller
 {

@@ -8,6 +8,148 @@
     <title>Employer Dashboard - JobIT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* ============================================
+   NOTIFICATION STYLES
+   ============================================ */
+
+        /* Notification dropdown positioning */
+        #notificationDropdown {
+            top: calc(100% + 8px);
+            right: 0;
+        }
+
+        /* Notification item styles */
+        .notification-item {
+            transition: all 0.2s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .notification-item:hover {
+            background-color: #f9fafb;
+        }
+
+        /* Unread notification styling */
+        .notification-item.unread {
+            background-color: #eff6ff;
+            border-left: 3px solid #3b82f6;
+        }
+
+        .notification-item.unread::before {
+            content: '';
+            position: absolute;
+            left: -3px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, #3b82f6, #8b5cf6);
+        }
+
+        /* Notification time text */
+        .notification-time {
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+
+        /* Badge animation */
+        @keyframes badgePulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.9;
+            }
+        }
+
+        #notificationBadge {
+            animation: badgePulse 2s ease-in-out infinite;
+        }
+
+        /* Notification icon container */
+        .notification-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        /* Scrollbar styling for notification list */
+        #notificationList::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #notificationList::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        #notificationList::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+
+        #notificationList::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Empty state styling */
+        .notification-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1rem;
+        }
+
+        /* Notification action buttons */
+        .notification-action {
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .notification-action:hover {
+            transform: translateY(-1px);
+        }
+
+        /* Loading state cho select */
+        select.form-control:disabled {
+            background-color: #f7fafc;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        select.form-control option:disabled {
+            color: #a0aec0;
+        }
+
+        /* Highlight khi đang load */
+        select.form-control[disabled] {
+            border-color: #667eea;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.7;
+            }
+        }
+
         /* Hashtag Styles - Được thêm từ postjob.blade.php */
         .hashtag-input-wrapper {
             position: relative;
@@ -320,14 +462,39 @@
             </div>
 
             <div class="flex items-center gap-4">
-                <a href="{{ url('/employer/postjob') }}" class="hidden md:block px-4 py-2 text-purple-600 border border-purple-600 rounded-lg font-semibold hover:bg-purple-50 transition-all">Đăng tuyển</a> <button class="px-4 py-2 text-purple-600 border border-purple-600 rounded-lg font-semibold hover:bg-purple-50 transition-all">Thông tin ứng viên</button>
+                <a href="{{ url('/employer/postjob') }}" class="hidden md:block px-4 py-2 text-purple-600 border border-purple-600 rounded-lg font-semibold hover:bg-purple-50 transition-all">Đăng tuyển</a>
+                <button class="px-4 py-2 text-purple-600 border border-purple-600 rounded-lg font-semibold hover:bg-purple-50 transition-all">Thông tin ứng viên</button>
 
-                <button id="btnNotifications" class="relative p-2 rounded-xl hover:bg-gray-100 transition-all duration-300">
-                    <svg class="w-6 h-6 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                </button>
+                <!-- ✅ NÚT THÔNG BÁO MỚI -->
+                <div class="relative">
+                    <button id="btnNotifications" class="relative p-2 rounded-xl hover:bg-gray-100 transition-all duration-300">
+                        <svg class="w-6 h-6 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <span id="notificationBadge" class="hidden absolute top-0 right-0 min-w-[20px] h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center px-1.5 animate-pulse">0</span>
+                    </button>
+
+                    <!-- DROPDOWN THÔNG BÁO -->
+                    <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 max-h-[500px] flex flex-col">
+                        <!-- Header -->
+                        <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+                            <h3 class="font-semibold text-gray-800">Thông báo</h3>
+                            <button id="btnMarkAllRead" class="text-xs text-purple-600 hover:text-purple-700 font-medium transition-colors">
+                                Đánh dấu tất cả đã đọc
+                            </button>
+                        </div>
+
+                        <!-- Notification List -->
+                        <div id="notificationList" class="flex-1 overflow-y-auto">
+                            <div class="p-8 text-center text-gray-500">
+                                <svg class="w-16 h-16 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                </svg>
+                                <p>Chưa có thông báo nào</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="relative">
                     <button id="btnProfile" class="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-100 transition-all">
@@ -837,7 +1004,9 @@
             </div>
 
             <!-- Info company -->
-            <div id="company-info" class="tab-content hidden">
+            <div id="company-info" class="tab-content hidden"
+                data-province="{{ $company->tinh_thanh ?? '' }}"
+                data-district="{{ $company->quan_huyen ?? '' }}">
                 <form id="companyForm" enctype="multipart/form-data">
                     @csrf
                     <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
@@ -997,17 +1166,17 @@
                     <div class="grid grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Tỉnh / Thành</label>
-                            <input type="text" name="tinh_thanh"
-                                value="{{ old('tinh_thanh', $company->tinh_thanh ?? '') }}"
-                                placeholder="VD: Hồ Chí Minh"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500" />
+                            <select id="company_province" name="tinh_thanh"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500">
+                                <option value="">-- Đang tải... --</option>
+                            </select>
                         </div>
                         <div>
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Quận / Huyện</label>
-                            <input type="text" name="quan_huyen"
-                                value="{{ old('quan_huyen', $company->quan_huyen ?? '') }}"
-                                placeholder="VD: Quận 10"
-                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500" />
+                            <select id="company_district" name="quan_huyen"
+                                class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500">
+                                <option value="">-- Chọn tỉnh trước --</option>
+                            </select>
                         </div>
                     </div>
                     <div class="mb-8">
@@ -1369,24 +1538,41 @@
                                         class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500">
                                 </div>
                             </div>
-
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                        Địa điểm làm việc <span class="text-red-500">*</span>
+                                        Tỉnh/Thành phố <span class="text-red-500">*</span>
                                     </label>
                                     <select id="edit_province" name="province" required
                                         class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500">
-                                        <option value="">-- Chọn tỉnh/thành phố --</option>
-                                        <option value="hanoi">Hà Nội</option>
-                                        <option value="hcm">Hồ Chí Minh</option>
-                                        <option value="danang">Đà Nẵng</option>
-                                        <option value="haiphong">Hải Phòng</option>
-                                        <option value="cantho">Cần Thơ</option>
-                                        <option value="other">Khác</option>
+                                        <option value="">-- Đang tải... --</option>
                                     </select>
                                 </div>
 
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Quận/Huyện <span class="text-red-500">*</span>
+                                    </label>
+                                    <select id="edit_district" name="district" required
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500">
+                                        <option value="">-- Chọn tỉnh trước --</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                    Địa chỉ cụ thể <span class="text-red-500">*</span>
+                                </label>
+                                <input type="text" id="edit_address_detail" name="address_detail" required maxlength="500"
+                                    placeholder="VD: 123 Nguyễn Văn Linh, Phường Tân Phú..."
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500">
+                                <div class="text-right text-xs text-gray-500 mt-1">
+                                    <span id="edit_addressCount">0</span>/500 ký tự
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">
                                         Hạn nộp hồ sơ <span class="text-red-500">*</span>
@@ -1394,6 +1580,7 @@
                                     <input type="date" id="edit_deadline" name="deadline" required
                                         class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500">
                                 </div>
+                                <div></div> <!-- Giữ layout cân đối -->
                             </div>
 
                         </div>
@@ -1534,7 +1721,8 @@
                 'edit_responsibilities': 'edit_respCount',
                 'edit_requirements': 'edit_reqCount',
                 'edit_benefits': 'edit_benefitsCount',
-                'edit_contact_method': 'edit_contactCount'
+                'edit_contact_method': 'edit_contactCount',
+                'edit_address_detail': 'edit_addressCount'
             };
 
             for (const inputId in editCounterMap) {
@@ -1599,7 +1787,7 @@
 
             // Populate form with job data
             function populateEditForm(job) {
-                console.log('🔍 Populating form with:', job); // Debug log
+                console.log('📝 Populating form with:', job); // Debug log
 
                 // Basic info
                 document.getElementById('edit_job_id').value = job.job_id;
@@ -1624,8 +1812,34 @@
                 // Other basic fields
                 document.getElementById('edit_working_type').value = job.working_type || '';
                 document.getElementById('edit_recruitment_count').value = job.recruitment_count || '';
-                document.getElementById('edit_province').value = job.province || '';
                 document.getElementById('edit_deadline').value = job.deadline || '';
+                document.getElementById('edit_address_detail').value = job.address_detail || '';
+
+                // ⭐ QUAN TRỌNG: Khởi tạo location selects TRƯỚC KHI set value
+                const provinceName = job.province || '';
+                const districtName = job.district || '';
+
+                console.log('🌍 Initializing locations with:', {
+                    provinceName,
+                    districtName
+                });
+
+                // ⭐ FIX: Gọi hàm init location và đợi hoàn thành
+                if (typeof window.initEditModalLocations === 'function') {
+                    window.initEditModalLocations(provinceName, districtName)
+                        .then(success => {
+                            if (success) {
+                                console.log('✅ Location selects initialized in populateEditForm');
+                            } else {
+                                console.error('❌ Failed to initialize location selects');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('❌ Error initializing locations:', error);
+                        });
+                } else {
+                    console.error('❌ window.initEditModalLocations is not defined!');
+                }
 
                 // Detail fields (from job.detail)
                 if (job.detail) {
@@ -1639,7 +1853,7 @@
                 }
 
                 // ✅ Load hashtags vào edit form
-                editHashtags = []; // Reset mảng
+                editHashtags = [];
                 if (job.hashtags && Array.isArray(job.hashtags)) {
                     job.hashtags.forEach(hashtag => {
                         if (hashtag.tag_name) {
@@ -1648,7 +1862,7 @@
                     });
 
                     console.log('✅ Loaded hashtags:', editHashtags);
-                    editRenderHashtags(); // Render ra UI
+                    editRenderHashtags();
                 }
 
                 // Update character counters
@@ -1660,22 +1874,6 @@
                     }
                 }
             }
-
-            // Tab switching
-            document.querySelectorAll('.edit-tab-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const tabNum = parseInt(this.getAttribute('data-tab').replace('edit-tab', ''));
-
-                    // Validate tab 1 before moving to tab 2
-                    if (tabNum === 2 && currentEditTab === 1) {
-                        if (!validateEditTab1()) {
-                            return;
-                        }
-                    }
-
-                    switchEditTab(tabNum);
-                });
-            });
 
             function switchEditTab(tabNum) {
                 currentEditTab = tabNum;
@@ -1741,6 +1939,8 @@
                     'edit_working_type',
                     'edit_recruitment_count',
                     'edit_province',
+                    'edit_district', // ✅ THÊM
+                    'edit_address_detail', // ✅ THÊM
                     'edit_deadline'
                 ];
 
@@ -1940,24 +2140,72 @@
                 }
             });
 
+            // THAY THẾ đoạn xử lý sidebar click cho company-info
             document.querySelectorAll('.sidebar-item').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const id = this.getAttribute('data-id');
+
+                    // Hide all tabs
                     document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+
+                    // Show target tab
                     const target = document.getElementById(id);
                     if (target) target.classList.remove('hidden');
+
+                    // Update sidebar styling
                     document.querySelectorAll('.sidebar-item').forEach(i => {
                         i.classList.remove('bg-gradient-to-r', 'from-purple-600', 'to-blue-600', 'text-white');
                         i.classList.add('text-gray-700');
                     });
                     this.classList.remove('text-gray-700');
                     this.classList.add('bg-gradient-to-r', 'from-purple-600', 'to-blue-600', 'text-white');
+
+                    // 🆕 Khởi tạo location selects khi mở tab Company Info
+                    if (id === 'company-info') {
+                        console.log('🎯 Company Info tab opened, initializing locations...');
+
+                        setTimeout(() => {
+                            const companyInfoTab = document.getElementById('company-info');
+
+                            if (!companyInfoTab) {
+                                console.error('❌ Company Info tab not found');
+                                return;
+                            }
+
+                            // ⭐ Lấy dữ liệu từ data attributes
+                            const currentProvince = companyInfoTab.getAttribute('data-province') || '';
+                            const currentDistrict = companyInfoTab.getAttribute('data-district') || '';
+
+                            console.log('🔍 Current location from data attributes:', {
+                                currentProvince,
+                                currentDistrict
+                            });
+
+                            if (typeof window.companyLocationManager !== 'undefined') {
+                                window.companyLocationManager.initialize(currentProvince, currentDistrict)
+                                    .then(success => {
+                                        if (success) {
+                                            console.log('✅ Company locations initialized successfully');
+                                        } else {
+                                            console.error('❌ Failed to initialize company locations');
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('❌ Error initializing company locations:', error);
+                                    });
+                            } else {
+                                console.error('❌ companyLocationManager not found');
+                            }
+                        }, 300); // Đợi 300ms để tab render xong
+                    }
+
+                    // Close sidebar on mobile
                     if (window.innerWidth < 1024) {
-                        sidebar.classList.add('-translate-x-full');
+                        const sidebar = document.getElementById('sidebar');
+                        if (sidebar) sidebar.classList.add('-translate-x-full');
                     }
                 });
             });
-
             const defaultBtn = document.querySelector('.sidebar-item[data-id="dashboard"]');
             if (defaultBtn) defaultBtn.click();
 
@@ -2788,7 +3036,936 @@
             });
         }
     </script>
+    <!-- PART 2: THÊM ĐOẠN NÀY VÀO CUỐI FILE, TRƯỚC </body> -->
+    <!-- ========== VIETNAM LOCATION API FOR EDIT MODAL ========== -->
+    <script>
+        class VietnamLocationAPI {
+            constructor() {
+                this.baseURL = 'https://provinces.open-api.vn/api';
+                this.provincesCache = null; // Cache để giảm API calls
+            }
 
+            async getProvinces() {
+                // Sử dụng cache nếu đã load trước đó
+                if (this.provincesCache) {
+                    console.log('✅ Using cached provinces data');
+                    return this.provincesCache;
+                }
+
+                try {
+                    console.log('🔄 Fetching provinces from API...');
+                    const response = await fetch(`${this.baseURL}/p/`);
+
+                    if (!response.ok) {
+                        throw new Error('API response not OK: ' + response.status);
+                    }
+
+                    const data = await response.json();
+                    this.provincesCache = data; // Lưu vào cache
+                    console.log('✅ Loaded provinces:', data.length);
+                    return data;
+                } catch (error) {
+                    console.error('❌ Error loading provinces:', error);
+                    console.log('⚠️ Using fallback provinces');
+                    return this.getFallbackProvinces();
+                }
+            }
+
+            async getDistricts(provinceCode) {
+                try {
+                    console.log('🔄 Fetching districts for province code:', provinceCode);
+                    const response = await fetch(`${this.baseURL}/p/${provinceCode}?depth=2`);
+
+                    if (!response.ok) {
+                        throw new Error('API response not OK: ' + response.status);
+                    }
+
+                    const data = await response.json();
+                    const districts = data.districts || [];
+                    console.log('✅ Loaded districts:', districts.length);
+                    return districts;
+                } catch (error) {
+                    console.error('❌ Error loading districts:', error);
+                    return [];
+                }
+            }
+
+            getFallbackProvinces() {
+                return [{
+                        code: 1,
+                        name: "Hà Nội"
+                    },
+                    {
+                        code: 79,
+                        name: "TP. Hồ Chí Minh"
+                    },
+                    {
+                        code: 48,
+                        name: "Đà Nẵng"
+                    },
+                    {
+                        code: 31,
+                        name: "Hải Phòng"
+                    },
+                    {
+                        code: 92,
+                        name: "Cần Thơ"
+                    },
+                    {
+                        code: 89,
+                        name: "An Giang"
+                    },
+                    {
+                        code: 77,
+                        name: "Bà Rịa - Vũng Tàu"
+                    },
+                    {
+                        code: 24,
+                        name: "Bắc Giang"
+                    },
+                    {
+                        code: 6,
+                        name: "Bắc Kạn"
+                    }
+                ];
+            }
+        }
+
+        // Khởi tạo API instance (Global variable)
+        const editLocationAPI = new VietnamLocationAPI();
+
+        console.log('✅ VietnamLocationAPI class loaded');
+    </script>
+    <!-- PART 3: THÊM TIẾP SAU PART 2 -->
+    <script>
+        // ============================================
+        // MODULE 2: LOCATION SELECT MANAGER
+        // ============================================
+        class EditLocationManager {
+            constructor() {
+                this.provinceSelect = null;
+                this.districtSelect = null;
+                this.isInitialized = false;
+            }
+
+            // Lấy DOM elements
+            getElements() {
+                this.provinceSelect = document.getElementById('edit_province');
+                this.districtSelect = document.getElementById('edit_district');
+
+                if (!this.provinceSelect || !this.districtSelect) {
+                    console.error('❌ Cannot find province/district select elements');
+                    return false;
+                }
+
+                console.log('✅ Found province and district select elements');
+                return true;
+            }
+
+            // Khởi tạo với dữ liệu hiện tại
+            async initialize(currentProvince = '', currentDistrict = '') {
+                console.log('🚀 Initializing EditLocationManager...', {
+                    currentProvince,
+                    currentDistrict
+                });
+
+                // Lấy DOM elements
+                if (!this.getElements()) {
+                    return false;
+                }
+
+                // Load provinces
+                await this.loadProvinces(currentProvince);
+
+                // Load districts nếu có province
+                if (currentProvince) {
+                    const provinceCode = this.getProvinceCode(currentProvince);
+                    if (provinceCode) {
+                        await this.loadDistricts(provinceCode, currentDistrict);
+                    }
+                }
+
+                // Setup event listener
+                this.setupEventListeners();
+
+                this.isInitialized = true;
+                console.log('✅ EditLocationManager initialized successfully');
+                return true;
+            }
+
+            // Load danh sách provinces
+            async loadProvinces(selectedProvince = '') {
+                console.log('📋 Loading provinces...');
+
+                // Hiển thị loading
+                this.provinceSelect.innerHTML = '<option value="">⏳ Đang tải...</option>';
+                this.provinceSelect.disabled = true;
+
+                // Fetch data
+                const provinces = await editLocationAPI.getProvinces();
+
+                // Sort theo tên
+                provinces.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+
+                // Clear và populate
+                this.provinceSelect.innerHTML = '<option value="">-- Chọn tỉnh/thành phố --</option>';
+
+                provinces.forEach(province => {
+                    const option = document.createElement('option');
+                    option.value = province.name;
+                    option.textContent = province.name;
+                    option.dataset.code = province.code;
+
+                    // Auto-select nếu match
+                    if (this.matchProvinceName(province.name, selectedProvince)) {
+                        option.selected = true;
+                        console.log('✅ Auto-selected province:', province.name);
+                    }
+
+                    this.provinceSelect.appendChild(option);
+                });
+
+                // Enable select
+                this.provinceSelect.disabled = false;
+                console.log('✅ Provinces loaded:', provinces.length);
+            }
+
+            // Load danh sách districts
+            async loadDistricts(provinceCode, selectedDistrict = '') {
+                console.log('📋 Loading districts for province code:', provinceCode);
+
+                // Hiển thị loading
+                this.districtSelect.innerHTML = '<option value="">⏳ Đang tải...</option>';
+                this.districtSelect.disabled = true;
+
+                // Fetch data
+                const districts = await editLocationAPI.getDistricts(provinceCode);
+
+                // Sort theo tên
+                districts.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+
+                // Clear và populate
+                this.districtSelect.innerHTML = '<option value="">-- Chọn quận/huyện --</option>';
+
+                districts.forEach(district => {
+                    const option = document.createElement('option');
+                    option.value = district.name;
+                    option.textContent = district.name;
+
+                    // Auto-select nếu match
+                    if (this.matchDistrictName(district.name, selectedDistrict)) {
+                        option.selected = true;
+                        console.log('✅ Auto-selected district:', district.name);
+                    }
+
+                    this.districtSelect.appendChild(option);
+                });
+
+                // Enable select
+                this.districtSelect.disabled = false;
+                console.log('✅ Districts loaded:', districts.length);
+            }
+
+            // Setup event listeners
+            setupEventListeners() {
+                // Remove old listener bằng cách clone node
+                const newProvinceSelect = this.provinceSelect.cloneNode(true);
+                this.provinceSelect.parentNode.replaceChild(newProvinceSelect, this.provinceSelect);
+                this.provinceSelect = newProvinceSelect;
+
+                // Add new listener
+                this.provinceSelect.addEventListener('change', async (e) => {
+                    const selectedOption = e.target.options[e.target.selectedIndex];
+                    const provinceCode = selectedOption?.dataset?.code;
+
+                    console.log('🔄 Province changed:', {
+                        name: selectedOption?.value,
+                        code: provinceCode
+                    });
+
+                    if (provinceCode) {
+                        await this.loadDistricts(provinceCode);
+                    } else {
+                        this.districtSelect.innerHTML = '<option value="">-- Chọn quận/huyện --</option>';
+                    }
+                });
+
+                console.log('✅ Event listeners setup complete');
+            }
+
+            // Helper: Lấy province code từ tên
+            getProvinceCode(provinceName) {
+                const option = Array.from(this.provinceSelect.options).find(opt =>
+                    this.matchProvinceName(opt.value, provinceName)
+                );
+                return option?.dataset?.code || null;
+            }
+
+            // Helper: So sánh tên province (case-insensitive, ignore accents)
+            matchProvinceName(name1, name2) {
+                if (!name1 || !name2) return false;
+                const normalize = (str) => str.toLowerCase().trim()
+                    .replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, 'a')
+                    .replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, 'e')
+                    .replace(/ì|í|ị|ỉ|ĩ/g, 'i')
+                    .replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, 'o')
+                    .replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, 'u')
+                    .replace(/ỳ|ý|ỵ|ỷ|ỹ/g, 'y')
+                    .replace(/đ/g, 'd');
+
+                return normalize(name1) === normalize(name2);
+            }
+
+            // Helper: So sánh tên district
+            matchDistrictName(name1, name2) {
+                return this.matchProvinceName(name1, name2); // Dùng chung logic
+            }
+
+            // Reset về trạng thái ban đầu
+            reset() {
+                if (this.provinceSelect) {
+                    this.provinceSelect.innerHTML = '<option value="">-- Chọn tỉnh/thành phố --</option>';
+                }
+                if (this.districtSelect) {
+                    this.districtSelect.innerHTML = '<option value="">-- Chọn quận/huyện --</option>';
+                }
+                this.isInitialized = false;
+                console.log('🔄 EditLocationManager reset');
+            }
+        }
+
+        // Khởi tạo manager instance (Global variable)
+        window.editLocationManager = new EditLocationManager();
+
+
+        console.log('✅ EditLocationManager class loaded');
+    </script>
+    <!-- THÊM SAU window.editLocationManager -->
+    <script>
+        // ============================================
+        // COMPANY INFO LOCATION MANAGER
+        // ============================================
+        class CompanyLocationManager {
+            constructor() {
+                this.provinceSelect = null;
+                this.districtSelect = null;
+                this.isInitialized = false;
+            }
+
+            getElements() {
+                this.provinceSelect = document.getElementById('company_province');
+                this.districtSelect = document.getElementById('company_district');
+
+                if (!this.provinceSelect || !this.districtSelect) {
+                    console.error('❌ Cannot find company province/district select elements');
+                    return false;
+                }
+
+                console.log('✅ Found company province and district select elements');
+                return true;
+            }
+
+            async initialize(currentProvince = '', currentDistrict = '') {
+                console.log('🚀 Initializing CompanyLocationManager...', {
+                    currentProvince,
+                    currentDistrict
+                });
+
+                if (!this.getElements()) {
+                    return false;
+                }
+
+                // Load provinces
+                await this.loadProvinces(currentProvince);
+
+                // Load districts nếu có province
+                if (currentProvince) {
+                    const provinceCode = this.getProvinceCode(currentProvince);
+                    if (provinceCode) {
+                        await this.loadDistricts(provinceCode, currentDistrict);
+                    }
+                }
+
+                // Setup event listener
+                this.setupEventListeners();
+
+                this.isInitialized = true;
+                console.log('✅ CompanyLocationManager initialized successfully');
+                return true;
+            }
+
+            async loadProvinces(selectedProvince = '') {
+                console.log('📋 Loading company provinces...');
+
+                this.provinceSelect.innerHTML = '<option value="">⏳ Đang tải...</option>';
+                this.provinceSelect.disabled = true;
+
+                const provinces = await editLocationAPI.getProvinces();
+                provinces.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+
+                this.provinceSelect.innerHTML = '<option value="">-- Chọn tỉnh/thành phố --</option>';
+
+                provinces.forEach(province => {
+                    const option = document.createElement('option');
+                    option.value = province.name;
+                    option.textContent = province.name;
+                    option.dataset.code = province.code;
+
+                    if (this.matchName(province.name, selectedProvince)) {
+                        option.selected = true;
+                        console.log('✅ Auto-selected company province:', province.name);
+                    }
+
+                    this.provinceSelect.appendChild(option);
+                });
+
+                this.provinceSelect.disabled = false;
+                console.log('✅ Company provinces loaded:', provinces.length);
+            }
+
+            async loadDistricts(provinceCode, selectedDistrict = '') {
+                console.log('📋 Loading company districts for province code:', provinceCode);
+
+                this.districtSelect.innerHTML = '<option value="">⏳ Đang tải...</option>';
+                this.districtSelect.disabled = true;
+
+                const districts = await editLocationAPI.getDistricts(provinceCode);
+                districts.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+
+                this.districtSelect.innerHTML = '<option value="">-- Chọn quận/huyện --</option>';
+
+                districts.forEach(district => {
+                    const option = document.createElement('option');
+                    option.value = district.name;
+                    option.textContent = district.name;
+
+                    if (this.matchName(district.name, selectedDistrict)) {
+                        option.selected = true;
+                        console.log('✅ Auto-selected company district:', district.name);
+                    }
+
+                    this.districtSelect.appendChild(option);
+                });
+
+                this.districtSelect.disabled = false;
+                console.log('✅ Company districts loaded:', districts.length);
+            }
+
+            setupEventListeners() {
+                const newProvinceSelect = this.provinceSelect.cloneNode(true);
+                this.provinceSelect.parentNode.replaceChild(newProvinceSelect, this.provinceSelect);
+                this.provinceSelect = newProvinceSelect;
+
+                this.provinceSelect.addEventListener('change', async (e) => {
+                    const selectedOption = e.target.options[e.target.selectedIndex];
+                    const provinceCode = selectedOption?.dataset?.code;
+
+                    console.log('🔄 Company province changed:', {
+                        name: selectedOption?.value,
+                        code: provinceCode
+                    });
+
+                    if (provinceCode) {
+                        await this.loadDistricts(provinceCode);
+                    } else {
+                        this.districtSelect.innerHTML = '<option value="">-- Chọn quận/huyện --</option>';
+                    }
+                });
+
+                console.log('✅ Company event listeners setup complete');
+            }
+
+            getProvinceCode(provinceName) {
+                const option = Array.from(this.provinceSelect.options).find(opt =>
+                    this.matchName(opt.value, provinceName)
+                );
+                return option?.dataset?.code || null;
+            }
+
+            matchName(name1, name2) {
+                if (!name1 || !name2) return false;
+                const normalize = (str) => str.toLowerCase().trim()
+                    .replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, 'a')
+                    .replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, 'e')
+                    .replace(/ì|í|ị|ỉ|ĩ/g, 'i')
+                    .replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, 'o')
+                    .replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, 'u')
+                    .replace(/ỳ|ý|ỵ|ỷ|ỹ/g, 'y')
+                    .replace(/đ/g, 'd');
+
+                return normalize(name1) === normalize(name2);
+            }
+        }
+
+        // Khởi tạo manager instance
+        window.companyLocationManager = new CompanyLocationManager();
+
+        console.log('✅ CompanyLocationManager class loaded');
+    </script>
+    <!-- THÊM SAU window.companyLocationManager = new CompanyLocationManager(); -->
+    <script>
+        // ============================================
+        // AUTO INIT COMPANY LOCATION ON PAGE LOAD
+        // ============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔄 Checking if Company Info tab is visible on page load...');
+
+            const companyInfoTab = document.getElementById('company-info');
+
+            if (!companyInfoTab) {
+                console.log('ℹ️ Company Info tab not found in DOM');
+                return;
+            }
+
+            // Kiểm tra xem tab có đang hiển thị không
+            const isVisible = !companyInfoTab.classList.contains('hidden');
+
+            if (isVisible) {
+                console.log('🎯 Company Info tab is visible, auto-initializing locations...');
+
+                // Lấy dữ liệu từ data attributes
+                const currentProvince = companyInfoTab.getAttribute('data-province') || '';
+                const currentDistrict = companyInfoTab.getAttribute('data-district') || '';
+
+                console.log('📍 Auto-init with location data:', {
+                    currentProvince,
+                    currentDistrict
+                });
+
+                // Đợi một chút để đảm bảo các class đã load xong
+                setTimeout(() => {
+                    if (typeof window.companyLocationManager !== 'undefined') {
+                        window.companyLocationManager.initialize(currentProvince, currentDistrict)
+                            .then(success => {
+                                if (success) {
+                                    console.log('✅ Company locations auto-initialized on page load');
+                                } else {
+                                    console.error('❌ Failed to auto-initialize company locations');
+                                }
+                            })
+                            .catch(error => {
+                                console.error('❌ Error auto-initializing company locations:', error);
+                            });
+                    } else {
+                        console.error('❌ companyLocationManager not defined yet');
+                    }
+                }, 500);
+            } else {
+                console.log('ℹ️ Company Info tab is hidden, will init when user opens it');
+            }
+        });
+    </script>
+    <!-- PART 4: THÊM TIẾP SAU PART 3 -->
+    <script>
+        // ============================================
+        // MODULE 3: PUBLIC INTERFACE
+        // ============================================
+
+        /**
+         * Hàm này được gọi từ populateEditForm() 
+         * để khởi tạo dropdowns với dữ liệu hiện tại
+         * 
+         * @param {string} provinceName - Tên tỉnh hiện tại (VD: "Hà Nội")
+         * @param {string} districtName - Tên huyện hiện tại (VD: "Ba Đình")
+         * @returns {Promise<boolean>} - true nếu thành công, false nếu thất bại
+         */
+        window.initEditModalLocations = async function(provinceName = '', districtName = '') {
+            console.log('🎯 initEditModalLocations called with:', {
+                provinceName,
+                districtName
+            });
+
+            try {
+                // Đợi một chút để đảm bảo modal đã render xong
+                await new Promise(resolve => setTimeout(resolve, 300));
+
+                // Initialize manager
+                const success = await window.editLocationManager.initialize(
+                    provinceName,
+                    districtName
+                );
+
+                if (!success) {
+                    console.error('❌ Failed to initialize location selects');
+                    return false;
+                }
+
+                console.log('✅ Location selects initialized successfully');
+                return true;
+
+            } catch (error) {
+                console.error('❌ Error in initEditModalLocations:', error);
+                return false;
+            }
+        };
+
+        console.log('✅ Public interface (initEditModalLocations) loaded');
+    </script>
+    <script>
+        // 🔍 DEBUG: Test API trực tiếp
+        async function testLocationAPI() {
+            console.log('=== TESTING LOCATION API ===');
+
+            try {
+                const response = await fetch('https://provinces.open-api.vn/api/p/');
+                const provinces = await response.json();
+
+                console.log('📦 Total provinces:', provinces.length);
+                console.log('📦 First 5 provinces:', provinces.slice(0, 5).map(p => ({
+                    code: p.code,
+                    name: p.name
+                })));
+
+                // Tìm TP. HCM
+                const hcm = provinces.find(p => p.name.includes('Hồ Chí Minh'));
+                console.log('🔍 TP. HCM:', hcm);
+
+                // Tìm Hà Nội
+                const hanoi = provinces.find(p => p.name.includes('Hà Nội'));
+                console.log('🔍 Hà Nội:', hanoi);
+
+            } catch (error) {
+                console.error('❌ API Error:', error);
+            }
+        }
+
+        // Gọi test ngay khi load trang
+        testLocationAPI();
+    </script>
+    <!-- ============================================
+     NOTIFICATION SYSTEM JAVASCRIPT
+     ============================================ -->
+    <script>
+        (function() {
+            'use strict';
+
+            class NotificationManager {
+                constructor() {
+                    this.dropdownVisible = false;
+                    this.notifications = [];
+                    this.unreadCount = 0;
+                    this.pollingInterval = null;
+                    this.init();
+                }
+
+                init() {
+                    console.log('🔔 Initializing Notification Manager...');
+                    this.bindEvents();
+                    this.loadNotifications();
+                    this.startPolling();
+                }
+
+                bindEvents() {
+                    const btnNotifications = document.getElementById('btnNotifications');
+                    const dropdown = document.getElementById('notificationDropdown');
+                    const btnMarkAllRead = document.getElementById('btnMarkAllRead');
+
+                    // Toggle dropdown
+                    if (btnNotifications) {
+                        btnNotifications.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            this.toggleDropdown();
+                        });
+                    }
+
+                    // Mark all as read
+                    if (btnMarkAllRead) {
+                        btnMarkAllRead.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            this.markAllAsRead();
+                        });
+                    }
+
+                    // Close dropdown when clicking outside
+                    document.addEventListener('click', (e) => {
+                        if (dropdown && !dropdown.contains(e.target) &&
+                            btnNotifications && !btnNotifications.contains(e.target)) {
+                            this.hideDropdown();
+                        }
+                    });
+                }
+
+                toggleDropdown() {
+                    const dropdown = document.getElementById('notificationDropdown');
+                    if (!dropdown) return;
+
+                    this.dropdownVisible = !this.dropdownVisible;
+
+                    if (this.dropdownVisible) {
+                        dropdown.classList.remove('hidden');
+                        this.loadNotifications();
+                    } else {
+                        dropdown.classList.add('hidden');
+                    }
+                }
+
+                hideDropdown() {
+                    const dropdown = document.getElementById('notificationDropdown');
+                    if (dropdown) {
+                        dropdown.classList.add('hidden');
+                        this.dropdownVisible = false;
+                    }
+                }
+
+                async loadNotifications() {
+                    try {
+                        const response = await fetch('/employer/notifications', {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                            }
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            this.notifications = data.notifications || [];
+                            this.unreadCount = data.unread_count || 0;
+
+                            console.log('✅ Loaded notifications:', this.notifications.length);
+                            console.log('📬 Unread count:', this.unreadCount);
+
+                            this.updateBadge();
+                            this.renderNotifications();
+                        } else {
+                            console.error('❌ Failed to load notifications:', data.message);
+                        }
+                    } catch (error) {
+                        console.error('❌ Error loading notifications:', error);
+                    }
+                }
+
+                updateBadge() {
+                    const badge = document.getElementById('notificationBadge');
+                    if (!badge) return;
+
+                    if (this.unreadCount > 0) {
+                        badge.textContent = this.unreadCount > 99 ? '99+' : this.unreadCount;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                }
+
+                renderNotifications() {
+                    const container = document.getElementById('notificationList');
+                    if (!container) return;
+
+                    if (this.notifications.length === 0) {
+                        container.innerHTML = `
+                    <div class="notification-empty p-8 text-center text-gray-500">
+                        <svg class="w-16 h-16 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                        </svg>
+                        <p class="text-sm font-medium">Chưa có thông báo nào</p>
+                        <p class="text-xs text-gray-400 mt-1">Thông báo mới sẽ xuất hiện ở đây</p>
+                    </div>
+                `;
+                        return;
+                    }
+
+                    const html = this.notifications.map(notif => this.renderNotificationItem(notif)).join('');
+                    container.innerHTML = html;
+
+                    // Bind click events
+                    container.querySelectorAll('.notification-item').forEach(item => {
+                        item.addEventListener('click', () => {
+                            const id = item.dataset.id;
+                            const jobId = item.dataset.jobId;
+                            this.handleNotificationClick(id, jobId);
+                        });
+                    });
+                }
+
+                renderNotificationItem(notif) {
+                    const unreadClass = !notif.is_read ? 'unread' : '';
+                    const icon = this.getNotificationIcon(notif.type);
+                    const timeAgo = this.formatTimeAgo(notif.created_at);
+                    const unreadDot = !notif.is_read ?
+                        '<div class="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 mt-1"></div>' :
+                        '';
+
+                    return `
+                <div class="notification-item ${unreadClass} p-4 border-b border-gray-100 hover:bg-gray-50" 
+                     data-id="${notif.id}" 
+                     data-job-id="${notif.data?.job_id || ''}">
+                    <div class="flex items-start gap-3">
+                        <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center">
+                            ${icon}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm text-gray-800 font-medium mb-1 line-clamp-2">${this.escapeHtml(notif.message)}</p>
+                            ${notif.data?.applicant_name ? `<p class="text-xs text-gray-600 mb-1">Ứng viên: ${this.escapeHtml(notif.data.applicant_name)}</p>` : ''}
+                            <p class="notification-time">${timeAgo}</p>
+                        </div>
+                        ${unreadDot}
+                    </div>
+                </div>
+            `;
+                }
+
+                getNotificationIcon(type) {
+                    const icons = {
+                        'new_application': `
+                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                `,
+                        'interview_scheduled': `
+                    <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                `,
+                        'default': `
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                    </svg>
+                `
+                    };
+
+                    return icons[type] || icons['default'];
+                }
+
+                formatTimeAgo(dateString) {
+                    try {
+                        const date = new Date(dateString);
+                        const now = new Date();
+                        const seconds = Math.floor((now - date) / 1000);
+
+                        if (seconds < 60) return 'Vừa xong';
+                        if (seconds < 3600) return `${Math.floor(seconds / 60)} phút trước`;
+                        if (seconds < 86400) return `${Math.floor(seconds / 3600)} giờ trước`;
+                        if (seconds < 604800) return `${Math.floor(seconds / 86400)} ngày trước`;
+
+                        return date.toLocaleDateString('vi-VN', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                        });
+                    } catch (e) {
+                        return 'Không rõ';
+                    }
+                }
+
+                async handleNotificationClick(notificationId, jobId) {
+                    console.log('🖱️ Notification clicked:', {
+                        notificationId,
+                        jobId
+                    });
+
+                    // Mark as read
+                    await this.markAsRead(notificationId);
+
+                    // Navigate to job applicants page
+                    if (jobId) {
+                        window.location.href = `/job/${jobId}/applicants`;
+                    }
+
+                    this.hideDropdown();
+                }
+
+                async markAsRead(notificationId) {
+                    try {
+                        const response = await fetch(`/employer/notifications/${notificationId}/read`, {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                            }
+                        });
+
+                        if (!response.ok) throw new Error('Failed to mark as read');
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            // Update local state
+                            const notif = this.notifications.find(n => n.id == notificationId);
+                            if (notif && !notif.is_read) {
+                                notif.is_read = true;
+                                this.unreadCount = Math.max(0, this.unreadCount - 1);
+                                this.updateBadge();
+                                this.renderNotifications();
+                            }
+                        }
+                    } catch (error) {
+                        console.error('❌ Error marking as read:', error);
+                    }
+                }
+
+                async markAllAsRead() {
+                    try {
+                        const response = await fetch('/employer/notifications/read-all', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                            }
+                        });
+
+                        if (!response.ok) throw new Error('Failed to mark all as read');
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            // Update local state
+                            this.notifications.forEach(notif => notif.is_read = true);
+                            this.unreadCount = 0;
+                            this.updateBadge();
+                            this.renderNotifications();
+
+                            console.log('✅ All notifications marked as read');
+                        }
+                    } catch (error) {
+                        console.error('❌ Error marking all as read:', error);
+                    }
+                }
+
+                startPolling() {
+                    // Check for new notifications every 30 seconds
+                    this.pollingInterval = setInterval(() => {
+                        this.loadNotifications();
+                    }, 30000);
+
+                    console.log('🔄 Notification polling started (30s interval)');
+                }
+
+                stopPolling() {
+                    if (this.pollingInterval) {
+                        clearInterval(this.pollingInterval);
+                        console.log('⏸️ Notification polling stopped');
+                    }
+                }
+
+                escapeHtml(text) {
+                    const div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                }
+            }
+
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', function() {
+                    window.notificationManager = new NotificationManager();
+                });
+            } else {
+                window.notificationManager = new NotificationManager();
+            }
+
+        })();
+    </script>
 </body>
 
 </html>

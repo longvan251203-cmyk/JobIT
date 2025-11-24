@@ -40,7 +40,7 @@
         </div>
         <div class="job-card-grid-meta-item">
             <i class="bi bi-award-fill"></i>
-            <span>{{ $job->experience }}</span>
+            <span>{{ $job->experience_label }}</span>
         </div>
     </div>
 

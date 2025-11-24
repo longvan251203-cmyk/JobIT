@@ -24,6 +24,8 @@ class JobPost extends Model
         'working_type',
         'recruitment_count',
         'province',
+        'district',
+        'address_detail',
         'deadline',
         'description',
         'responsibilities',
@@ -40,7 +42,19 @@ class JobPost extends Model
         return $this->belongsTo(Company::class, 'companies_id', 'companies_id');
     }
 
+    // ✅ THÊM ACCESSOR ĐƠN GIẢN - Tự động chuyển đổi experience
+    public function getExperienceLabelAttribute()
+    {
+        $labels = [
+            'no_experience' => 'Không yêu cầu',
+            'under_1' => 'Dưới 1 năm',
+            '1_2' => '1-2 năm',
+            '2_5' => '2-5 năm',
+            '5_plus' => 'Trên 5 năm',
+        ];
 
+        return $labels[$this->experience] ?? $this->experience;
+    }
     public function detail()
     {
         return $this->hasOne(JobDetail::class, 'job_id');

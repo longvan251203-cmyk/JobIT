@@ -49,4 +49,15 @@ class Company extends Model
     {
         return $this->hasMany(NhanVienCty::class, 'companies_id', 'companies_id');
     }
+    public function user()
+    {
+        return $this->hasOneThrough(
+            User::class,
+            Employer::class,
+            'id',           // Foreign key on employers table
+            'user_id',      // Foreign key on users table
+            'employer_id',  // Local key on companies table
+            'user_id'       // Local key on employers table
+        );
+    }
 }
