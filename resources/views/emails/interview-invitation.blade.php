@@ -216,7 +216,7 @@
             <div class="note">
                 ⚠️ <strong>Lưu ý:</strong>
                 <ul>
-                    <li>Vui lòng xác nhận lại với chúng tôi qua email hoặc số điện thoại bên dưới</li>
+                    <li>Vui lòng xác nhận lại với chúng tôi qua email này</li>
                     <li>Chuẩn bị trước các câu hỏi và tài liệu liên quan đến vị trí ứng tuyển</li>
                     <li>Đảm bảo kết nối internet ổn định nếu phỏng vấn online</li>
                 </ul>

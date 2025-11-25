@@ -25,6 +25,338 @@
     <link href="{{ asset('assets/css/homeapp.css') }}" rel="stylesheet">
 </head>
 <style>
+    /* ========================================
+   SEARCH INPUT IMPROVEMENTS
+======================================== */
+    .search-input-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem 1.5rem;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        flex: 1;
+    }
+
+    .search-input {
+        flex: 1;
+        border: none;
+        outline: none;
+        font-size: 1rem;
+        color: #1f2937;
+    }
+
+    .search-input::placeholder {
+        color: #9ca3af;
+    }
+
+    .location-select {
+        border: none;
+        outline: none;
+        font-size: 1rem;
+        color: #1f2937;
+        background: transparent;
+        cursor: pointer;
+        min-width: 150px;
+    }
+
+    .search-btn {
+        padding: 0.875rem 2.5rem;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .search-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
+    }
+
+    /* ========================================
+   FILTER SECTION IMPROVEMENTS
+======================================== */
+    .filter-section {
+        padding: 1.5rem 0;
+        background: #f9fafb;
+    }
+
+    .filter-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 1rem;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+
+    .filter-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: #374151;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .filter-btn:hover {
+        border-color: #10b981;
+        background: #f0fdf4;
+        transform: translateY(-1px);
+    }
+
+    .filter-btn.active {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border-color: #10b981;
+    }
+
+    .filter-btn.btn-reset {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        border-color: #ef4444;
+    }
+
+    .filter-btn.btn-reset:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        transform: translateY(-1px);
+    }
+
+    /* Badge trên filter button */
+    .filter-btn .badge {
+        background: #ef4444;
+        color: white;
+        font-size: 0.75rem;
+        padding: 0.15rem 0.5rem;
+        border-radius: 10px;
+        margin-left: 0.25rem;
+        font-weight: 600;
+    }
+
+    /* ========================================
+   LOADING OVERLAY
+======================================== */
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(4px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+    }
+
+    .loading-overlay .spinner {
+        width: 60px;
+        height: 60px;
+        border: 4px solid #e5e7eb;
+        border-top-color: #10b981;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+    }
+
+    .loading-overlay p {
+        margin-top: 1.5rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #374151;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* ========================================
+   JOB EMPTY STATE ENHANCEMENTS
+======================================== */
+    .job-empty-state .badge.bg-light:hover {
+        background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%) !important;
+        color: white !important;
+        border-color: #667EEA !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    /* ========================================
+   RESPONSIVE IMPROVEMENTS
+======================================== */
+    @media (max-width: 768px) {
+        .search-input-wrapper {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .location-select {
+            width: 100%;
+            padding: 0.5rem;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 0.75rem;
+        }
+
+        .search-btn {
+            width: 100%;
+            padding: 0.875rem 1.5rem;
+        }
+
+        .filter-container {
+            gap: 0.75rem;
+        }
+
+        .filter-btn {
+            font-size: 0.875rem;
+            padding: 0.65rem 1rem;
+        }
+    }
+
+    /* ========================================
+   SMOOTH TRANSITIONS
+======================================== */
+    .jobs-grid {
+        transition: opacity 0.3s ease;
+    }
+
+    .jobs-grid.loading {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    /* ========================================
+   HIGHLIGHT SEARCH RESULTS
+======================================== */
+    .search-highlight {
+        background: linear-gradient(120deg, #fef3c7 0%, #fde047 100%);
+        padding: 0.1rem 0.3rem;
+        border-radius: 4px;
+        font-weight: 600;
+    }
+
+    /* Filter Dropdown Styles */
+    .filter-dropdown-wrapper {
+        position: relative;
+    }
+
+    .filter-dropdown-menu {
+        position: absolute;
+        top: calc(100% + 8px);
+        left: 0;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        padding: 0.5rem;
+        min-width: 250px;
+        max-height: 400px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+        animation: dropdownFadeIn 0.2s ease;
+    }
+
+    .filter-dropdown-menu.show {
+        display: block;
+    }
+
+    @keyframes dropdownFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .filter-checkbox-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: background 0.2s;
+        margin: 0;
+    }
+
+    .filter-checkbox-item:hover {
+        background: #f3f4f6;
+    }
+
+    .filter-checkbox-item input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        margin-right: 0.75rem;
+        cursor: pointer;
+        accent-color: #10b981;
+    }
+
+    .filter-checkbox-item span {
+        font-size: 0.95rem;
+        color: #1f2937;
+    }
+
+    .filter-btn.active {
+        background: #10b981;
+        color: white;
+    }
+
+    .filter-btn.btn-reset {
+        background: #ef4444;
+        color: white;
+    }
+
+    .filter-btn.btn-reset:hover {
+        background: #dc2626;
+    }
+
+    /* Active filter badge */
+    .filter-btn .badge {
+        background: #ef4444;
+        color: white;
+        font-size: 0.75rem;
+        padding: 0.15rem 0.5rem;
+        border-radius: 10px;
+        margin-left: 0.5rem;
+    }
+
+    /* Custom scrollbar cho dropdown */
+    .filter-dropdown-menu::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .filter-dropdown-menu::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .filter-dropdown-menu::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+
+    .filter-dropdown-menu::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
     .btn-apply-now {
         background: linear-gradient(135deg, #10b981 0%, #059669 100%);
         color: white;
@@ -366,47 +698,166 @@
         </div>
     </header>
     <!-- Search Section -->
+    <!-- Search Section - Cập nhật -->
     <section class="search-section">
         <div class="search-container">
             <div class="search-box">
                 <div class="search-input-wrapper">
                     <i class="bi bi-search" style="color: #A0AEC0; font-size: 1.2rem;"></i>
-                    <input type="text" class="search-input" placeholder="Tìm theo kỹ năng, vị trí, công ty...">
+                    <input type="text" id="searchInput" class="search-input"
+                        placeholder="Tìm theo kỹ năng, vị trí, công ty...">
                     <i class="bi bi-geo-alt" style="color: #A0AEC0; font-size: 1.2rem;"></i>
-                    <select class="location-select">
-                        <option value="">Địa Điểm</option>
-                        <option value="HCM">Hồ Chí Minh</option>
-                        <option value="HN">Hà Nội</option>
-                        <option value="DN">Đà Nẵng</option>
+                    <select id="locationSelect" class="location-select">
+                        <option value="">Tất cả địa điểm</option>
+                        <option value="Hồ Chí Minh">Hồ Chí Minh</option>
+                        <option value="Hà Nội">Hà Nội</option>
+                        <option value="Đà Nẵng">Đà Nẵng</option>
+                        <option value="Cần Thơ">Cần Thơ</option>
+                        <option value="Hải Phòng">Hải Phòng</option>
+                        <option value="Bình Dương">Bình Dương</option>
+                        <option value="Đồng Nai">Đồng Nai</option>
                         <option value="Remote">Remote</option>
                     </select>
                 </div>
-                <button class="search-btn">Tìm kiếm</button>
+                <button class="search-btn" id="searchBtn">Tìm kiếm</button>
             </div>
         </div>
     </section>
-    <!-- Filter Section -->
+    <!-- Filter Section - Nâng cao -->
     <section class="filter-section">
         <div class="filter-container">
-            <button class="filter-btn">
-                <i class="bi bi-folder"></i>
-                Tất cả danh mục (1)
-            </button>
-            <button class="filter-btn">
-                <i class="bi bi-bar-chart"></i>
-                Cấp bậc
-            </button>
-            <button class="filter-btn">
-                <i class="bi bi-gift"></i>
-                Phúc lợi
-            </button>
-            <button class="filter-btn">
-                <i class="bi bi-briefcase"></i>
-                Hình thức làm việc
-            </button>
-            <button class="filter-btn all-filters-btn">
-                <i class="bi bi-sliders"></i>
-                Tất cả bộ lọc
+            <!-- Dropdown Danh mục -->
+            <div class="filter-dropdown-wrapper">
+                <button class="filter-btn" id="categoryFilterBtn">
+                    <i class="bi bi-folder"></i>
+                    <span>Tất cả danh mục</span>
+                    <i class="bi bi-chevron-down ms-2"></i>
+                </button>
+                <div class="filter-dropdown-menu" id="categoryDropdown">
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="category" value="all" checked>
+                        <span>Tất cả</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="category" value="backend">
+                        <span>Backend Developer</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="category" value="frontend">
+                        <span>Frontend Developer</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="category" value="fullstack">
+                        <span>Fullstack Developer</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="category" value="mobile">
+                        <span>Mobile Developer</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="category" value="devops">
+                        <span>DevOps Engineer</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Dropdown Cấp bậc -->
+            <div class="filter-dropdown-wrapper">
+                <button class="filter-btn" id="levelFilterBtn">
+                    <i class="bi bi-bar-chart"></i>
+                    <span>Cấp bậc</span>
+                    <i class="bi bi-chevron-down ms-2"></i>
+                </button>
+                <div class="filter-dropdown-menu" id="levelDropdown">
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="level" value="intern">
+                        <span>Thực tập sinh</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="level" value="fresher">
+                        <span>Fresher</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="level" value="junior">
+                        <span>Junior</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="level" value="middle">
+                        <span>Middle</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="level" value="senior">
+                        <span>Senior</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="level" value="leader">
+                        <span>Leader</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Dropdown Kinh nghiệm -->
+            <div class="filter-dropdown-wrapper">
+                <button class="filter-btn" id="experienceFilterBtn">
+                    <i class="bi bi-award"></i>
+                    <span>Kinh nghiệm</span>
+                    <i class="bi bi-chevron-down ms-2"></i>
+                </button>
+                <div class="filter-dropdown-menu" id="experienceDropdown">
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="experience" value="no_experience">
+                        <span>Không yêu cầu</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="experience" value="under_1">
+                        <span>Dưới 1 năm</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="experience" value="1_2">
+                        <span>1-2 năm</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="experience" value="2_5">
+                        <span>2-5 năm</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="experience" value="5_plus">
+                        <span>Trên 5 năm</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Dropdown Hình thức làm việc -->
+            <div class="filter-dropdown-wrapper">
+                <button class="filter-btn" id="workingTypeFilterBtn">
+                    <i class="bi bi-briefcase"></i>
+                    <span>Hình thức</span>
+                    <i class="bi bi-chevron-down ms-2"></i>
+                </button>
+                <div class="filter-dropdown-menu" id="workingTypeDropdown">
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="working_type" value="full_time">
+                        <span>Toàn thời gian</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="working_type" value="part_time">
+                        <span>Bán thời gian</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="working_type" value="remote">
+                        <span>Remote</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="working_type" value="freelance">
+                        <span>Freelance</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Nút Reset -->
+            <button class="filter-btn btn-reset" id="resetFiltersBtn">
+                <i class="bi bi-arrow-clockwise"></i>
+                Đặt lại
             </button>
         </div>
     </section>
@@ -1493,6 +1944,8 @@
                 loadSavedJobs();
                 loadAppliedJobs();
             }
+            // ✅ Expose function to window scope
+            window.attachJobCardEvents = attachJobCardEvents;
 
             // ========== BACK TO GRID BUTTON ==========
             if (backToGridBtn) {
@@ -1816,6 +2269,428 @@
             // ========== KHỞI TẠO PAGINATION ==========
             handlePagination();
         });
+        // ========== SEARCH & FILTER FUNCTIONALITY ==========
+        (function() {
+            let searchTimeout = null;
+            let currentFilters = {
+                search: '',
+                location: '',
+                categories: [],
+                levels: [],
+                experiences: [],
+                working_types: []
+            };
+
+            // Elements
+            const searchInput = document.getElementById('searchInput');
+            const locationSelect = document.getElementById('locationSelect');
+            const searchBtn = document.getElementById('searchBtn');
+            const resetBtn = document.getElementById('resetFiltersBtn');
+            const loadingOverlay = document.getElementById('jobsLoadingOverlay');
+            const paginationWrapper = document.getElementById('paginationWrapper');
+            const gridView = document.getElementById('gridView');
+
+            // Dropdown buttons
+            const categoryBtn = document.getElementById('categoryFilterBtn');
+            const levelBtn = document.getElementById('levelFilterBtn');
+            const experienceBtn = document.getElementById('experienceFilterBtn');
+            const workingTypeBtn = document.getElementById('workingTypeFilterBtn');
+
+            // Dropdown menus
+            const categoryDropdown = document.getElementById('categoryDropdown');
+            const levelDropdown = document.getElementById('levelDropdown');
+            const experienceDropdown = document.getElementById('experienceDropdown');
+            const workingTypeDropdown = document.getElementById('workingTypeDropdown');
+
+            // ========== Toggle Dropdown ==========
+            function toggleDropdown(menu) {
+                const isShown = menu.classList.contains('show');
+
+                // Đóng tất cả dropdown khác
+                document.querySelectorAll('.filter-dropdown-menu').forEach(m => {
+                    m.classList.remove('show');
+                });
+
+                // Toggle dropdown hiện tại
+                if (!isShown) {
+                    menu.classList.add('show');
+                }
+            }
+
+            // ========== Đóng dropdown khi click outside ==========
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.filter-dropdown-wrapper')) {
+                    document.querySelectorAll('.filter-dropdown-menu').forEach(menu => {
+                        menu.classList.remove('show');
+                    });
+                }
+            });
+
+            // ========== Gắn sự kiện cho dropdown buttons ==========
+            if (categoryBtn) {
+                categoryBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleDropdown(categoryDropdown);
+                });
+            }
+
+            if (levelBtn) {
+                levelBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleDropdown(levelDropdown);
+                });
+            }
+
+            if (experienceBtn) {
+                experienceBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleDropdown(experienceDropdown);
+                });
+            }
+
+            if (workingTypeBtn) {
+                workingTypeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    toggleDropdown(workingTypeDropdown);
+                });
+            }
+
+            // ========== Cập nhật filter badge ==========
+            function updateFilterBadge(button, count) {
+                let badge = button.querySelector('.badge');
+
+                if (count > 0) {
+                    if (!badge) {
+                        badge = document.createElement('span');
+                        badge.className = 'badge';
+                        button.appendChild(badge);
+                    }
+                    badge.textContent = count;
+                    button.classList.add('active');
+                } else {
+                    if (badge) {
+                        badge.remove();
+                    }
+                    button.classList.remove('active');
+                }
+            }
+
+            // ========== Thu thập filter data ==========
+            function collectFilters() {
+                currentFilters = {
+                    search: searchInput ? searchInput.value.trim() : '',
+                    location: locationSelect ? locationSelect.value : '',
+                    categories: [],
+                    levels: [],
+                    experiences: [],
+                    working_types: []
+                };
+
+                // Category filters
+                document.querySelectorAll('input[name="category"]:checked').forEach(cb => {
+                    if (cb.value !== 'all') {
+                        currentFilters.categories.push(cb.value);
+                    }
+                });
+
+                // Level filters
+                document.querySelectorAll('input[name="level"]:checked').forEach(cb => {
+                    currentFilters.levels.push(cb.value);
+                });
+
+                // Experience filters
+                document.querySelectorAll('input[name="experience"]:checked').forEach(cb => {
+                    currentFilters.experiences.push(cb.value);
+                });
+
+                // Working type filters
+                document.querySelectorAll('input[name="working_type"]:checked').forEach(cb => {
+                    currentFilters.working_types.push(cb.value);
+                });
+
+                // Cập nhật badge cho các button
+                updateFilterBadge(categoryBtn, currentFilters.categories.length);
+                updateFilterBadge(levelBtn, currentFilters.levels.length);
+                updateFilterBadge(experienceBtn, currentFilters.experiences.length);
+                updateFilterBadge(workingTypeBtn, currentFilters.working_types.length);
+
+                return currentFilters;
+            }
+
+            // ========== Kiểm tra có filter nào được áp dụng không ==========
+            function hasActiveFilters(filters) {
+                return filters.search ||
+                    filters.location ||
+                    filters.categories.length > 0 ||
+                    filters.levels.length > 0 ||
+                    filters.experiences.length > 0 ||
+                    filters.working_types.length > 0;
+            }
+
+            // ========== Thực hiện search & filter ==========
+            function performSearch(page = 1) {
+                const filters = collectFilters();
+
+                // Hiển thị loading
+                if (loadingOverlay) {
+                    loadingOverlay.style.display = 'flex';
+                }
+
+                // ✅ FIX: Nếu KHÔNG có filter nào, load tất cả jobs
+                if (!hasActiveFilters(filters)) {
+                    console.log('ℹ️ No filters applied, loading all jobs...');
+                    loadAllJobs(page);
+                    return;
+                }
+
+                // Build query string
+                const params = new URLSearchParams();
+                params.append('page', page);
+
+                // ✅ QUAN TRỌNG: Chỉ thêm param khi có giá trị
+                if (filters.search) params.append('search', filters.search);
+                if (filters.location) params.append('location', filters.location);
+                if (filters.categories.length) params.append('categories', filters.categories.join(','));
+                if (filters.levels.length) params.append('levels', filters.levels.join(','));
+                if (filters.experiences.length) params.append('experiences', filters.experiences.join(','));
+                if (filters.working_types.length) params.append('working_types', filters.working_types.join(','));
+
+                // Log để debug
+                console.log('🔍 Searching with filters:', filters);
+                console.log('📡 API URL:', `/api/jobs/search?${params.toString()}`);
+
+                // AJAX request
+                fetch(`/api/jobs/search?${params.toString()}`, {
+                        method: 'GET',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Cập nhật grid view
+                            if (gridView) {
+                                gridView.innerHTML = data.html;
+                            }
+
+                            // Cập nhật pagination
+                            if (paginationWrapper) {
+                                paginationWrapper.innerHTML = data.pagination || '';
+                            }
+
+                            // Cập nhật số lượng kết quả
+                            updateResultCount(data.total);
+
+                            // Re-attach events
+                            // ✅ Re-attach events với timeout để đảm bảo DOM đã render
+                            setTimeout(() => {
+                                if (typeof window.attachJobCardEvents === 'function') {
+                                    window.attachJobCardEvents();
+                                    console.log('✅ Events re-attached after search');
+                                } else {
+                                    console.error('❌ attachJobCardEvents not found');
+                                }
+                            }, 100);
+
+                            // Scroll to results
+                            const featuredSection = document.querySelector('.featured-section');
+                            if (featuredSection) {
+                                window.scrollTo({
+                                    top: featuredSection.offsetTop - 100,
+                                    behavior: 'smooth'
+                                });
+                            }
+
+                            // Hiển thị thông báo kết quả
+                            if (data.total === 0) {
+                                showToast('Không tìm thấy công việc phù hợp', 'info');
+                            } else {
+                                console.log(`✅ Found ${data.total} jobs`);
+                            }
+                        } else {
+                            showToast(data.message || 'Không tìm thấy kết quả', 'info');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Search error:', error);
+                        showToast('Có lỗi xảy ra khi tìm kiếm', 'error');
+                    })
+                    .finally(() => {
+                        if (loadingOverlay) {
+                            loadingOverlay.style.display = 'none';
+                        }
+                    });
+            }
+
+            // ========== ✅ THÊM HÀM MỚI: Load tất cả jobs ==========
+            function loadAllJobs(page = 1) {
+                if (loadingOverlay) {
+                    loadingOverlay.style.display = 'flex';
+                }
+
+                fetch(`/api/jobs?page=${page}`, {
+                        method: 'GET',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            if (gridView) {
+                                gridView.innerHTML = data.html;
+                            }
+
+                            if (paginationWrapper) {
+                                paginationWrapper.innerHTML = data.pagination || '';
+                            }
+
+                            updateResultCount(data.total);
+
+                            if (typeof attachJobCardEvents === 'function') {
+                                attachJobCardEvents();
+                            }
+
+                            console.log(`✅ Loaded ${data.total} jobs (page ${page})`);
+                        } else {
+                            showToast('Không thể tải dữ liệu', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading jobs:', error);
+                        showToast('Có lỗi xảy ra khi tải dữ liệu', 'error');
+                    })
+                    .finally(() => {
+                        if (loadingOverlay) {
+                            loadingOverlay.style.display = 'none';
+                        }
+                    });
+            }
+
+            // ========== Cập nhật số lượng kết quả ==========
+            function updateResultCount(total) {
+                const titleElement = document.querySelector('.section-title-highlight h2');
+                if (titleElement) {
+                    titleElement.textContent = `${total}+ cơ hội việc làm IT`;
+                }
+            }
+
+            // ========== Search button click ==========
+            if (searchBtn) {
+                searchBtn.addEventListener('click', function() {
+                    performSearch();
+                });
+            }
+
+            // ========== Enter key in search input ==========
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        performSearch();
+                    }
+                });
+
+                // Real-time search (debounced)
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+
+                    const searchValue = this.value.trim();
+
+                    // ✅ FIX: Cho phép search ngay cả khi rỗng (để load lại tất cả jobs)
+                    searchTimeout = setTimeout(() => {
+                        performSearch();
+                    }, 800);
+                });
+            }
+
+            // ========== Location select change ==========
+            if (locationSelect) {
+                locationSelect.addEventListener('change', function() {
+                    // ✅ FIX: Luôn gọi performSearch, không cần check điều kiện
+                    performSearch();
+                });
+            }
+
+            // ========== Checkbox change ==========
+            document.querySelectorAll('.filter-checkbox-item input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    // Xử lý "Tất cả" trong category
+                    if (this.name === 'category' && this.value === 'all' && this.checked) {
+                        document.querySelectorAll('input[name="category"]').forEach(cb => {
+                            if (cb.value !== 'all') cb.checked = false;
+                        });
+                    } else if (this.name === 'category' && this.value !== 'all' && this.checked) {
+                        const allCheckbox = document.querySelector('input[name="category"][value="all"]');
+                        if (allCheckbox) allCheckbox.checked = false;
+                    }
+
+                    // Tự động search khi thay đổi filter
+                    performSearch();
+                });
+            });
+
+            // ========== Reset filters ==========
+            if (resetBtn) {
+                resetBtn.addEventListener('click', function() {
+                    // Reset search input
+                    if (searchInput) searchInput.value = '';
+
+                    // Reset location
+                    if (locationSelect) locationSelect.value = '';
+
+                    // Uncheck all checkboxes
+                    document.querySelectorAll('.filter-checkbox-item input[type="checkbox"]').forEach(cb => {
+                        cb.checked = false;
+                    });
+
+                    // Check "Tất cả" in category
+                    const allCheckbox = document.querySelector('input[name="category"][value="all"]');
+                    if (allCheckbox) allCheckbox.checked = true;
+
+                    // Reset badges
+                    updateFilterBadge(categoryBtn, 0);
+                    updateFilterBadge(levelBtn, 0);
+                    updateFilterBadge(experienceBtn, 0);
+                    updateFilterBadge(workingTypeBtn, 0);
+
+                    // ✅ FIX: Load lại tất cả jobs thay vì search
+                    loadAllJobs();
+
+                    showToast('Đã đặt lại bộ lọc', 'info');
+                });
+            }
+
+            // ========== Xử lý pagination ==========
+            if (paginationWrapper) {
+                paginationWrapper.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    const target = e.target.closest('.page-link');
+                    if (!target) return;
+
+                    const pageItem = target.closest('.page-item');
+                    if (pageItem && pageItem.classList.contains('disabled')) return;
+
+                    const page = parseInt(target.getAttribute('data-page'));
+                    if (!page || page < 1) return;
+
+                    // ✅ FIX: Kiểm tra xem có filter không
+                    const filters = collectFilters();
+                    if (hasActiveFilters(filters)) {
+                        performSearch(page);
+                    } else {
+                        loadAllJobs(page);
+                    }
+                });
+            }
+
+            console.log('✅ Search & Filter initialized (Fixed Version)');
+        })();
     </script>
 
 

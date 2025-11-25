@@ -1,15 +1,32 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\JobApiController;
+use App\Http\Controllers\JobController;
 use App\Http\Controllers\ApplicantController;
 
-// ✅ Route lấy danh sách jobs với phân trang (phải đặt TRƯỚC route có tham số)
-Route::get('/jobs', [JobApiController::class, 'index']);
+/*
+|--------------------------------------------------------------------------
+| API Routes
+|--------------------------------------------------------------------------
+*/
+
+// ✅ SEARCH & FILTER - PHẢI ĐẶT TRƯỚC các route có tham số
+Route::get('/jobs/search', [JobController::class, 'searchJobs']);
+
+// ✅ Route lấy danh sách jobs với phân trang
+Route::get('/jobs', [JobController::class, 'getJobsPaginated']);
 
 // ✅ Route lấy chi tiết job (đặt SAU)
-Route::get('/jobs/{id}', [JobApiController::class, 'show']);
-// api.php
-Route::middleware('auth:sanctum')->group(function () {
-    Route::get('/saved-jobs', [ApplicantController::class, 'getSavedJobIds']);
-});
+Route::get('/jobs/{id}', [JobController::class, 'getJobDetail']);
+
+// ✅ Check application status
+Route::get('/jobs/{id}/check-application', [JobController::class, 'checkApplicationStatus']);
+
+// ✅ Get applied jobs (yêu cầu auth hoặc trả về empty nếu guest)
+Route::get('/applied-jobs', [JobController::class, 'getAppliedJobIds']);
+
+// ✅ Get saved jobs (yêu cầu auth hoặc trả về empty nếu guest)
+Route::get('/saved-jobs', [ApplicantController::class, 'getSavedJobIds']);
+
+// ✅ Hashtag search (cho autocomplete)
+Route::get('/hashtags/search', [JobController::class, 'searchHashtags']);

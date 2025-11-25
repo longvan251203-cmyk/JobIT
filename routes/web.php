@@ -80,8 +80,7 @@ Route::prefix('applicant')->middleware(['auth'])->group(function () {
         ->name('applicant.viewCv');
     Route::get('/delete-cv', [ApplicantController::class, 'deleteCv'])
         ->name('applicant.deleteCv');
-    Route::get('/{id}/download-cv', [ApplicantController::class, 'downloadCV'])
-        ->name('applicant.downloadCV');
+
 
     // Jobs đã ứng tuyển
     Route::get('/applied-jobs', function () {
@@ -321,4 +320,11 @@ Route::middleware('auth')->group(function () {
 
     // Hủy ứng tuyển
     Route::delete('/application/{id}/cancel', [ApplicationController::class, 'cancel']);
+});
+Route::prefix('applicant')->middleware(['auth'])->group(function () {
+    // ... các route khác ...
+
+    // Download CV
+    Route::get('/download-cv/{id}', [ApplicantController::class, 'downloadCV'])
+        ->name('applicant.downloadCV');
 });

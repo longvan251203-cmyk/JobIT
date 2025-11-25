@@ -752,12 +752,7 @@ class ApplicantController extends Controller
         return back()->with('success', 'Đã xoá CV thành công.');
     }
 
-    public function downloadCV($id)
-    {
-        $applicant = Applicant::with(['hocvan', 'kinhnghiem', 'kynang'])->findOrFail($id);
-        $pdf = Pdf::loadView('applicant.cv_pdf', compact('applicant'));
-        return $pdf->download($applicant->hoten_uv . '_CV.pdf');
-    }
+
     // ============ XEM CV ============
 
     public function showApplicantCV($id)
@@ -1067,5 +1062,69 @@ class ApplicantController extends Controller
                 'message' => 'Lỗi: ' . $e->getMessage()
             ], 500);
         }
+    }
+    public function downloadCV($id)
+    {
+        $user = Auth::user();
+        $applicant = $user->applicant; // Lấy từ relationship
+
+        // Kiểm tra applicant có tồn tại không
+        if (!$applicant || $applicant->id_uv != $id) {
+            return redirect()->back()->with('error', 'Không tìm thấy thông tin ứng viên!');
+        }
+
+        // Lấy tất cả dữ liệu liên quan
+        $email = $user->email;
+
+        $hocvan = HocVan::where('applicant_id', $id)
+            ->orderBy('tu_ngay', 'desc')
+            ->get();
+
+        $kinhnghiem = KinhNghiem::where('applicant_id', $id)
+            ->orderBy('tu_ngay', 'desc')
+            ->get();
+
+        $kynang = DB::table('ky_nang')
+            ->where('applicant_id', $id)
+            ->get();
+
+        $ngoaiNgu = DB::table('ngoai_ngu')
+            ->where('applicant_id', $id)
+            ->get();
+
+        $duAn = DB::table('du_an')
+            ->where('applicant_id', $id)
+            ->orderBy('ngay_bat_dau', 'desc')
+            ->get();
+
+        $chungChi = ChungChi::where('applicant_id', $id)
+            ->orderBy('thoigian', 'desc')
+            ->get();
+
+        $giaiThuong = GiaiThuong::where('applicant_id', $id)
+            ->orderBy('thoigian', 'desc')
+            ->get();
+
+        // Tạo tên file
+        $fileName = 'CV_' . str_replace(' ', '_', $applicant->hoten_uv ?? 'Ung_Vien') . '_' . date('dmY') . '.pdf';
+
+        // Load view và tạo PDF
+        $pdf = PDF::loadView('applicant.cv-template', compact(
+            'applicant',
+            'email',
+            'hocvan',
+            'kinhnghiem',
+            'kynang',
+            'ngoaiNgu',
+            'duAn',
+            'chungChi',
+            'giaiThuong'
+        ));
+
+        // Cấu hình PDF
+        $pdf->setPaper('A4', 'portrait');
+
+        // Download trực tiếp
+        return $pdf->download($fileName);
     }
 }

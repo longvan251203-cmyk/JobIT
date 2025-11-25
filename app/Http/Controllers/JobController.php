@@ -792,4 +792,190 @@ class JobController extends Controller
 
         return $html;
     }
+    /**
+     * ✅ TÌM KIẾM & LỌC JOB (AJAX)
+     */
+    /**
+     * ✅ TÌM KIẾM & LỌC JOB (AJAX) - FIXED VERSION
+     */
+    /**
+     * ✅ TÌM KIẾM & LỌC JOB (AJAX) - FIXED VERSION
+     * Sửa lỗi: Khi chỉ chọn location mà không nhập search term thì vẫn hiển thị jobs
+     */
+    public function searchJobs(Request $request)
+    {
+        try {
+            $query = JobPost::with(['company', 'hashtags', 'detail']);
+
+            // Log input để debug
+            Log::info('🔍 Search request received', [
+                'all_params' => $request->all(),
+                'search' => $request->input('search'),
+                'location' => $request->input('location'),
+                'categories' => $request->input('categories'),
+                'levels' => $request->input('levels'),
+                'experiences' => $request->input('experiences'),
+                'working_types' => $request->input('working_types'),
+            ]);
+
+            // ✅ Đếm số lượng filters được áp dụng
+            $hasFilters = false;
+
+            // 🔍 TÌM KIẾM THEO TỪ KHÓA (tên job, công ty, kỹ năng)
+            if ($request->filled('search')) {
+                $hasFilters = true;
+                $searchTerm = $request->input('search');
+
+                $query->where(function ($q) use ($searchTerm) {
+                    // Tìm trong title
+                    $q->where('title', 'like', '%' . $searchTerm . '%')
+                        // Tìm trong tên công ty
+                        ->orWhereHas('company', function ($companyQuery) use ($searchTerm) {
+                            $companyQuery->where('tencty', 'like', '%' . $searchTerm . '%');
+                        })
+                        // Tìm trong hashtags (kỹ năng)
+                        ->orWhereHas('hashtags', function ($hashtagQuery) use ($searchTerm) {
+                            $hashtagQuery->where('tag_name', 'like', '%' . $searchTerm . '%');
+                        })
+                        // Tìm trong description
+                        ->orWhereHas('detail', function ($detailQuery) use ($searchTerm) {
+                            $detailQuery->where('description', 'like', '%' . $searchTerm . '%')
+                                ->orWhere('requirements', 'like', '%' . $searchTerm . '%');
+                        });
+                });
+
+                Log::info('✅ Search term applied', ['term' => $searchTerm]);
+            }
+
+            // 🗺️ LỌC THEO ĐỊA ĐIỂM (hoạt động độc lập với search)
+            if ($request->filled('location')) {
+                $hasFilters = true;
+                $location = $request->input('location');
+                $query->where('province', $location);
+
+                Log::info('✅ Location filter applied', ['location' => $location]);
+            }
+
+            // 📁 LỌC THEO DANH MỤC (categories - mapping với hashtags)
+            if ($request->filled('categories')) {
+                $hasFilters = true;
+                $categories = explode(',', $request->input('categories'));
+
+                // Map category với hashtags phổ biến
+                $categoryMap = [
+                    'backend' => ['php', 'laravel', 'nodejs', 'python', 'java', 'spring', 'c#', '.net', 'ruby', 'go'],
+                    'frontend' => ['react', 'vuejs', 'vue', 'angular', 'javascript', 'html', 'css', 'typescript', 'nextjs'],
+                    'fullstack' => ['fullstack', 'full-stack', 'full stack'],
+                    'mobile' => ['android', 'ios', 'react native', 'flutter', 'swift', 'kotlin'],
+                    'devops' => ['devops', 'docker', 'kubernetes', 'aws', 'ci/cd', 'jenkins', 'terraform']
+                ];
+
+                $query->where(function ($q) use ($categories, $categoryMap) {
+                    foreach ($categories as $category) {
+                        if (isset($categoryMap[$category])) {
+                            $q->orWhereHas('hashtags', function ($hashtagQuery) use ($categoryMap, $category) {
+                                $hashtagQuery->whereIn('tag_name', $categoryMap[$category]);
+                            });
+                        }
+                    }
+                });
+
+                Log::info('✅ Categories filter applied', ['categories' => $categories]);
+            }
+
+            // 📊 LỌC THEO CẤP BẬC
+            if ($request->filled('levels')) {
+                $hasFilters = true;
+                $levels = explode(',', $request->input('levels'));
+                $query->whereIn('level', $levels);
+
+                Log::info('✅ Levels filter applied', ['levels' => $levels]);
+            }
+
+            // 🎯 LỌC THEO KINH NGHIỆM
+            if ($request->filled('experiences')) {
+                $hasFilters = true;
+                $experiences = explode(',', $request->input('experiences'));
+                $query->whereIn('experience', $experiences);
+
+                Log::info('✅ Experiences filter applied', ['experiences' => $experiences]);
+            }
+
+            // 💼 LỌC THEO HÌNH THỨC LÀM VIỆC
+            if ($request->filled('working_types')) {
+                $hasFilters = true;
+                $workingTypes = explode(',', $request->input('working_types'));
+                $query->whereIn('working_type', $workingTypes);
+
+                Log::info('✅ Working types filter applied', ['working_types' => $workingTypes]);
+            }
+
+            // ✅ Chỉ lọc status = 'active' khi có bất kỳ filter nào
+            // (Nếu không có filter gì cả, frontend sẽ gọi API /api/jobs thay vì search)
+            if ($hasFilters) {
+                $query->where('status', 'active');
+            }
+
+            // Sắp xếp: Mới nhất trước
+            $query->orderBy('created_at', 'desc');
+
+            // ✅ LOG QUERY ĐỂ DEBUG
+            Log::info('🔍 Final SQL Query', [
+                'sql' => $query->toSql(),
+                'bindings' => $query->getBindings()
+            ]);
+
+            // Phân trang
+            $perPage = 12;
+            $jobs = $query->paginate($perPage);
+
+            // ✅ LOG KẾT QUẢ
+            Log::info('📊 Search results', [
+                'total' => $jobs->total(),
+                'per_page' => $jobs->perPage(),
+                'current_page' => $jobs->currentPage(),
+                'has_filters' => $hasFilters,
+                'job_count' => $jobs->count(),
+                'sample_job_ids' => $jobs->take(5)->pluck('job_id')->toArray()
+            ]);
+
+            // ✅ Kiểm tra nếu không có kết quả
+            if ($jobs->total() === 0) {
+                Log::warning('⚠️ No jobs found with current filters');
+            }
+
+            // Render HTML
+            $html = view('applicant.partials.job-cards', ['jobs' => $jobs])->render();
+            $paginationHtml = $this->buildPaginationHtml($jobs);
+
+            return response()->json([
+                'success' => true,
+                'html' => $html,
+                'pagination' => $paginationHtml,
+                'total' => $jobs->total(),
+                'current_page' => $jobs->currentPage(),
+                'last_page' => $jobs->lastPage(),
+                'per_page' => $jobs->perPage(),
+                'has_filters' => $hasFilters,
+                'message' => $jobs->total() === 0 ? 'Không tìm thấy công việc phù hợp' : null
+            ]);
+        } catch (\Exception $e) {
+            Log::error('❌ Search error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+                'request_data' => $request->all()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi tìm kiếm: ' . $e->getMessage(),
+                'error_details' => config('app.debug') ? [
+                    'message' => $e->getMessage(),
+                    'line' => $e->getLine(),
+                    'file' => basename($e->getFile())
+                ] : null
+            ], 500);
+        }
+    }
 }

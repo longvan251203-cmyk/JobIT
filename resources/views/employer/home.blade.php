@@ -696,16 +696,7 @@
                 <!-- Recent Activity -->
                 <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
                     <h2 class="text-2xl font-bold mb-6">Hoạt động gần đây</h2>
-                    <div class="space-y-4">
-                        <div class="flex items-center gap-4 p-4 bg-purple-50 rounded-xl">
-                            <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center text-white font-semibold">AN</div>
-                            <div class="flex-1">
-                                <p class="font-semibold text-gray-800">Anh Nguyễn đã ứng tuyển</p>
-                                <p class="text-sm text-gray-600">Senior Frontend Developer • 2 giờ trước</p>
-                            </div>
-                            <button class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">Xem hồ sơ</button>
-                        </div>
-                    </div>
+
                 </div>
             </div>
 
@@ -1232,7 +1223,7 @@
             <div id="applicants" class="tab-content hidden">
                 <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
                     <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-6">Thông tin ứng viên</h2>
-                    <div class="space-y-4">
+                    <!-- <div class="space-y-4">
                         <div class="p-6 border border-gray-200 rounded-xl hover:shadow-lg transition-all">
                             <div class="flex items-start justify-between">
                                 <div class="flex gap-4 flex-1">
@@ -1253,7 +1244,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
 
