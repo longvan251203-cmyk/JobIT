@@ -25,24 +25,31 @@ class HomeController extends Controller
     // Phương thức Dashboard của Applicant
     public function applicantDashboard(Request $request)
     {
-        // ✅ Phân trang jobs - 12 items/page
+        // ✅ Phân trang jobs - CHỈ LẤY JOB CÒN HẠN
         $jobs = JobPost::with(['company', 'hashtags', 'detail'])
-            ->where('status', 'active') // Chỉ lấy job đang active
+            ->where('status', 'active')
+            ->where('deadline', '>=', now()->toDateString()) // 🎯 THÊM DÒNG NÀY
             ->orderBy('created_at', 'desc')
             ->paginate(12);
 
-        // ✅ Thống kê
+        // ✅ Thống kê - CHỈ ĐẾM JOB CÒN HẠN
         $stats = [
-            'total_jobs' => JobPost::where('status', 'active')->count(),
-            'total_companies' => JobPost::distinct('companies_id')->count('companies_id'),
-            'total_applicants' => 15000, // Hoặc lấy từ DB
+            'total_jobs' => JobPost::where('status', 'active')
+                ->where('deadline', '>=', now()->toDateString()) // 🎯 THÊM DÒNG NÀY
+                ->count(),
+            'total_companies' => JobPost::where('status', 'active')
+                ->where('deadline', '>=', now()->toDateString()) // 🎯 THÊM DÒNG NÀY
+                ->distinct('companies_id')
+                ->count('companies_id'),
+            'total_applicants' => 15000,
             'satisfaction_rate' => 98,
         ];
 
-        // ✅ Top 12 công ty (theo số lượng job)
+        // ✅ Top 12 công ty - CHỈ ĐẾM JOB CÒN HẠN
         $topCompanies = JobPost::with('company')
             ->select('companies_id', DB::raw('COUNT(*) as job_count'))
             ->where('status', 'active')
+            ->where('deadline', '>=', now()->toDateString()) // 🎯 THÊM DÒNG NÀY
             ->groupBy('companies_id')
             ->orderBy('job_count', 'desc')
             ->limit(12)
@@ -54,14 +61,10 @@ class HomeController extends Controller
                 ];
             });
 
-        // ✅ Blog posts (nếu có bảng blogs)
-        // $blogs = Blog::latest()->take(6)->get();
-
         return view('applicant.homeapp', [
             'jobs' => $jobs,
             'stats' => $stats,
             'topCompanies' => $topCompanies,
-            // 'blogs' => $blogs,
         ]);
     }
 }
