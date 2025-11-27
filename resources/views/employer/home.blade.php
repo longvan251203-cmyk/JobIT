@@ -677,7 +677,7 @@
                             </svg>
                         </div>
                         <h3 class="text-3xl font-bold text-gray-800 mb-2">1,432</h3>
-                        <p class="text-sm text-gray-600 mb-2">Lượt xem hồ sơ</p>
+                        <!-- <p class="text-sm text-gray-600 mb-2">Lượt xem hồ sơ</p> -->
                         <span class="inline-flex items-center text-sm font-semibold text-green-600">+124 hôm nay</span>
                     </div>
 
@@ -917,7 +917,7 @@
                                         @endif
                                         <span>{{ $job->applications_count }} ứng viên</span>
 
-                                        <span>0 lượt xem</span>
+                                        <!-- <span>0 lượt xem</span> -->
                                         <span>{{ date('d/m/Y', strtotime($job->deadline)) }}</span>
                                     </div>
                                     <div class="flex gap-2 flex-wrap">

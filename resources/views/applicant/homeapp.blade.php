@@ -26,6 +26,172 @@
 </head>
 <style>
     /* ========================================
+   BADGE SẮP HẾT HẠN - VERSION 2
+======================================== */
+    .badge-urgent-wrapper {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        z-index: 15;
+    }
+
+    .badge-urgent {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        color: white;
+        padding: 0.5rem 0.9rem;
+        border-radius: 24px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        box-shadow:
+            0 4px 12px rgba(245, 158, 11, 0.35),
+            0 0 0 3px rgba(245, 158, 11, 0.1);
+        animation: badgeGlow 2s ease-in-out infinite;
+        white-space: nowrap;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    .badge-urgent i {
+        font-size: 0.95rem;
+        animation: clockTick 1s ease-in-out infinite;
+    }
+
+    /* Badge đặc biệt cho "Hết hạn hôm nay" */
+    .badge-urgent.badge-today {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        box-shadow:
+            0 4px 12px rgba(239, 68, 68, 0.4),
+            0 0 0 3px rgba(239, 68, 68, 0.15);
+        animation: badgePulseRed 1.5s ease-in-out infinite;
+    }
+
+    /* Animation cho badge vàng */
+    @keyframes badgeGlow {
+
+        0%,
+        100% {
+            box-shadow:
+                0 4px 12px rgba(245, 158, 11, 0.35),
+                0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+
+        50% {
+            box-shadow:
+                0 6px 20px rgba(245, 158, 11, 0.5),
+                0 0 0 5px rgba(245, 158, 11, 0.2);
+        }
+    }
+
+    /* Animation cho badge đỏ (hết hạn hôm nay) */
+    @keyframes badgePulseRed {
+
+        0%,
+        100% {
+            box-shadow:
+                0 4px 12px rgba(239, 68, 68, 0.4),
+                0 0 0 3px rgba(239, 68, 68, 0.15);
+            transform: scale(1);
+        }
+
+        50% {
+            box-shadow:
+                0 6px 20px rgba(239, 68, 68, 0.6),
+                0 0 0 6px rgba(239, 68, 68, 0.25);
+            transform: scale(1.03);
+        }
+    }
+
+    /* Animation cho icon đồng hồ */
+    @keyframes clockTick {
+
+        0%,
+        100% {
+            transform: rotate(0deg);
+        }
+
+        25% {
+            transform: rotate(-10deg);
+        }
+
+        75% {
+            transform: rotate(10deg);
+        }
+    }
+
+    /* Làm nổi bật deadline trong footer khi sắp hết hạn */
+    .job-card-grid-footer .deadline-urgent {
+        color: #d97706;
+        font-weight: 600;
+        animation: deadlineHighlight 2s ease-in-out infinite;
+    }
+
+    @keyframes deadlineHighlight {
+
+        0%,
+        100% {
+            color: #d97706;
+        }
+
+        50% {
+            color: #f59e0b;
+        }
+    }
+
+    /* Đảm bảo job card có position relative */
+    .job-card-grid {
+        position: relative;
+        /* ... các style khác giữ nguyên ... */
+    }
+
+    /* Responsive cho mobile */
+    @media (max-width: 768px) {
+        .badge-urgent {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.75rem;
+            gap: 0.3rem;
+        }
+
+        .badge-urgent i {
+            font-size: 0.85rem;
+        }
+
+        .badge-urgent-wrapper {
+            top: 8px;
+            right: 8px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .badge-urgent {
+            padding: 0.35rem 0.65rem;
+            font-size: 0.7rem;
+        }
+
+        .badge-urgent i {
+            font-size: 0.8rem;
+        }
+    }
+
+    /* Đảm bảo badge không che logo */
+    .job-card-grid-header {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Hiệu ứng khi hover vào card có badge */
+    .job-card-grid:hover .badge-urgent {
+        transform: translateY(-2px);
+        transition: transform 0.3s ease;
+    }
+
+    .job-card-grid:hover .badge-urgent.badge-today {
+        animation: badgePulseRed 1s ease-in-out infinite;
+    }
+
+    /* ========================================
    SEARCH INPUT IMPROVEMENTS
 ======================================== */
     .search-input-wrapper {

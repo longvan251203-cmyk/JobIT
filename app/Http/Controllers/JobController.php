@@ -294,10 +294,14 @@ class JobController extends Controller
     {
         $job = JobPost::with(['company', 'hashtags', 'detail'])
             ->where('job_id', $id)
+            ->where('status', 'active')                      // 🎯 THÊM DÒNG NÀY
+            ->where('deadline', '>=', now()->toDateString()) // 🎯 THÊM DÒNG NÀY
             ->first();
 
         if (!$job) {
-            return response()->json(['error' => 'Job not found'], 404);
+            return response()->json([
+                'error' => 'Công việc không tồn tại hoặc đã hết hạn' // 🎯 SỬA MESSAGE
+            ], 404);
         }
 
         return response()->json([
@@ -705,11 +709,11 @@ class JobController extends Controller
         try {
             $page = $request->input('page', 1);
             $perPage = 12; // Số job mỗi trang
-
             $jobs = JobPost::with(['company', 'hashtags'])
+                ->where('status', 'active')                      // 🎯 THÊM DÒNG NÀY
+                ->where('deadline', '>=', now()->toDateString()) // 🎯 THÊM DÒNG NÀY
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage, ['*'], 'page', $page);
-
             // Render HTML cho job cards
             $html = view('applicant.partials.job-cards', ['jobs' => $jobs])->render();
 
@@ -913,7 +917,9 @@ class JobController extends Controller
             // ✅ Chỉ lọc status = 'active' khi có bất kỳ filter nào
             // (Nếu không có filter gì cả, frontend sẽ gọi API /api/jobs thay vì search)
             if ($hasFilters) {
-                $query->where('status', 'active');
+                // ✅ LUÔN LỌC JOB CÒN HẠN (không cần điều kiện $hasFilters)
+                $query->where('status', 'active')
+                    ->where('deadline', '>=', now()->toDateString()); // 🎯 THÊM DÒNG NÀY
             }
 
             // Sắp xếp: Mới nhất trước

@@ -25,31 +25,24 @@ class HomeController extends Controller
     // Phương thức Dashboard của Applicant
     public function applicantDashboard(Request $request)
     {
-        // ✅ Phân trang jobs - CHỈ LẤY JOB CÒN HẠN
+        // ✅ Sử dụng scope ->active()
         $jobs = JobPost::with(['company', 'hashtags', 'detail'])
-            ->where('status', 'active')
-            ->where('deadline', '>=', now()->toDateString()) // 🎯 THÊM DÒNG NÀY
+            ->active() // 🎯 THAY 2 DÒNG WHERE BẰNG 1 SCOPE
             ->orderBy('created_at', 'desc')
             ->paginate(12);
 
-        // ✅ Thống kê - CHỈ ĐẾM JOB CÒN HẠN
         $stats = [
-            'total_jobs' => JobPost::where('status', 'active')
-                ->where('deadline', '>=', now()->toDateString()) // 🎯 THÊM DÒNG NÀY
-                ->count(),
-            'total_companies' => JobPost::where('status', 'active')
-                ->where('deadline', '>=', now()->toDateString()) // 🎯 THÊM DÒNG NÀY
+            'total_jobs' => JobPost::active()->count(), // 🎯 DÙNG SCOPE
+            'total_companies' => JobPost::active()      // 🎯 DÙNG SCOPE
                 ->distinct('companies_id')
                 ->count('companies_id'),
             'total_applicants' => 15000,
             'satisfaction_rate' => 98,
         ];
 
-        // ✅ Top 12 công ty - CHỈ ĐẾM JOB CÒN HẠN
         $topCompanies = JobPost::with('company')
             ->select('companies_id', DB::raw('COUNT(*) as job_count'))
-            ->where('status', 'active')
-            ->where('deadline', '>=', now()->toDateString()) // 🎯 THÊM DÒNG NÀY
+            ->active() // 🎯 DÙNG SCOPE
             ->groupBy('companies_id')
             ->orderBy('job_count', 'desc')
             ->limit(12)

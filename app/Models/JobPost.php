@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class JobPost extends Model
 {
@@ -35,7 +36,26 @@ class JobPost extends Model
         'working_environment',
         'contact_method'
     ];
+    /**
+     * Scope: Chỉ lấy jobs còn hạn và đang active
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active')
+            ->where('deadline', '>=', Carbon::now()->toDateString());
+    }
 
+    /**
+     * Scope: Chỉ lấy jobs sắp hết hạn (còn <= 3 ngày)
+     */
+    public function scopeExpiringSoon($query)
+    {
+        $today = Carbon::now()->toDateString();
+        $threeDaysLater = Carbon::now()->addDays(3)->toDateString();
+
+        return $query->where('status', 'active')
+            ->whereBetween('deadline', [$today, $threeDaysLater]);
+    }
     // ✅ Sửa tên method cho chuẩn
     public function company()
     {
