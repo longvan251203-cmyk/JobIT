@@ -8,6 +8,7 @@ use App\Http\Controllers\ApplicantController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\EmployerController;
 
 // ==================== TRANG CHỦ ====================
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -327,4 +328,17 @@ Route::prefix('applicant')->middleware(['auth'])->group(function () {
     // Download CV
     Route::get('/download-cv/{id}', [ApplicantController::class, 'downloadCV'])
         ->name('applicant.downloadCV');
+});
+// ==================== CHI TIẾT CÔNG VIỆC ====================
+// Sử dụng JobController@show và truyền vào ID của Job
+Route::get('/job-detail/{id}', [JobController::class, 'show'])->name('job.detail');
+// Thêm vào trong group middleware ['auth']
+// Trang quản lý ứng viên cho nhà tuyển dụng
+Route::middleware(['auth', 'employer'])->group(function () {
+    // ✅ THÊM ROUTE CHO TRANG APPLICANTS
+    Route::get('/employer/job/{job_id}/applicants', [EmployerController::class, 'jobApplicants'])
+        ->name('employer.job.applicants');
+
+
+    // ...existing routes...
 });

@@ -2,15 +2,71 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Application;
 use App\Models\JobPost;
+use App\Models\Application;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class EmployerController extends Controller
 {
+    // ✅ DASHBOARD (existing)
+    public function index()
+    {
+        $user = Auth::user();
+        $employer = $user->employer;
+        $company = $employer?->company;
+
+        $jobPosts = $company
+            ? JobPost::where('companies_id', $company->companies_id)
+            ->with('detail')
+            ->withCount('applications')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            : collect();
+
+        $recruiters = $company
+            ? \App\Models\Employer::where('companies_id', $company->companies_id)->get()
+            : collect();
+
+        return view('employer.home', compact('company', 'jobPosts', 'recruiters'));
+    }
+
+    // ✅ XEM TẤT CẢ ỨNG VIÊN
+    public function applicantsIndex()
+    {
+        $user = Auth::user();
+        $company = $user->employer->company ?? null;
+
+        $applications = Application::whereIn('job_id', function ($query) use ($company) {
+            $query->select('job_id')
+                ->from('jobposts')
+                ->where('companies_id', $company->companies_id ?? null);
+        })
+            ->with(['applicant', 'job', 'job.company'])
+            ->paginate(12);
+
+        return view('employer.applicants-dashboard', compact('applications'));
+    }
+
+    // ✅ XEM ỨNG VIÊN CHO 1 JOB CỤ THỂ
+    public function jobApplicants($job_id)
+    {
+        $user = Auth::user();
+        $company = $user->employer->company ?? null;
+
+        $job = JobPost::where('job_id', $job_id)
+            ->where('companies_id', $company->companies_id ?? null)
+            ->firstOrFail();
+
+        $applications = Application::where('job_id', $job_id)
+            ->with(['applicant', 'job', 'job.company'])
+            ->paginate(12);
+
+        return view('employer.job-applicants', compact('job', 'applications'));
+    }
+
     /**
      * Hiển thị danh sách ứng viên cho một công việc
      */

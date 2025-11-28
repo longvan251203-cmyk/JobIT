@@ -18,8 +18,9 @@ class JobController extends Controller
     {
         $job = JobPost::with(['company', 'hashtags', 'detail'])
             ->findOrFail($id);
-
-        return view('applicant.jobdetail', compact('job'));
+        // Lấy thông tin công ty từ quan hệ
+        $company = $job->company;
+        return view('applicant.job-detail', compact('job', 'company'));
     }
 
     // Trả về JSON job
@@ -796,82 +797,331 @@ class JobController extends Controller
 
         return $html;
     }
+    // ============================================
+    // JobController.php - FIXED LOCATION SEARCH
+    // ============================================
+    private function buildLocationMapping()
+    {
+        return [
+            // Hà Nội
+            'ha-noi' => [
+                'Hà Nội',
+                'Ha Noi',
+                'hanoi',
+                'hn',
+                'Thành phố Hà Nội',
+                'Thanh pho Ha Noi',
+            ],
+
+            // TP. Hồ Chí Minh
+            'ho-chi-minh' => [
+                'TP. Hồ Chí Minh',
+                'TP.HCM',
+                'TPHCM',
+                'Ho Chi Minh',
+                'hcm',
+                'hochiminh',
+                'Thành phố Hồ Chí Minh',
+                'Thanh pho Ho Chi Minh',
+                'Saigon',
+                'SaiGon',
+                'Sài Gòn',
+            ],
+
+            // Đà Nẵng
+            'da-nang' => [
+                'Đà Nẵng',
+                'Da Nang',
+                'danang',
+                'dn',
+                'Thành phố Đà Nẵng',
+                'Thanh pho Da Nang',
+            ],
+
+            // Cần Thơ
+            'can-tho' => [
+                'Thành phố Cần Thơ',
+                'Cần Thơ',
+                'Can Tho',
+                'cantho',
+                'can tho',
+                'ct',
+                'Thanh pho Can Tho',
+            ],
+
+            // Hải Phòng
+            'hai-phong' => [
+                'Hải Phòng',
+                'Hai Phong',
+                'haiphong',
+                'hp',
+                'Thành phố Hải Phòng',
+                'Thanh pho Hai Phong',
+            ],
+
+            // Bình Dương
+            'binh-duong' => [
+                'Bình Dương',
+                'Binh Duong',
+                'binhduong',
+                'bd',
+                'Tỉnh Bình Dương',
+                'Tinh Binh Duong',
+            ],
+
+            // Đồng Nai
+            'dong-nai' => [
+                'Đồng Nai',
+                'Dong Nai',
+                'dongnai',
+                'dn',
+                'Tỉnh Đồng Nai',
+                'Tinh Dong Nai',
+            ],
+
+            // Bà Rịa - Vũng Tàu
+            'ba-ria-vung-tau' => [
+                'Bà Rịa - Vũng Tàu',
+                'Ba Ria Vung Tau',
+                'ba ria vung tau',
+                'brvt',
+                'Tỉnh Bà Rịa - Vũng Tàu',
+            ],
+
+            // An Giang
+            'an-giang' => [
+                'An Giang',
+                'angiang',
+                'ag',
+                'Tỉnh An Giang',
+            ],
+
+            // Các tỉnh khác
+            'bac-giang' => ['Bắc Giang', 'Bac Giang', 'bacgiang', 'bg'],
+            'bac-kan' => ['Bắc Kạn', 'Bac Kan', 'backan', 'bk'],
+            'bac-ninh' => ['Bắc Ninh', 'Bac Ninh', 'bacninh', 'bn'],
+            'ben-tre' => ['Bến Tre', 'Ben Tre', 'bentre', 'bt'],
+            'binh-dinh' => ['Bình Định', 'Binh Dinh', 'binhdinh'],
+            'binh-phuoc' => ['Bình Phước', 'Binh Phuoc', 'binhphuoc', 'bp'],
+            'binh-thuan' => ['Bình Thuận', 'Binh Thuan', 'binhthuan'],
+            'ca-mau' => ['Cà Mau', 'Ca Mau', 'camau', 'cm'],
+            'cao-bang' => ['Cao Bằng', 'Cao Bang', 'caobang', 'cb'],
+            'dak-lak' => ['Đắk Lắk', 'Dak Lak', 'daklak', 'dl'],
+            'dak-nong' => ['Đắk Nông', 'Dak Nong', 'daknong', 'dn'],
+            'dien-bien' => ['Điện Biên', 'Dien Bien', 'dienbien', 'db'],
+            'gia-lai' => ['Gia Lai', 'gialai', 'gl'],
+            'ha-giang' => ['Hà Giang', 'Ha Giang', 'hagiang', 'hg'],
+            'ha-nam' => ['Hà Nam', 'Ha Nam', 'hanam', 'hnam'],
+            'ha-tinh' => ['Hà Tĩnh', 'Ha Tinh', 'hatinh', 'ht'],
+            'hai-duong' => ['Hải Dương', 'Hai Duong', 'haiduong', 'hd'],
+            'hau-giang' => ['Hậu Giang', 'Hau Giang', 'haugiang', 'hgi'],
+            'hoa-binh' => ['Hòa Bình', 'Hoa Binh', 'hoabinh', 'hb'],
+            'hung-yen' => ['Hưng Yên', 'Hung Yen', 'hungyen', 'hy'],
+            'khanh-hoa' => ['Khánh Hòa', 'Khanh Hoa', 'khanhhoa', 'kh'],
+            'kien-giang' => ['Kiên Giang', 'Kien Giang', 'kiengiang', 'kg'],
+            'kon-tum' => ['Kon Tum', 'kontum', 'kt'],
+            'lai-chau' => ['Lai Châu', 'Lai Chau', 'laichau', 'lc'],
+            'lam-dong' => ['Lâm Đồng', 'Lam Dong', 'lamdong', 'ld'],
+            'lang-son' => ['Lạng Sơn', 'Lang Son', 'langson', 'ls'],
+            'lao-cai' => ['Lào Cai', 'Lao Cai', 'laocai', 'lcai'],
+            'long-an' => ['Long An', 'longan', 'la'],
+            'nam-dinh' => ['Nam Định', 'Nam Dinh', 'namdinh', 'nd'],
+            'nghe-an' => ['Nghệ An', 'Nghe An', 'nghean', 'na'],
+            'ninh-binh' => ['Ninh Bình', 'Ninh Binh', 'ninhbinh', 'nb'],
+            'ninh-thuan' => ['Ninh Thuận', 'Ninh Thuan', 'ninhthuan'],
+            'phu-tho' => ['Phú Thọ', 'Phu Tho', 'phutho', 'pt'],
+            'phu-yen' => ['Phú Yên', 'Phu Yen', 'phuyen', 'py'],
+            'quang-binh' => ['Quảng Bình', 'Quang Binh', 'quangbinh', 'qb'],
+            'quang-nam' => ['Quảng Nam', 'Quang Nam', 'quangnam', 'qnam'],
+            'quang-ngai' => ['Quảng Ngãi', 'Quang Ngai', 'quangngai', 'qng'],
+            'quang-ninh' => ['Quảng Ninh', 'Quang Ninh', 'quangninh', 'qn'],
+            'quang-tri' => ['Quảng Trị', 'Quang Tri', 'quangtri', 'qt'],
+            'soc-trang' => ['Sóc Trăng', 'Soc Trang', 'soctrang', 'st'],
+            'son-la' => ['Sơn La', 'Son La', 'sonla', 'sl'],
+            'tay-ninh' => ['Tây Ninh', 'Tay Ninh', 'tayninh', 'tn'],
+            'thai-binh' => ['Thái Bình', 'Thai Binh', 'thaibinh', 'tb'],
+            'thai-nguyen' => ['Thái Nguyên', 'Thai Nguyen', 'thainguyen', 'tng'],
+            'thanh-hoa' => ['Thanh Hóa', 'Thanh Hoa', 'thanhhoa', 'th'],
+            'thua-thien-hue' => ['Thừa Thiên Huế', 'Thua Thien Hue', 'thuathienhue', 'tth', 'Huế'],
+            'tien-giang' => ['Tiền Giang', 'Tien Giang', 'tiengiang', 'tg'],
+            'tra-vinh' => ['Trà Vinh', 'Tra Vinh', 'travinh', 'tv'],
+            'tuyen-quang' => ['Tuyên Quang', 'Tuyen Quang', 'tuyenquang', 'tq'],
+            'vinh-long' => ['Vĩnh Long', 'Vinh Long', 'vinhlong', 'vl'],
+            'vinh-phuc' => ['Vĩnh Phúc', 'Vinh Phuc', 'vinhphuc', 'vp'],
+            'yen-bai' => ['Yên Bái', 'Yen Bai', 'yenbai', 'yb'],
+            'remote' => ['Remote', 'remote', 'WFH', 'Work from home', 'Làm từ xa'],
+        ];
+    }
+    private function normalizeText($text)
+    {
+        // Chuyển sang lowercase
+        $text = strtolower(trim($text));
+
+        // Loại bỏ dấu Vietnamese
+        $text = preg_replace(
+            '/[^a-z0-9\s]/i',
+            '',
+            iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $text)
+        );
+
+        return trim(preg_replace('/\s+/', ' ', $text));
+    }
+
     /**
-     * ✅ TÌM KIẾM & LỌC JOB (AJAX)
+     * ✅ Tìm khớp location từ input user
      */
+    private function findMatchingLocationKey($userInput)
+    {
+        $mapping = $this->buildLocationMapping();
+        $normalizedInput = $this->normalizeText($userInput);
+
+        Log::info('🔍 Finding location match', [
+            'user_input' => $userInput,
+            'normalized_input' => $normalizedInput
+        ]);
+
+        // Tìm khớp chính xác
+        foreach ($mapping as $key => $variations) {
+            foreach ($variations as $variation) {
+                $normalizedVariation = $this->normalizeText($variation);
+
+                if ($normalizedVariation === $normalizedInput) {
+                    Log::info('✅ Location matched exactly', [
+                        'key' => $key,
+                        'variation' => $variation,
+                        'normalized' => $normalizedVariation
+                    ]);
+                    return $key;
+                }
+            }
+        }
+
+        // Tìm khớp từng phần (fallback)
+        foreach ($mapping as $key => $variations) {
+            foreach ($variations as $variation) {
+                $normalizedVariation = $this->normalizeText($variation);
+
+                if (
+                    strpos($normalizedVariation, $normalizedInput) !== false ||
+                    strpos($normalizedInput, $normalizedVariation) !== false
+                ) {
+                    Log::info('✅ Location matched partially', [
+                        'key' => $key,
+                        'variation' => $variation
+                    ]);
+                    return $key;
+                }
+            }
+        }
+
+        Log::warning('⚠️ No location match found', ['input' => $userInput]);
+        return null;
+    }
+
     /**
-     * ✅ TÌM KIẾM & LỌC JOB (AJAX) - FIXED VERSION
+     * ✅ Lấy tất cả variations của một location key
      */
+    private function getLocationVariations($locationKey)
+    {
+        $mapping = $this->buildLocationMapping();
+
+        if (isset($mapping[$locationKey])) {
+            $variations = $mapping[$locationKey];
+            Log::info('📍 Got location variations', [
+                'key' => $locationKey,
+                'variations_count' => count($variations),
+                'variations' => $variations
+            ]);
+            return $variations;
+        }
+
+        return [];
+    }
+
+
+
     /**
-     * ✅ TÌM KIẾM & LỌC JOB (AJAX) - FIXED VERSION
-     * Sửa lỗi: Khi chỉ chọn location mà không nhập search term thì vẫn hiển thị jobs
+     * ✅ SEARCH JOBS - UPDATED WITH BETTER LOCATION MATCHING
      */
     public function searchJobs(Request $request)
     {
         try {
             $query = JobPost::with(['company', 'hashtags', 'detail']);
-
-            // Log input để debug
-            Log::info('🔍 Search request received', [
-                'all_params' => $request->all(),
-                'search' => $request->input('search'),
-                'location' => $request->input('location'),
-                'categories' => $request->input('categories'),
-                'levels' => $request->input('levels'),
-                'experiences' => $request->input('experiences'),
-                'working_types' => $request->input('working_types'),
-            ]);
-
-            // ✅ Đếm số lượng filters được áp dụng
             $hasFilters = false;
+            $locationMessage = '';
 
-            // 🔍 TÌM KIẾM THEO TỪ KHÓA (tên job, công ty, kỹ năng)
+            // ========== SEARCH BY KEYWORD ==========
             if ($request->filled('search')) {
                 $hasFilters = true;
                 $searchTerm = $request->input('search');
 
                 $query->where(function ($q) use ($searchTerm) {
-                    // Tìm trong title
                     $q->where('title', 'like', '%' . $searchTerm . '%')
-                        // Tìm trong tên công ty
                         ->orWhereHas('company', function ($companyQuery) use ($searchTerm) {
                             $companyQuery->where('tencty', 'like', '%' . $searchTerm . '%');
                         })
-                        // Tìm trong hashtags (kỹ năng)
                         ->orWhereHas('hashtags', function ($hashtagQuery) use ($searchTerm) {
                             $hashtagQuery->where('tag_name', 'like', '%' . $searchTerm . '%');
                         })
-                        // Tìm trong description
                         ->orWhereHas('detail', function ($detailQuery) use ($searchTerm) {
                             $detailQuery->where('description', 'like', '%' . $searchTerm . '%')
                                 ->orWhere('requirements', 'like', '%' . $searchTerm . '%');
                         });
                 });
 
-                Log::info('✅ Search term applied', ['term' => $searchTerm]);
+                Log::info('✅ Search keyword applied', ['term' => $searchTerm]);
             }
 
-            // 🗺️ LỌC THEO ĐỊA ĐIỂM (hoạt động độc lập với search)
+            // ========== FILTER BY LOCATION - COMPLETE VERSION ==========
             if ($request->filled('location')) {
                 $hasFilters = true;
-                $location = $request->input('location');
-                $query->where('province', $location);
+                $userLocation = $request->input('location');
 
-                Log::info('✅ Location filter applied', ['location' => $location]);
+                // 1️⃣ Tìm khớp location key
+                $locationKey = $this->findMatchingLocationKey($userLocation);
+
+                if ($locationKey) {
+                    // 2️⃣ Lấy tất cả variations
+                    $variations = $this->getLocationVariations($locationKey);
+
+                    if (!empty($variations)) {
+                        // 3️⃣ Query với LIKE pattern để match tất cả variations
+                        $query->where(function ($q) use ($variations) {
+                            foreach ($variations as $variation) {
+                                $q->orWhere('province', 'like', '%' . $variation . '%');
+                            }
+                        });
+
+                        Log::info('✅ Location filter applied successfully', [
+                            'user_input' => $userLocation,
+                            'matched_key' => $locationKey,
+                            'variations_used' => $variations,
+                            'variation_count' => count($variations)
+                        ]);
+
+                        // Lấy display name cho message
+                        $displayName = $variations[0]; // Tên đầu tiên là tên chính
+                        $locationMessage = " tại {$displayName}";
+                    }
+                } else {
+                    Log::warning('⚠️ Location not found in mapping', ['input' => $userLocation]);
+                    // Fallback: search trực tiếp nếu không match
+                    $query->where('province', 'like', '%' . $userLocation . '%');
+                    $locationMessage = " tại {$userLocation}";
+                }
             }
 
-            // 📁 LỌC THEO DANH MỤC (categories - mapping với hashtags)
+            // ========== FILTER BY CATEGORY ==========
             if ($request->filled('categories')) {
                 $hasFilters = true;
                 $categories = explode(',', $request->input('categories'));
 
-                // Map category với hashtags phổ biến
                 $categoryMap = [
-                    'backend' => ['php', 'laravel', 'nodejs', 'python', 'java', 'spring', 'c#', '.net', 'ruby', 'go'],
-                    'frontend' => ['react', 'vuejs', 'vue', 'angular', 'javascript', 'html', 'css', 'typescript', 'nextjs'],
-                    'fullstack' => ['fullstack', 'full-stack', 'full stack'],
-                    'mobile' => ['android', 'ios', 'react native', 'flutter', 'swift', 'kotlin'],
-                    'devops' => ['devops', 'docker', 'kubernetes', 'aws', 'ci/cd', 'jenkins', 'terraform']
+                    'backend' => ['php', 'laravel', 'nodejs', 'python', 'java', 'spring', 'c#', '.net'],
+                    'frontend' => ['react', 'vuejs', 'vue', 'angular', 'javascript', 'html', 'css', 'typescript'],
+                    'fullstack' => ['fullstack', 'full-stack'],
+                    'mobile' => ['android', 'ios', 'react native', 'flutter'],
+                    'devops' => ['devops', 'docker', 'kubernetes', 'aws'],
                 ];
 
                 $query->where(function ($q) use ($categories, $categoryMap) {
@@ -883,76 +1133,49 @@ class JobController extends Controller
                         }
                     }
                 });
-
-                Log::info('✅ Categories filter applied', ['categories' => $categories]);
             }
 
-            // 📊 LỌC THEO CẤP BẬC
+            // ========== FILTER BY LEVEL ==========
             if ($request->filled('levels')) {
                 $hasFilters = true;
                 $levels = explode(',', $request->input('levels'));
                 $query->whereIn('level', $levels);
-
-                Log::info('✅ Levels filter applied', ['levels' => $levels]);
             }
 
-            // 🎯 LỌC THEO KINH NGHIỆM
+            // ========== FILTER BY EXPERIENCE ==========
             if ($request->filled('experiences')) {
                 $hasFilters = true;
                 $experiences = explode(',', $request->input('experiences'));
                 $query->whereIn('experience', $experiences);
-
-                Log::info('✅ Experiences filter applied', ['experiences' => $experiences]);
             }
 
-            // 💼 LỌC THEO HÌNH THỨC LÀM VIỆC
+            // ========== FILTER BY WORKING TYPE ==========
             if ($request->filled('working_types')) {
                 $hasFilters = true;
                 $workingTypes = explode(',', $request->input('working_types'));
                 $query->whereIn('working_type', $workingTypes);
-
-                Log::info('✅ Working types filter applied', ['working_types' => $workingTypes]);
             }
 
-            // ✅ Chỉ lọc status = 'active' khi có bất kỳ filter nào
-            // (Nếu không có filter gì cả, frontend sẽ gọi API /api/jobs thay vì search)
+            // ========== APPLY STATUS & DEADLINE FILTERS ==========
             if ($hasFilters) {
-                // ✅ LUÔN LỌC JOB CÒN HẠN (không cần điều kiện $hasFilters)
                 $query->where('status', 'active')
-                    ->where('deadline', '>=', now()->toDateString()); // 🎯 THÊM DÒNG NÀY
+                    ->where('deadline', '>=', now()->toDateString());
             }
 
-            // Sắp xếp: Mới nhất trước
             $query->orderBy('created_at', 'desc');
 
-            // ✅ LOG QUERY ĐỂ DEBUG
-            Log::info('🔍 Final SQL Query', [
-                'sql' => $query->toSql(),
-                'bindings' => $query->getBindings()
-            ]);
-
-            // Phân trang
             $perPage = 12;
             $jobs = $query->paginate($perPage);
-
-            // ✅ LOG KẾT QUẢ
-            Log::info('📊 Search results', [
-                'total' => $jobs->total(),
-                'per_page' => $jobs->perPage(),
-                'current_page' => $jobs->currentPage(),
-                'has_filters' => $hasFilters,
-                'job_count' => $jobs->count(),
-                'sample_job_ids' => $jobs->take(5)->pluck('job_id')->toArray()
-            ]);
-
-            // ✅ Kiểm tra nếu không có kết quả
-            if ($jobs->total() === 0) {
-                Log::warning('⚠️ No jobs found with current filters');
-            }
 
             // Render HTML
             $html = view('applicant.partials.job-cards', ['jobs' => $jobs])->render();
             $paginationHtml = $this->buildPaginationHtml($jobs);
+
+            Log::info('✅ Search completed', [
+                'has_filters' => $hasFilters,
+                'total_results' => $jobs->total(),
+                'location_message' => $locationMessage
+            ]);
 
             return response()->json([
                 'success' => true,
@@ -963,24 +1186,18 @@ class JobController extends Controller
                 'last_page' => $jobs->lastPage(),
                 'per_page' => $jobs->perPage(),
                 'has_filters' => $hasFilters,
-                'message' => $jobs->total() === 0 ? 'Không tìm thấy công việc phù hợp' : null
+                'location_message' => $locationMessage,
             ]);
         } catch (\Exception $e) {
-            Log::error('❌ Search error: ' . $e->getMessage(), [
+            Log::error('❌ Search error', [
+                'message' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'line' => $e->getLine(),
-                'file' => $e->getFile(),
                 'request_data' => $request->all()
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'Có lỗi xảy ra khi tìm kiếm: ' . $e->getMessage(),
-                'error_details' => config('app.debug') ? [
-                    'message' => $e->getMessage(),
-                    'line' => $e->getLine(),
-                    'file' => basename($e->getFile())
-                ] : null
+                'message' => 'Có lỗi xảy ra khi tìm kiếm: ' . $e->getMessage()
             ], 500);
         }
     }

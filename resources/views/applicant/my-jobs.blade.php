@@ -2,6 +2,64 @@
 <html lang="vi">
 @include('applicant.partials.head')
 <style>
+    /* Thêm vào phần <style> của my-jobs.blade.php */
+    /* Job Title Hover Effect */
+    .job-title a {
+        transition: all 0.3s ease;
+        position: relative;
+    }
+
+    .job-title a:hover {
+        color: var(--primary-color) !important;
+    }
+
+    .job-title a::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: var(--primary-color);
+        transition: width 0.3s ease;
+    }
+
+    .job-title a:hover::after {
+        width: 100%;
+    }
+
+    /* Job Card Hover Effect */
+    .job-card-modern {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    .job-card-modern:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+        border-color: var(--primary-color);
+    }
+
+    /* Prevent hover effect when clicking buttons */
+    .btn-action,
+    .cancel-application-btn,
+    .unsave-job-btn,
+    .btn-apply-now {
+        position: relative;
+        z-index: 10;
+    }
+
+    /* Job Title Clickable */
+    .job-title {
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+
+    .job-title:hover {
+        color: var(--primary-color);
+        text-decoration: underline;
+    }
+
     /* Thêm vào phần CSS của my-jobs.blade.php */
     /* Status Filter Pills */
     /* Modal Styling */
@@ -1012,7 +1070,7 @@
                             $isExpired = $app->isJobExpired();
                             @endphp
 
-                            <div class="job-card-modern {{ $isExpired ? 'expired' : '' }}" data-status="{{ $status['status'] }}">
+                            <div class="job-card-modern {{ $isExpired ? 'expired' : '' }}" data-status="{{ $status['status'] }}" data-job-id="{{ $app->job_id }}">
                                 <div class="row align-items-start">
                                     <!-- Logo công ty -->
                                     <div class="col-md-2 text-center">
@@ -1029,12 +1087,18 @@
 
                                     <!-- Thông tin công việc -->
                                     <div class="col-md-7">
+                                        <!-- ✅ CẬP NHẬT: Thêm link vào job title -->
                                         <h4 class="job-title">
-                                            {{ $app->job->title ?? 'Tiêu đề công việc' }}
+                                            <a href="{{ route('job.detail', $app->job_id) }}"
+                                                class="text-decoration-none text-dark hover-underline"
+                                                style="color: inherit;">
+                                                {{ $app->job->title ?? 'Tiêu đề công việc' }}
+                                            </a>
                                             @if($isExpired)
                                             <span class="badge bg-secondary ms-2" style="font-size: 0.7rem;">Hết hạn</span>
                                             @endif
                                         </h4>
+
                                         <p class="company-name">{{ $app->job->company->tencty ?? 'Tên công ty' }}</p>
 
                                         <span class="salary-badge {{ (!$app->job->salary_min || !$app->job->salary_max) ? 'negotiable' : '' }}">
@@ -1074,68 +1138,32 @@
                                             <div>
                                                 <i class="bi bi-calendar-check"></i>
                                                 <strong>Ứng tuyển:</strong>
-                                                {{-- ✅ LẤY GIỜ CHÍNH XÁC VỚI TIMEZONE VIỆT NAM --}}
                                                 {{ \Carbon\Carbon::parse($app->ngay_ung_tuyen)->setTimezone('Asia/Ho_Chi_Minh')->format('d/m/Y H:i') }}
                                             </div>
                                             <div>
                                                 <i class="bi bi-clock-history"></i>
                                                 <strong>Hạn nộp:</strong>
                                                 {{ \Carbon\Carbon::parse($app->job->deadline)->setTimezone('Asia/Ho_Chi_Minh')->format('d/m/Y') }}
-                                                @php
-                                                $deadlineCarbon = \Carbon\Carbon::parse($app->job->deadline)->setTimezone('Asia/Ho_Chi_Minh');
-                                                $now = \Carbon\Carbon::now('Asia/Ho_Chi_Minh');
-                                                $isExpired = $now->isAfter($deadlineCarbon);
-                                                $daysLeft = (int) ceil($now->diffInDays($deadlineCarbon, false));
-                                                @endphp
-                                                @if($isExpired)
-                                                <span class="text-danger ms-1">(Đã hết hạn)</span>
-                                                @elseif($daysLeft >= 0 && $daysLeft <= 3)
-                                                    <span class="text-warning ms-1">(Còn {{ $daysLeft }} ngày)</span>
-                                                    @endif
                                             </div>
                                         </div>
                                     </div>
 
                                     <!-- Trạng thái và Actions -->
                                     <div class="col-md-3 text-end">
-                                        <!-- Hiển thị trạng thái -->
                                         <div class="status-badge {{ $status['class'] }} mb-3"
                                             title="{{ $status['description'] }}">
                                             <i class="bi {{ $status['icon'] }}"></i>
                                             {{ $status['text'] }}
                                         </div>
 
-                                        <!-- Thông báo đặc biệt theo trạng thái -->
-                                        @if($status['status'] === 'dang_phong_van')
-                                        <div class="alert alert-info p-2 mb-3" style="font-size: 0.8rem; text-align: left;">
-                                            <i class="bi bi-envelope-check"></i>
-                                            <strong>Lưu ý:</strong> Kiểm tra email để xem lịch phỏng vấn
-                                        </div>
-                                        @elseif($status['status'] === 'duoc_chon')
-                                        <div class="alert alert-success p-2 mb-3" style="font-size: 0.8rem; text-align: left;">
-                                            <i class="bi bi-check-circle"></i>
-                                            Nhà tuyển dụng sẽ liên hệ sớm
-                                        </div>
-                                        @elseif($status['status'] === 'het_han')
-                                        <div class="alert alert-secondary p-2 mb-3" style="font-size: 0.8rem; text-align: left;">
-                                            <i class="bi bi-info-circle"></i>
-                                            Công việc đã hết hạn nộp
-                                        </div>
-                                        @elseif($status['status'] === 'khong_phu_hop')
-                                        <div class="alert alert-light p-2 mb-3" style="font-size: 0.8rem; text-align: left;">
-                                            <i class="bi bi-lightbulb"></i>
-                                            Đừng nản lòng, tiếp tục tìm việc khác
-                                        </div>
-                                        @endif
-
                                         <!-- Nút Actions -->
                                         <div class="d-flex flex-column gap-2">
-                                            <a href="{{ route('home') }}#job-{{ $app->job_id }}"
+                                            <!-- ✅ CẬP NHẬT: Sử dụng route thay vì anchor link -->
+                                            <a href="{{ route('job.detail', $app->job_id) }}"
                                                 class="btn btn-action btn-view">
                                                 <i class="bi bi-eye me-2"></i>Xem chi tiết
                                             </a>
 
-                                            <!-- Chỉ cho hủy nếu chờ xử lý hoặc đang phỏng vấn và chưa hết hạn -->
                                             @if(in_array($status['status'], ['cho_xu_ly', 'dang_phong_van']))
                                             <button class="btn btn-action btn-cancel cancel-application-btn"
                                                 data-application-id="{{ $app->application_id }}"
@@ -1143,7 +1171,6 @@
                                                 <i class="bi bi-x-lg me-2"></i>Hủy ứng tuyển
                                             </button>
                                             @endif
-
                                         </div>
                                     </div>
                                 </div>
@@ -1161,17 +1188,15 @@
                             @endif
                         </div>
                         <!-- Tab Đã lưu -->
-                        <!-- Tab Đã lưu -->
                         <div class="tab-pane fade" id="saved" role="tabpanel">
                             @if($savedJobs->count() > 0)
                             @foreach($savedJobs as $saved)
                             @php
                             $isExpired = \Carbon\Carbon::now()->isAfter(\Carbon\Carbon::parse($saved->job->deadline));
-
-                            // ✅ KIỂM TRA ĐÃ ỨNG TUYỂN CHƯA
                             $hasApplied = $applications->where('job_id', $saved->job_id)->count() > 0;
                             @endphp
-                            <div class="job-card-modern">
+
+                            <div class="job-card-modern" data-job-id="{{ $saved->job_id }}">
                                 <div class="row align-items-start">
                                     <div class="col-md-2 text-center">
                                         <div class="company-logo-wrapper">
@@ -1184,13 +1209,20 @@
                                             @endif
                                         </div>
                                     </div>
+
                                     <div class="col-md-7">
+                                        <!-- ✅ CẬP NHẬT: Thêm link vào job title -->
                                         <h4 class="job-title">
-                                            {{ $saved->job->title ?? 'Tiêu đề công việc' }}
+                                            <a href="{{ route('job.detail', $saved->job_id) }}"
+                                                class="text-decoration-none text-dark hover-underline"
+                                                style="color: inherit;">
+                                                {{ $saved->job->title ?? 'Tiêu đề công việc' }}
+                                            </a>
                                             @if($isExpired)
                                             <span class="badge bg-secondary ms-2" style="font-size: 0.7rem;">Hết hạn</span>
                                             @endif
                                         </h4>
+
                                         <p class="company-name">{{ $saved->job->company->tencty ?? 'Tên công ty' }}</p>
 
                                         <span class="salary-badge {{ (!$saved->job->salary_min || !$saved->job->salary_max) ? 'negotiable' : '' }}">
@@ -1236,21 +1268,9 @@
                                                 <i class="bi bi-clock-history"></i>
                                                 <strong>Hạn nộp:</strong>
                                                 {{ \Carbon\Carbon::parse($saved->job->deadline)->setTimezone('Asia/Ho_Chi_Minh')->format('d/m/Y') }}
-                                                @php
-                                                $deadlineCarbon = \Carbon\Carbon::parse($saved->job->deadline)->setTimezone('Asia/Ho_Chi_Minh');
-                                                $now = \Carbon\Carbon::now('Asia/Ho_Chi_Minh');
-                                                $isExpired = $now->isAfter($deadlineCarbon);
-                                                $daysLeft = (int) ceil($now->diffInDays($deadlineCarbon, false));
-                                                @endphp
-                                                @if($isExpired)
-                                                <span class="text-danger ms-1">(Đã hết hạn)</span>
-                                                @elseif($daysLeft >= 0 && $daysLeft <= 3)
-                                                    <span class="text-warning ms-1">(Còn {{ $daysLeft }} ngày)</span>
-                                                    @endif
                                             </div>
                                         </div>
 
-                                        <!-- ✅ THÔNG BÁO HẾT HẠN -->
                                         @if($isExpired)
                                         <div class="alert alert-danger p-2 mt-3" style="font-size: 0.8rem; text-align: left;">
                                             <i class="bi bi-exclamation-circle-fill me-2"></i>
@@ -1262,30 +1282,26 @@
                                     <!-- Actions -->
                                     <div class="col-md-3 text-end">
                                         <div class="d-flex flex-column gap-2">
-                                            <a href="{{ route('home') }}#job-{{ $saved->job_id }}" class="btn btn-action btn-view">
+                                            <!-- ✅ CẬP NHẬT: Sử dụng route -->
+                                            <a href="{{ route('job.detail', $saved->job_id) }}"
+                                                class="btn btn-action btn-view">
                                                 <i class="bi bi-eye me-2"></i>Xem chi tiết
                                             </a>
 
-                                            <!-- ✅ KIỂM TRA ĐÃ ỨNG TUYỂN RỒI CHỈ -->
                                             @if($hasApplied)
-                                            <!-- NÚT TRẠNG THÁI: ĐÃ ỨNG TUYỂN -->
                                             <button class="btn btn-action" disabled
                                                 style="background: #6366f1; color: white; border: none; cursor: not-allowed;">
                                                 <i class="bi bi-check-circle me-2"></i>Đã ứng tuyển
                                             </button>
                                             @elseif(!$isExpired)
-                                            <!-- NÚT ỨNG TUYỂN NGAY (chỉ nếu chưa ứng tuyển và chưa hết hạn) -->
                                             <button class="btn btn-action btn-apply-now"
                                                 style="background: linear-gradient(135deg, #10b981, #34d399); color: white; border: none;"
                                                 data-job-id="{{ $saved->job_id }}"
-                                                data-job-title="{{ $saved->job->title }}"
-                                                title="Ứng tuyển luôn công việc này">
+                                                data-job-title="{{ $saved->job->title }}">
                                                 <i class="bi bi-send-check me-2"></i>Ứng tuyển ngay
                                             </button>
                                             @else
-                                            <!-- NÚT DISABLED: HẾT HẠN -->
-                                            <button class="btn btn-action"
-                                                disabled
+                                            <button class="btn btn-action" disabled
                                                 style="background: #d1d5db; color: #6b7280; border: none; cursor: not-allowed;">
                                                 <i class="bi bi-x-circle me-2"></i>Hết hạn nộp
                                             </button>

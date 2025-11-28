@@ -17,6 +17,87 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class ApplicationController extends Controller
 {
+    /**
+     * ✅ HIỂN THỊ DANH SÁCH TẤT CẢ ỨNG VIÊN CỦA EMPLOYER
+     */
+    public function index(Request $request)
+    {
+        try {
+            // Lấy employer hiện tại
+            $employer = Auth::user()->employer;
+
+            if (!$employer || !$employer->company) {
+                return redirect()->route('company.edit')
+                    ->with('error', 'Vui lòng hoàn tất thông tin công ty trước');
+            }
+
+            $company = $employer->company;
+
+            // ✅ Lấy tất cả jobs của company này
+            $jobIds = JobPost::where('companies_id', $company->companies_id)
+                ->pluck('job_id');
+
+            // ✅ Query applications với relationships đúng
+            $applicationsQuery = Application::with(['job'])
+                ->whereIn('job_id', $jobIds)
+                ->orderBy('ngay_ung_tuyen', 'desc');
+
+            // ✅ Search filter
+            if ($request->has('search') && $request->search != '') {
+                $search = $request->search;
+                $applicationsQuery->where(function ($query) use ($search) {
+                    $query->where('hoten', 'like', '%' . $search . '%')
+                        ->orWhere('email', 'like', '%' . $search . '%')
+                        ->orWhere('sdt', 'like', '%' . $search . '%');
+                });
+            }
+
+            // ✅ Status filter
+            if ($request->has('status') && $request->status != '') {
+                $applicationsQuery->where('trang_thai', $request->status);
+            }
+
+            // ✅ Job filter
+            if ($request->has('job_id') && $request->job_id != '') {
+                $applicationsQuery->where('job_id', $request->job_id);
+            }
+
+            // ✅ Pagination
+            $applicants = $applicationsQuery->paginate(12);
+
+            // ✅ Statistics
+            $totalApplicants = Application::whereIn('job_id', $jobIds)->count();
+
+            $activeJobs = JobPost::where('companies_id', $company->companies_id)
+                ->where('deadline', '>=', now())
+                ->count();
+
+            $newApplicants = Application::whereIn('job_id', $jobIds)
+                ->where('ngay_ung_tuyen', '>=', Carbon::now()->startOfWeek())
+                ->count();
+
+            $interviewScheduled = Application::whereIn('job_id', $jobIds)
+                ->where('trang_thai', Application::STATUS_DANG_PHONG_VAN)
+                ->count();
+
+            // ✅ Danh sách jobs cho filter dropdown
+            $jobs = JobPost::where('companies_id', $company->companies_id)
+                ->select('job_id', 'title')
+                ->get();
+
+            return view('employer.applicants-dashboard', compact(
+                'applicants',
+                'jobs',
+                'totalApplicants',
+                'activeJobs',
+                'newApplicants',
+                'interviewScheduled'
+            ));
+        } catch (\Exception $e) {
+            Log::error('❌ Error in applicants index: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Có lỗi xảy ra');
+        }
+    }
     public function store(Request $request)
     {
         try {

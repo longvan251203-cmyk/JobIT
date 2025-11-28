@@ -26,6 +26,77 @@
 </head>
 <style>
     /* ========================================
+   LOCATION DETAIL STYLES
+======================================== */
+    .location-detail-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .location-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1rem;
+        background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+        border-radius: 12px;
+        border-left: 4px solid #10b981;
+        transition: all 0.3s ease;
+    }
+
+    .location-row:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+    }
+
+    .location-row>i {
+        font-size: 1.5rem;
+        color: #10b981;
+        margin-top: 0.25rem;
+        flex-shrink: 0;
+    }
+
+    .location-info {
+        flex: 1;
+    }
+
+    .location-label {
+        font-size: 0.85rem;
+        color: #6b7280;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .location-value {
+        font-size: 1rem;
+        color: #1f2937;
+        font-weight: 500;
+        line-height: 1.5;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .location-row {
+            padding: 0.875rem;
+        }
+
+        .location-row>i {
+            font-size: 1.25rem;
+        }
+
+        .location-label {
+            font-size: 0.75rem;
+        }
+
+        .location-value {
+            font-size: 0.9rem;
+        }
+    }
+
+    /* ========================================
    BADGE SẮP HẾT HẠN - VERSION 2
 ======================================== */
     .badge-urgent-wrapper {
@@ -875,14 +946,14 @@
                     <i class="bi bi-geo-alt" style="color: #A0AEC0; font-size: 1.2rem;"></i>
                     <select id="locationSelect" class="location-select">
                         <option value="">Tất cả địa điểm</option>
-                        <option value="Hồ Chí Minh">Hồ Chí Minh</option>
-                        <option value="Hà Nội">Hà Nội</option>
-                        <option value="Đà Nẵng">Đà Nẵng</option>
-                        <option value="Cần Thơ">Cần Thơ</option>
-                        <option value="Hải Phòng">Hải Phòng</option>
-                        <option value="Bình Dương">Bình Dương</option>
-                        <option value="Đồng Nai">Đồng Nai</option>
-                        <option value="Remote">Remote</option>
+                        <option value="hanoi">Hà Nội</option>
+                        <option value="hcm">TP. Hồ Chí Minh</option>
+                        <option value="danang">Đà Nẵng</option>
+                        <option value="cantho">Cần Thơ</option>
+                        <option value="haiphong">Hải Phòng</option>
+                        <option value="binhduong">Bình Dương</option>
+                        <option value="dongnai">Đồng Nai</option>
+                        <option value="remote">Remote</option>
                     </select>
                 </div>
                 <button class="search-btn" id="searchBtn">Tìm kiếm</button>
@@ -1064,7 +1135,7 @@
         <div class="featured-section">
             <div class="section-title-highlight">
                 <div class="section-subtitle">TẤT CẢ CÔNG VIỆC</div>
-                <h2>{{ $stats['total_jobs'] }}+ cơ hội việc làm IT</h2>
+                <h2>{{ $stats['total_jobs'] }} cơ hội việc làm IT</h2>
             </div>
 
             <!-- ✅ Loading Overlay -->
@@ -1898,11 +1969,15 @@
             <div class="job-detail-header">
                 <div class="job-detail-company">
                     <div class="company-logo-large">${logoHtml}</div>
-                    <div class="job-detail-title-section">
-                        <h2 class="job-detail-title">${job.title}</h2>
-                        <div class="job-detail-company-name">${job.company ? job.company.tencty : 'Công ty'}</div>
-                        <span class="job-detail-salary ${salaryClass}">${salaryHtml}</span>
-                    </div>
+                  <div class="job-detail-title-section">
+    <h2 class="job-detail-title">
+        <a href="/job-detail/${job.job_id}" class="text-decoration-none text-dark hover-link-primary">
+            ${job.title}
+        </a>
+    </h2>
+    <div class="job-detail-company-name">${job.company ? job.company.tencty : 'Công ty'}</div>
+    <span class="job-detail-salary ${salaryClass}">${salaryHtml}</span>
+</div>
                 </div>
                 <div class="job-detail-actions">
                     <button type="button" class="btn-apply-now" data-job-id="${job.job_id}">
@@ -1939,10 +2014,38 @@
                         </div>
                     </div>
                 </div>
-                <div class="detail-section">
-                    <h3 class="detail-section-title"><i class="bi bi-geo-alt-fill"></i> Địa điểm làm việc</h3>
-                    <div class="info-value">${job.province}</div>
-                </div>
+               <div class="detail-section">
+    <h3 class="detail-section-title">
+        <i class="bi bi-geo-alt-fill"></i> Địa điểm làm việc
+    </h3>
+    <div class="location-detail-wrapper">
+        <div class="location-row">
+            <i class="bi bi-building"></i>
+            <div class="location-info">
+                <div class="location-label">Tỉnh/Thành phố</div>
+                <div class="location-value">${job.province || 'Chưa cập nhật'}</div>
+            </div>
+        </div>
+        ${job.district ? `
+        <div class="location-row">
+            <i class="bi bi-map"></i>
+            <div class="location-info">
+                <div class="location-label">Quận/Huyện</div>
+                <div class="location-value">${job.district}</div>
+            </div>
+        </div>
+        ` : ''}
+        ${job.address_detail ? `
+        <div class="location-row">
+            <i class="bi bi-geo-alt"></i>
+            <div class="location-info">
+                <div class="location-label">Địa chỉ cụ thể</div>
+                <div class="location-value">${job.address_detail}</div>
+            </div>
+        </div>
+        ` : ''}
+    </div>
+</div>
                 ${job.description ? `
                 <div class="detail-section">
                     <h3 class="detail-section-title"><i class="bi bi-file-text-fill"></i> Mô tả công việc</h3>
@@ -2648,7 +2751,16 @@
                             }
 
                             // Cập nhật số lượng kết quả
-                            updateResultCount(data.total);
+                            if (data.location_message) {
+                                const formattedMessage = data.location_message.replace(/tại (.+)$/, (match, location) => {
+                                    return `tại ${formatLocationDisplay(location)}`;
+                                });
+                                updateResultCount(data.total, formattedMessage);
+                            } else {
+                                updateResultCount(data.total, '');
+                            }
+
+                            console.log('✅ Location display helper loaded');
 
                             // Re-attach events
                             // ✅ Re-attach events với timeout để đảm bảo DOM đã render
@@ -2738,11 +2850,30 @@
                     });
             }
 
+            function formatLocationDisplay(locationName) {
+                if (!locationName) return '';
+
+                return locationName
+                    .replace('Thành phố ', '')
+                    .replace('Tỉnh ', '')
+                    .trim();
+            }
+
             // ========== Cập nhật số lượng kết quả ==========
-            function updateResultCount(total) {
+            function updateResultCount(total, locationMessage = '') {
                 const titleElement = document.querySelector('.section-title-highlight h2');
                 if (titleElement) {
-                    titleElement.textContent = `${total}+ cơ hội việc làm IT`;
+                    // ✅ Format location message nếu có
+                    if (locationMessage) {
+                        // Lấy tên từ backend (VD: " tại Hà Nội")
+                        const parts = locationMessage.match(/tại (.+)$/);
+                        if (parts && parts[1]) {
+                            const formattedName = formatLocationDisplay(parts[1]);
+                            locationMessage = ` tại ${formattedName}`;
+                        }
+                    }
+
+                    titleElement.textContent = `${total} cơ hội việc làm IT${locationMessage}`;
                 }
             }
 
@@ -2778,7 +2909,7 @@
             if (locationSelect) {
                 locationSelect.addEventListener('change', function() {
                     // ✅ FIX: Luôn gọi performSearch, không cần check điều kiện
-                    performSearch();
+                    // performSearch();
                 });
             }
 
