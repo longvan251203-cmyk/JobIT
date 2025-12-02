@@ -69,7 +69,7 @@ class CandidatesController extends Controller
         if ($request->filled('education')) {
             $educations = $request->education;
             $query->whereHas('hocvan', function ($q) use ($educations) {
-                $q->whereIn('trinh_do', $educations);
+                $q->whereIn('trinhdo', $educations);
             });
         }
 
@@ -122,7 +122,7 @@ class CandidatesController extends Controller
                 break;
             case 'education':
                 $query->join('hoc_van', 'applicants.id_uv', '=', 'hoc_van.applicant_id')
-                    ->orderByRaw("FIELD(hoc_van.trinh_do, 'Tiến sĩ', 'Thạc sĩ', 'Đại học', 'Cao đẳng', 'Trung cấp')")
+                    ->orderByRaw("FIELD(hoc_van.trinhdo, 'Tiến sĩ', 'Thạc sĩ', 'Đại học', 'Cao đẳng', 'Trung cấp')")
                     ->select('applicants.*');
                 break;
             default: // newest

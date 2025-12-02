@@ -25,6 +25,88 @@
     <link href="{{ asset('assets/css/homeapp.css') }}" rel="stylesheet">
 </head>
 <style>
+    /* ✨ Style cho nút Gợi ý việc làm */
+    .btn-recommendations {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        position: relative;
+        margin-right: 12px;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-recommendations:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+    }
+
+    .btn-recommendations i {
+        font-size: 18px;
+    }
+
+    .btn-recommendations .badge-count {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #ff4757;
+        color: white;
+        font-size: 11px;
+        font-weight: 600;
+        padding: 2px 6px;
+        border-radius: 10px;
+        min-width: 20px;
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
+    }
+
+    /* Style cho badge nhỏ trong dropdown */
+    .badge-small {
+        background: #667eea;
+        color: white;
+        font-size: 10px;
+        padding: 2px 6px;
+        border-radius: 8px;
+        margin-left: 8px;
+        font-weight: 600;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .btn-recommendations span {
+            display: none;
+        }
+
+        .btn-recommendations {
+            padding: 10px 14px;
+        }
+
+        .btn-recommendations i {
+            margin: 0;
+        }
+    }
+</style>
+<style>
     /* ========================================
    LOCATION DETAIL STYLES
 ======================================== */
@@ -901,11 +983,27 @@
                 @if(!Auth::check())
                 <a class="btn-login" href="{{ route('login') }}">Đăng nhập</a>
                 @else
+
+                <!-- ✨ NÚT GỢI Ý VIỆC LÀM MỚI -->
+                <a class="btn-recommendations" href="{{ route('applicant.recommendations') }}">
+                    <i class="bi bi-stars"></i>
+                    <span>Gợi ý việc làm</span>
+                    @php
+                    $recsCount = \App\Models\JobRecommendation::where('applicant_id', Auth::user()->applicant->id ?? 0)
+                    ->where('score', '>=', 60)
+                    ->count();
+                    @endphp
+                    @if($recsCount > 0)
+                    <span class="badge-count">{{ $recsCount }}</span>
+                    @endif
+                </a>
+
                 <!-- ✅ Nút Việc Làm Của Tôi -->
                 <a class="btn-my-jobs" href="{{ route('applicant.myJobs') }}">
                     <i class="bi bi-briefcase-fill"></i>
                     Việc Làm Của Tôi
                 </a>
+
                 <div class="user-dropdown">
                     <button class="user-btn" id="userDropdownBtn">
                         <img src="{{ asset('assets/img/user.png') }}" alt="" class="user-avatar">
@@ -916,6 +1014,18 @@
                         <li><a href="{{ route('applicant.profile') }}"><i class="bi bi-person"></i> Hồ sơ</a></li>
                         <li><a href="#"><i class="bi bi-info-circle"></i> Thông tin cá nhân</a></li>
                         <li><a href="#"><i class="bi bi-file-earmark-text"></i> Hồ sơ Đính kèm</a></li>
+
+                        <!-- ✨ THÊM VÀO DROPDOWN MENU -->
+                        <li>
+                            <a href="{{ route('applicant.recommendations') }}">
+                                <i class="bi bi-stars"></i>
+                                Gợi ý việc làm
+                                @if($recsCount > 0)
+                                <span class="badge-small">{{ $recsCount }}</span>
+                                @endif
+                            </a>
+                        </li>
+
                         <li><a href="{{ route('applicant.myJobs') }}"><i class="bi bi-briefcase"></i> Việc làm của tôi</a></li>
                         <li><a href="#"><i class="bi bi-envelope"></i> Lời mời công việc</a></li>
                         <li><a href="#"><i class="bi bi-bell"></i> Thông báo</a></li>

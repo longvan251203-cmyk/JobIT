@@ -9,6 +9,7 @@ use App\Http\Controllers\JobController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\EmployerController;
+use App\Http\Controllers\JobRecommendationController;
 
 // ==================== TRANG CHỦ ====================
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -373,4 +374,19 @@ Route::middleware(['auth'])->prefix('employer')->name('employer.')->group(functi
 
     // Liên hệ ứng viên
     Route::get('/candidates/{id}/contact', [CandidatesController::class, 'contact'])->name('candidates.contact');
+});
+// Thêm vào routes/web.php
+
+
+
+Route::middleware(['auth'])->group(function () {  // ← Chỉ giữ 'auth'
+
+    Route::get('/applicant/recommendations', [JobRecommendationController::class, 'index'])
+        ->name('applicant.recommendations');
+
+    Route::post('/applicant/recommendations/refresh', [JobRecommendationController::class, 'refresh'])
+        ->name('applicant.recommendations.refresh');
+
+    Route::post('/applicant/recommendations/{id}/viewed', [JobRecommendationController::class, 'markAsViewed'])
+        ->name('applicant.recommendations.viewed');
 });

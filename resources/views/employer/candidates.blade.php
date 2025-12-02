@@ -541,73 +541,118 @@
 
     <!-- HEADER -->
     <!-- HEADER -->
+    <!-- HEADER -->
     <header class="main-header sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 py-4">
             <div class="flex items-center justify-between gap-4">
                 <!-- Logo -->
-                <a href="{{ route('employer.dashboard') }}" class="flex items-center gap-3 flex-shrink-0">
+                <a href="{{ route('employer.dashboard') }}" class="flex-shrink-0">
                     <span class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">JobIT</span>
                 </a>
 
-                <!-- Search Bar with Location - Desktop -->
-                <div class="hidden md:flex items-center flex-1 gap-3">
+                <!-- Search Bar with Location - Dài ra giữa -->
+                <div class="flex-1 flex items-center gap-3 mx-6">
                     <!-- Search Input -->
-                    <div class="search-wrapper flex-1" style="max-width: 500px;">
-                        <div class="search-input-container">
-                            <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <circle cx="11" cy="11" r="8" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35" />
-                            </svg>
-                            <input type="text"
-                                id="searchKeyword"
-                                class="search-input"
-                                placeholder="Tìm theo kỹ năng, vị trí..."
-                                value="{{ request('keyword') }}">
-                        </div>
-
-                        <!-- Location Filter -->
-                        <div class="location-select-container">
-                            <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            <select id="locationFilter" class="location-select">
-                                <option value="">Tất cả tỉnh/thành</option>
-                                <!-- Miền Bắc -->
-                                <option value="Hà Nội" {{ request('location') == 'Hà Nội' ? 'selected' : '' }}>Hà Nội</option>
-                                <option value="Hải Phòng" {{ request('location') == 'Hải Phòng' ? 'selected' : '' }}>Hải Phòng</option>
-                                <option value="Quảng Ninh" {{ request('location') == 'Quảng Ninh' ? 'selected' : '' }}>Quảng Ninh</option>
-                                <!-- ... các option khác giữ nguyên ... -->
-                            </select>
-                            <svg class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </div>
-
-                        <!-- Search Button -->
-                        <button onclick="searchCandidates()" class="search-btn flex-shrink-0">
-                            <i class="bi bi-search"></i> Tìm kiếm
-                        </button>
+                    <div class="search-input-container flex-1">
+                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="8" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35" />
+                        </svg>
+                        <input type="text"
+                            id="searchKeyword"
+                            class="search-input"
+                            placeholder="Tìm theo kỹ năng, vị trí..."
+                            value="{{ request('keyword') }}">
                     </div>
+
+                    <!-- Location Filter Dropdown -->
+                    <div class="location-select-container relative">
+                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        <select id="locationFilter" class="location-select">
+                            <option value="">Tất cả tỉnh/thành</option>
+                            <!-- Miền Bắc -->
+                            <option value="Hà Nội" {{ request('location') == 'Hà Nội' ? 'selected' : '' }}>Hà Nội</option>
+                            <option value="Hải Phòng" {{ request('location') == 'Hải Phòng' ? 'selected' : '' }}>Hải Phòng</option>
+                            <option value="Quảng Ninh" {{ request('location') == 'Quảng Ninh' ? 'selected' : '' }}>Quảng Ninh</option>
+                            <option value="Bắc Giang" {{ request('location') == 'Bắc Giang' ? 'selected' : '' }}>Bắc Giang</option>
+                            <option value="Bắc Kạn" {{ request('location') == 'Bắc Kạn' ? 'selected' : '' }}>Bắc Kạn</option>
+                            <option value="Cao Bằng" {{ request('location') == 'Cao Bằng' ? 'selected' : '' }}>Cao Bằng</option>
+                            <option value="Lạng Sơn" {{ request('location') == 'Lạng Sơn' ? 'selected' : '' }}>Lạng Sơn</option>
+                            <option value="Tuyên Quang" {{ request('location') == 'Tuyên Quang' ? 'selected' : '' }}>Tuyên Quang</option>
+                            <option value="Yên Bái" {{ request('location') == 'Yên Bái' ? 'selected' : '' }}>Yên Bái</option>
+                            <option value="Thái Nguyên" {{ request('location') == 'Thái Nguyên' ? 'selected' : '' }}>Thái Nguyên</option>
+                            <option value="Phú Thọ" {{ request('location') == 'Phú Thọ' ? 'selected' : '' }}>Phú Thọ</option>
+                            <option value="Vĩnh Phúc" {{ request('location') == 'Vĩnh Phúc' ? 'selected' : '' }}>Vĩnh Phúc</option>
+                            <option value="Hà Giang" {{ request('location') == 'Hà Giang' ? 'selected' : '' }}>Hà Giang</option>
+                            <!-- Miền Trung -->
+                            <option value="Thanh Hóa" {{ request('location') == 'Thanh Hóa' ? 'selected' : '' }}>Thanh Hóa</option>
+                            <option value="Nghệ An" {{ request('location') == 'Nghệ An' ? 'selected' : '' }}>Nghệ An</option>
+                            <option value="Hà Tĩnh" {{ request('location') == 'Hà Tĩnh' ? 'selected' : '' }}>Hà Tĩnh</option>
+                            <option value="Quảng Bình" {{ request('location') == 'Quảng Bình' ? 'selected' : '' }}>Quảng Bình</option>
+                            <option value="Quảng Trị" {{ request('location') == 'Quảng Trị' ? 'selected' : '' }}>Quảng Trị</option>
+                            <option value="Thừa Thiên Huế" {{ request('location') == 'Thừa Thiên Huế' ? 'selected' : '' }}>Thừa Thiên Huế</option>
+                            <option value="Đà Nẵng" {{ request('location') == 'Đà Nẵng' ? 'selected' : '' }}>Đà Nẵng</option>
+                            <option value="Quảng Nam" {{ request('location') == 'Quảng Nam' ? 'selected' : '' }}>Quảng Nam</option>
+                            <option value="Quảng Ngãi" {{ request('location') == 'Quảng Ngãi' ? 'selected' : '' }}>Quảng Ngãi</option>
+                            <option value="Bình Định" {{ request('location') == 'Bình Định' ? 'selected' : '' }}>Bình Định</option>
+                            <option value="Phú Yên" {{ request('location') == 'Phú Yên' ? 'selected' : '' }}>Phú Yên</option>
+                            <option value="Khánh Hòa" {{ request('location') == 'Khánh Hòa' ? 'selected' : '' }}>Khánh Hòa</option>
+                            <option value="Ninh Thuận" {{ request('location') == 'Ninh Thuận' ? 'selected' : '' }}>Ninh Thuận</option>
+                            <option value="Bình Thuận" {{ request('location') == 'Bình Thuận' ? 'selected' : '' }}>Bình Thuận</option>
+                            <!-- Miền Nam -->
+                            <option value="Hồ Chí Minh" {{ request('location') == 'Hồ Chí Minh' ? 'selected' : '' }}>Hồ Chí Minh</option>
+                            <option value="Hà Nội" {{ request('location') == 'Hà Nội' ? 'selected' : '' }}>Hà Nội</option>
+                            <option value="Bình Dương" {{ request('location') == 'Bình Dương' ? 'selected' : '' }}>Bình Dương</option>
+                            <option value="Đồng Nai" {{ request('location') == 'Đồng Nai' ? 'selected' : '' }}>Đồng Nai</option>
+                            <option value="Bà Rịa - Vũng Tàu" {{ request('location') == 'Bà Rịa - Vũng Tàu' ? 'selected' : '' }}>Bà Rịa - Vũng Tàu</option>
+                            <option value="Long An" {{ request('location') == 'Long An' ? 'selected' : '' }}>Long An</option>
+                            <option value="Tiền Giang" {{ request('location') == 'Tiền Giang' ? 'selected' : '' }}>Tiền Giang</option>
+                            <option value="Bến Tre" {{ request('location') == 'Bến Tre' ? 'selected' : '' }}>Bến Tre</option>
+                            <option value="Vĩnh Long" {{ request('location') == 'Vĩnh Long' ? 'selected' : '' }}>Vĩnh Long</option>
+                            <option value="Cần Thơ" {{ request('location') == 'Cần Thơ' ? 'selected' : '' }}>Cần Thơ</option>
+                            <option value="An Giang" {{ request('location') == 'An Giang' ? 'selected' : '' }}>An Giang</option>
+                            <option value="Kiên Giang" {{ request('location') == 'Kiên Giang' ? 'selected' : '' }}>Kiên Giang</option>
+                            <option value="Cà Mau" {{ request('location') == 'Cà Mau' ? 'selected' : '' }}>Cà Mau</option>
+                            <option value="Sóc Trăng" {{ request('location') == 'Sóc Trăng' ? 'selected' : '' }}>Sóc Trăng</option>
+                            <option value="Bạc Liêu" {{ request('location') == 'Bạc Liêu' ? 'selected' : '' }}>Bạc Liêu</option>
+                            <option value="Hậu Giang" {{ request('location') == 'Hậu Giang' ? 'selected' : '' }}>Hậu Giang</option>
+                            <option value="Đắk Lắk" {{ request('location') == 'Đắk Lắk' ? 'selected' : '' }}>Đắk Lắk</option>
+                            <option value="Đắk Nông" {{ request('location') == 'Đắk Nông' ? 'selected' : '' }}>Đắk Nông</option>
+                            <option value="Gia Lai" {{ request('location') == 'Gia Lai' ? 'selected' : '' }}>Gia Lai</option>
+                            <option value="Kon Tum" {{ request('location') == 'Kon Tum' ? 'selected' : '' }}>Kon Tum</option>
+                            <option value="Lâm Đồng" {{ request('location') == 'Lâm Đồng' ? 'selected' : '' }}>Lâm Đồng</option>
+                        </select>
+                        <svg class="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+
+                    <!-- Search Button -->
+                    <button onclick="searchCandidates()" class="search-btn flex-shrink-0">
+                        <i class="bi bi-search"></i>
+                    </button>
                 </div>
 
-                <!-- Action Buttons & Profile - Desktop -->
-                <div class="hidden md:flex items-center gap-3 flex-shrink-0">
-                    <!-- Notifications -->
+                <!-- Right Actions - Notifications & Profile -->
+                <div class="flex items-center gap-4 flex-shrink-0">
+                    <!-- Notifications Bell -->
                     <div class="relative">
-                        <button id="btnNotifications" class="relative p-2 rounded-xl hover:bg-gray-100 transition-all duration-300">
-                            <svg class="w-6 h-6 text-purple-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        <button id="btnNotifications" class="relative p-2 rounded-lg hover:bg-gray-100 transition-all duration-300">
+                            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                             </svg>
                             <span id="notificationBadge" class="hidden absolute top-0 right-0 min-w-[20px] h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center px-1.5 animate-pulse">0</span>
                         </button>
 
                         <!-- Notification Dropdown -->
-                        <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-96 bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 max-h-[500px] flex flex-col">
+                        <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-96 bg-white rounded-xl shadow-2xl border border-gray-100 z-50 max-h-[500px] flex flex-col">
                             <div class="p-4 border-b border-gray-200 flex items-center justify-between">
                                 <h3 class="font-semibold text-gray-800">Thông báo</h3>
                                 <button id="btnMarkAllRead" class="text-xs text-purple-600 hover:text-purple-700 font-medium transition-colors">
-                                    Đánh dấu tất cả đã đọc
+                                    Đánh dấu đã đọc
                                 </button>
                             </div>
                             <div id="notificationList" class="flex-1 overflow-y-auto">
@@ -623,68 +668,42 @@
 
                     <!-- Profile Menu -->
                     <div class="relative">
-                        <button id="btnProfile" class="flex items-center gap-3 p-2 rounded-xl hover:bg-gray-100 transition-all">
+                        <button id="btnProfile" class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-all">
                             @php
                             $company = auth()->user()->employer->company ?? null;
                             $logoPath = $company && $company->logo ? asset('assets/img/' . $company->logo) : null;
                             @endphp
 
                             @if($logoPath)
-                            <img src="{{ $logoPath }}" alt="Company Logo" class="w-10 h-10 rounded-full object-cover shadow-lg">
+                            <img src="{{ $logoPath }}" alt="Company Logo" class="w-10 h-10 rounded-lg object-cover shadow-md">
                             @else
-                            <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold shadow-lg">
+                            <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center text-white font-semibold text-sm shadow-md">
                                 {{ strtoupper(substr($company->tencty ?? 'TD', 0, 2)) }}
                             </div>
                             @endif
 
-                            <svg class="w-4 h-4 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path d="M19 9l-7 7-7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                             </svg>
                         </button>
 
+                        <!-- Profile Dropdown Menu -->
                         <div id="profileMenu" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 py-2">
                             <div class="px-4 py-3 border-b border-gray-100">
                                 <p class="font-semibold text-gray-800">{{ $company->tencty ?? 'Chưa cập nhật' }}</p>
                                 <p class="text-sm text-gray-500">{{ auth()->user()->email }}</p>
                             </div>
-                            <a href="{{ route('employer.dashboard') }}" class="block px-4 py-2 hover:bg-gray-50 text-gray-700">
+                            <a href="{{ route('employer.dashboard') }}" class="block px-4 py-2 hover:bg-gray-50 text-gray-700 transition-colors">
                                 <i class="bi bi-house-door mr-2"></i> Dashboard
                             </a>
                             <form action="{{ route('logout') }}" method="POST">
                                 @csrf
-                                <button type="submit" class="w-full text-left px-4 py-2 hover:bg-gray-50 text-red-600">
+                                <button type="submit" class="w-full text-left px-4 py-2 hover:bg-gray-50 text-red-600 transition-colors">
                                     <i class="bi bi-box-arrow-right mr-2"></i> Đăng xuất
                                 </button>
                             </form>
                         </div>
                     </div>
-                </div>
-
-                <!-- Mobile Menu Button -->
-                <button id="btnToggleMobileMenu" class="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                    </svg>
-                </button>
-            </div>
-
-            <!-- Mobile Search Bar -->
-            <div class="md:hidden mt-4">
-                <div class="search-wrapper">
-                    <div class="search-input-container">
-                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <circle cx="11" cy="11" r="8" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35" />
-                        </svg>
-                        <input type="text"
-                            id="searchKeywordMobile"
-                            class="search-input"
-                            placeholder="Tìm kiếm..."
-                            value="{{ request('keyword') }}">
-                    </div>
-                    <button onclick="searchCandidates()" class="search-btn">
-                        <i class="bi bi-search"></i>
-                    </button>
                 </div>
             </div>
         </div>
