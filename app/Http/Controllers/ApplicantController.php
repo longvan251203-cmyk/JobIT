@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Applicant;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\SavedJob;
@@ -620,42 +621,73 @@ class ApplicantController extends Controller
      */
     public function storeKyNang(Request $request)
     {
+        // Validate
         $request->validate([
             'ten_ky_nang' => 'required|array|min:1',
             'ten_ky_nang.*' => 'required|string|max:100',
             'nam_kinh_nghiem' => 'required|array|min:1',
-            'nam_kinh_nghiem.*' => 'required'
+            'nam_kinh_nghiem.*' => 'required|integer|min:0'
         ], [
             'ten_ky_nang.required' => 'Vui lòng nhập ít nhất một kỹ năng',
             'ten_ky_nang.*.required' => 'Tên kỹ năng không được để trống',
             'nam_kinh_nghiem.required' => 'Vui lòng chọn năm kinh nghiệm',
+            'nam_kinh_nghiem.*.required' => 'Năm kinh nghiệm không được để trống',
         ]);
 
         try {
+            $user = Auth::user();
+            $applicant = $user->applicant;
+
+            if (!$applicant) {
+                return redirect()->back()->with('error', 'Không tìm thấy thông tin ứng viên!');
+            }
+
             $tenKyNang = $request->ten_ky_nang;
             $namKinhNghiem = $request->nam_kinh_nghiem;
 
+            $added = 0;
+            $skipped = 0;
+
             // Lưu từng kỹ năng
-            foreach ($tenKyNang as $index => $ten) {
+            for ($i = 0; $i < count($tenKyNang); $i++) {
                 // Kiểm tra trùng lặp
-                $exists = KyNang::where('applicant_id', Auth::user()->id_uv)
-                    ->where('ten_ky_nang', $ten)
+                $exists = KyNang::where('applicant_id', $applicant->id_uv)
+                    ->where('ten_ky_nang', $tenKyNang[$i])
                     ->exists();
 
                 if (!$exists) {
-                    KyNang::create([
-                        'applicant_id' => Auth::user()->id_uv,
-                        'ten_ky_nang' => $ten,
-                        'nam_kinh_nghiem' => $namKinhNghiem[$index] ?? 0,
-                        'mo_ta' => null // Có thể thêm mô tả sau
-                    ]);
+                    try {
+                        KyNang::create([
+                            'applicant_id' => $applicant->id_uv,
+                            'ten_ky_nang' => $tenKyNang[$i],
+                            'nam_kinh_nghiem' => $namKinhNghiem[$i] ?? 0,
+                            'mo_ta' => null
+                        ]);
+                        $added++;
+                    } catch (\Exception $e) {
+                        Log::error('Lỗi khi thêm kỹ năng: ' . $e->getMessage());
+                        continue;
+                    }
+                } else {
+                    $skipped++;
                 }
             }
 
-            return redirect()->back()->with('success', 'Đã thêm kỹ năng thành công!');
+            // Thông báo kết quả
+            if ($added > 0 && $skipped > 0) {
+                return redirect()->route('applicant.hoso')
+                    ->with('success', "Đã thêm {$added} kỹ năng thành công! ({$skipped} kỹ năng bị trùng)");
+            } elseif ($added > 0) {
+                return redirect()->route('applicant.hoso')
+                    ->with('success', "Đã thêm {$added} kỹ năng thành công!");
+            } else {
+                return redirect()->route('applicant.hoso')
+                    ->with('info', 'Tất cả kỹ năng đã tồn tại trong hồ sơ của bạn!');
+            }
         } catch (\Exception $e) {
             Log::error('Lỗi khi lưu kỹ năng: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Có lỗi xảy ra khi lưu kỹ năng!');
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            return redirect()->back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
     }
 
@@ -1127,4 +1159,72 @@ class ApplicantController extends Controller
         // Download trực tiếp
         return $pdf->download($fileName);
     }
+
+
+    public function update(Request $request)
+    {
+        $applicant = Applicant::findOrFail(Auth::user()->applicant->id_uv);
+
+        // Validate
+        $validated = $request->validate([
+            'hoten_uv' => 'required|string|max:255',
+            'chucdanh' => 'nullable|string|max:255',
+            'ngaysinh' => 'nullable|date',
+            'sdt_uv' => 'nullable|string|max:20',
+            'gioitinh_uv' => 'nullable|in:Nam,Nữ,Khác',
+            'diachi_uv' => 'nullable|string|max:255',
+            'mucluong_mongmuon' => 'nullable|string|max:100', // ✅ Thêm validation
+            'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+        ]);
+
+        // Xử lý upload avatar
+        if ($request->hasFile('avatar')) {
+            if ($applicant->avatar) {
+                Storage::disk('public')->delete('assets/img/avt/' . $applicant->avatar);
+            }
+            $file = $request->file('avatar');
+            $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('assets/img/avt'), $filename);
+            $applicant->avatar = $filename;
+        }
+
+        // Update thông tin
+        $applicant->update([
+            'hoten_uv' => $validated['hoten_uv'],
+            'chucdanh' => $validated['chucdanh'] ?? $applicant->chucdanh,
+            'ngaysinh' => $validated['ngaysinh'] ?? $applicant->ngaysinh,
+            'sdt_uv' => $validated['sdt_uv'] ?? $applicant->sdt_uv,
+            'gioitinh_uv' => $validated['gioitinh_uv'] ?? $applicant->gioitinh_uv,
+            'diachi_uv' => $validated['diachi_uv'] ?? $applicant->diachi_uv,
+            'mucluong_mongmuon' => $validated['mucluong_mongmuon'] ?? $applicant->mucluong_mongmuon, // ✅ Thêm
+        ]);
+
+        return redirect()->route('applicant.hoso')
+            ->with('success', 'Cập nhật hồ sơ thành công!');
+    }
+
+    // ...existing code...
+
+    public function updateMucLuong(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Bạn cần đăng nhập trước.');
+        }
+
+        $request->validate([
+            'mucluong_mongmuon' => 'nullable|string|max:100',
+        ]);
+
+        DB::table('applicants')->where('user_id', $user->id)->update([
+            'mucluong_mongmuon' => $request->mucluong_mongmuon,
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->route('applicant.hoso')
+            ->with('success', 'Cập nhật mức lương mong muốn thành công!');
+    }
+
+    // ...existing code...
 }

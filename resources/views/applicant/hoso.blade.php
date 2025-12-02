@@ -2,7 +2,28 @@
 <html lang="vi">
 
 @include('applicant.partials.head')
+<style>
+    /* ... existing styles ... */
 
+    /* ✅ FIX AVATAR BỊCO DÃNCO DÃN */
+    #avatarPreview {
+        width: 150px !important;
+        height: 150px !important;
+        object-fit: cover !important;
+        object-position: center !important;
+        border-radius: 50% !important;
+        border: 5px solid #667eea !important;
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3) !important;
+        flex-shrink: 0;
+    }
+
+    /* Container avatar */
+    .position-relative.d-inline-block {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+</style>
 <style>
     /* Custom style cho ngoại ngữ section */
     /* Custom style cho ngoại ngữ section */
@@ -344,21 +365,197 @@
         border-bottom: none !important;
     }
 
-    /* Animations */
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    /* ✅ CV MODAL STYLING */
+    .cv-modal-content {
+        border-radius: 24px !important;
+        border: none !important;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
     }
 
-    .card {
-        animation: fadeInUp 0.6s ease-out;
+    .cv-modal-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        border: none !important;
+        border-radius: 24px 24px 0 0 !important;
+        color: white;
+    }
+
+    .cv-modal-body {
+        background: #f8fafc;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    .cv-sidebar {
+        background: white;
+        border-radius: 12px;
+        border: 1px solid #e5e7eb;
+    }
+
+    .cv-avatar {
+        border: 5px solid #667eea;
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+        width: 150px;
+        height: 150px;
+        object-fit: cover;
+    }
+
+    .cv-section-title {
+        color: #1f2937;
+        border-bottom: 3px solid #667eea;
+        padding-bottom: 12px;
+        margin-bottom: 16px;
+        font-weight: 700;
+        font-size: 1.05rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .cv-info-item {
+        padding: 12px 0;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .cv-info-item:last-child {
+        border-bottom: none;
+    }
+
+    .cv-info-item i {
+        color: #667eea;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .cv-info-label {
+        font-size: 0.75rem;
+        color: #6b7280;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        display: block;
+        margin-bottom: 2px;
+    }
+
+    .cv-info-value {
+        font-size: 0.9rem;
+        color: #1f2937;
+        font-weight: 500;
+    }
+
+    .cv-content-section {
+        margin-bottom: 28px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .cv-content-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .cv-timeline-item {
+        padding-left: 20px;
+        border-left: 3px solid #667eea;
+        margin-bottom: 20px;
+        position: relative;
+        padding-bottom: 16px;
+    }
+
+    .cv-timeline-item:last-child {
+        padding-bottom: 0;
+    }
+
+    .cv-timeline-item::before {
+        content: '';
+        position: absolute;
+        left: -8px;
+        top: 4px;
+        width: 12px;
+        height: 12px;
+        background: #667eea;
+        border-radius: 50%;
+        border: 3px solid white;
+        box-shadow: 0 0 0 2px #667eea;
+    }
+
+    .cv-job-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 6px;
+    }
+
+    .cv-company {
+        font-size: 0.95rem;
+        color: #667eea;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .cv-date {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-bottom: 12px;
+    }
+
+    .cv-description {
+        font-size: 0.9rem;
+        color: #374151;
+        line-height: 1.6;
+        margin-bottom: 8px;
+    }
+
+    .cv-badge {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 8px 14px;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        margin-right: 8px;
+        margin-bottom: 10px;
+        display: inline-block;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .cv-modal-footer {
+        background: white;
+        border-top: 1px solid #e5e7eb;
+        border-radius: 0 0 24px 24px;
+        padding: 20px 24px;
+    }
+
+    .cv-modal-footer .btn {
+        border-radius: 10px;
+        font-weight: 600;
+        padding: 10px 20px;
+        transition: all 0.3s ease;
+    }
+
+    .cv-modal-footer .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+    }
+
+    .cv-modal-footer .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    @media print {
+
+        .cv-modal-header,
+        .cv-modal-footer {
+            display: none !important;
+        }
+
+        .cv-modal-body {
+            background: white !important;
+            max-height: none !important;
+        }
     }
 
     /* Responsive */
@@ -460,6 +657,12 @@
                                     <span class="info-tag-modern">
                                         <i class="bi bi-geo-alt"></i> {{ $applicant->diachi_uv ?? 'Chưa cập nhật' }}
                                     </span>
+                                    <!-- Thêm vào div .d-flex.flex-wrap.gap-2.mb-3 trong header card -->
+                                    @if($applicant->mucluong_mongmuon)
+                                    <span class="info-tag-modern">
+                                        <i class="bi bi-cash-coin"></i> {{ $applicant->mucluong_mongmuon }}
+                                    </span>
+                                    @endif
                                 </div>
 
                                 <!-- Nút chỉnh sửa -->
@@ -639,6 +842,36 @@
                             <a href="#" class="btn btn-light rounded-circle shadow-sm ms-3"
                                 data-bs-toggle="modal" data-bs-target="#addKinhNghiemModal">
                                 <i class="bi bi-plus-lg"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Section mức lương mong muốn -->
+                    <!-- ✅ SECTION MỨC LƯƠNG MONG MUỐN -->
+                    <div class="card shadow-sm border-0 rounded-3 mb-3">
+                        <div class="card-body d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="section-header-modern">
+                                    <div class="section-icon-modern">
+                                        <i class="bi bi-cash-coin"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-0">Mức lương mong muốn</h5>
+                                </div>
+
+                                @if($applicant->mucluong_mongmuon)
+                                <div class="mt-3">
+                                    <div class="alert alert-info py-3 mb-0">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        <strong>{{ $applicant->mucluong_mongmuon }}</strong>
+                                    </div>
+                                </div>
+                                @else
+                                <p class="text-muted mb-0 mt-3">Chưa cập nhật mức lương mong muốn.</p>
+                                @endif
+                            </div>
+
+                            <!-- Nút chỉnh sửa -->
+                            <a href="#" class="btn btn-light rounded-circle shadow-sm ms-3" data-bs-toggle="modal" data-bs-target="#editMucLuongModal">
+                                <i class="bi bi-pencil-square"></i>
                             </a>
                         </div>
                     </div>
@@ -1080,190 +1313,225 @@
                         </div>
                     </div>
                     <!-- Modal Xem CV -->
+                    <!-- ✅ MODAL XEM CV - THIẾT KẾ CHUYÊN NGHIỆP -->
                     <div class="modal fade" id="viewCVModal" tabindex="-1" aria-labelledby="viewCVLabel" aria-hidden="true">
                         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-                            <div class="modal-content rounded-3 shadow-lg">
-                                <div class="modal-header bg-primary text-white">
-                                    <h5 class="modal-title" id="viewCVLabel">
-                                        <i class="bi bi-file-earmark-person"></i> CV Ứng viên
-                                    </h5>
+                            <div class="modal-content cv-modal-content">
+
+                                <!-- ✅ HEADER CV -->
+                                <div class="modal-header cv-modal-header">
+                                    <div class="d-flex align-items-center gap-3 flex-grow-1">
+                                        <img src="{{ $applicant->avatar ? asset('assets/img/avt/'.$applicant->avatar) : asset('assets/img/avt/default-avatar.png') }}"
+                                            alt="Avatar"
+                                            class="cv-avatar rounded-circle">
+                                        <div class="text-white">
+                                            <h5 class="modal-title fw-bold mb-0" id="viewCVLabel">
+                                                {{ $applicant->hoten_uv ?? 'Họ tên ứng viên' }}
+                                            </h5>
+                                            <p class="mb-0 opacity-85">
+                                                <i class="bi bi-briefcase-fill me-1"></i>{{ $applicant->chucdanh ?? 'Chức danh' }}
+                                            </p>
+                                        </div>
+                                    </div>
                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                 </div>
 
-                                <div class="modal-body p-4" style="max-height: 80vh; overflow-y: auto;">
-                                    <div class="row">
-                                        <!-- Cột trái: Avatar + Thông tin liên hệ -->
-                                        <div class="col-md-4 bg-light p-4 rounded-start">
+                                <!-- ✅ BODY CV -->
+                                <div class="modal-body cv-modal-body p-0" style="max-height: 80vh; overflow-y: auto;">
+                                    <div class="row g-0">
+
+                                        <!-- ===== CỘT TRÁI: SIDEBAR ===== -->
+                                        <div class="col-md-3 cv-sidebar p-4 border-end">
+
+                                            <!-- Avatar -->
                                             <div class="text-center mb-4">
                                                 <img src="{{ $applicant->avatar ? asset('assets/img/avt/'.$applicant->avatar) : asset('assets/img/avt/default-avatar.png') }}"
-                                                    alt="Avatar" class="rounded-circle mb-3 border border-3 border-primary"
-                                                    width="150" height="150" style="object-fit: cover;">
-                                                <h4 class="fw-bold mb-1">{{ $applicant->hoten_uv ?? 'Họ tên ứng viên' }}</h4>
-                                                <p class="text-muted mb-0">{{ $applicant->chucdanh ?? 'Chức danh / Vị trí' }}</p>
+                                                    alt="Avatar"
+                                                    class="cv-avatar rounded-circle">
+                                                <h5 class="fw-bold mt-3 mb-1">{{ $applicant->hoten_uv ?? 'N/A' }}</h5>
+                                                <p class="text-muted small mb-0">{{ $applicant->chucdanh ?? 'N/A' }}</p>
                                             </div>
 
                                             <hr class="my-3">
 
-                                            <h6 class="fw-bold text-primary mb-3">
-                                                <i class="bi bi-person-lines-fill me-2"></i>Thông tin liên hệ
-                                            </h6>
+                                            <!-- ===== THÔNG TIN LIÊN HỆ ===== -->
+                                            <h6 class="cv-section-title">Thông tin</h6>
 
-                                            <div class="mb-2">
-                                                <i class="bi bi-envelope text-primary me-2"></i>
-                                                <small>{{ Auth::user()->email }}</small>
+                                            @if(Auth::user()->email)
+                                            <div class="cv-info-item">
+                                                <i class="bi bi-envelope"></i>
+                                                <div>
+                                                    <small class="cv-info-label">Email</small>
+                                                    <small class="cv-info-value">{{ Auth::user()->email }}</small>
+                                                </div>
                                             </div>
+                                            @endif
 
-                                            <div class="mb-2">
-                                                <i class="bi bi-telephone text-primary me-2"></i>
-                                                <small>{{ $applicant->sdt_uv ?? 'Chưa cập nhật' }}</small>
+                                            @if($applicant->sdt_uv)
+                                            <div class="cv-info-item">
+                                                <i class="bi bi-telephone"></i>
+                                                <div>
+                                                    <small class="cv-info-label">Điện thoại</small>
+                                                    <small class="cv-info-value">{{ $applicant->sdt_uv }}</small>
+                                                </div>
                                             </div>
+                                            @endif
 
-                                            <div class="mb-2">
-                                                <i class="bi bi-calendar text-primary me-2"></i>
-                                                <small>{{ $applicant->ngaysinh ?? 'Chưa cập nhật' }}</small>
+                                            @if($applicant->diachi_uv)
+                                            <div class="cv-info-item">
+                                                <i class="bi bi-geo-alt"></i>
+                                                <div>
+                                                    <small class="cv-info-label">Địa chỉ</small>
+                                                    <small class="cv-info-value">{{ $applicant->diachi_uv }}</small>
+                                                </div>
                                             </div>
+                                            @endif
 
-                                            <div class="mb-2">
-                                                <i class="bi bi-gender-ambiguous text-primary me-2"></i>
-                                                <small>{{ $applicant->gioitinh_uv ?? 'Chưa cập nhật' }}</small>
+                                            <!-- ✅ MỨC LƯONG MONG MUON -->
+                                            @if($applicant->mucluong_mongmuon)
+                                            <hr class="my-3">
+                                            <h6 class="cv-section-title">Mức lương</h6>
+                                            <div class="cv-info-item">
+                                                <i class="bi bi-cash-coin"></i>
+                                                <div>
+                                                    <small class="cv-info-label">Mong muốn</small>
+                                                    <small class="cv-info-value text-success fw-bold">{{ $applicant->mucluong_mongmuon }}</small>
+                                                </div>
                                             </div>
+                                            @endif
 
-                                            <div class="mb-2">
-                                                <i class="bi bi-geo-alt text-primary me-2"></i>
-                                                <small>{{ $applicant->diachi_uv ?? 'Chưa cập nhật' }}</small>
-                                            </div>
-
-                                            <!-- Ngoại ngữ -->
+                                            <!-- ===== NGOẠI NGỮ ===== -->
                                             @if(isset($ngoaiNgu) && $ngoaiNgu->count() > 0)
                                             <hr class="my-3">
-                                            <h6 class="fw-bold text-primary mb-3">
-                                                <i class="bi bi-translate me-2"></i>Ngoại ngữ
-                                            </h6>
+                                            <h6 class="cv-section-title">Ngoại ngữ</h6>
                                             @foreach($ngoaiNgu as $nn)
-                                            <div class="mb-2">
-                                                <i class="bi bi-check-circle text-success me-2"></i>
-                                                <small><strong>{{ $nn->ten_ngoai_ngu }}</strong> - {{ $nn->trinh_do }}</small>
+                                            <div class="cv-info-item">
+                                                <i class="bi bi-translate"></i>
+                                                <div>
+                                                    <small class="cv-info-label">{{ $nn->ten_ngoai_ngu }}</small>
+                                                    <small class="cv-info-value">{{ $nn->trinh_do }}</small>
+                                                </div>
                                             </div>
                                             @endforeach
                                             @endif
+
                                         </div>
 
-                                        <!-- Cột phải: Nội dung CV -->
-                                        <div class="col-md-8 p-4">
-                                            <!-- Giới thiệu bản thân -->
-                                            <div class="mb-4">
-                                                <h5 class="fw-bold text-primary border-bottom border-2 border-primary pb-2 mb-3">
+                                        <!-- ===== CỘT PHẢI: NỘI DUNG CV ===== -->
+                                        <div class="col-md-9 p-4">
+
+                                            <!-- ===== GIỚI THIỆU BẢN THÂN ===== -->
+                                            @if($applicant->gioithieu)
+                                            <div class="cv-content-section">
+                                                <h5 class="cv-section-title">
                                                     <i class="bi bi-person me-2"></i>Giới thiệu bản thân
                                                 </h5>
-                                                <div class="text-muted">
-                                                    {!! $applicant->gioithieu ?? '<em>Chưa cập nhật giới thiệu bản thân.</em>' !!}
-                                                </div>
+                                                <p class="cv-description">
+                                                    {!! nl2br(e($applicant->gioithieu)) !!}
+                                                </p>
                                             </div>
+                                            @endif
 
-                                            <!-- Kinh nghiệm làm việc -->
-                                            <div class="mb-4">
-                                                <h5 class="fw-bold text-primary border-bottom border-2 border-primary pb-2 mb-3">
+                                            <!-- ===== KINH NGHIỆM LÀM VIỆC ===== -->
+                                            @if(isset($kinhnghiem) && $kinhnghiem->count() > 0)
+                                            <div class="cv-content-section">
+                                                <h5 class="cv-section-title">
                                                     <i class="bi bi-briefcase me-2"></i>Kinh nghiệm làm việc
                                                 </h5>
-                                                @if(isset($kinhnghiem) && $kinhnghiem->count())
                                                 @foreach($kinhnghiem as $item)
-                                                <div class="mb-3 ps-3 border-start border-3 border-secondary">
-                                                    <h6 class="fw-bold mb-1">{{ $item->chucdanh }}</h6>
-                                                    <p class="text-muted small mb-1">
-                                                        <i class="bi bi-building me-1"></i>{{ $item->congty }}
-                                                    </p>
-                                                    <p class="text-muted small mb-2">
-                                                        <i class="bi bi-calendar-range me-1"></i>
+                                                <div class="cv-timeline-item">
+                                                    <div class="cv-job-title">{{ $item->chucdanh ?? 'N/A' }}</div>
+                                                    <div class="cv-company">{{ $item->congty ?? 'N/A' }}</div>
+                                                    <div class="cv-date">
+                                                        <i class="bi bi-calendar-event me-1"></i>
                                                         {{ \Carbon\Carbon::parse($item->tu_ngay)->format('m/Y') }} -
-                                                        {{ $item->dang_lam_viec ? 'Hiện tại' : \Carbon\Carbon::parse($item->den_ngay)->format('m/Y') }}
-                                                    </p>
+                                                        {{ $item->dang_lam_viec ? '<span class="badge bg-success text-white">Hiện tại</span>' : \Carbon\Carbon::parse($item->den_ngay)->format('m/Y') }}
+                                                    </div>
                                                     @if($item->mota)
-                                                    <div class="small mb-2">
+                                                    <div class="cv-description mb-2">
                                                         <strong>Mô tả:</strong><br>
                                                         {!! nl2br(e($item->mota)) !!}
                                                     </div>
                                                     @endif
                                                     @if($item->duan)
-                                                    <div class="small">
+                                                    <div class="cv-description">
                                                         <strong>Dự án tham gia:</strong><br>
                                                         {!! nl2br(e($item->duan)) !!}
                                                     </div>
                                                     @endif
                                                 </div>
                                                 @endforeach
-                                                @else
-                                                <p class="text-muted"><em>Chưa cập nhật kinh nghiệm làm việc.</em></p>
-                                                @endif
                                             </div>
+                                            @endif
 
-                                            <!-- Học vấn -->
-                                            <div class="mb-4">
-                                                <h5 class="fw-bold text-primary border-bottom border-2 border-primary pb-2 mb-3">
+                                            <!-- ===== HỌC VẤN ===== -->
+                                            @if(isset($hocvan) && $hocvan->count() > 0)
+                                            <div class="cv-content-section">
+                                                <h5 class="cv-section-title">
                                                     <i class="bi bi-mortarboard me-2"></i>Học vấn
                                                 </h5>
-                                                @if(isset($hocvan) && $hocvan->count())
                                                 @foreach($hocvan as $item)
-                                                <div class="mb-3 ps-3 border-start border-3 border-secondary">
-                                                    <h6 class="fw-bold mb-1">{{ $item->truong }}</h6>
-                                                    <p class="mb-1 small">{{ $item->nganh }} - <span class="badge bg-info">{{ $item->trinhdo }}</span></p>
-                                                    <p class="text-muted small mb-1">
-                                                        <i class="bi bi-calendar-range me-1"></i>
+                                                <div class="cv-timeline-item">
+                                                    <div class="cv-job-title">{{ $item->truong ?? 'N/A' }}</div>
+                                                    <div class="cv-date">
+                                                        {{ $item->nganh ?? 'N/A' }} -
+                                                        <span class="cv-badge" style="background: #e3f2fd; color: #1976d2;">
+                                                            {{ $item->trinhdo ?? 'N/A' }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="cv-date">
+                                                        <i class="bi bi-calendar-event me-1"></i>
                                                         {{ \Carbon\Carbon::parse($item->tu_ngay)->format('Y') }} -
-                                                        {{ $item->dang_hoc ? 'Hiện tại' : \Carbon\Carbon::parse($item->den_ngay)->format('Y') }}
-                                                    </p>
+                                                        {{ $item->dang_hoc ? '<span class="badge bg-success text-white">Hiện tại</span>' : \Carbon\Carbon::parse($item->den_ngay)->format('Y') }}
+                                                    </div>
                                                     @if($item->thongtin_khac)
-                                                    <p class="small text-muted fst-italic mb-0">{{ $item->thongtin_khac }}</p>
+                                                    <p class="cv-description fst-italic mb-0">{{ $item->thongtin_khac }}</p>
                                                     @endif
                                                 </div>
                                                 @endforeach
-                                                @else
-                                                <p class="text-muted"><em>Chưa cập nhật học vấn.</em></p>
-                                                @endif
                                             </div>
+                                            @endif
 
-                                            <!-- Kỹ năng -->
-                                            <div class="mb-4">
-                                                <h5 class="fw-bold text-primary border-bottom border-2 border-primary pb-2 mb-3">
+                                            <!-- ===== KỸ NĂNG ===== -->
+                                            @if(isset($kynang) && $kynang->count() > 0)
+                                            <div class="cv-content-section">
+                                                <h5 class="cv-section-title">
                                                     <i class="bi bi-lightbulb me-2"></i>Kỹ năng
                                                 </h5>
-                                                @if(isset($kynang) && $kynang->count())
                                                 <div class="d-flex flex-wrap gap-2">
                                                     @foreach($kynang as $item)
-                                                    <span class="badge bg-primary fs-6 py-2 px-3">
+                                                    <span class="cv-badge">
                                                         {{ $item->ten_ky_nang }}
-                                                        <span class="opacity-75">({{ $item->nam_kinh_nghiem == 0 ? '<1 năm' : $item->nam_kinh_nghiem . ' năm' }})</span>
+                                                        <span style="opacity: 0.85;">({{ $item->nam_kinh_nghiem == 0 ? '< 1 năm' : $item->nam_kinh_nghiem . ' năm' }})</span>
                                                     </span>
                                                     @endforeach
                                                 </div>
-                                                @else
-                                                <p class="text-muted"><em>Chưa cập nhật kỹ năng.</em></p>
-                                                @endif
                                             </div>
+                                            @endif
 
-                                            <!-- Dự án nổi bật -->
+                                            <!-- ===== DỰ ÁN NỔI BẬT ===== -->
                                             @if(isset($duAn) && $duAn->count() > 0)
-                                            <div class="mb-4">
-                                                <h5 class="fw-bold text-primary border-bottom border-2 border-primary pb-2 mb-3">
+                                            <div class="cv-content-section">
+                                                <h5 class="cv-section-title">
                                                     <i class="bi bi-kanban me-2"></i>Dự án nổi bật
                                                 </h5>
                                                 @foreach($duAn as $da)
-                                                <div class="mb-3 ps-3 border-start border-3 border-secondary">
-                                                    <h6 class="fw-bold mb-1">{{ $da->ten_duan }}</h6>
-                                                    <p class="text-muted small mb-2">
-                                                        <i class="bi bi-calendar-range me-1"></i>
+                                                <div class="cv-timeline-item">
+                                                    <div class="cv-job-title">{{ $da->ten_duan ?? 'N/A' }}</div>
+                                                    <div class="cv-date">
+                                                        <i class="bi bi-calendar-event me-1"></i>
                                                         {{ date('m/Y', strtotime($da->ngay_bat_dau)) }} -
-                                                        {{ $da->dang_lam ? 'Hiện tại' : date('m/Y', strtotime($da->ngay_ket_thuc)) }}
-                                                    </p>
+                                                        {{ $da->dang_lam ? '<span class="badge bg-success text-white">Hiện tại</span>' : date('m/Y', strtotime($da->ngay_ket_thuc)) }}
+                                                    </div>
                                                     @if($da->mota_duan)
-                                                    <div class="small mb-2">
+                                                    <div class="cv-description mb-2">
                                                         {!! nl2br(e($da->mota_duan)) !!}
                                                     </div>
                                                     @endif
                                                     @if($da->duongdan_website)
-                                                    <p class="small mb-0">
-                                                        <i class="bi bi-link-45deg text-primary"></i>
-                                                        <a href="{{ $da->duongdan_website }}" target="_blank" class="text-decoration-none">
-                                                            {{ $da->duongdan_website }}
+                                                    <p class="mb-0">
+                                                        <a href="{{ $da->duongdan_website }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                            <i class="bi bi-box-arrow-up-right me-1"></i>Xem dự án
                                                         </a>
                                                     </p>
                                                     @endif
@@ -1272,31 +1540,28 @@
                                             </div>
                                             @endif
 
-                                            <!-- Chứng chỉ -->
+                                            <!-- ===== CHỨNG CHỈ ===== -->
                                             @if(isset($chungChi) && $chungChi->count() > 0)
-                                            <div class="mb-4">
-                                                <h5 class="fw-bold text-primary border-bottom border-2 border-primary pb-2 mb-3">
+                                            <div class="cv-content-section">
+                                                <h5 class="cv-section-title">
                                                     <i class="bi bi-award me-2"></i>Chứng chỉ
                                                 </h5>
                                                 @foreach($chungChi as $cc)
-                                                <div class="mb-3 ps-3 border-start border-3 border-secondary">
-                                                    <h6 class="fw-bold mb-1">{{ $cc->ten_chungchi }}</h6>
-                                                    <p class="text-muted small mb-1">
-                                                        <i class="bi bi-building me-1"></i>{{ $cc->to_chuc }}
-                                                    </p>
-                                                    <p class="text-muted small mb-2">
+                                                <div class="cv-timeline-item">
+                                                    <div class="cv-job-title">{{ $cc->ten_chungchi ?? 'N/A' }}</div>
+                                                    <div class="cv-company">{{ $cc->to_chuc ?? 'N/A' }}</div>
+                                                    <div class="cv-date">
                                                         <i class="bi bi-calendar me-1"></i>{{ date('m/Y', strtotime($cc->thoigian)) }}
-                                                    </p>
+                                                    </div>
                                                     @if($cc->mo_ta)
-                                                    <div class="small mb-2">
+                                                    <div class="cv-description mb-2">
                                                         {!! nl2br(e($cc->mo_ta)) !!}
                                                     </div>
                                                     @endif
                                                     @if($cc->link_chungchi)
-                                                    <p class="small mb-0">
-                                                        <i class="bi bi-link-45deg text-primary"></i>
-                                                        <a href="{{ $cc->link_chungchi }}" target="_blank" class="text-decoration-none">
-                                                            Xem chứng chỉ
+                                                    <p class="mb-0">
+                                                        <a href="{{ $cc->link_chungchi }}" target="_blank" class="btn btn-sm btn-outline-warning">
+                                                            <i class="bi bi-box-arrow-up-right me-1"></i>Xem chứng chỉ
                                                         </a>
                                                     </p>
                                                     @endif
@@ -1305,26 +1570,23 @@
                                             </div>
                                             @endif
 
-                                            <!-- Giải thưởng -->
+                                            <!-- ===== GIẢI THƯỞNG ===== -->
                                             @if(isset($giaiThuong) && $giaiThuong->count() > 0)
-                                            <div class="mb-4">
-                                                <h5 class="fw-bold text-primary border-bottom border-2 border-primary pb-2 mb-3">
+                                            <div class="cv-content-section">
+                                                <h5 class="cv-section-title">
                                                     <i class="bi bi-trophy me-2"></i>Giải thưởng
                                                 </h5>
                                                 @foreach($giaiThuong as $gt)
-                                                <div class="mb-3 ps-3 border-start border-3 border-warning">
-                                                    <h6 class="fw-bold mb-1">
-                                                        <i class="bi bi-trophy-fill text-warning me-1"></i>
-                                                        {{ $gt->ten_giaithuong }}
-                                                    </h6>
-                                                    <p class="text-muted small mb-1">
-                                                        <i class="bi bi-building me-1"></i>{{ $gt->to_chuc }}
-                                                    </p>
-                                                    <p class="text-muted small mb-2">
-                                                        <i class="bi bi-calendar-event me-1"></i>{{ date('m/Y', strtotime($gt->thoigian)) }}
-                                                    </p>
+                                                <div class="cv-timeline-item">
+                                                    <div class="cv-job-title">
+                                                        <i class="bi bi-trophy-fill text-warning me-2"></i>{{ $gt->ten_giaithuong ?? 'N/A' }}
+                                                    </div>
+                                                    <div class="cv-company">{{ $gt->to_chuc ?? 'N/A' }}</div>
+                                                    <div class="cv-date">
+                                                        <i class="bi bi-calendar-event me-1"></i>{{ date('m/Y', strtotime($gt->thoigian ?? now())) }}
+                                                    </div>
                                                     @if($gt->mo_ta)
-                                                    <div class="small">
+                                                    <div class="cv-description">
                                                         {!! nl2br(e($gt->mo_ta)) !!}
                                                     </div>
                                                     @endif
@@ -1332,19 +1594,28 @@
                                                 @endforeach
                                             </div>
                                             @endif
+
                                         </div>
                                     </div>
                                 </div>
 
-                                <div class="modal-footer bg-light">
-                                    <a href="{{ route('applicant.downloadCV', $applicant->id_uv) }}" class="btn btn-primary">
-                                        <i class="bi bi-download"></i> Download CV
-                                    </a>
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                <!-- ✅ FOOTER CV -->
+                                <div class="modal-footer cv-modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                        <i class="bi bi-x-lg me-1"></i>Đóng
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary" onclick="window.print()">
+                                        <i class="bi bi-printer me-1"></i>In CV
+                                    </button>
+                                    <button type="button" class="btn btn-primary">
+                                        <i class="bi bi-download me-1"></i>Tải PDF
+                                    </button>
                                 </div>
+
                             </div>
                         </div>
                     </div>
+
 
                     <!-- Modal chỉnh sửa hồ sơ -->
                     <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
@@ -1363,29 +1634,31 @@
                                             <div class="col-md-4 text-center mb-3">
                                                 <div class="position-relative d-inline-block">
                                                     <!-- Hiển thị avatar -->
-                                                    <img src="{{ $applicant->avatar 
+                                                    <img id="avatarPreview"
+                                                        src="{{ $applicant->avatar 
                                         ? asset('assets/img/avt/'.$applicant->avatar) 
                                         : asset('assets/img/avt/default-avatar.png') }}"
                                                         class="rounded-circle border"
                                                         alt="Avatar"
-                                                        width="150" height="150">
+                                                        width="150" height="150"
+                                                        style="object-fit: cover;">
 
                                                     <!-- Input upload ẩn -->
                                                     <input type="file" name="avatar" id="avatar" class="d-none" accept="image/*">
 
                                                     <!-- Nút sửa -->
-                                                    <label for="avatar" class="btn btn-sm btn-danger position-absolute bottom-0 start-0">
+                                                    <label for="avatar" class="btn btn-sm btn-danger position-absolute bottom-0 start-0" title="Thay đổi ảnh">
                                                         <i class="bi bi-pencil"></i> Sửa
                                                     </label>
 
                                                     <!-- Nút xóa -->
                                                     @if($applicant->avatar)
-                                                    <a href="{{ route('applicant.deleteAvatar') }}"
-                                                        class="btn btn-sm btn-secondary position-absolute bottom-0 end-0">
+                                                    <button type="button" class="btn btn-sm btn-secondary position-absolute bottom-0 end-0" id="deleteAvatarBtn" title="Xóa ảnh">
                                                         <i class="bi bi-trash"></i> Xóa
-                                                    </a>
+                                                    </button>
                                                     @endif
                                                 </div>
+                                                <p class="text-muted small mt-2">Tối đa 5MB, định dạng: JPG, PNG</p>
                                             </div>
 
                                             <!-- Cột thông tin -->
@@ -1425,6 +1698,7 @@
                                                             <option value="Khác" {{ ($applicant->gioitinh_uv ?? '') == 'Khác' ? 'selected' : '' }}>Khác</option>
                                                         </select>
                                                     </div>
+
                                                     <!-- Địa chỉ -->
                                                     <div class="col-12 mb-3">
                                                         <label for="diachi_uv" class="form-label">Địa chỉ</label>
@@ -1434,7 +1708,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div> <!-- đóng modal-body -->
+                                    </div>
 
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
@@ -1646,7 +1920,7 @@
                         </div>
                     </div>
 
-                    <!-- Modal Thêm Ngoại Ngữ -->
+                    <!-- ✅ MODAL THÊM NGOẠI NGỮ - ĐẶT NGOÀI, KHÔNG BÊN TRONG MODAL KHÁC -->
                     <div class="modal fade" id="addNgoaiNguModal" tabindex="-1" aria-labelledby="addNgoaiNguModalLabel" aria-hidden="true">
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content rounded-3 shadow">
@@ -1722,355 +1996,9 @@
                             </div>
                         </div>
                     </div>
-                    <!-- Modal Thêm/Sửa Kinh Nghiệm -->
-                    <div class="modal fade" id="addKinhNghiemModal" tabindex="-1" aria-hidden="true">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content rounded-3">
-                                <form id="kinhNghiemForm" method="POST" action="{{ route('kinhnghiem.store') }}">
-                                    @csrf
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="kinhNghiemModalLabel">Thêm Kinh Nghiệm Làm Việc</h5>
-                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                                    </div>
-                                    <div class="modal-body">
 
-                                        <!-- Chức danh -->
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Chức danh <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" name="chucdanh" id="kn_chucdanh"
-                                                placeholder="VD: Senior Developer, Marketing Manager..." required>
-                                            <small class="text-muted">Nhập vị trí công việc của bạn</small>
-                                        </div>
-
-                                        <!-- Công ty -->
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Tên công ty <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control" name="congty" id="kn_congty"
-                                                placeholder="VD: FPT Software, Viettel..." required>
-                                            <small class="text-muted">Nơi bạn đã/đang làm việc</small>
-                                        </div>
-
-                                        <!-- Đang làm việc -->
-                                        <div class="form-check mb-3">
-                                            <input type="checkbox" class="form-check-input" name="dang_lam_viec" id="kn_dangLamViec">
-                                            <label for="kn_dangLamViec" class="form-check-label">
-                                                <i class="bi bi-briefcase-fill text-primary me-1"></i>
-                                                Tôi đang làm việc tại đây
-                                            </label>
-                                        </div>
-
-                                        <!-- Thời gian -->
-                                        <div class="row">
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label fw-bold">Từ <span class="text-danger">*</span></label>
-                                                <input type="month" class="form-control" name="tu_ngay" id="kn_tuNgay" required>
-                                            </div>
-                                            <div class="col-md-6 mb-3">
-                                                <label class="form-label fw-bold">Đến</label>
-                                                <input type="month" class="form-control" name="den_ngay" id="kn_denNgay">
-                                            </div>
-                                        </div>
-
-                                        <!-- Mô tả chi tiết -->
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Mô tả chi tiết</label>
-                                            <div class="alert alert-info py-2">
-                                                <i class="bi bi-lightbulb text-warning me-1"></i>
-                                                <strong>Tips:</strong> Tóm lược lĩnh vực công ty, vai trò, trách nhiệm và kết quả đạt được
-                                            </div>
-                                            <textarea class="form-control" name="mota" id="kn_mota"
-                                                rows="6" maxlength="2500" style="height:200px"
-                                                placeholder="VD: 
-                                        - Phát triển và bảo trì hệ thống quản lý khách hàng cho 50+ doanh nghiệp
-                                        - Dẫn dắt team 5 developers, áp dụng Agile/Scrum
-                                        - Tăng hiệu suất hệ thống 40% thông qua tối ưu database..."></textarea>
-                                            <small class="text-muted"><span id="mota_count">0</span>/2500 ký tự</small>
-                                        </div>
-
-                                        <!-- Dự án -->
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Dự án đã tham gia</label>
-                                            <div class="alert alert-info py-2">
-                                                <i class="bi bi-lightbulb text-warning me-1"></i>
-                                                <strong>Tips:</strong> Mô tả dự án quan trọng, vai trò, công nghệ sử dụng
-                                            </div>
-                                            <textarea class="form-control" name="duan" id="kn_duan"
-                                                rows="6" maxlength="2500" style="height:200px"
-                                                placeholder="VD:
-• E-commerce Platform (2023)
-  - Vai trò: Lead Developer
-  - Công nghệ: Laravel, Vue.js, MySQL
-  - Quy mô: Team 8 người
-  - Kết quả: Xử lý 10,000+ đơn hàng/ngày..."></textarea>
-                                            <small class="text-muted"><span id="duan_count">0</span>/2500 ký tự</small>
-                                        </div>
-
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                                        <button type="submit" class="btn btn-primary" id="kinhNghiemSubmitBtn">Lưu</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Modal Thêm Kỹ Năng -->
-                    <!-- Modal Thêm Kỹ Năng -->
-                    <div class="modal fade" id="addKyNangModal" tabindex="-1" aria-labelledby="addKyNangModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-lg">
-                            <div class="modal-content rounded-3 shadow">
-                                <div class="modal-header">
-                                    <h5 class="modal-title fw-bold" id="addKyNangModalLabel">
-                                        <i class="bi bi-lightbulb me-2"></i>Thêm Kỹ Năng
-                                    </h5>
-                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-
-                                <form id="kyNangForm" action="{{ route('applicant.storeKyNang') }}" method="POST">
-                                    @csrf
-                                    <div class="modal-body">
-                                        <p class="text-muted mb-3">
-                                            <i class="bi bi-info-circle me-1"></i>
-                                            Thêm các kỹ năng bạn sở hữu và năm kinh nghiệm của bạn
-                                        </p>
-
-                                        <!-- Danh sách kỹ năng đã chọn (hiển thị tạm thời) -->
-                                        <div id="selectedSkills" class="mb-3"></div>
-
-                                        <!-- Form nhập kỹ năng mới -->
-                                        <div class="border rounded p-3 bg-light">
-                                            <div class="row">
-                                                <!-- Tìm kỹ năng -->
-                                                <div class="col-md-6 mb-3">
-                                                    <label class="form-label fw-bold">Tên kỹ năng <span class="text-danger">*</span></label>
-                                                    <input type="text" id="skillInput" class="form-control" list="skillSuggestions" placeholder="Nhập kỹ năng...">
-                                                    <datalist id="skillSuggestions">
-                                                        <option value="Java">
-                                                        <option value="PHP">
-                                                        <option value="Python">
-                                                        <option value="JavaScript">
-                                                        <option value="HTML">
-                                                        <option value="CSS">
-                                                        <option value="Laravel">
-                                                        <option value="React">
-                                                        <option value="Vue.js">
-                                                        <option value="Node.js">
-                                                        <option value="SQL">
-                                                        <option value="MySQL">
-                                                        <option value="MongoDB">
-                                                        <option value="Git">
-                                                        <option value="Docker">
-                                                        <option value="AWS">
-                                                        <option value="Azure">
-                                                        <option value="Angular">
-                                                        <option value="TypeScript">
-                                                        <option value="C++">
-                                                        <option value="C#">
-                                                        <option value=".NET">
-                                                        <option value="Spring Boot">
-                                                        <option value="Django">
-                                                        <option value="Flask">
-                                                        <option value="Express.js">
-                                                        <option value="REST API">
-                                                        <option value="GraphQL">
-                                                        <option value="Redis">
-                                                        <option value="PostgreSQL">
-                                                        <option value="Elasticsearch">
-                                                    </datalist>
-                                                    <div class="form-text">Ví dụ: Java, PHP, HTML, CSS...</div>
-                                                </div>
-
-                                                <!-- Chọn năm kinh nghiệm -->
-                                                <div class="col-md-6 mb-3">
-                                                    <label class="form-label fw-bold">Năm kinh nghiệm <span class="text-danger">*</span></label>
-                                                    <select id="experienceSelect" class="form-select">
-                                                        <option value="">-- Chọn năm kinh nghiệm --</option>
-                                                        <option value="0">&lt; 1 năm</option>
-                                                        @for($i = 1; $i <= 10; $i++)
-                                                            <option value="{{ $i }}">{{ $i }} năm</option>
-                                                            @endfor
-                                                            <option value="10+">10+ năm</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <!-- Nút thêm kỹ năng vào danh sách -->
-                                            <button type="button" class="btn btn-primary btn-sm" id="addSkillBtn">
-                                                <i class="bi bi-plus-lg"></i> Thêm
-                                            </button>
-                                        </div>
-
-                                        <!-- Hidden inputs cho form submit -->
-                                        <div id="hiddenSkillInputs"></div>
-                                    </div>
-
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                                        <button type="submit" class="btn btn-danger" id="submitKyNangBtn" disabled>
-                                            <i class="bi bi-check-lg"></i> Lưu
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Modal Thêm/Sửa Dự Án Nổi Bật -->
-                    <div class="modal fade" id="addDuAnModal" tabindex="-1" aria-labelledby="addDuAnModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-xl">
-                            <div class="modal-content rounded-3">
-                                <form id="duAnForm" method="POST" action="{{ route('duan.store') }}">
-                                    @csrf
-                                    <div class="modal-header">
-                                        <h5 class="modal-title fw-bold" id="addDuAnModalLabel">
-                                            <i class="bi bi-kanban me-2"></i>Dự án nổi bật
-                                        </h5>
-                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-
-                                    <div class="modal-body">
-                                        <!-- Tips -->
-                                        <div class="alert alert-warning py-2 mb-3">
-                                            <i class="bi bi-lightbulb text-warning me-1"></i>
-                                            <strong>Tips:</strong> Thể hiện dự án liên quan đến kỹ năng và khả năng của bạn, và đảm bảo bao gồm mô tả dự án, vai trò của bạn, công nghệ sử dụng và số thành viên.
-                                        </div>
-
-                                        <!-- Tên dự án -->
-                                        <div class="mb-3">
-                                            <label for="ten_duan" class="form-label fw-bold">
-                                                Tên dự án <span class="text-danger">*</span>
-                                            </label>
-                                            <input type="text"
-                                                class="form-control"
-                                                id="ten_duan"
-                                                name="ten_duan"
-                                                placeholder="VD: Hệ thống quản lý nhân sự, Website bán hàng..."
-                                                required>
-                                        </div>
-
-                                        <!-- Checkbox đang làm -->
-                                        <div class="form-check mb-3">
-                                            <input class="form-check-input"
-                                                type="checkbox"
-                                                id="dang_lam"
-                                                name="dang_lam"
-                                                value="1">
-                                            <label class="form-check-label" for="dang_lam">
-                                                <i class="bi bi-briefcase-fill text-primary me-1"></i>
-                                                Tôi vẫn đang làm dự án này
-                                            </label>
-                                        </div>
-
-                                        <!-- Ngày bắt đầu và kết thúc -->
-                                        <div class="row mb-3">
-                                            <div class="col-md-6">
-                                                <label for="thang_bat_dau" class="form-label fw-bold">
-                                                    Ngày bắt đầu <span class="text-danger">*</span>
-                                                </label>
-                                                <div class="row">
-                                                    <div class="col-6">
-                                                        <select class="form-select" id="thang_bat_dau" name="thang_bat_dau" required>
-                                                            <option value="">Tháng</option>
-                                                            @for($i = 1; $i <= 12; $i++)
-                                                                <option value="{{ $i }}">Tháng {{ $i }}</option>
-                                                                @endfor
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-6">
-                                                        <select class="form-select" id="nam_bat_dau" name="nam_bat_dau" required>
-                                                            <option value="">Năm</option>
-                                                            @for($year = date('Y'); $year >= 1990; $year--)
-                                                            <option value="{{ $year }}">{{ $year }}</option>
-                                                            @endfor
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <label for="thang_ket_thuc" class="form-label fw-bold">
-                                                    Ngày kết thúc <span class="text-danger">*</span>
-                                                </label>
-                                                <div class="row">
-                                                    <div class="col-6">
-                                                        <select class="form-select" id="thang_ket_thuc" name="thang_ket_thuc">
-                                                            <option value="">Tháng</option>
-                                                            @for($i = 1; $i <= 12; $i++)
-                                                                <option value="{{ $i }}">Tháng {{ $i }}</option>
-                                                                @endfor
-                                                        </select>
-                                                    </div>
-                                                    <div class="col-6">
-                                                        <select class="form-select" id="nam_ket_thuc" name="nam_ket_thuc">
-                                                            <option value="">Năm</option>
-                                                            @for($year = date('Y'); $year >= 1990; $year--)
-                                                            <option value="{{ $year }}">{{ $year }}</option>
-                                                            @endfor
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <!-- Mô tả dự án - KHUNG LỚN -->
-                                        <div class="mb-3">
-                                            <label for="mota_duan" class="form-label fw-bold">Mô tả dự án</label>
-
-                                            <textarea class="form-control"
-                                                id="mota_duan"
-                                                name="mota_duan"
-                                                rows="15"
-                                                maxlength="2500"
-                                                style="min-height: 350px; font-size: 14px;"
-                                                placeholder="• Mô tả: Viết mô tả ngắn gọn dự án
-• Vai trò: Chức danh của bạn trong dự án
-• Trách nhiệm:
-  ◦ Trách nhiệm đầu tiên
-  ◦ Trách nhiệm thứ hai
-• Công nghệ: Liệt kê các công nghệ đã sử dụng
-• Nhóm: x thành viên"></textarea>
-
-                                            <div class="d-flex justify-content-between align-items-center mt-2">
-                                                <small class="text-muted">
-                                                    <span id="mota_count">0</span>/2500 ký tự
-                                                </small>
-                                                <button type="button"
-                                                    class="btn btn-sm btn-outline-secondary"
-                                                    id="insertTemplateBtn">
-                                                    <i class="bi bi-file-text"></i> Chèn mẫu gợi ý
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <!-- Đường dẫn website -->
-                                        <div class="mb-3">
-                                            <label for="duongdan_website" class="form-label fw-bold">Đường dẫn website</label>
-                                            <input type="url"
-                                                class="form-control"
-                                                id="duongdan_website"
-                                                name="duongdan_website"
-                                                placeholder="https://example.com">
-                                            <small class="text-muted">URL demo hoặc source code (Github, Gitlab...)</small>
-                                        </div>
-                                    </div>
-
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
-                                        <button type="submit" class="btn btn-danger" id="submitDuAnBtn">
-                                            <i class="bi bi-check-lg"></i> Lưu
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-
-
-
+                    <!-- ...existing code... -->
                 </div>
-            </div>
-
-        </div>
     </main>
     <!-- xử lý chứng chỉ -->
     <script>
@@ -2962,7 +2890,6 @@
                     const originalHTML = deleteBtn.innerHTML;
                     deleteBtn.innerHTML = '<i class="bi bi-hourglass-split"></i>';
 
-                    // Gửi request xóa
                     fetch(`/applicant/ky-nang/${id}/delete`, {
                             method: 'POST',
                             headers: {
@@ -3152,7 +3079,188 @@
             });
         });
     </script>
+    <!-- ✅ MODAL CHỈNH SỬA MỨC LƯƠNG MONG MUỐN -->
+    <div class="modal fade" id="editMucLuongModal" tabindex="-1" aria-labelledby="editMucLuongModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content rounded-3">
+                <form id="mucLuongForm" method="POST" action="{{ route('applicant.updateMucLuong') }}">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" id="editMucLuongModalLabel">
+                            <i class="bi bi-cash-coin me-2"></i>Cập nhật mức lương mong muốn
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
 
+                    <div class="modal-body">
+                        <div class="alert alert-info py-2 mb-3">
+                            <i class="bi bi-lightbulb text-warning me-1"></i>
+                            <strong>Tips:</strong> Chọn mức lương phù hợp với kinh nghiệm và kỹ năng của bạn để tăng cơ hội được nhà tuyển dụng liên hệ
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="mucluong_mongmuon" class="form-label fw-bold">
+                                Chọn mức lương <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select form-select-lg" name="mucluong_mongmuon" id="mucluong_mongmuon" required>
+                                <option value="">-- Vui lòng chọn mức lương --</option>
+                                <option value="Thỏa thuận" {{ ($applicant->mucluong_mongmuon ?? '') == 'Thỏa thuận' ? 'selected' : '' }}>
+                                    Thỏa thuận
+                                </option>
+                                <option value="Dưới 3 triệu" {{ ($applicant->mucluong_mongmuon ?? '') == 'Dưới 3 triệu' ? 'selected' : '' }}>
+                                    Dưới 3 triệu VNĐ
+                                </option>
+                                <option value="3 triệu - 5 triệu" {{ ($applicant->mucluong_mongmuon ?? '') == '3 triệu - 5 triệu' ? 'selected' : '' }}>
+                                    3 - 5 triệu VNĐ
+                                </option>
+                                <option value="5 triệu - 7 triệu" {{ ($applicant->mucluong_mongmuon ?? '') == '5 triệu - 7 triệu' ? 'selected' : '' }}>
+                                    5 - 7 triệu VNĐ
+                                </option>
+                                <option value="7 triệu - 10 triệu" {{ ($applicant->mucluong_mongmuon ?? '') == '7 triệu - 10 triệu' ? 'selected' : '' }}>
+                                    7 - 10 triệu VNĐ
+                                </option>
+                                <option value="10 triệu - 12 triệu" {{ ($applicant->mucluong_mongmuon ?? '') == '10 triệu - 12 triệu' ? 'selected' : '' }}>
+                                    10 - 12 triệu VNĐ
+                                </option>
+                                <option value="12 triệu - 15 triệu" {{ ($applicant->mucluong_mongmuon ?? '') == '12 triệu - 15 triệu' ? 'selected' : '' }}>
+                                    12 - 15 triệu VNĐ
+                                </option>
+                                <option value="15 triệu - 20 triệu" {{ ($applicant->mucluong_mongmuon ?? '') == '15 triệu - 20 triệu' ? 'selected' : '' }}>
+                                    15 - 20 triệu VNĐ
+                                </option>
+                                <option value="20 triệu - 25 triệu" {{ ($applicant->mucluong_mongmuon ?? '') == '20 triệu - 25 triệu' ? 'selected' : '' }}>
+                                    20 - 25 triệu VNĐ
+                                </option>
+                                <option value="25 triệu - 30 triệu" {{ ($applicant->mucluong_mongmuon ?? '') == '25 triệu - 30 triệu' ? 'selected' : '' }}>
+                                    25 - 30 triệu VNĐ
+                                </option>
+                                <option value="Trên 30 triệu" {{ ($applicant->mucluong_mongmuon ?? '') == 'Trên 30 triệu' ? 'selected' : '' }}>
+                                    Trên 30 triệu VNĐ
+                                </option>
+                            </select>
+                            <small class="text-muted d-block mt-2">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Thông tin này sẽ giúp nhà tuyển dụng biết mức lương bạn đang mong muốn
+                            </small>
+                        </div>
+
+                        <!-- Display preview -->
+                        <div class="mt-4 p-3 bg-light rounded">
+                            <p class="mb-2"><strong>Xem trước:</strong></p>
+                            <div class="alert alert-success mb-0" id="previewSalary">
+                                <i class="bi bi-check-circle me-2"></i>
+                                <span id="previewText">Thỏa thuận</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary" id="submitMucLuongBtn">
+                            <i class="bi bi-check-lg"></i> Lưu thay đổi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ SCRIPT XỬ LÝ MỨC LƯƠNG -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectEl = document.getElementById('mucluong_mongmuon');
+            const previewText = document.getElementById('previewText');
+
+            // Cập nhật preview khi thay đổi select
+            if (selectEl) {
+                selectEl.addEventListener('change', function() {
+                    previewText.textContent = this.value || 'Vui lòng chọn mức lương';
+                });
+
+                // Set preview khi load trang
+                previewText.textContent = selectEl.value || 'Chưa cập nhật';
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const avatarInput = document.getElementById('avatar');
+            const avatarPreview = document.getElementById('avatarPreview');
+            const deleteAvatarBtn = document.getElementById('deleteAvatarBtn');
+
+            // ========== PREVIEW AVATAR TRƯỚC KHI UPLOAD ==========
+            if (avatarInput) {
+                avatarInput.addEventListener('change', function(e) {
+                    const file = this.files[0];
+
+                    if (!file) return;
+
+                    // Validate file size (5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('Kích thước ảnh không được vượt quá 5MB!');
+                        this.value = '';
+                        return;
+                    }
+
+                    // Validate file type
+                    const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+                    if (!validTypes.includes(file.type)) {
+                        alert('Chỉ chấp nhận định dạng JPG hoặc PNG!');
+                        this.value = '';
+                        return;
+                    }
+
+                    // Preview ảnh
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        avatarPreview.src = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            // ========== XÓA AVATAR ==========
+            if (deleteAvatarBtn) {
+                deleteAvatarBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    if (confirm('Bạn có chắc muốn xóa ảnh đại diện?')) {
+                        // Disable button
+                        deleteAvatarBtn.disabled = true;
+                        deleteAvatarBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Đang xóa...';
+
+                        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
+                        fetch('{{ route("applicant.deleteAvatar") }}', {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': csrfToken,
+                                    'Content-Type': 'application/json'
+                                }
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    alert('Đã xóa ảnh đại diện!');
+                                    // Reload trang
+                                    location.reload();
+                                } else {
+                                    alert(data.message || 'Lỗi khi xóa ảnh!');
+                                    deleteAvatarBtn.disabled = false;
+                                    deleteAvatarBtn.innerHTML = '<i class="bi bi-trash"></i> Xóa';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Lỗi:', error);
+                                alert('Không thể xóa ảnh. Vui lòng thử lại!');
+                                deleteAvatarBtn.disabled = false;
+                                deleteAvatarBtn.innerHTML = '<i class="bi bi-trash"></i> Xóa';
+                            });
+                    }
+                });
+            }
+        });
+    </script>
     @include('applicant.partials.footer')
 </body>
 

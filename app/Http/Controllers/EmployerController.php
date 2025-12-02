@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\JobPost;
 use App\Models\Application;
+use App\Models\Applicant;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -291,5 +292,82 @@ class EmployerController extends Controller
         }
 
         return response()->download($filePath);
+    }
+    public function searchCandidates(Request $request)
+    {
+        $query = Applicant::query();
+
+        // ✅ FIX: Filter theo từ khóa
+        if ($request->has('keyword') && !empty($request->keyword)) {
+            $keyword = $request->keyword;
+            $query->where(function ($q) use ($keyword) {
+                $q->where('hoten_uv', 'LIKE', "%{$keyword}%")
+                    ->orWhere('chucdanh', 'LIKE', "%{$keyword}%")
+                    ->orWhere('gioithieu', 'LIKE', "%{$keyword}%");
+            });
+        }
+
+        // ✅ FIX: Filter theo địa điểm - Kiểm tra array không rỗng
+        if ($request->has('location')) {
+            $locations = $request->location;
+
+            // ✅ QUAN TRỌNG: Đảm bảo $locations là array và không rỗng
+            if (is_array($locations) && count($locations) > 0) {
+                $query->whereIn('diachi_uv', $locations);
+            }
+        }
+
+        // ✅ FIX: Filter theo kinh nghiệm
+        if ($request->has('experience')) {
+            $experiences = $request->experience;
+
+            if (is_array($experiences) && count($experiences) > 0) {
+                $query->whereHas('kinhnghiem', function ($q) use ($experiences) {
+                    $q->whereIn('experience_level', $experiences);
+                });
+            }
+        }
+
+        // ✅ FIX: Filter theo học vấn
+        if ($request->has('education')) {
+            $educations = $request->education;
+
+            if (is_array($educations) && count($educations) > 0) {
+                $query->whereHas('hocvan', function ($q) use ($educations) {
+                    $q->whereIn('trinh_do', $educations);
+                });
+            }
+        }
+
+        // ✅ FIX: Filter theo kỹ năng
+        if ($request->has('skills')) {
+            $skills = $request->skills;
+
+            if (is_array($skills) && count($skills) > 0) {
+                $query->whereHas('kynang', function ($q) use ($skills) {
+                    $q->whereIn('ten_ky_nang', $skills);
+                });
+            }
+        }
+
+        // Load relationships
+        $candidates = $query->with(['kynang', 'kinhnghiem', 'hocvan', 'user'])
+            ->paginate(12);
+
+        return view('employer.candidates', compact('candidates'));
+    }
+
+    // ✅ API endpoint để lấy chi tiết ứng viên (cho modal)
+    public function getCandidateDetail($candidateId)
+    {
+        $candidate = Applicant::with([
+            'kynang',
+            'kinhnghiem',
+            'hocvan',
+            'ngoaiNgu',
+            'user'
+        ])->findOrFail($candidateId);
+
+        return response()->json($candidate);
     }
 }

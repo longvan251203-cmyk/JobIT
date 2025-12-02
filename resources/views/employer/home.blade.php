@@ -463,7 +463,8 @@
 
             <div class="flex items-center gap-4">
                 <a href="{{ url('/employer/postjob') }}" class="hidden md:block px-4 py-2 text-purple-600 border border-purple-600 rounded-lg font-semibold hover:bg-purple-50 transition-all">Đăng tuyển</a>
-                <a href="{{ route('job.applicants.dashboard') }}" class="hidden md:block px-4 py-2 text-green-600 border border-green-600 rounded-lg font-semibold hover:bg-green-50 transition-all">
+                <a href="{{ route('employer.candidates') }}"
+                    class="hidden md:block px-4 py-2 text-green-600 border border-green-600 rounded-lg font-semibold hover:bg-green-50 transition-all">
                     <i class="bi bi-people-fill me-1"></i>Ứng viên
                 </a>
 

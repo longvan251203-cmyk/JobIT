@@ -24,7 +24,8 @@ class Applicant extends Model
         'diachi_uv',
         'avatar',
         'cv',          // thêm nếu bạn lưu CV
-        'gioithieu'
+        'gioithieu',
+        'mucluong_mongmuon',
     ];
 
     protected $casts = [

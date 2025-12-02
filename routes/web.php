@@ -342,3 +342,35 @@ Route::middleware(['auth', 'employer'])->group(function () {
 
     // ...existing routes...
 });
+Route::middleware('auth')->group(function () {
+    Route::get('/employer/candidates', [EmployerController::class, 'searchCandidates'])->name('employer.candidates');
+    Route::get('/employer/candidates/{id}', [EmployerController::class, 'viewCandidateCV'])->name('employer.candidate.view');
+    Route::get('/employer/candidates/{id}/download-cv', [ApplicantController::class, 'downloadCV'])->name('employer.candidate.downloadCV');
+});
+// ✅ Thêm route update mức lương
+Route::middleware(['auth'])->group(function () {
+    Route::post('/applicant/update-muc-luong', [ApplicantController::class, 'updateMucLuong'])
+        ->name('applicant.updateMucLuong');
+
+    // Route khác...
+});
+// Thêm vào file routes/web.php
+
+use App\Http\Controllers\CandidatesController;
+
+// ============ EMPLOYER ROUTES - Candidates Management ============
+// Sử dụng middleware 'auth' thay vì 'employer' (tạm thời)
+Route::middleware(['auth'])->prefix('employer')->name('employer.')->group(function () {
+
+    // Danh sách ứng viên với filter
+    Route::get('/candidates', [CandidatesController::class, 'index'])->name('candidates');
+
+    // Xem chi tiết ứng viên (JSON)
+    Route::get('/candidates/{id}', [CandidatesController::class, 'show'])->name('candidates.show');
+
+    // Download CV
+    Route::get('/candidates/{id}/download-cv', [CandidatesController::class, 'downloadCV'])->name('candidates.download');
+
+    // Liên hệ ứng viên
+    Route::get('/candidates/{id}/contact', [CandidatesController::class, 'contact'])->name('candidates.contact');
+});
