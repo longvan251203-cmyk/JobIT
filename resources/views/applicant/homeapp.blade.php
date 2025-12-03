@@ -938,6 +938,511 @@
             transform: scale(1);
         }
     }
+
+    /* ========== TOP COMPANIES SECTION ========== */
+    .main-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+
+    .featured-section {
+        margin: 2rem 0;
+    }
+
+    .section-title-highlight {
+        margin-bottom: 1.5rem;
+    }
+
+    .section-subtitle {
+        font-size: 0.9rem;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+    }
+
+    h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0 0 1rem 0;
+        line-height: 1.2;
+    }
+
+    /* TOP COMPANIES - COMPANY CARD */
+    .companies-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .company-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .company-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .company-card-logo {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        overflow: hidden;
+        flex-shrink: 0;
+        margin-bottom: 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .company-card-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .company-card-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .company-card-meta {
+        font-size: 0.85rem;
+        color: #6b7280;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .company-card-meta i {
+        color: #10b981;
+        font-size: 0.9rem;
+    }
+
+    /* ========== RECOMMENDED JOBS SECTION (NEW) ========== */
+    .recommended-jobs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 2rem;
+        margin: 2rem 0;
+    }
+
+    .recommended-job-card {
+        background: white;
+        border-radius: 18px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        border: 2px solid transparent;
+    }
+
+    .recommended-job-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #764ba2);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .recommended-job-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+        border-color: rgba(102, 126, 234, 0.2);
+    }
+
+    .recommended-job-card:hover::before {
+        opacity: 1;
+    }
+
+    .recommended-job-card.high-match {
+        border-color: rgba(17, 153, 142, 0.2);
+    }
+
+    .recommended-job-card.high-match::before {
+        background: linear-gradient(90deg, #11998e, #38ef7d);
+    }
+
+    .recommended-job-card.medium-match {
+        border-color: rgba(102, 126, 234, 0.2);
+    }
+
+    /* Match Badge */
+    .match-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 1.4rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 10;
+    }
+
+    .match-badge.high-match {
+        background: linear-gradient(135deg, #11998e, #38ef7d);
+        color: white;
+    }
+
+    .match-badge.medium-match {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .match-badge.low-match {
+        background: linear-gradient(135deg, #fa709a, #fee140);
+        color: white;
+    }
+
+    .match-percentage {
+        text-align: center;
+    }
+
+    /* Company Header */
+    .rec-job-header {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1.2rem;
+        padding-top: 0.5rem;
+    }
+
+    .rec-company-logo {
+        width: 60px;
+        height: 60px;
+        border-radius: 14px;
+        flex-shrink: 0;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .rec-company-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .rec-job-info {
+        flex: 1;
+    }
+
+    .rec-job-title {
+        font-size: 1.05rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0 0 0.4rem 0;
+        line-height: 1.4;
+    }
+
+    .rec-company-name {
+        font-size: 0.85rem;
+        color: #718096;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    /* Meta Information */
+    .rec-job-meta {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .meta-item {
+        font-size: 0.85rem;
+        color: #4b5563;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .meta-item i {
+        color: #667eea;
+        font-size: 0.9rem;
+    }
+
+    /* Salary */
+    .rec-job-salary {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #11998e;
+        margin-bottom: 1rem;
+        padding: 0.75rem;
+        background: linear-gradient(135deg, rgba(17, 153, 142, 0.05) 0%, rgba(56, 239, 125, 0.05) 100%);
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .rec-job-salary .negotiable {
+        color: #667eea;
+    }
+
+    /* Tags */
+    .rec-job-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        margin-bottom: 1rem;
+    }
+
+    .rec-tag {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(102, 126, 234, 0.05) 100%);
+        color: #667eea;
+        border-radius: 20px;
+        font-weight: 600;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+    }
+
+    .rec-tag:hover {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(102, 126, 234, 0.15) 100%);
+    }
+
+    .rec-tag.more {
+        background: linear-gradient(135deg, rgba(250, 112, 154, 0.1) 0%, rgba(250, 112, 154, 0.05) 100%);
+        color: #fa709a;
+    }
+
+    /* Deadline */
+    .rec-job-deadline {
+        font-size: 0.85rem;
+        color: #718096;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .rec-job-deadline i {
+        color: #fa709a;
+    }
+
+    /* Action Buttons */
+    .rec-job-actions {
+        display: flex;
+        gap: 0.6rem;
+    }
+
+    .rec-btn {
+        flex: 1;
+        padding: 0.75rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-height: 40px;
+    }
+
+    .rec-btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        flex: 2;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .rec-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    }
+
+    .rec-btn-primary:active {
+        transform: translateY(0);
+    }
+
+    .rec-btn-icon {
+        width: 40px;
+        min-width: 40px;
+        padding: 0;
+        background: white;
+        color: #718096;
+        border: 2px solid #e5e7eb;
+    }
+
+    .rec-btn-icon:hover {
+        border-color: #667eea;
+        color: #667eea;
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .rec-btn-icon.saved {
+        border-color: #ef4444;
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.05);
+    }
+
+    /* Match Indicator Line */
+    .match-indicator {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: #e5e7eb;
+    }
+
+    .match-indicator.high-match {
+        background: linear-gradient(90deg, #11998e, #38ef7d);
+    }
+
+    .match-indicator.medium-match {
+        background: linear-gradient(90deg, #667eea, #764ba2);
+    }
+
+    .match-indicator.low-match {
+        background: linear-gradient(90deg, #fa709a, #fee140);
+    }
+
+    /* View All Button */
+    .btn-view-all {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 1rem 2.5rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-view-all:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 28px rgba(102, 126, 234, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-view-all i:last-child {
+        transition: transform 0.3s ease;
+    }
+
+    .btn-view-all:hover i:last-child {
+        transform: translateX(4px);
+    }
+
+    /* Empty State */
+    .rec-empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        border-radius: 20px;
+        border: 2px dashed #e5e7eb;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        color: #cbd5e1;
+        margin-bottom: 1rem;
+    }
+
+    .rec-empty-state h4 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .rec-empty-state p {
+        color: #718096;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-complete-profile {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 0.9rem 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 700;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-complete-profile:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px rgba(102, 126, 234, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 1200px) {
+        .recommended-jobs-grid {
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .recommended-jobs-grid {
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .match-badge {
+            width: 60px;
+            height: 60px;
+            font-size: 1.2rem;
+        }
+
+        .rec-btn {
+            font-size: 0.8rem;
+            padding: 0.6rem;
+        }
+
+        .rec-btn-primary {
+            flex: 1.5;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .recommended-jobs-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .rec-job-actions {
+            gap: 0.4rem;
+        }
+
+        .rec-btn {
+            min-height: 36px;
+        }
+    }
 </style>
 
 <body>
@@ -1437,6 +1942,125 @@
             </div>
         </div>
     </div>
+
+
+    <!-- ========== RECOMMENDED JOBS SECTION (NEW) ========== -->
+    <div class="main-container">
+        <div class="featured-section">
+            <div class="section-title-highlight">
+                <div class="section-subtitle">DÀNH CHO BẠN</div>
+                <h2>Các công việc được gợi ý</h2>
+                <p style="color: #718096; margin-top: 0.5rem;">Được cá nhân hóa dựa trên kỹ năng và kinh nghiệm của bạn</p>
+            </div>
+
+            @if(Auth::check() && $recommendedJobs && $recommendedJobs->count() > 0)
+            <div class="recommended-jobs-grid">
+                @foreach($recommendedJobs as $rec)
+                @php
+                $job = $rec->job;
+                $matchScore = $rec->score ?? 0;
+                $matchClass = $matchScore >= 80 ? 'high-match' : ($matchScore >= 60 ? 'medium-match' : 'low-match');
+                @endphp
+
+                <div class="recommended-job-card {{ $matchClass }}" data-job-id="{{ $job->job_id }}">
+                    <div class="match-badge {{ $matchClass }}">
+                        <div class="match-percentage">{{ number_format($matchScore, 0) }}%</div>
+                    </div>
+
+                    <div class="rec-job-header">
+                        <div class="rec-company-logo">
+                            @if($job->company && $job->company->logo)
+                            <img src="{{ asset('assets/img/' . $job->company->logo) }}" alt="{{ $job->company->tencty }}">
+                            @else
+                            <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667EEA, #764BA2); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.5rem;">
+                                {{ substr($job->company->tencty ?? 'C', 0, 1) }}
+                            </div>
+                            @endif
+                        </div>
+                        <div class="rec-job-info">
+                            <h4 class="rec-job-title">{{ Str::limit($job->title, 45) }}</h4>
+                            <p class="rec-company-name">{{ $job->company->tencty ?? 'Công ty' }}</p>
+                        </div>
+                    </div>
+
+                    <div class="rec-job-meta">
+                        <span class="meta-item">
+                            <i class="bi bi-geo-alt"></i>
+                            {{ $job->province }}
+                        </span>
+                        <span class="meta-item">
+                            <i class="bi bi-briefcase"></i>
+                            {{ ucfirst($job->level) }}
+                        </span>
+                    </div>
+
+                    <div class="rec-job-salary">
+                        @if($job->salary_min && $job->salary_max)
+                        {{ number_format($job->salary_min, 0, ',', '.') }} - {{ number_format($job->salary_max, 0, ',', '.') }} {{ strtoupper($job->salary_type) }}
+                        @else
+                        <span class="negotiable">Thỏa thuận</span>
+                        @endif
+                    </div>
+
+                    @if($job->hashtags && $job->hashtags->count() > 0)
+                    <div class="rec-job-tags">
+                        @foreach($job->hashtags->take(3) as $tag)
+                        <span class="rec-tag">{{ $tag->tag_name }}</span>
+                        @endforeach
+                        @if($job->hashtags->count() > 3)
+                        <span class="rec-tag more">+{{ $job->hashtags->count() - 3 }}</span>
+                        @endif
+                    </div>
+                    @endif
+
+                    <div class="rec-job-deadline">
+                        <i class="bi bi-clock-history"></i>
+                        Hạn: {{ \Carbon\Carbon::parse($job->deadline)->format('d/m/Y') }}
+                    </div>
+
+                    <div class="rec-job-actions">
+                        <button class="rec-btn rec-btn-primary" onclick="openApplyModal('{{ $job->job_id }}')">
+                            <i class="bi bi-send-fill"></i>
+                            Ứng tuyển
+                        </button>
+                        <button class="rec-btn rec-btn-icon save-btn-rec" data-job-id="{{ $job->job_id }}" title="Lưu công việc">
+                            <i class="bi bi-heart"></i>
+                        </button>
+                        <a href="{{ route('job.detail', $job->job_id) }}" class="rec-btn rec-btn-icon" title="Xem chi tiết">
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+
+                    <div class="match-indicator {{ $matchClass }}"></div>
+                </div>
+                @endforeach
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{{ route('applicant.recommendations') }}" class="btn-view-all">
+                    <i class="bi bi-stars"></i>
+                    <span>Xem tất cả gợi ý ({{ $recommendedJobs->count() }})</span>
+                    <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+            @else
+            <div class="rec-empty-state">
+                <div class="empty-icon">
+                    <i class="bi bi-stars"></i>
+                </div>
+                <h4>Chưa có gợi ý</h4>
+                <p>Hoàn thành hồ sơ của bạn để nhận những gợi ý công việc tốt nhất</p>
+                <a href="{{ route('applicant.profile') }}" class="btn-complete-profile">
+                    <i class="bi bi-pencil-square"></i>
+                    Hoàn thành hồ sơ
+                </a>
+            </div>
+            @endif
+        </div>
+    </div>
+
+    <!-- ========== BLOG SECTION ========== -->
+    <!-- ...existing code... -->
     <!-- ========== BLOG SECTION ========== -->
     <div class="main-container">
         <div class="featured-section">
@@ -1690,10 +2314,15 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Main Application Script -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            'use strict';
 
-            // ✅ THÊM HÀM NÀY NGAY ĐẦU
+            // ========================================
+            // HELPER FUNCTIONS
+            // ========================================
+
             function getExperienceLabel(code) {
                 const labels = {
                     'no_experience': 'Không yêu cầu',
@@ -1704,33 +2333,24 @@
                 };
                 return labels[code] || code;
             }
-            // ========== BIẾN GLOBAL ==========
-            const gridView = document.getElementById('gridView');
-            const detailView = document.getElementById('detailView');
-            const backToGridBtn = document.getElementById('backToGrid');
-            const jobDetailColumn = document.getElementById('jobDetailColumn');
-            const jobListColumn = document.getElementById('jobListColumn');
-            const loadingOverlay = document.getElementById('jobsLoadingOverlay');
-            const paginationWrapper = document.getElementById('paginationWrapper');
 
-            // ========== XỬ LÝ USER DROPDOWN ==========
-            const userDropdownBtn = document.getElementById('userDropdownBtn');
-            const userDropdown = document.querySelector('.user-dropdown');
-
-            if (userDropdownBtn) {
-                userDropdownBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    userDropdown.classList.toggle('active');
-                });
-
-                document.addEventListener('click', function(e) {
-                    if (!userDropdown.contains(e.target)) {
-                        userDropdown.classList.remove('active');
-                    }
-                });
+            function formatLocationDisplay(locationName) {
+                if (!locationName) return '';
+                return locationName
+                    .replace('Thành phố ', '')
+                    .replace('Tỉnh ', '')
+                    .trim();
             }
 
-            // ========== TOAST NOTIFICATION ==========
+            function checkAuth() {
+                const isLoggedIn = document.querySelector('meta[name="user-authenticated"]');
+                return isLoggedIn && isLoggedIn.content === 'true';
+            }
+
+            // ========================================
+            // TOAST NOTIFICATION
+            // ========================================
+
             function showToast(message, type = 'success') {
                 const oldToast = document.querySelector('.custom-toast');
                 if (oldToast) oldToast.remove();
@@ -1747,14 +2367,14 @@
                     type === 'info' ? 'bi-info-circle-fill' : 'bi-heart-fill';
 
                 toast.style.cssText = `
-            position: fixed; top: 80px; right: 20px;
-            background: ${bgColor}; color: white;
-            padding: 1rem 1.5rem; border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-            z-index: 9999; animation: slideIn 0.3s ease;
-            display: flex; align-items: center; gap: 0.75rem;
-            font-weight: 500; min-width: 280px;
-        `;
+                position: fixed; top: 80px; right: 20px;
+                background: ${bgColor}; color: white;
+                padding: 1rem 1.5rem; border-radius: 12px;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+                z-index: 9999; animation: slideIn 0.3s ease;
+                display: flex; align-items: center; gap: 0.75rem;
+                font-weight: 500; min-width: 280px;
+            `;
 
                 toast.innerHTML = `<i class="bi ${icon}" style="font-size: 1.2rem;"></i><span>${message}</span>`;
                 document.body.appendChild(toast);
@@ -1765,87 +2385,111 @@
                 }, 3000);
             }
 
+            // Add animation styles
             if (!document.getElementById('toast-animations')) {
                 const style = document.createElement('style');
                 style.id = 'toast-animations';
                 style.textContent = `
-            @keyframes slideIn {
-                from { transform: translateX(400px); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            @keyframes slideOut {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(400px); opacity: 0; }
-            }
-        `;
+                @keyframes slideIn {
+                    from { transform: translateX(400px); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOut {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(400px); opacity: 0; }
+                }
+            `;
                 document.head.appendChild(style);
             }
 
-            // ========== KIỂM TRA ĐĂNG NHẬP ==========
-            function checkAuth() {
-                const isLoggedIn = document.querySelector('meta[name="user-authenticated"]');
-                return isLoggedIn && isLoggedIn.content === 'true';
+            // ========================================
+            // DOM ELEMENTS
+            // ========================================
+
+            const gridView = document.getElementById('gridView');
+            const detailView = document.getElementById('detailView');
+            const backToGridBtn = document.getElementById('backToGrid');
+            const jobDetailColumn = document.getElementById('jobDetailColumn');
+            const jobListColumn = document.getElementById('jobListColumn');
+            const loadingOverlay = document.getElementById('jobsLoadingOverlay');
+            const paginationWrapper = document.getElementById('paginationWrapper');
+
+            // Search & Filter Elements
+            const searchInput = document.getElementById('searchInput');
+            const locationSelect = document.getElementById('locationSelect');
+            const searchBtn = document.getElementById('searchBtn');
+            const resetBtn = document.getElementById('resetFiltersBtn');
+
+            // Dropdown buttons
+            const categoryBtn = document.getElementById('categoryFilterBtn');
+            const levelBtn = document.getElementById('levelFilterBtn');
+            const experienceBtn = document.getElementById('experienceFilterBtn');
+            const workingTypeBtn = document.getElementById('workingTypeFilterBtn');
+
+            // Dropdown menus
+            const categoryDropdown = document.getElementById('categoryDropdown');
+            const levelDropdown = document.getElementById('levelDropdown');
+            const experienceDropdown = document.getElementById('experienceDropdown');
+            const workingTypeDropdown = document.getElementById('workingTypeDropdown');
+
+            // ========================================
+            // USER DROPDOWN
+            // ========================================
+
+            const userDropdownBtn = document.getElementById('userDropdownBtn');
+            const userDropdown = document.querySelector('.user-dropdown');
+
+            if (userDropdownBtn) {
+                userDropdownBtn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    userDropdown.classList.toggle('active');
+                });
+
+                document.addEventListener('click', function(e) {
+                    if (!userDropdown.contains(e.target)) {
+                        userDropdown.classList.remove('active');
+                    }
+                });
             }
 
-            // ========== CẬP NHẬT NÚT ỨNG TUYỂN ==========
+            // ========================================
+            // APPLY & SAVE BUTTON MANAGEMENT
+            // ========================================
+
             function updateApplyButton(button, hasApplied) {
                 if (!button) return;
 
                 const icon = button.querySelector('i');
+                button.classList.toggle('applied', hasApplied);
+                button.disabled = hasApplied;
+                button.title = hasApplied ? 'Bạn đã ứng tuyển công việc này' : 'Ứng tuyển ngay';
 
-                if (hasApplied) {
-                    button.classList.add('applied');
-                    button.disabled = true;
-                    button.title = 'Bạn đã ứng tuyển công việc này';
+                if (icon) {
+                    icon.classList.toggle('bi-send-fill', !hasApplied);
+                    icon.classList.toggle('bi-check-circle-fill', hasApplied);
+                }
 
-                    if (icon) {
-                        icon.classList.remove('bi-send-fill');
-                        icon.classList.add('bi-check-circle-fill');
-                    }
+                const textContent = hasApplied ? 'Đã ứng tuyển' : 'Ứng tuyển ngay';
+                const textNode = Array.from(button.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
 
-                    // ✅ FIX: Xóa toàn bộ text nodes và tạo mới
-                    button.childNodes.forEach(node => {
-                        if (node.nodeType === Node.TEXT_NODE) {
-                            node.remove();
-                        }
-                    });
-                    button.appendChild(document.createTextNode('Đã ứng tuyển'));
-
+                if (textNode) {
+                    textNode.textContent = textContent;
                 } else {
-                    button.classList.remove('applied');
-                    button.disabled = false;
-                    button.title = 'Ứng tuyển ngay';
-
-                    if (icon) {
-                        icon.classList.remove('bi-check-circle-fill');
-                        icon.classList.add('bi-send-fill');
-                    }
-
-                    // ✅ FIX: Xóa toàn bộ text nodes và tạo mới
-                    button.childNodes.forEach(node => {
-                        if (node.nodeType === Node.TEXT_NODE) {
-                            node.remove();
-                        }
-                    });
-                    button.appendChild(document.createTextNode('Ứng tuyển ngay'));
+                    button.appendChild(document.createTextNode(textContent));
                 }
             }
 
-            // ========== ĐỒNG BỘ NÚT ỨNG TUYỂN ==========
             function syncApplyButtons(jobId, hasApplied) {
-                // Grid view
                 const gridCard = document.querySelector(`.job-card-grid[data-job-id="${jobId}"]`);
                 if (gridCard) {
                     const gridBtn = gridCard.querySelector('.btn-apply-now');
                     if (gridBtn) updateApplyButton(gridBtn, hasApplied);
                 }
 
-                // Detail view
                 const detailBtn = document.querySelector(`.btn-apply-now[data-job-id="${jobId}"]`);
                 if (detailBtn) updateApplyButton(detailBtn, hasApplied);
             }
 
-            // ========== LOAD TRẠNG THÁI ĐÃ ỨNG TUYỂN ==========
             function loadAppliedJobs() {
                 if (!checkAuth()) return;
 
@@ -1858,7 +2502,7 @@
                     })
                     .then(response => response.json())
                     .then(data => {
-                        if (data.success && data.appliedJobIds && data.appliedJobIds.length > 0) {
+                        if (data.success && data.appliedJobIds?.length > 0) {
                             data.appliedJobIds.forEach(jobId => {
                                 syncApplyButtons(jobId, true);
                             });
@@ -1867,7 +2511,6 @@
                     .catch(error => console.error('Error loading applied jobs:', error));
             }
 
-            // ========== KIỂM TRA TRẠNG THÁI ỨNG TUYỂN CHO 1 JOB ==========
             function checkApplicationStatus(jobId) {
                 if (!checkAuth()) return;
 
@@ -1887,43 +2530,35 @@
                     .catch(error => console.error('Error checking application status:', error));
             }
 
-            // ========== CẬP NHẬT TRẠNG THÁI NÚT SAVE ==========
+            // ========================================
+            // SAVE BUTTON FUNCTIONS
+            // ========================================
+
             function updateSaveButton(button, isSaved) {
+                if (!button) return;
+
                 const icon = button.querySelector('i');
-                if (isSaved) {
-                    button.classList.add('saved');
-                    if (icon) {
-                        icon.classList.remove('bi-heart');
-                        icon.classList.add('bi-heart-fill');
-                    }
-                } else {
-                    button.classList.remove('saved');
-                    if (icon) {
-                        icon.classList.remove('bi-heart-fill');
-                        icon.classList.add('bi-heart');
-                    }
+                button.classList.toggle('saved', isSaved);
+
+                if (icon) {
+                    icon.classList.toggle('bi-heart', !isSaved);
+                    icon.classList.toggle('bi-heart-fill', isSaved);
                 }
             }
 
-            // ========== ĐỒNG BỘ NÚT SAVE ==========
             function syncSaveButtons(jobId, isSaved) {
-                const gridCard = document.querySelector(`.job-card-grid[data-job-id="${jobId}"]`);
-                if (gridCard) {
-                    const gridBtn = gridCard.querySelector('.save-btn-grid');
-                    if (gridBtn) updateSaveButton(gridBtn, isSaved);
-                }
-
-                const listCard = document.querySelector(`.job-card[data-job-id="${jobId}"]`);
-                if (listCard) {
-                    const listBtn = listCard.querySelector('.save-btn-small');
-                    if (listBtn) updateSaveButton(listBtn, isSaved);
-                }
-
-                const largeBtn = document.querySelector(`.save-btn-large[data-job-id="${jobId}"]`);
-                if (largeBtn) updateSaveButton(largeBtn, isSaved);
+                ['job-card-grid', 'job-card', 'save-btn-large'].forEach(selector => {
+                    let btn;
+                    if (selector === 'save-btn-large') {
+                        btn = document.querySelector(`.${selector}[data-job-id="${jobId}"]`);
+                    } else {
+                        const card = document.querySelector(`.${selector}[data-job-id="${jobId}"]`);
+                        btn = card?.querySelector(selector === 'job-card-grid' ? '.save-btn-grid' : '.save-btn-small');
+                    }
+                    if (btn) updateSaveButton(btn, isSaved);
+                });
             }
 
-            // ========== XỬ LÝ SAVE/UNSAVE JOB ==========
             function handleSaveJob(jobId, isSaved, button) {
                 if (!checkAuth()) {
                     showToast('Vui lòng đăng nhập để lưu công việc!', 'error');
@@ -1962,7 +2597,6 @@
                     });
             }
 
-            // ========== LOAD TRẠNG THÁI ĐÃ LƯU ==========
             function loadSavedJobs() {
                 if (!checkAuth()) return;
 
@@ -1975,7 +2609,7 @@
                     })
                     .then(response => response.json())
                     .then(data => {
-                        if (data.success && data.savedJobIds) {
+                        if (data.success && data.savedJobIds?.length) {
                             data.savedJobIds.forEach(jobId => {
                                 syncSaveButtons(jobId, true);
                             });
@@ -1984,7 +2618,10 @@
                     .catch(error => console.error('Error loading saved jobs:', error));
             }
 
-            // ========== SWITCH BETWEEN GRID AND DETAIL VIEW ==========
+            // ========================================
+            // VIEW SWITCHING
+            // ========================================
+
             function showGridView() {
                 if (gridView && detailView) {
                     gridView.classList.remove('hidden');
@@ -2007,30 +2644,30 @@
 
                     setTimeout(() => {
                         document.querySelectorAll('.job-card').forEach(card => {
-                            card.classList.remove('active');
-                            if (card.getAttribute('data-job-id') == jobId) {
-                                card.classList.add('active');
-                                card.scrollIntoView({
-                                    behavior: 'smooth',
-                                    block: 'nearest'
-                                });
-                            }
+                            card.classList.toggle('active', card.getAttribute('data-job-id') == jobId);
                         });
                         loadJobDetail(jobId);
                     }, 0);
                 }
             }
 
-            // ========== LOAD JOB DETAIL ==========
+            if (backToGridBtn) {
+                backToGridBtn.addEventListener('click', showGridView);
+            }
+
+            // ========================================
+            // JOB DETAIL LOADING
+            // ========================================
+
             function loadJobDetail(jobId) {
                 if (!jobDetailColumn) return;
 
                 jobDetailColumn.innerHTML = `
-            <div class="job-detail-empty">
-                <i class="bi bi-hourglass-split"></i>
-                <p>Đang tải thông tin...</p>
-            </div>
-        `;
+                <div class="job-detail-empty">
+                    <i class="bi bi-hourglass-split"></i>
+                    <p>Đang tải thông tin...</p>
+                </div>
+            `;
 
                 fetch(`/api/jobs/${jobId}`)
                     .then(response => {
@@ -2044,15 +2681,14 @@
                     .catch(error => {
                         console.error('Error:', error);
                         jobDetailColumn.innerHTML = `
-                <div class="job-detail-empty">
-                    <i class="bi bi-exclamation-circle"></i>
-                    <p>Không thể tải thông tin công việc</p>
-                </div>
-            `;
+                    <div class="job-detail-empty">
+                        <i class="bi bi-exclamation-circle"></i>
+                        <p>Không thể tải thông tin công việc</p>
+                    </div>
+                `;
                     });
             }
 
-            // ========== RENDER JOB DETAIL ==========
             function renderJobDetail(job) {
                 const formatMoney = (num) => new Intl.NumberFormat('vi-VN').format(num);
 
@@ -2067,123 +2703,119 @@
 
                 const deadline = new Date(job.deadline).toLocaleDateString('vi-VN');
 
-                const logoHtml = job.company && job.company.logo ?
+                const logoHtml = job.company?.logo ?
                     `<img src="/assets/img/${job.company.logo}" alt="Company Logo">` :
-                    `<div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667EEA, #764BA2); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">${job.company ? job.company.tencty.charAt(0) : 'C'}</div>`;
+                    `<div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667EEA, #764BA2); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">${job.company?.tencty?.charAt(0) || 'C'}</div>`;
 
-                const hashtagsHtml = job.hashtags && job.hashtags.length > 0 ?
+                const hashtagsHtml = job.hashtags?.length ?
                     job.hashtags.map(tag => `<span class="tag-item">${tag.tag_name}</span>`).join('') :
                     '<p class="text-muted">Không có thông tin</p>';
 
+                const buildDetailSection = (title, icon, content) => {
+                    return content ? `
+                    <div class="detail-section">
+                        <h3 class="detail-section-title"><i class="bi ${icon}"></i> ${title}</h3>
+                        <div class="job-description">${content.replace(/\n/g, '<br>')}</div>
+                    </div>
+                ` : '';
+                };
+
                 jobDetailColumn.innerHTML = `
-            <div class="job-detail-header">
-                <div class="job-detail-company">
-                    <div class="company-logo-large">${logoHtml}</div>
-                  <div class="job-detail-title-section">
-    <h2 class="job-detail-title">
-        <a href="/job-detail/${job.job_id}" class="text-decoration-none text-dark hover-link-primary">
-            ${job.title}
-        </a>
-    </h2>
-    <div class="job-detail-company-name">${job.company ? job.company.tencty : 'Công ty'}</div>
-    <span class="job-detail-salary ${salaryClass}">${salaryHtml}</span>
-</div>
-                </div>
-                <div class="job-detail-actions">
-                    <button type="button" class="btn-apply-now" data-job-id="${job.job_id}">
-                        <i class="bi bi-send-fill me-2"></i>Ứng tuyển ngay
-                    </button>
-                    <button class="save-btn-large" title="Lưu công việc" data-job-id="${job.job_id}">
-                        <i class="bi bi-heart" style="font-size: 1.2rem;"></i>
-                    </button>
-                </div>
-            </div>
-            <div class="job-detail-content">
-                <div class="detail-section">
-                    <h3 class="detail-section-title"><i class="bi bi-info-circle-fill"></i> Thông tin chung</h3>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <div class="info-label"><i class="bi bi-briefcase"></i> Cấp bậc</div>
-                            <div class="info-value">${job.level}</div>
-                        </div>
-                       <div class="info-item">
-    <div class="info-label"><i class="bi bi-award"></i> Kinh nghiệm</div>
-    <div class="info-value">${getExperienceLabel(job.experience)}</div>
-</div>
-                        <div class="info-item">
-                            <div class="info-label"><i class="bi bi-people"></i> Số lượng tuyển</div>
-                            <div class="info-value">${job.recruitment_count || 'Không giới hạn'}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label"><i class="bi bi-clock-history"></i> Hạn nộp hồ sơ</div>
-                            <div class="info-value" style="color: #EF4444;">${deadline}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label"><i class="bi bi-laptop"></i> Hình thức làm việc</div>
-                            <div class="info-value">${job.working_type}</div>
+                <div class="job-detail-header">
+                    <div class="job-detail-company">
+                        <div class="company-logo-large">${logoHtml}</div>
+                        <div class="job-detail-title-section">
+                            <h2 class="job-detail-title">
+                                <a href="/job-detail/${job.job_id}" class="text-decoration-none text-dark hover-link-primary">
+                                    ${job.title}
+                                </a>
+                            </h2>
+                            <div class="job-detail-company-name">${job.company?.tencty || 'Công ty'}</div>
+                            <span class="job-detail-salary ${salaryClass}">${salaryHtml}</span>
                         </div>
                     </div>
+                    <div class="job-detail-actions">
+                        <button type="button" class="btn-apply-now" data-job-id="${job.job_id}">
+                            <i class="bi bi-send-fill me-2"></i>Ứng tuyển ngay
+                        </button>
+                        <button class="save-btn-large" title="Lưu công việc" data-job-id="${job.job_id}">
+                            <i class="bi bi-heart" style="font-size: 1.2rem;"></i>
+                        </button>
+                    </div>
                 </div>
-               <div class="detail-section">
-    <h3 class="detail-section-title">
-        <i class="bi bi-geo-alt-fill"></i> Địa điểm làm việc
-    </h3>
-    <div class="location-detail-wrapper">
-        <div class="location-row">
-            <i class="bi bi-building"></i>
-            <div class="location-info">
-                <div class="location-label">Tỉnh/Thành phố</div>
-                <div class="location-value">${job.province || 'Chưa cập nhật'}</div>
-            </div>
-        </div>
-        ${job.district ? `
-        <div class="location-row">
-            <i class="bi bi-map"></i>
-            <div class="location-info">
-                <div class="location-label">Quận/Huyện</div>
-                <div class="location-value">${job.district}</div>
-            </div>
-        </div>
-        ` : ''}
-        ${job.address_detail ? `
-        <div class="location-row">
-            <i class="bi bi-geo-alt"></i>
-            <div class="location-info">
-                <div class="location-label">Địa chỉ cụ thể</div>
-                <div class="location-value">${job.address_detail}</div>
-            </div>
-        </div>
-        ` : ''}
-    </div>
-</div>
-                ${job.description ? `
-                <div class="detail-section">
-                    <h3 class="detail-section-title"><i class="bi bi-file-text-fill"></i> Mô tả công việc</h3>
-                    <div class="job-description">${job.description.replace(/\n/g, '<br>')}</div>
-                </div>` : ''}
-                ${job.requirements ? `
-                <div class="detail-section">
-                    <h3 class="detail-section-title"><i class="bi bi-list-check"></i> Yêu cầu ứng viên</h3>
-                    <div class="job-description">${job.requirements.replace(/\n/g, '<br>')}</div>
-                </div>` : ''}
-                ${job.benefits ? `
-                <div class="detail-section">
-                    <h3 class="detail-section-title"><i class="bi bi-gift-fill"></i> Quyền lợi</h3>
-                    <div class="job-description">${job.benefits.replace(/\n/g, '<br>')}</div>
-                </div>` : ''}
-                ${job.hashtags && job.hashtags.length > 0 ? `
-                <div class="detail-section">
-                    <h3 class="detail-section-title"><i class="bi bi-code-slash"></i> Kỹ năng yêu cầu</h3>
-                    <div class="tags-list">${hashtagsHtml}</div>
-                </div>` : ''}
-            </div>
-        `;
+                <div class="job-detail-content">
+                    <div class="detail-section">
+                        <h3 class="detail-section-title"><i class="bi bi-info-circle-fill"></i> Thông tin chung</h3>
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-label"><i class="bi bi-briefcase"></i> Cấp bậc</div>
+                                <div class="info-value">${job.level}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label"><i class="bi bi-award"></i> Kinh nghiệm</div>
+                                <div class="info-value">${getExperienceLabel(job.experience)}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label"><i class="bi bi-people"></i> Số lượng tuyển</div>
+                                <div class="info-value">${job.recruitment_count || 'Không giới hạn'}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label"><i class="bi bi-clock-history"></i> Hạn nộp hồ sơ</div>
+                                <div class="info-value" style="color: #EF4444;">${deadline}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label"><i class="bi bi-laptop"></i> Hình thức làm việc</div>
+                                <div class="info-value">${job.working_type}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="detail-section">
+                        <h3 class="detail-section-title">
+                            <i class="bi bi-geo-alt-fill"></i> Địa điểm làm việc
+                        </h3>
+                        <div class="location-detail-wrapper">
+                            <div class="location-row">
+                                <i class="bi bi-building"></i>
+                                <div class="location-info">
+                                    <div class="location-label">Tỉnh/Thành phố</div>
+                                    <div class="location-value">${job.province || 'Chưa cập nhật'}</div>
+                                </div>
+                            </div>
+                            ${job.district ? `
+                            <div class="location-row">
+                                <i class="bi bi-map"></i>
+                                <div class="location-info">
+                                    <div class="location-label">Quận/Huyện</div>
+                                    <div class="location-value">${job.district}</div>
+                                </div>
+                            </div>
+                            ` : ''}
+                            ${job.address_detail ? `
+                            <div class="location-row">
+                                <i class="bi bi-geo-alt"></i>
+                                <div class="location-info">
+                                    <div class="location-label">Địa chỉ cụ thể</div>
+                                    <div class="location-value">${job.address_detail}</div>
+                                </div>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    ${buildDetailSection('Mô tả công việc', 'bi-file-text-fill', job.description)}
+                    ${buildDetailSection('Yêu cầu ứng viên', 'bi-list-check', job.requirements)}
+                    ${buildDetailSection('Quyền lợi', 'bi-gift-fill', job.benefits)}
+                    ${job.hashtags?.length ? `
+                    <div class="detail-section">
+                        <h3 class="detail-section-title"><i class="bi bi-code-slash"></i> Kỹ năng yêu cầu</h3>
+                        <div class="tags-list">${hashtagsHtml}</div>
+                    </div>` : ''}
+                </div>
+            `;
 
                 jobDetailColumn.scrollTop = 0;
                 attachDetailButtons();
             }
 
-            // ========== ATTACH DETAIL BUTTONS ==========
             function attachDetailButtons() {
                 const saveBtnLarge = document.querySelector('.save-btn-large');
                 const applyBtn = document.querySelector('.btn-apply-now');
@@ -2222,126 +2854,112 @@
                 }
             }
 
-            // ========== ATTACH GRID CARD EVENTS ==========
+            // ========================================
+            // EVENT ATTACHMENTS
+            // ========================================
+
             function attachGridCardEvents() {
                 document.querySelectorAll('.job-card-grid').forEach(card => {
-                    const newCard = card.cloneNode(true);
-                    card.parentNode.replaceChild(newCard, card);
+                    const applyBtn = card.querySelector('.btn-apply-now');
+                    const saveBtn = card.querySelector('.save-btn-grid');
 
-                    newCard.addEventListener('click', function(e) {
-                        if (e.target.closest('.save-btn-grid') || e.target.closest('.btn-apply-now')) return;
-                        const jobId = this.getAttribute('data-job-id');
-                        if (jobId) showDetailView(jobId);
+                    card.addEventListener('click', function(e) {
+                        if (!e.target.closest('.save-btn-grid, .btn-apply-now')) {
+                            const jobId = this.getAttribute('data-job-id');
+                            if (jobId) showDetailView(jobId);
+                        }
                     });
 
-                    const applyBtn = newCard.querySelector('.btn-apply-now');
                     if (applyBtn) {
                         applyBtn.addEventListener('click', function(e) {
                             e.stopPropagation();
+                            handleApplyClick.call(this);
+                        });
+                    }
 
-                            if (this.classList.contains('applied')) {
-                                showToast('Bạn đã ứng tuyển công việc này rồi!', 'info');
-                                return;
-                            }
-
-                            if (!checkAuth()) {
-                                showToast('Vui lòng đăng nhập để ứng tuyển!', 'error');
-                                setTimeout(() => window.location.href = '/login', 1500);
-                                return;
-                            }
-
-                            const jobId = this.getAttribute('data-job-id');
-                            window.currentJobId = jobId;
-
-                            const modal = document.getElementById('applyJobModal');
-                            if (modal) {
-                                const bsModal = new bootstrap.Modal(modal);
-                                bsModal.show();
-                            }
+                    if (saveBtn) {
+                        saveBtn.addEventListener('click', function(e) {
+                            e.stopPropagation();
+                            const jobId = card.getAttribute('data-job-id');
+                            const isSaved = this.classList.contains('saved');
+                            handleSaveJob(jobId, isSaved, this);
                         });
                     }
                 });
             }
 
-            // ========== ATTACH LIST CARD EVENTS ==========
             function attachListCardEvents() {
                 document.querySelectorAll('.job-card').forEach(card => {
                     card.addEventListener('click', function(e) {
-                        if (e.target.closest('.save-btn-small')) return;
-                        document.querySelectorAll('.job-card').forEach(c => c.classList.remove('active'));
-                        this.classList.add('active');
-                        const jobId = this.getAttribute('data-job-id');
-                        loadJobDetail(jobId);
-                    });
-                });
-            }
-
-            // ========== ATTACH SAVE BUTTON EVENTS ==========
-            function attachSaveButtonGrid() {
-                document.querySelectorAll('.save-btn-grid').forEach(btn => {
-                    const newBtn = btn.cloneNode(true);
-                    btn.parentNode.replaceChild(newBtn, btn);
-
-                    newBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        const jobCard = this.closest('.job-card-grid');
-                        const jobId = jobCard?.getAttribute('data-job-id');
-                        if (!jobId) {
-                            showToast('Không xác định được công việc!', 'error');
-                            return;
+                        if (!e.target.closest('.save-btn-small')) {
+                            document.querySelectorAll('.job-card').forEach(c => c.classList.remove('active'));
+                            this.classList.add('active');
+                            const jobId = this.getAttribute('data-job-id');
+                            loadJobDetail(jobId);
                         }
-                        const isSaved = this.classList.contains('saved');
-                        handleSaveJob(jobId, isSaved, this);
                     });
                 });
             }
 
-            function attachSaveButtonSmall() {
-                document.querySelectorAll('.save-btn-small').forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        const jobCard = this.closest('.job-card');
-                        const jobId = jobCard?.getAttribute('data-job-id');
-                        if (!jobId) {
-                            showToast('Không xác định được công việc!', 'error');
-                            return;
-                        }
-                        const isSaved = this.classList.contains('saved');
-                        handleSaveJob(jobId, isSaved, this);
-                    });
+            function attachSaveButtons() {
+                document.querySelectorAll('.save-btn-grid, .save-btn-small').forEach(btn => {
+                    btn.removeEventListener('click', handleSaveClick);
+                    btn.addEventListener('click', handleSaveClick);
                 });
             }
 
-            // ========== ATTACH ALL JOB CARD EVENTS ==========
+            function handleApplyClick() {
+                if (this.classList.contains('applied')) {
+                    showToast('Bạn đã ứng tuyển công việc này rồi!', 'info');
+                    return;
+                }
+
+                if (!checkAuth()) {
+                    showToast('Vui lòng đăng nhập để ứng tuyển!', 'error');
+                    setTimeout(() => window.location.href = '/login', 1500);
+                    return;
+                }
+
+                const jobId = this.getAttribute('data-job-id') || this.closest('[data-job-id]')?.getAttribute('data-job-id');
+                window.currentJobId = jobId;
+
+                const modal = document.getElementById('applyJobModal');
+                if (modal) {
+                    const bsModal = new bootstrap.Modal(modal);
+                    bsModal.show();
+                }
+            }
+
+            function handleSaveClick(e) {
+                e.stopPropagation();
+                e.preventDefault();
+
+                const card = this.closest('[data-job-id]');
+                const jobId = card?.getAttribute('data-job-id');
+
+                if (!jobId) {
+                    showToast('Không xác định được công việc!', 'error');
+                    return;
+                }
+
+                const isSaved = this.classList.contains('saved');
+                handleSaveJob(jobId, isSaved, this);
+            }
+
             function attachJobCardEvents() {
                 attachGridCardEvents();
                 attachListCardEvents();
-                attachSaveButtonGrid();
-                attachSaveButtonSmall();
+                attachSaveButtons();
                 loadSavedJobs();
                 loadAppliedJobs();
             }
-            // ✅ Expose function to window scope
+
             window.attachJobCardEvents = attachJobCardEvents;
 
-            // ========== BACK TO GRID BUTTON ==========
-            if (backToGridBtn) {
-                backToGridBtn.addEventListener('click', function() {
-                    showGridView();
-                });
-            }
+            // ========================================
+            // MODAL ỨNG TUYỂN
+            // ========================================
 
-            // ========== XỬ LÝ FILTER BUTTONS ==========
-            const filterBtns = document.querySelectorAll('.filter-btn:not(.all-filters-btn)');
-            filterBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    this.classList.toggle('active');
-                });
-            });
-
-            // ========== XỬ LÝ MODAL ỨNG TUYỂN ==========
             const uploadOption = document.getElementById('uploadOption');
             const profileOption = document.getElementById('profileOption');
             const uploadSection = document.getElementById('uploadSection');
@@ -2355,13 +2973,9 @@
                     });
                     this.closest('.cv-option-card').classList.add('active');
 
-                    if (this.value === 'upload') {
-                        uploadSection.style.display = 'block';
-                        profileSection.style.display = 'none';
-                    } else {
-                        uploadSection.style.display = 'none';
-                        profileSection.style.display = 'block';
-                    }
+                    const isUpload = this.value === 'upload';
+                    if (uploadSection) uploadSection.style.display = isUpload ? 'block' : 'none';
+                    if (profileSection) profileSection.style.display = isUpload ? 'none' : 'block';
                 });
             });
 
@@ -2374,7 +2988,7 @@
             const removeFile = document.getElementById('removeFile');
 
             if (selectFileBtn) {
-                selectFileBtn.addEventListener('click', () => cvFileInput.click());
+                selectFileBtn.addEventListener('click', () => cvFileInput?.click());
             }
 
             if (cvFileInput) {
@@ -2396,8 +3010,7 @@
                 uploadArea.addEventListener('drop', function(e) {
                     e.preventDefault();
                     this.classList.remove('dragover');
-                    const file = e.dataTransfer.files[0];
-                    handleFile(file);
+                    handleFile(e.dataTransfer.files[0]);
                 });
             }
 
@@ -2417,16 +3030,16 @@
                     return;
                 }
 
-                fileName.textContent = file.name;
-                fileNameDisplay.style.display = 'block';
-                uploadArea.style.display = 'none';
+                if (fileName) fileName.textContent = file.name;
+                if (fileNameDisplay) fileNameDisplay.style.display = 'block';
+                if (uploadArea) uploadArea.style.display = 'none';
             }
 
             if (removeFile) {
                 removeFile.addEventListener('click', function() {
-                    cvFileInput.value = '';
-                    fileNameDisplay.style.display = 'none';
-                    uploadArea.style.display = 'block';
+                    if (cvFileInput) cvFileInput.value = '';
+                    if (fileNameDisplay) fileNameDisplay.style.display = 'none';
+                    if (uploadArea) uploadArea.style.display = 'block';
                 });
             }
 
@@ -2436,34 +3049,26 @@
 
             if (letterTextarea) {
                 letterTextarea.addEventListener('input', function() {
-                    charCount.textContent = this.value.length;
+                    if (charCount) charCount.textContent = this.value.length;
                 });
-                charCount.textContent = letterTextarea.value.length;
+                if (charCount) charCount.textContent = letterTextarea.value.length;
             }
 
-            // ========== FORM SUBMIT - ỨNG TUYỂN ==========
+            // Form Submit
             const applyJobForm = document.getElementById('applyJobForm');
             if (applyJobForm) {
                 applyJobForm.addEventListener('submit', function(e) {
                     e.preventDefault();
 
-                    const cvType = document.querySelector('input[name="cv_type"]:checked').value;
-                    if (cvType === 'upload' && !cvFileInput.files.length) {
+                    const cvType = document.querySelector('input[name="cv_type"]:checked')?.value;
+                    if (cvType === 'upload' && !cvFileInput?.files.length) {
                         showToast('Vui lòng tải lên CV của bạn', 'error');
                         return;
                     }
 
-                    let jobId = window.currentJobId;
-
-                    if (!jobId) {
-                        const activeCard = document.querySelector('.job-card.active');
-                        jobId = activeCard ? activeCard.getAttribute('data-job-id') : null;
-                    }
-
-                    if (!jobId) {
-                        const applyBtn = document.querySelector('.btn-apply-now');
-                        jobId = applyBtn ? applyBtn.getAttribute('data-job-id') : null;
-                    }
+                    let jobId = window.currentJobId ||
+                        document.querySelector('.job-card.active')?.getAttribute('data-job-id') ||
+                        document.querySelector('.btn-apply-now')?.getAttribute('data-job-id');
 
                     if (!jobId) {
                         showToast('Không xác định được công việc. Vui lòng thử lại!', 'error');
@@ -2490,11 +3095,9 @@
                         .then(data => {
                             if (data.success) {
                                 showToast(data.message, 'success');
-
-                                // ✅ CẬP NHẬT NÚT ỨNG TUYỂN NGAY SAU KHI THÀNH CÔNG
                                 syncApplyButtons(jobId, true);
 
-                                const modal = bootstrap.Modal.getInstance(document.getElementById('applyJobModal'));
+                                const modal = bootstrap.Modal.getInstance(applyJobModal);
                                 if (modal) modal.hide();
 
                                 applyJobForm.reset();
@@ -2503,12 +3106,10 @@
                                 if (fileNameDisplay) fileNameDisplay.style.display = 'none';
                                 if (uploadArea) uploadArea.style.display = 'block';
                             } else {
-                                if (data.errors) {
-                                    const errorMessages = Object.values(data.errors).flat().join('\n');
-                                    showToast(errorMessages, 'error');
-                                } else {
-                                    showToast(data.message || 'Có lỗi xảy ra. Vui lòng thử lại!', 'error');
-                                }
+                                const errorMsg = data.errors ?
+                                    Object.values(data.errors).flat().join('\n') :
+                                    data.message || 'Có lỗi xảy ra. Vui lòng thử lại!';
+                                showToast(errorMsg, 'error');
                             }
                         })
                         .catch(error => {
@@ -2526,12 +3127,12 @@
             const applyModal = document.getElementById('applyJobModal');
             if (applyModal) {
                 applyModal.addEventListener('hidden.bs.modal', function() {
-                    const form = document.getElementById('applyJobForm');
-                    if (form) form.reset();
+                    if (applyJobForm) applyJobForm.reset();
                     if (uploadSection) uploadSection.style.display = 'block';
                     if (profileSection) profileSection.style.display = 'none';
                     if (fileNameDisplay) fileNameDisplay.style.display = 'none';
                     if (uploadArea) uploadArea.style.display = 'block';
+
                     document.querySelectorAll('.cv-option-card').forEach(card => {
                         card.classList.remove('active');
                     });
@@ -2540,116 +3141,63 @@
                 });
             }
 
-            // ========== KHỞI TẠO BAN ĐẦU ==========
-            attachJobCardEvents();
+            // ========================================
+            // FILTER DROPDOWNS
+            // ========================================
 
-            console.log('✅ All features initialized successfully');
+            function toggleDropdown(menu) {
+                if (!menu) return;
 
-            // ========== XỬ LÝ PAGINATION AJAX ==========
-            function handlePagination() {
-                const paginationWrapper = document.getElementById('paginationWrapper');
-
-                if (!paginationWrapper) return;
-
-                // Xử lý click vào các nút pagination
-                paginationWrapper.addEventListener('click', function(e) {
-                    e.preventDefault();
-
-                    const target = e.target.closest('.page-link');
-                    if (!target) return;
-
-                    const pageItem = target.closest('.page-item');
-                    if (pageItem && pageItem.classList.contains('disabled')) return;
-
-                    const page = parseInt(target.getAttribute('data-page'));
-                    if (!page || page < 1) return;
-
-                    loadJobsByPage(page);
+                const isShown = menu.classList.contains('show');
+                document.querySelectorAll('.filter-dropdown-menu').forEach(m => {
+                    m.classList.remove('show');
                 });
-            }
 
-            // ========== LOAD JOBS BY PAGE ==========
-            function loadJobsByPage(page) {
-                // Hiển thị loading overlay
-                if (loadingOverlay) {
-                    loadingOverlay.style.display = 'flex';
+                if (!isShown) {
+                    menu.classList.add('show');
                 }
-
-                // Scroll to top
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
-
-                fetch(`/api/jobs?page=${page}`, {
-                        method: 'GET',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        if (data.success) {
-                            // Cập nhật grid view
-                            if (gridView) {
-                                gridView.innerHTML = data.html;
-                            }
-
-                            // Cập nhật pagination
-                            if (paginationWrapper) {
-                                paginationWrapper.innerHTML = data.pagination;
-                            }
-
-                            // Cập nhật URL (không reload trang)
-                            const newUrl = `${window.location.pathname}?page=${page}`;
-                            window.history.pushState({
-                                page: page
-                            }, '', newUrl);
-
-                            // Re-attach events cho các job cards mới
-                            attachJobCardEvents();
-
-                            console.log(`✅ Loaded page ${page} successfully`);
-                        } else {
-                            showToast('Không thể tải dữ liệu', 'error');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error loading jobs:', error);
-                        showToast('Có lỗi xảy ra khi tải dữ liệu', 'error');
-                    })
-                    .finally(() => {
-                        // Ẩn loading overlay
-                        if (loadingOverlay) {
-                            loadingOverlay.style.display = 'none';
-                        }
-                    });
             }
 
-            // ========== XỬ LÝ BROWSER BACK/FORWARD ==========
-            window.addEventListener('popstate', function(e) {
-                if (e.state && e.state.page) {
-                    loadJobsByPage(e.state.page);
-                } else {
-                    // Nếu không có state, reload về page 1
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const page = parseInt(urlParams.get('page')) || 1;
-                    loadJobsByPage(page);
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.filter-dropdown-wrapper')) {
+                    document.querySelectorAll('.filter-dropdown-menu').forEach(menu => {
+                        menu.classList.remove('show');
+                    });
                 }
             });
 
-            // ========== KHỞI TẠO PAGINATION ==========
-            handlePagination();
-        });
-        // ========== SEARCH & FILTER FUNCTIONALITY ==========
-        (function() {
+            [{
+                    btn: categoryBtn,
+                    menu: categoryDropdown
+                },
+                {
+                    btn: levelBtn,
+                    menu: levelDropdown
+                },
+                {
+                    btn: experienceBtn,
+                    menu: experienceDropdown
+                },
+                {
+                    btn: workingTypeBtn,
+                    menu: workingTypeDropdown
+                }
+            ].forEach(({
+                btn,
+                menu
+            }) => {
+                if (btn) {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        toggleDropdown(menu);
+                    });
+                }
+            });
+
+            // ========================================
+            // SEARCH & FILTER
+            // ========================================
+
             let searchTimeout = null;
             let currentFilters = {
                 search: '',
@@ -2660,82 +3208,9 @@
                 working_types: []
             };
 
-            // Elements
-            const searchInput = document.getElementById('searchInput');
-            const locationSelect = document.getElementById('locationSelect');
-            const searchBtn = document.getElementById('searchBtn');
-            const resetBtn = document.getElementById('resetFiltersBtn');
-            const loadingOverlay = document.getElementById('jobsLoadingOverlay');
-            const paginationWrapper = document.getElementById('paginationWrapper');
-            const gridView = document.getElementById('gridView');
-
-            // Dropdown buttons
-            const categoryBtn = document.getElementById('categoryFilterBtn');
-            const levelBtn = document.getElementById('levelFilterBtn');
-            const experienceBtn = document.getElementById('experienceFilterBtn');
-            const workingTypeBtn = document.getElementById('workingTypeFilterBtn');
-
-            // Dropdown menus
-            const categoryDropdown = document.getElementById('categoryDropdown');
-            const levelDropdown = document.getElementById('levelDropdown');
-            const experienceDropdown = document.getElementById('experienceDropdown');
-            const workingTypeDropdown = document.getElementById('workingTypeDropdown');
-
-            // ========== Toggle Dropdown ==========
-            function toggleDropdown(menu) {
-                const isShown = menu.classList.contains('show');
-
-                // Đóng tất cả dropdown khác
-                document.querySelectorAll('.filter-dropdown-menu').forEach(m => {
-                    m.classList.remove('show');
-                });
-
-                // Toggle dropdown hiện tại
-                if (!isShown) {
-                    menu.classList.add('show');
-                }
-            }
-
-            // ========== Đóng dropdown khi click outside ==========
-            document.addEventListener('click', function(e) {
-                if (!e.target.closest('.filter-dropdown-wrapper')) {
-                    document.querySelectorAll('.filter-dropdown-menu').forEach(menu => {
-                        menu.classList.remove('show');
-                    });
-                }
-            });
-
-            // ========== Gắn sự kiện cho dropdown buttons ==========
-            if (categoryBtn) {
-                categoryBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    toggleDropdown(categoryDropdown);
-                });
-            }
-
-            if (levelBtn) {
-                levelBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    toggleDropdown(levelDropdown);
-                });
-            }
-
-            if (experienceBtn) {
-                experienceBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    toggleDropdown(experienceDropdown);
-                });
-            }
-
-            if (workingTypeBtn) {
-                workingTypeBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    toggleDropdown(workingTypeDropdown);
-                });
-            }
-
-            // ========== Cập nhật filter badge ==========
             function updateFilterBadge(button, count) {
+                if (!button) return;
+
                 let badge = button.querySelector('.badge');
 
                 if (count > 0) {
@@ -2747,47 +3222,26 @@
                     badge.textContent = count;
                     button.classList.add('active');
                 } else {
-                    if (badge) {
-                        badge.remove();
-                    }
+                    badge?.remove();
                     button.classList.remove('active');
                 }
             }
 
-            // ========== Thu thập filter data ==========
             function collectFilters() {
                 currentFilters = {
-                    search: searchInput ? searchInput.value.trim() : '',
-                    location: locationSelect ? locationSelect.value : '',
-                    categories: [],
-                    levels: [],
-                    experiences: [],
-                    working_types: []
+                    search: searchInput?.value.trim() || '',
+                    location: locationSelect?.value || '',
+                    categories: Array.from(document.querySelectorAll('input[name="category"]:checked'))
+                        .filter(cb => cb.value !== 'all')
+                        .map(cb => cb.value),
+                    levels: Array.from(document.querySelectorAll('input[name="level"]:checked'))
+                        .map(cb => cb.value),
+                    experiences: Array.from(document.querySelectorAll('input[name="experience"]:checked'))
+                        .map(cb => cb.value),
+                    working_types: Array.from(document.querySelectorAll('input[name="working_type"]:checked'))
+                        .map(cb => cb.value)
                 };
 
-                // Category filters
-                document.querySelectorAll('input[name="category"]:checked').forEach(cb => {
-                    if (cb.value !== 'all') {
-                        currentFilters.categories.push(cb.value);
-                    }
-                });
-
-                // Level filters
-                document.querySelectorAll('input[name="level"]:checked').forEach(cb => {
-                    currentFilters.levels.push(cb.value);
-                });
-
-                // Experience filters
-                document.querySelectorAll('input[name="experience"]:checked').forEach(cb => {
-                    currentFilters.experiences.push(cb.value);
-                });
-
-                // Working type filters
-                document.querySelectorAll('input[name="working_type"]:checked').forEach(cb => {
-                    currentFilters.working_types.push(cb.value);
-                });
-
-                // Cập nhật badge cho các button
                 updateFilterBadge(categoryBtn, currentFilters.categories.length);
                 updateFilterBadge(levelBtn, currentFilters.levels.length);
                 updateFilterBadge(experienceBtn, currentFilters.experiences.length);
@@ -2796,128 +3250,30 @@
                 return currentFilters;
             }
 
-            // ========== Kiểm tra có filter nào được áp dụng không ==========
             function hasActiveFilters(filters) {
-                return filters.search ||
+                return !!(filters.search ||
                     filters.location ||
                     filters.categories.length > 0 ||
                     filters.levels.length > 0 ||
                     filters.experiences.length > 0 ||
-                    filters.working_types.length > 0;
+                    filters.working_types.length > 0);
             }
 
-            // ========== Thực hiện search & filter ==========
-            function performSearch(page = 1) {
-                const filters = collectFilters();
-
-                // Hiển thị loading
-                if (loadingOverlay) {
-                    loadingOverlay.style.display = 'flex';
+            function updateResultCount(total, locationMessage = '') {
+                const titleElement = document.querySelector('.section-title-highlight h2');
+                if (titleElement) {
+                    if (locationMessage) {
+                        const match = locationMessage.match(/tại (.+)$/);
+                        if (match) {
+                            locationMessage = ` tại ${formatLocationDisplay(match[1])}`;
+                        }
+                    }
+                    titleElement.textContent = `${total} cơ hội việc làm IT${locationMessage}`;
                 }
-
-                // ✅ FIX: Nếu KHÔNG có filter nào, load tất cả jobs
-                if (!hasActiveFilters(filters)) {
-                    console.log('ℹ️ No filters applied, loading all jobs...');
-                    loadAllJobs(page);
-                    return;
-                }
-
-                // Build query string
-                const params = new URLSearchParams();
-                params.append('page', page);
-
-                // ✅ QUAN TRỌNG: Chỉ thêm param khi có giá trị
-                if (filters.search) params.append('search', filters.search);
-                if (filters.location) params.append('location', filters.location);
-                if (filters.categories.length) params.append('categories', filters.categories.join(','));
-                if (filters.levels.length) params.append('levels', filters.levels.join(','));
-                if (filters.experiences.length) params.append('experiences', filters.experiences.join(','));
-                if (filters.working_types.length) params.append('working_types', filters.working_types.join(','));
-
-                // Log để debug
-                console.log('🔍 Searching with filters:', filters);
-                console.log('📡 API URL:', `/api/jobs/search?${params.toString()}`);
-
-                // AJAX request
-                fetch(`/api/jobs/search?${params.toString()}`, {
-                        method: 'GET',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Cập nhật grid view
-                            if (gridView) {
-                                gridView.innerHTML = data.html;
-                            }
-
-                            // Cập nhật pagination
-                            if (paginationWrapper) {
-                                paginationWrapper.innerHTML = data.pagination || '';
-                            }
-
-                            // Cập nhật số lượng kết quả
-                            if (data.location_message) {
-                                const formattedMessage = data.location_message.replace(/tại (.+)$/, (match, location) => {
-                                    return `tại ${formatLocationDisplay(location)}`;
-                                });
-                                updateResultCount(data.total, formattedMessage);
-                            } else {
-                                updateResultCount(data.total, '');
-                            }
-
-                            console.log('✅ Location display helper loaded');
-
-                            // Re-attach events
-                            // ✅ Re-attach events với timeout để đảm bảo DOM đã render
-                            setTimeout(() => {
-                                if (typeof window.attachJobCardEvents === 'function') {
-                                    window.attachJobCardEvents();
-                                    console.log('✅ Events re-attached after search');
-                                } else {
-                                    console.error('❌ attachJobCardEvents not found');
-                                }
-                            }, 100);
-
-                            // Scroll to results
-                            const featuredSection = document.querySelector('.featured-section');
-                            if (featuredSection) {
-                                window.scrollTo({
-                                    top: featuredSection.offsetTop - 100,
-                                    behavior: 'smooth'
-                                });
-                            }
-
-                            // Hiển thị thông báo kết quả
-                            if (data.total === 0) {
-                                showToast('Không tìm thấy công việc phù hợp', 'info');
-                            } else {
-                                console.log(`✅ Found ${data.total} jobs`);
-                            }
-                        } else {
-                            showToast(data.message || 'Không tìm thấy kết quả', 'info');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Search error:', error);
-                        showToast('Có lỗi xảy ra khi tìm kiếm', 'error');
-                    })
-                    .finally(() => {
-                        if (loadingOverlay) {
-                            loadingOverlay.style.display = 'none';
-                        }
-                    });
             }
 
-            // ========== ✅ THÊM HÀM MỚI: Load tất cả jobs ==========
             function loadAllJobs(page = 1) {
-                if (loadingOverlay) {
-                    loadingOverlay.style.display = 'flex';
-                }
+                if (loadingOverlay) loadingOverlay.style.display = 'flex';
 
                 fetch(`/api/jobs?page=${page}`, {
                         method: 'GET',
@@ -2930,19 +3286,15 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            if (gridView) {
-                                gridView.innerHTML = data.html;
-                            }
-
-                            if (paginationWrapper) {
-                                paginationWrapper.innerHTML = data.pagination || '';
-                            }
-
+                            if (gridView) gridView.innerHTML = data.html;
+                            if (paginationWrapper) paginationWrapper.innerHTML = data.pagination || '';
                             updateResultCount(data.total);
 
-                            if (typeof attachJobCardEvents === 'function') {
-                                attachJobCardEvents();
-                            }
+                            setTimeout(() => {
+                                if (typeof window.attachJobCardEvents === 'function') {
+                                    window.attachJobCardEvents();
+                                }
+                            }, 100);
 
                             console.log(`✅ Loaded ${data.total} jobs (page ${page})`);
                         } else {
@@ -2954,47 +3306,85 @@
                         showToast('Có lỗi xảy ra khi tải dữ liệu', 'error');
                     })
                     .finally(() => {
-                        if (loadingOverlay) {
-                            loadingOverlay.style.display = 'none';
-                        }
+                        if (loadingOverlay) loadingOverlay.style.display = 'none';
                     });
             }
 
-            function formatLocationDisplay(locationName) {
-                if (!locationName) return '';
+            function performSearch(page = 1) {
+                const filters = collectFilters();
 
-                return locationName
-                    .replace('Thành phố ', '')
-                    .replace('Tỉnh ', '')
-                    .trim();
-            }
+                if (loadingOverlay) loadingOverlay.style.display = 'flex';
 
-            // ========== Cập nhật số lượng kết quả ==========
-            function updateResultCount(total, locationMessage = '') {
-                const titleElement = document.querySelector('.section-title-highlight h2');
-                if (titleElement) {
-                    // ✅ Format location message nếu có
-                    if (locationMessage) {
-                        // Lấy tên từ backend (VD: " tại Hà Nội")
-                        const parts = locationMessage.match(/tại (.+)$/);
-                        if (parts && parts[1]) {
-                            const formattedName = formatLocationDisplay(parts[1]);
-                            locationMessage = ` tại ${formattedName}`;
-                        }
-                    }
-
-                    titleElement.textContent = `${total} cơ hội việc làm IT${locationMessage}`;
+                if (!hasActiveFilters(filters)) {
+                    console.log('ℹ️ No filters applied, loading all jobs...');
+                    loadAllJobs(page);
+                    return;
                 }
+
+                const params = new URLSearchParams();
+                params.append('page', page);
+
+                if (filters.search) params.append('search', filters.search);
+                if (filters.location) params.append('location', filters.location);
+                if (filters.categories.length) params.append('categories', filters.categories.join(','));
+                if (filters.levels.length) params.append('levels', filters.levels.join(','));
+                if (filters.experiences.length) params.append('experiences', filters.experiences.join(','));
+                if (filters.working_types.length) params.append('working_types', filters.working_types.join(','));
+
+                console.log('🔍 Searching with filters:', filters);
+
+                fetch(`/api/jobs/search?${params.toString()}`, {
+                        method: 'GET',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            if (gridView) gridView.innerHTML = data.html;
+                            if (paginationWrapper) paginationWrapper.innerHTML = data.pagination || '';
+
+                            if (data.location_message) {
+                                const formattedMessage = data.location_message.replace(/tại (.+)$/, (match, location) => {
+                                    return `tại ${formatLocationDisplay(location)}`;
+                                });
+                                updateResultCount(data.total, formattedMessage);
+                            } else {
+                                updateResultCount(data.total, '');
+                            }
+
+                            setTimeout(() => {
+                                if (typeof window.attachJobCardEvents === 'function') {
+                                    window.attachJobCardEvents();
+                                    console.log('✅ Events re-attached after search');
+                                }
+                            }, 100);
+
+                            if (data.total === 0) {
+                                showToast('Không tìm thấy công việc phù hợp', 'info');
+                            }
+                        } else {
+                            showToast(data.message || 'Không tìm thấy kết quả', 'info');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Search error:', error);
+                        showToast('Có lỗi xảy ra khi tìm kiếm', 'error');
+                    })
+                    .finally(() => {
+                        if (loadingOverlay) loadingOverlay.style.display = 'none';
+                    });
             }
 
-            // ========== Search button click ==========
+            // Search button
             if (searchBtn) {
-                searchBtn.addEventListener('click', function() {
-                    performSearch();
-                });
+                searchBtn.addEventListener('click', () => performSearch());
             }
 
-            // ========== Enter key in search input ==========
+            // Enter key
             if (searchInput) {
                 searchInput.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') {
@@ -3002,91 +3392,73 @@
                     }
                 });
 
-                // Real-time search (debounced)
                 searchInput.addEventListener('input', function() {
                     clearTimeout(searchTimeout);
-
-                    const searchValue = this.value.trim();
-
-                    // ✅ FIX: Cho phép search ngay cả khi rỗng (để load lại tất cả jobs)
-                    searchTimeout = setTimeout(() => {
-                        performSearch();
-                    }, 800);
+                    searchTimeout = setTimeout(() => performSearch(), 800);
                 });
             }
 
-            // ========== Location select change ==========
+            // Location select
             if (locationSelect) {
-                locationSelect.addEventListener('change', function() {
-                    // ✅ FIX: Luôn gọi performSearch, không cần check điều kiện
-                    // performSearch();
-                });
+                locationSelect.addEventListener('change', () => performSearch());
             }
 
-            // ========== Checkbox change ==========
+            // Checkboxes
             document.querySelectorAll('.filter-checkbox-item input[type="checkbox"]').forEach(checkbox => {
                 checkbox.addEventListener('change', function() {
-                    // Xử lý "Tất cả" trong category
                     if (this.name === 'category' && this.value === 'all' && this.checked) {
-                        document.querySelectorAll('input[name="category"]').forEach(cb => {
-                            if (cb.value !== 'all') cb.checked = false;
+                        document.querySelectorAll('input[name="category"]:not([value="all"])').forEach(cb => {
+                            cb.checked = false;
                         });
                     } else if (this.name === 'category' && this.value !== 'all' && this.checked) {
                         const allCheckbox = document.querySelector('input[name="category"][value="all"]');
                         if (allCheckbox) allCheckbox.checked = false;
                     }
 
-                    // Tự động search khi thay đổi filter
                     performSearch();
                 });
             });
 
-            // ========== Reset filters ==========
+            // Reset button
             if (resetBtn) {
                 resetBtn.addEventListener('click', function() {
-                    // Reset search input
                     if (searchInput) searchInput.value = '';
-
-                    // Reset location
                     if (locationSelect) locationSelect.value = '';
 
-                    // Uncheck all checkboxes
                     document.querySelectorAll('.filter-checkbox-item input[type="checkbox"]').forEach(cb => {
                         cb.checked = false;
                     });
 
-                    // Check "Tất cả" in category
                     const allCheckbox = document.querySelector('input[name="category"][value="all"]');
                     if (allCheckbox) allCheckbox.checked = true;
 
-                    // Reset badges
                     updateFilterBadge(categoryBtn, 0);
                     updateFilterBadge(levelBtn, 0);
                     updateFilterBadge(experienceBtn, 0);
                     updateFilterBadge(workingTypeBtn, 0);
 
-                    // ✅ FIX: Load lại tất cả jobs thay vì search
                     loadAllJobs();
-
                     showToast('Đã đặt lại bộ lọc', 'info');
                 });
             }
 
-            // ========== Xử lý pagination ==========
+            // ========================================
+            // PAGINATION
+            // ========================================
+
             if (paginationWrapper) {
                 paginationWrapper.addEventListener('click', function(e) {
-                    e.preventDefault();
-
                     const target = e.target.closest('.page-link');
                     if (!target) return;
 
+                    e.preventDefault();
+
                     const pageItem = target.closest('.page-item');
-                    if (pageItem && pageItem.classList.contains('disabled')) return;
+                    if (pageItem?.classList.contains('disabled')) return;
 
                     const page = parseInt(target.getAttribute('data-page'));
                     if (!page || page < 1) return;
 
-                    // ✅ FIX: Kiểm tra xem có filter không
                     const filters = collectFilters();
                     if (hasActiveFilters(filters)) {
                         performSearch(page);
@@ -3096,11 +3468,15 @@
                 });
             }
 
-            console.log('✅ Search & Filter initialized (Fixed Version)');
-        })();
+            // ========================================
+            // INITIALIZE
+            // ========================================
+
+            attachJobCardEvents();
+
+            console.log('✅ All features initialized successfully');
+        });
     </script>
-
-
 </body>
 
 </html>

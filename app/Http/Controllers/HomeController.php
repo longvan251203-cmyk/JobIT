@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\JobPost;
 use App\Models\HocVan;
 use App\Models\KinhNghiem;
+use App\Models\JobRecommendation;
 use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
@@ -54,10 +55,25 @@ class HomeController extends Controller
                 ];
             });
 
+        // ✅ THÊM PHẦN NÀY - Recommended Jobs
+        $recommendedJobs = collect();
+
+        if (Auth::check() && Auth::user()->applicant) {
+            $applicantId = Auth::user()->applicant->id_uv; // hoặc id tùy theo cấu trúc model của bạn
+
+            $recommendedJobs = JobRecommendation::where('applicant_id', $applicantId)
+                ->where('score', '>=', 60)
+                ->orderBy('score', 'desc')
+                ->with('job.company', 'job.hashtags')
+                ->take(6)
+                ->get();
+        }
+
         return view('applicant.homeapp', [
             'jobs' => $jobs,
             'stats' => $stats,
             'topCompanies' => $topCompanies,
+            'recommendedJobs' => $recommendedJobs, // ✅ Thêm dòng này
         ]);
     }
 }

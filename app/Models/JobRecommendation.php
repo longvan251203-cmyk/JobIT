@@ -19,7 +19,9 @@ class JobRecommendation extends Model
         'match_details' => 'array',
         'is_viewed' => 'boolean',
         'is_applied' => 'boolean',
-        'score' => 'decimal:2'
+        'score' => 'decimal:2',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     // Relationships

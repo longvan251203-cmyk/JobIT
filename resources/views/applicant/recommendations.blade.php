@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gợi ý việc làm cho bạn</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Gợi ý việc làm phù hợp</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
@@ -15,17 +16,15 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
-        /* Header */
         .main-header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);
             padding: 1rem 0;
             position: sticky;
             top: 0;
@@ -38,142 +37,19 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
-        .nav-menu {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .nav-menu li a {
-            color: #333;
-            text-decoration: none;
-            font-weight: 600;
-            transition: all 0.3s;
-            position: relative;
-        }
-
-        .nav-menu li a:hover {
-            color: #667eea;
-        }
-
-        .nav-menu li a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: #667eea;
-            transition: width 0.3s;
-        }
-
-        .nav-menu li a:hover::after {
-            width: 100%;
-        }
-
-        .btn-employer {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 0.6rem 1.5rem;
-            border-radius: 50px;
-            border: none;
-            font-weight: 600;
-            transition: all 0.3s;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-employer:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        /* Hero Section */
         .hero-section {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-            padding: 3rem 0;
-            margin: 2rem 0;
+            background: rgba(255, 255, 255, 0.95);
             border-radius: 30px;
-            position: relative;
-            overflow: hidden;
+            padding: 2.5rem;
+            margin: 2rem 0;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         }
 
-        .hero-section::before {
-            content: '';
-            position: absolute;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(102, 126, 234, 0.2) 0%, transparent 70%);
-            top: -250px;
-            right: -250px;
-            animation: float 6s ease-in-out infinite;
-        }
-
-        @keyframes float {
-
-            0%,
-            100% {
-                transform: translate(0, 0);
-            }
-
-            50% {
-                transform: translate(-20px, 20px);
-            }
-        }
-
-        .hero-title {
-            font-size: 3rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 1rem;
-        }
-
-        .hero-subtitle {
-            font-size: 1.2rem;
-            color: #555;
-            margin-bottom: 2rem;
-        }
-
-        .refresh-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 50px;
-            border: none;
-            font-weight: 700;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
-
-        .refresh-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
-        }
-
-        .refresh-btn i {
-            transition: transform 0.5s;
-        }
-
-        .refresh-btn:hover i {
-            transform: rotate(180deg);
-        }
-
-        /* Stats Cards */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1.5rem;
             margin: 2rem 0;
         }
@@ -181,21 +57,10 @@
         .stat-card {
             background: white;
             border-radius: 20px;
-            padding: 2rem;
-            position: relative;
-            overflow: hidden;
+            padding: 1.5rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            border-left: 4px solid;
             transition: all 0.3s;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
         }
 
         .stat-card:hover {
@@ -203,118 +68,47 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
         }
 
-        .stat-card.purple::before {
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+        .stat-card.purple {
+            border-color: #667eea;
         }
 
-        .stat-card.green::before {
-            background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);
+        .stat-card.green {
+            border-color: #38ef7d;
         }
 
-        .stat-card.blue::before {
-            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+        .stat-card.blue {
+            border-color: #4facfe;
         }
 
-        .stat-card.orange::before {
-            background: linear-gradient(90deg, #fa709a 0%, #fee140 100%);
+        .stat-card.orange {
+            border-color: #fa709a;
         }
 
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            color: white;
-            margin-bottom: 1rem;
-        }
-
-        .stat-card.purple .stat-icon {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .stat-card.green .stat-icon {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-        }
-
-        .stat-card.blue .stat-icon {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-        }
-
-        .stat-card.orange .stat-icon {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-        }
-
-        .stat-number {
-            font-size: 3rem;
-            font-weight: 900;
-            color: #333;
-            line-height: 1;
-            margin-bottom: 0.5rem;
-        }
-
-        .stat-label {
-            font-size: 1rem;
-            color: #666;
-            font-weight: 600;
-        }
-
-        /* Job Cards */
+        /* JOB CARD - IMPROVED */
         .job-card {
             background: white;
             border-radius: 25px;
             padding: 2rem;
             margin-bottom: 2rem;
             box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            opacity: 0;
-            transform: translateY(30px);
-            animation: slideUp 0.6s forwards;
+            transition: all 0.3s;
+            border-left: 5px solid;
         }
 
-        @keyframes slideUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .job-card.high-match {
+            border-color: #38ef7d;
         }
 
-        .job-card:nth-child(1) {
-            animation-delay: 0.1s;
+        .job-card.medium-match {
+            border-color: #667eea;
         }
 
-        .job-card:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-
-        .job-card:nth-child(3) {
-            animation-delay: 0.3s;
-        }
-
-        .job-card:nth-child(4) {
-            animation-delay: 0.4s;
-        }
-
-        .job-card::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            height: 100%;
-            width: 5px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .job-card.high-match::before {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        .job-card.low-match {
+            border-color: #fa709a;
         }
 
         .job-card:hover {
-            transform: translateY(-8px);
+            transform: translateY(-5px);
             box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
         }
 
@@ -322,6 +116,8 @@
             display: flex;
             gap: 1.5rem;
             margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #f0f0f0;
         }
 
         .company-logo {
@@ -337,11 +133,6 @@
             font-weight: 900;
             flex-shrink: 0;
             box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-            transition: all 0.3s;
-        }
-
-        .job-card:hover .company-logo {
-            transform: rotate(5deg) scale(1.05);
         }
 
         .job-info {
@@ -349,23 +140,15 @@
         }
 
         .job-title {
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             font-weight: 800;
             color: #333;
             margin-bottom: 0.5rem;
-            transition: all 0.3s;
-        }
-
-        .job-card:hover .job-title {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
         }
 
         .company-name {
             color: #666;
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -375,10 +158,9 @@
         .match-score {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 1rem 1.5rem;
+            padding: 1rem;
             border-radius: 15px;
             text-align: center;
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
             min-width: 100px;
         }
 
@@ -390,7 +172,6 @@
             font-size: 2.5rem;
             font-weight: 900;
             line-height: 1;
-            display: block;
         }
 
         .match-score .label {
@@ -415,7 +196,6 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            transition: all 0.3s;
         }
 
         .job-tag.location {
@@ -451,84 +231,92 @@
             }
         }
 
-        .job-tag:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Match Analysis */
+        /* MATCH ANALYSIS - IMPROVED */
         .match-analysis {
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.03) 0%, rgba(118, 75, 162, 0.03) 100%);
             border-radius: 20px;
-            padding: 1.5rem;
+            padding: 2rem;
             margin-bottom: 1.5rem;
         }
 
         .analysis-title {
-            font-size: 1rem;
-            font-weight: 700;
+            font-size: 1.1rem;
+            font-weight: 800;
             color: #333;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .analysis-title i {
+            font-size: 1.5rem;
+            color: #667eea;
+        }
+
+        .criteria-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .criteria-item {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+        }
+
+        .criteria-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .criteria-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 1rem;
+        }
+
+        .criteria-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
             display: flex;
             align-items: center;
             gap: 0.5rem;
         }
 
-        .analysis-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
+        .criteria-name i {
+            font-size: 1.2rem;
         }
 
-        .analysis-item {
-            background: white;
-            border-radius: 15px;
-            padding: 1rem;
-            transition: all 0.3s;
-        }
-
-        .analysis-item:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .analysis-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.8rem;
-        }
-
-        .analysis-label {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: #666;
-            text-transform: uppercase;
-        }
-
-        .analysis-value {
-            font-size: 1.3rem;
+        .criteria-score {
+            font-size: 1.8rem;
             font-weight: 900;
         }
 
-        .analysis-value.purple {
+        .criteria-score.high {
+            color: #38ef7d;
+        }
+
+        .criteria-score.medium {
             color: #667eea;
         }
 
-        .analysis-value.green {
-            color: #11998e;
+        .criteria-score.low {
+            color: #fa709a;
         }
 
-        .analysis-value.blue {
-            color: #4facfe;
-        }
-
-        .progress-bar {
-            height: 8px;
-            background: #e0e0e0;
+        .progress-bar-wrapper {
+            height: 10px;
+            background: #f0f0f0;
             border-radius: 10px;
             overflow: hidden;
-            position: relative;
+            margin-bottom: 0.8rem;
         }
 
         .progress-fill {
@@ -537,19 +325,70 @@
             transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .progress-fill.purple {
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-        }
-
-        .progress-fill.green {
+        .progress-fill.high {
             background: linear-gradient(90deg, #11998e 0%, #38ef7d 100%);
         }
 
-        .progress-fill.blue {
-            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+        .progress-fill.medium {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
         }
 
-        /* Action Buttons */
+        .progress-fill.low {
+            background: linear-gradient(90deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .criteria-reason {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.6;
+            padding: 0.8rem;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 10px;
+            border-left: 3px solid #667eea;
+        }
+
+        /* SKILLS DETAILS */
+        .skills-details {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .skills-section {
+            margin-bottom: 0.8rem;
+        }
+
+        .skills-section-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+
+        .skill-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .skill-tag {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .skill-tag.matched {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .skill-tag.missing {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        /* ACTION BUTTONS */
         .job-actions {
             display: flex;
             gap: 1rem;
@@ -592,8 +431,6 @@
         .btn-secondary:hover {
             background: #667eea;
             color: white;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
         }
 
         .btn-icon {
@@ -619,71 +456,28 @@
             background: #fff5f5;
         }
 
-        /* Empty State */
-        .empty-state {
-            background: white;
-            border-radius: 30px;
-            padding: 4rem;
-            text-align: center;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-        }
-
-        .empty-icon {
-            width: 150px;
-            height: 150px;
-            margin: 0 auto 2rem;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 4rem;
-            color: #667eea;
-            animation: bounce 2s infinite;
-        }
-
-        @keyframes bounce {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-20px);
-            }
-        }
-
-        .empty-title {
-            font-size: 2rem;
-            font-weight: 900;
-            color: #333;
-            margin-bottom: 1rem;
-        }
-
-        .empty-text {
+        .refresh-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            border: none;
+            font-weight: 700;
             font-size: 1.1rem;
-            color: #666;
-            margin-bottom: 2rem;
-            line-height: 1.6;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
         }
 
-        /* Footer */
-        .main-footer {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 2rem 0;
-            margin-top: 4rem;
-            box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.1);
+        .refresh-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
         }
 
-        .footer-content {
-            text-align: center;
-            color: #666;
-        }
-
-        /* Loading State */
-        .loading {
+        .loading-spinner {
             display: inline-block;
             width: 20px;
             height: 20px;
@@ -699,23 +493,9 @@
             }
         }
 
-        /* Responsive */
         @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2rem;
-            }
-
-            .nav-menu {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
             .job-header {
                 flex-direction: column;
-            }
-
-            .match-score {
-                align-self: flex-start;
             }
 
             .btn-action {
@@ -726,6 +506,24 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        :root {
+            --location-score: {
+                    {
+                    $details['location']['score']
+                }
+            }
+
+            %;
+
+            --salary-score: {
+                    {
+                    $details['salary']['score']
+                }
+            }
+
+            %;
+        }
     </style>
 </head>
 
@@ -735,20 +533,12 @@
         <div class="container">
             <div class="d-flex justify-content-between align-items-center">
                 <div class="logo">JobMatch</div>
-                <nav class="d-none d-md-block">
-                    <ul class="nav-menu">
-                        <li><a href="#">Trang chủ</a></li>
-                        <li><a href="#">Giới thiệu</a></li>
-                        <li><a href="#">Công ty</a></li>
-                        <li><a href="#">Việc làm</a></li>
-                        <li><a href="#">Blog</a></li>
-                        <li><a href="#">Contact</a></li>
-                    </ul>
-                </nav>
-                <button class="btn-employer">
-                    <i class="bi bi-briefcase me-2"></i>
-                    Nhà tuyển dụng
-                </button>
+                <div class="d-flex gap-3 align-items-center">
+                    <span class="text-muted">Xin chào, <strong>{{ Auth::user()->name }}</strong></span>
+                    <a href="{{ route('home') }}" class="btn btn-outline-primary">
+                        <i class="bi bi-house-door"></i> Trang chủ
+                    </a>
+                </div>
             </div>
         </div>
     </header>
@@ -759,13 +549,13 @@
         <div class="hero-section">
             <div class="row align-items-center">
                 <div class="col-lg-8">
-                    <div class="d-flex align-items-center mb-3">
-                        <div style="width: 60px; height: 60px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px; display: flex; align-items: center; justify-content: center; margin-right: 1rem;">
-                            <i class="bi bi-stars text-white" style="font-size: 1.8rem;"></i>
-                        </div>
-                        <h1 class="hero-title mb-0">Gợi ý việc làm cho bạn</h1>
-                    </div>
-                    <p class="hero-subtitle ms-5 ps-3">Được cá nhân hóa dựa trên kỹ năng, kinh nghiệm và sở thích của bạn</p>
+                    <h1 class="mb-3" style="font-size: 2.5rem; font-weight: 900; color: #333;">
+                        <i class="bi bi-stars text-primary"></i>
+                        Gợi ý việc làm phù hợp với bạn
+                    </h1>
+                    <p class="text-muted" style="font-size: 1.1rem;">
+                        Được cá nhân hóa dựa trên kỹ năng, kinh nghiệm, địa điểm và sở thích của bạn
+                    </p>
                 </div>
                 <div class="col-lg-4 text-lg-end">
                     <button class="refresh-btn" onclick="refreshRecommendations()">
@@ -779,324 +569,342 @@
         <!-- Statistics -->
         <div class="stats-grid">
             <div class="stat-card purple">
-                <div class="stat-icon">
-                    <i class="bi bi-briefcase-fill"></i>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div style="font-size: 2.5rem; font-weight: 900; color: #667eea;">
+                            {{ $stats['total'] }}
+                        </div>
+                        <div style="font-size: 0.9rem; color: #666; font-weight: 600;">
+                            Việc làm phù hợp
+                        </div>
+                    </div>
+                    <i class="bi bi-briefcase-fill" style="font-size: 3rem; color: rgba(102, 126, 234, 0.2);"></i>
                 </div>
-                <div class="stat-number">24</div>
-                <div class="stat-label">Việc làm phù hợp</div>
             </div>
 
             <div class="stat-card green">
-                <div class="stat-icon">
-                    <i class="bi bi-star-fill"></i>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div style="font-size: 2.5rem; font-weight: 900; color: #38ef7d;">
+                            {{ $stats['high_match'] }}
+                        </div>
+                        <div style="font-size: 0.9rem; color: #666; font-weight: 600;">
+                            Phù hợp cao (≥80%)
+                        </div>
+                    </div>
+                    <i class="bi bi-star-fill" style="font-size: 3rem; color: rgba(56, 239, 125, 0.2);"></i>
                 </div>
-                <div class="stat-number">18</div>
-                <div class="stat-label">Phù hợp cao (≥80%)</div>
             </div>
 
             <div class="stat-card blue">
-                <div class="stat-icon">
-                    <i class="bi bi-eye-slash-fill"></i>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div style="font-size: 2.5rem; font-weight: 900; color: #4facfe;">
+                            {{ $stats['not_viewed'] }}
+                        </div>
+                        <div style="font-size: 0.9rem; color: #666; font-weight: 600;">
+                            Chưa xem
+                        </div>
+                    </div>
+                    <i class="bi bi-eye-slash-fill" style="font-size: 3rem; color: rgba(79, 172, 254, 0.2);"></i>
                 </div>
-                <div class="stat-number">12</div>
-                <div class="stat-label">Chưa xem</div>
             </div>
 
             <div class="stat-card orange">
-                <div class="stat-icon">
-                    <i class="bi bi-send-fill"></i>
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div style="font-size: 2.5rem; font-weight: 900; color: #fa709a;">
+                            {{ $stats['not_applied'] }}
+                        </div>
+                        <div style="font-size: 0.9rem; color: #666; font-weight: 600;">
+                            Chưa ứng tuyển
+                        </div>
+                    </div>
+                    <i class="bi bi-send-fill" style="font-size: 3rem; color: rgba(250, 112, 154, 0.2);"></i>
                 </div>
-                <div class="stat-number">20</div>
-                <div class="stat-label">Chưa ứng tuyển</div>
             </div>
         </div>
 
         <!-- Job Listings -->
         <div class="job-listings mt-4">
-            <!-- Job Card 1 -->
-            <div class="job-card high-match">
+            @forelse($recommendations as $rec)
+            @php
+            $job = $rec->job;
+            $details = $rec->match_details_parsed;
+            $matchClass = $rec->score >= 80 ? 'high-match' : ($rec->score >= 60 ? 'medium-match' : 'low-match');
+
+            // Helper function to get score level
+            $getScoreLevel = function($score) {
+            if ($score >= 80) return 'high';
+            if ($score >= 60) return 'medium';
+            return 'low';
+            };
+            @endphp
+
+            <div class="job-card {{ $matchClass }}">
+                <!-- Job Header -->
                 <div class="job-header">
-                    <div class="company-logo">T</div>
+                    @if($job->company && $job->company->logo)
+                    <img src="{{ asset('assets/img/' . $job->company->logo) }}" alt="Company Logo" class="company-logo" style="width: 80px; height: 80px; object-fit: cover;" />
+                    @else
+                    <div class="company-logo">
+                        {{ strtoupper(substr($job->company->ten_cty ?? 'C', 0, 1)) }}
+                    </div>
+                    @endif
                     <div class="job-info">
-                        <h3 class="job-title">Senior Frontend Developer</h3>
+                        <h3 class="job-title">{{ $job->title }}</h3>
                         <div class="company-name">
                             <i class="bi bi-building"></i>
-                            Tech Innovation Vietnam
+                            {{ $job->company->tencty ?? 'Công ty' }}
                         </div>
                     </div>
                     <div class="match-score">
-                        <span class="score">92%</span>
+                        <span class="score">{{ number_format($rec->score, 0) }}%</span>
                         <span class="label">Phù hợp</span>
                     </div>
                 </div>
 
+                <!-- Job Tags -->
                 <div class="job-tags">
                     <span class="job-tag location">
                         <i class="bi bi-geo-alt-fill"></i>
-                        Hồ Chí Minh
+                        {{ $job->province }}
                     </span>
-                    <span class="job-tag salary">
-                        <i class="bi bi-cash-stack"></i>
-                        25,000,000 - 40,000,000 VND
-                    </span>
-                    <span class="job-tag level">
-                        <i class="bi bi-briefcase-fill"></i>
-                        Senior
-                    </span>
-                    <span class="job-tag new">
-                        <i class="bi bi-star-fill"></i>
-                        Mới
-                    </span>
-                </div>
-
-                <div class="match-analysis">
-                    <div class="analysis-title">
-                        <i class="bi bi-graph-up-arrow"></i>
-                        Phân tích mức độ phù hợp
-                    </div>
-                    <div class="analysis-grid">
-                        <div class="analysis-item">
-                            <div class="analysis-header">
-                                <span class="analysis-label">Kỹ năng</span>
-                                <span class="analysis-value purple">95%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill purple" style="width: 95%"></div>
-                            </div>
-                        </div>
-                        <div class="analysis-item">
-                            <div class="analysis-header">
-                                <span class="analysis-label">Kinh nghiệm</span>
-                                <span class="analysis-value green">90%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill green" style="width: 90%"></div>
-                            </div>
-                        </div>
-                        <div class="analysis-item">
-                            <div class="analysis-header">
-                                <span class="analysis-label">Địa điểm</span>
-                                <span class="analysis-value blue">90%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill blue" style="width: 90%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="job-actions">
-                    <button class="btn-action btn-primary" onclick="viewJob('job-001')">
-                        <i class="bi bi-eye-fill"></i>
-                        <span>Xem chi tiết</span>
-                    </button>
-                    <button class="btn-action btn-secondary" onclick="applyJob('job-001')">
-                        <i class="bi bi-send-fill"></i>
-                        <span>Ứng tuyển ngay</span>
-                    </button>
-                    <button class="btn-action btn-icon" onclick="toggleSave(this)">
-                        <i class="bi bi-heart"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Job Card 2 -->
-            <div class="job-card">
-                <div class="job-header">
-                    <div class="company-logo">C</div>
-                    <div class="job-info">
-                        <h3 class="job-title">UI/UX Designer</h3>
-                        <div class="company-name">
-                            <i class="bi bi-building"></i>
-                            Creative Studio
-                        </div>
-                    </div>
-                    <div class="match-score">
-                        <span class="score">78%</span>
-                        <span class="label">Phù hợp</span>
-                    </div>
-                </div>
-                <div class="job-tags">
-                    <span class="job-tag location">
-                        <i class="bi bi-geo-alt-fill"></i>
-                        Hà Nội
-                    </span>
+                    @if($job->salary_type === 'negotiable')
                     <span class="job-tag salary">
                         <i class="bi bi-cash-stack"></i>
                         Thỏa thuận
                     </span>
-                    <span class="job-tag level">
-                        <i class="bi bi-briefcase-fill"></i>
-                        Middle
-                    </span>
-                </div>
-                <div class="match-analysis">
-                    <div class="analysis-title">
-                        <i class="bi bi-graph-up-arrow"></i>
-                        Phân tích mức độ phù hợp
-                    </div>
-                    <div class="analysis-grid">
-                        <div class="analysis-item">
-                            <div class="analysis-header">
-                                <span class="analysis-label">Kỹ năng</span>
-                                <span class="analysis-value purple">82%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill purple" style="width: 82%"></div>
-                            </div>
-                        </div>
-                        <div class="analysis-item">
-                            <div class="analysis-header">
-                                <span class="analysis-label">Kinh nghiệm</span>
-                                <span class="analysis-value green">75%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill green" style="width: 75%"></div>
-                            </div>
-                        </div>
-                        <div class="analysis-item">
-                            <div class="analysis-header">
-                                <span class="analysis-label">Địa điểm</span>
-                                <span class="analysis-value blue">70%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill blue" style="width: 70%"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="job-actions">
-                    <button class="btn-action btn-primary" onclick="viewJob('job-002')">
-                        <i class="bi bi-eye-fill"></i>
-                        <span>Xem chi tiết</span>
-                    </button>
-                    <button class="btn-action btn-secondary" onclick="applyJob('job-002')">
-                        <i class="bi bi-send-fill"></i>
-                        <span>Ứng tuyển ngay</span>
-                    </button>
-                    <button class="btn-action btn-icon" onclick="toggleSave(this)">
-                        <i class="bi bi-heart"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Job Card 3 -->
-            <div class="job-card high-match">
-                <div class="job-header">
-                    <div class="company-logo">D</div>
-                    <div class="job-info">
-                        <h3 class="job-title">Full Stack Developer</h3>
-                        <div class="company-name">
-                            <i class="bi bi-building"></i>
-                            Digital Solutions Co.
-                        </div>
-                    </div>
-                    <div class="match-score">
-                        <span class="score">88%</span>
-                        <span class="label">Phù hợp</span>
-                    </div>
-                </div>
-
-                <div class="job-tags">
-                    <span class="job-tag location">
-                        <i class="bi bi-geo-alt-fill"></i>
-                        Đà Nẵng
-                    </span>
+                    @else
                     <span class="job-tag salary">
                         <i class="bi bi-cash-stack"></i>
-                        20,000,000 - 35,000,000 VND
+                        {{ number_format($job->salary_min) }} - {{ number_format($job->salary_max) }} VNĐ
                     </span>
+                    @endif
                     <span class="job-tag level">
                         <i class="bi bi-briefcase-fill"></i>
-                        Middle
+                        {{ $job->experience }}
                     </span>
-                    <span class="job-tag new">
+                    @if(\Carbon\Carbon::parse($job->created_at)->diffInDays(now()) < 7)
+                        <span class="job-tag new">
                         <i class="bi bi-star-fill"></i>
                         Mới
-                    </span>
+                        </span>
+                        @endif
                 </div>
 
+                <!-- Match Analysis -->
                 <div class="match-analysis">
                     <div class="analysis-title">
                         <i class="bi bi-graph-up-arrow"></i>
-                        Phân tích mức độ phù hợp
+                        Phân tích chi tiết độ phù hợp
                     </div>
-                    <div class="analysis-grid">
-                        <div class="analysis-item">
-                            <div class="analysis-header">
-                                <span class="analysis-label">Kỹ năng</span>
-                                <span class="analysis-value purple">90%</span>
+
+                    <div class="criteria-grid">
+                        <!-- 1. Skills -->
+                        @if(isset($details['skills']) && is_array($details['skills']))
+                        <div class="criteria-item">
+                            <div class="criteria-header">
+                                <div class="criteria-name">
+                                    <i class="bi bi-code-square"></i>
+                                    Kỹ năng
+                                </div>
+                                <div class="criteria-score {{ $getScoreLevel($details['skills']['score']) }}">
+                                    {{ number_format($details['skills']['score'], 0) }}%
+                                </div>
                             </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill purple" style="width: 90%"></div>
+                            <div class="progress-bar-wrapper">
+                                <div class="progress-fill {{ $getScoreLevel($details['skills']['score']) }}"
+                                    style="width: {{ $details['skills']['score'] }}% !important;"></div>
+                            </div>
+                            <div class="criteria-reason">
+                                {{ $details['skills']['reason'] }}
+                            </div>
+
+                            @if(!empty($details['skills']['details']['matched_skills']) || !empty($details['skills']['details']['missing_skills']))
+                            <div class="skills-details">
+                                @if(!empty($details['skills']['details']['matched_skills']))
+                                <div class="skills-section">
+                                    <div class="skills-section-title">✓ Kỹ năng phù hợp:</div>
+                                    <div class="skill-tags">
+                                        @foreach($details['skills']['details']['matched_skills'] as $skill)
+                                        <span class="skill-tag matched">{{ $skill }}</span>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                @endif
+
+                                @if(!empty($details['skills']['details']['missing_skills']))
+                                <div class="skills-section">
+                                    <div class="skills-section-title">✗ Kỹ năng còn thiếu:</div>
+                                    <div class="skill-tags">
+                                        @foreach($details['skills']['details']['missing_skills'] as $skill)
+                                        <span class="skill-tag missing">{{ $skill }}</span>
+                                        @endforeach
+                                    </div>
+                                </div>
+                                @endif
+                            </div>
+                            @endif
+                        </div>
+                        @endif
+
+                        <!-- 2. Experience -->
+                        @if(isset($details['experience']) && is_array($details['experience']))
+                        <div class="criteria-item">
+                            <div class="criteria-header">
+                                <div class="criteria-name">
+                                    <i class="bi bi-clock-history"></i>
+                                    Kinh nghiệm
+                                </div>
+                                <div class="criteria-score {{ $getScoreLevel($details['experience']['score']) }}">
+                                    {{ number_format($details['experience']['score'], 0) }}%
+                                </div>
+                            </div>
+                            <div class="progress-bar-wrapper">
+                                <div class="progress-fill {{ $getScoreLevel($details['experience']['score']) }}"
+                                    style="width: {{ $details['experience']['score'] }}% !important;"></div>
+                            </div>
+                            <div class="criteria-reason">
+                                {{ $details['experience']['reason'] }}
                             </div>
                         </div>
-                        <div class="analysis-item">
-                            <div class="analysis-header">
-                                <span class="analysis-label">Kinh nghiệm</span>
-                                <span class="analysis-value green">88%</span>
+                        @endif
+
+                        <!-- 3. Location -->
+                        @if(isset($details['location']) && is_array($details['location']))
+                        <div class="criteria-item">
+                            <div class="criteria-header">
+                                <div class="criteria-name">
+                                    <i class="bi bi-geo-alt"></i>
+                                    Địa điểm
+                                </div>
+                                <div class="criteria-score {{ $getScoreLevel($details['location']['score']) }}">
+                                    {{ number_format($details['location']['score'], 0) }}%
+                                </div>
                             </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill green" style="width: 88%"></div>
+                            <div class="progress-bar-wrapper">
+                                <div class="progress-fill {{ $getScoreLevel($details['location']['score']) }}"
+                                    style="width: {{ $details['location']['score'] }}% !important;"></div>
+                            </div>
+                            <div class="criteria-reason">
+                                {{ $details['location']['reason'] }}
                             </div>
                         </div>
-                        <div class="analysis-item">
-                            <div class="analysis-header">
-                                <span class="analysis-label">Địa điểm</span>
-                                <span class="analysis-value blue">85%</span>
+                        @endif
+
+                        <!-- 4. Salary -->
+                        @if(isset($details['salary']) && is_array($details['salary']))
+                        <div class="criteria-item">
+                            <div class="criteria-header">
+                                <div class="criteria-name">
+                                    <i class="bi bi-cash-coin"></i>
+                                    Mức lương
+                                </div>
+                                <div class="criteria-score {{ $getScoreLevel($details['salary']['score']) }}">
+                                    {{ number_format($details['salary']['score'], 0) }}%
+                                </div>
                             </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill blue" style="width: 85%"></div>
+                            <div class="progress-bar-wrapper">
+                                <div class="progress-fill {{ $getScoreLevel($details['salary']['score']) }}"
+                                    style="width: {{ $details['salary']['score'] }}% !important;"></div>
+                            </div>
+                            <div class="criteria-reason">
+                                {{ $details['salary']['reason'] }}
                             </div>
                         </div>
+                        @endif
+
+
+
+                        <!-- 6. Language -->
+                        @if(isset($details['language']) && is_array($details['language']))
+                        <div class="criteria-item">
+                            <div class="criteria-header">
+                                <div class="criteria-name">
+                                    <i class="bi bi-translate"></i>
+                                    Ngoại ngữ
+                                </div>
+                                <div class="criteria-score {{ $getScoreLevel($details['language']['score']) }}">
+                                    {{ number_format($details['language']['score'], 0) }}%
+                                </div>
+                            </div>
+                            <div class="progress-bar-wrapper">
+                                <div class="progress-fill {{ $getScoreLevel($details['language']['score']) }}"
+                                    style="width: {{ $details['language']['score'] }}% !important;"></div>
+                            </div>
+                            <div class="criteria-reason">
+                                {{ $details['language']['reason'] }}
+                            </div>
+                        </div>
+                        @endif
                     </div>
                 </div>
 
+                <!-- Action Buttons -->
                 <div class="job-actions">
-                    <button class="btn-action btn-primary" onclick="viewJob('job-003')">
+                    <a href="{{ route('job.detail', $job->job_id) }}" class="btn-action btn-primary" onclick="markAsViewed({{ $rec->id }}); return false;">
                         <i class="bi bi-eye-fill"></i>
                         <span>Xem chi tiết</span>
-                    </button>
-                    <button class="btn-action btn-secondary" onclick="applyJob('job-003')">
+                    </a>
+                    <a href="{{ route('application.store', $job->job_id) }}"
+                        class="btn-action btn-secondary">
                         <i class="bi bi-send-fill"></i>
                         <span>Ứng tuyển ngay</span>
-                    </button>
-                    <button class="btn-action btn-icon" onclick="toggleSave(this)">
+                    </a>
+                    <button class="btn-action btn-icon"
+                        onclick="toggleSave(this, '{{ $job->job_id }}')">
                         <i class="bi bi-heart"></i>
                     </button>
                 </div>
             </div>
+            @empty
+            <div class="text-center py-5">
+                <div style="font-size: 4rem; color: #ddd;">
+                    <i class="bi bi-inbox"></i>
+                </div>
+                <h3 class="mt-3">Chưa có việc làm phù hợp</h3>
+                <p class="text-muted">Vui lòng cập nhật đầy đủ hồ sơ để nhận được gợi ý tốt nhất</p>
+                <a href="{{ route('profile') }}" class="btn btn-primary mt-3">
+                    Cập nhật hồ sơ
+                </a>
+            </div>
+            @endforelse
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="main-footer">
-        <div class="container">
-            <div class="footer-content">
-                <p class="mb-0">© 2025 JobMatch. Tất cả các quyền được bảo lưu.</p>
-            </div>
-        </div>
-    </footer>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // CSRF Token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
+
         // Refresh recommendations
         async function refreshRecommendations() {
             const btn = event.target.closest('button');
             const originalHTML = btn.innerHTML;
 
             btn.disabled = true;
-            btn.innerHTML = '<span class="loading"></span><span class="ms-2">Đang tải...</span>';
+            btn.innerHTML = '<span class="loading-spinner"></span><span class="ms-2">Đang tải...</span>';
 
             try {
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 2000));
+                const response = await fetch('{{ route("applicant.recommendations.refresh") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
 
-                btn.innerHTML = '<i class="bi bi-check-circle-fill"></i><span class="ms-2">Thành công!</span>';
+                const data = await response.json();
 
-                setTimeout(() => {
-                    location.reload();
-                }, 500);
+                if (data.success) {
+                    btn.innerHTML = '<i class="bi bi-check-circle-fill"></i><span class="ms-2">Thành công!</span>';
+                    setTimeout(() => {
+                        location.reload();
+                    }, 500);
+                } else {
+                    throw new Error(data.message);
+                }
             } catch (error) {
                 console.error('Error:', error);
                 btn.innerHTML = '<i class="bi bi-exclamation-circle-fill"></i><span class="ms-2">Thất bại!</span>';
@@ -1108,24 +916,23 @@
             }
         }
 
-        // View job details
-        function viewJob(jobId) {
-            console.log('Viewing job:', jobId);
-            // Navigate to job details page
-            // window.location.href = `/job/${jobId}`;
-            alert(`Xem chi tiết công việc: ${jobId}`);
-        }
-
-        // Apply for job
-        function applyJob(jobId) {
-            console.log('Applying for job:', jobId);
-            // Navigate to application page
-            // window.location.href = `/job/${jobId}/apply`;
-            alert(`Ứng tuyển công việc: ${jobId}`);
+        // Mark as viewed
+        async function markAsViewed(recommendationId) {
+            try {
+                await fetch(`/recommendations/${recommendationId}/viewed`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+            } catch (error) {
+                console.error('Error marking as viewed:', error);
+            }
         }
 
         // Toggle save job
-        function toggleSave(btn) {
+        function toggleSave(btn, jobId) {
             const icon = btn.querySelector('i');
 
             if (icon.classList.contains('bi-heart')) {
@@ -1138,16 +945,20 @@
                 setTimeout(() => {
                     btn.style.transform = 'scale(1)';
                 }, 200);
+
+                // TODO: Call API to save job
             } else {
                 icon.classList.remove('bi-heart-fill');
                 icon.classList.add('bi-heart');
                 btn.classList.remove('saved');
+
+                // TODO: Call API to unsave job
             }
         }
 
         // Animate progress bars on scroll
         const observerOptions = {
-            threshold: 0.5
+            threshold: 0.3
         };
 
         const observer = new IntersectionObserver((entries) => {
@@ -1161,6 +972,7 @@
                             bar.style.width = width;
                         }, 100);
                     });
+                    observer.unobserve(entry.target);
                 }
             });
         }, observerOptions);
@@ -1170,4 +982,44 @@
                 observer.observe(analysis);
             });
         });
+
+        /**
+         * Cập nhật recommendations sau khi profile thay đổi
+         * Gọi hàm này từ các trang profile update
+         */
+        async function recalculateRecommendations() {
+            try {
+                const response = await fetch('{{ route("applicant.recommendations.recalculate") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Reload trang sau 1 giây
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    console.error('Error:', data.message);
+                }
+            } catch (error) {
+                console.error('Error recalculating recommendations:', error);
+            }
+        }
+
+        /**
+         * Listen to changes từ localStorage (khi profile update hoàn tất)
+         * Hoặc broadcast event nếu dùng WebSocket
+         */
+        window.addEventListener('profileUpdated', function() {
+            recalculateRecommendations();
+        });
     </script>
+</body>
+
+</html>

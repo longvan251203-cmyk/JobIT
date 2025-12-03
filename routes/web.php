@@ -389,4 +389,12 @@ Route::middleware(['auth'])->group(function () {  // ← Chỉ giữ 'auth'
 
     Route::post('/applicant/recommendations/{id}/viewed', [JobRecommendationController::class, 'markAsViewed'])
         ->name('applicant.recommendations.viewed');
+
+    // API recalculate recommendations
+    Route::post('/recommendations/recalculate', [JobRecommendationController::class, 'recalculateAfterProfileUpdate'])
+        ->name('applicant.recommendations.recalculate');
+
+    // API: Lấy recommendations dạng HTML cho home page
+    Route::get('/api/recommendations/home', [JobRecommendationController::class, 'getRecommendedJobsForHome'])
+        ->name('api.recommendations.home');
 });

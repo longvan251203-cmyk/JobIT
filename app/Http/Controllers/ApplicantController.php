@@ -107,7 +107,13 @@ class ApplicantController extends Controller
         }
 
         DB::table('applicants')->where('user_id', $user->id)->update($updateData);
-
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Cập nhật hồ sơ thành công',
+                'redirect' => route('applicant.recommendations')
+            ]);
+        }
         return redirect()->route('applicant.hoso')->with('success', 'Cập nhật hồ sơ thành công!');
     }
 
