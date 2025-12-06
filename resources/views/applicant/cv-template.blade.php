@@ -170,7 +170,7 @@
         <!-- Header -->
         <div class="cv-header">
             <h1>{{ $applicant->hoten_uv ?? 'Họ tên ứng viên' }}</h1>
-            <div class="position">{{ $applicant->chucdanh ?? 'Chức danh / Vị trí' }}</div>
+            <div class="position">{{ $applicant->vitritungtuyen ?? 'Chức danh / Vị trí' }}</div>
 
             <div class="contact-info">
                 <div class="contact-item">✉ {{ $email }}</div>

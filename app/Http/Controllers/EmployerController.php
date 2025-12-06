@@ -302,7 +302,7 @@ class EmployerController extends Controller
             $keyword = $request->keyword;
             $query->where(function ($q) use ($keyword) {
                 $q->where('hoten_uv', 'LIKE', "%{$keyword}%")
-                    ->orWhere('chucdanh', 'LIKE', "%{$keyword}%")
+                    ->orWhere('vitritungtuyen', 'LIKE', "%{$keyword}%")
                     ->orWhere('gioithieu', 'LIKE', "%{$keyword}%");
             });
         }

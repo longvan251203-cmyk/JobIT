@@ -75,7 +75,7 @@ class ApplicantController extends Controller
 
         $request->validate([
             'hoten_uv' => 'required|string|max:255',
-            'chucdanh' => 'nullable|string|max:255',
+            'vitriungtuyen' => 'nullable|string|max:255',
             'ngaysinh' => 'nullable|date',
             'sdt_uv' => 'nullable|string|max:20',
             'gioitinh_uv' => 'nullable|string|max:10',
@@ -85,7 +85,7 @@ class ApplicantController extends Controller
 
         $updateData = [
             'hoten_uv'   => $request->hoten_uv,
-            'chucdanh'   => $request->chucdanh,
+            'vitriungtuyen'   => $request->vitriungtuyen,
             'ngaysinh'   => $request->ngaysinh,
             'sdt_uv'     => $request->sdt_uv,
             'gioitinh_uv' => $request->gioitinh_uv,
@@ -1174,7 +1174,7 @@ class ApplicantController extends Controller
         // Validate
         $validated = $request->validate([
             'hoten_uv' => 'required|string|max:255',
-            'chucdanh' => 'nullable|string|max:255',
+            'vitriungtuyen' => 'nullable|string|max:255',
             'ngaysinh' => 'nullable|date',
             'sdt_uv' => 'nullable|string|max:20',
             'gioitinh_uv' => 'nullable|in:Nam,Nữ,Khác',
@@ -1197,7 +1197,7 @@ class ApplicantController extends Controller
         // Update thông tin
         $applicant->update([
             'hoten_uv' => $validated['hoten_uv'],
-            'chucdanh' => $validated['chucdanh'] ?? $applicant->chucdanh,
+            'vitriungtuyen' => $validated['vitriungtuyen'] ?? $applicant->vitriungtuyen,
             'ngaysinh' => $validated['ngaysinh'] ?? $applicant->ngaysinh,
             'sdt_uv' => $validated['sdt_uv'] ?? $applicant->sdt_uv,
             'gioitinh_uv' => $validated['gioitinh_uv'] ?? $applicant->gioitinh_uv,

@@ -458,7 +458,7 @@
                                     alt="Avatar" class="avatar">
                                 <div>
                                     <div style="font-weight: 600; color: #1a1a1a;">{{ $application->hoten }}</div>
-                                    <div style="font-size: 13px; color: #6b7280;">{{ $application->applicant->chucdanh ?? 'Chưa cập nhật' }}</div>
+                                    <div style="font-size: 13px; color: #6b7280;">{{ $application->applicant->vitritungtuyen ?? 'Chưa cập nhật' }}</div>
                                 </div>
                             </div>
                         </td>
@@ -724,7 +724,7 @@
                             <img src="${applicant.avatar ? '/assets/img/avt/' + applicant.avatar : '/assets/img/avt/default-avatar.png'}" 
                                  alt="Avatar" style="width: 120px; height: 120px; border-radius: 50%; margin-bottom: 16px; border: 4px solid white; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
                             <h4 style="font-size: 18px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px;">${application.hoten}</h4>
-                            <p style="font-size: 14px; color: #6b7280;">${applicant.chucdanh || 'Chức danh'}</p>
+                            <p style="font-size: 14px; color: #6b7280;">${applicant.vitritungtuyen || 'Chức danh'}</p>
                         </div>
                         
                         <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px;">

@@ -1459,19 +1459,26 @@
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                        Cấp bậc <span class="text-red-500">*</span>
+                                        Vị trí tuyển dụng <span class="text-red-500">*</span>
                                     </label>
                                     <select id="edit_level" name="level" required
                                         class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500">
-                                        <option value="">-- Chọn cấp bậc --</option>
+                                        <option value="" selected>-- Chọn vị trí --</option>
                                         <option value="intern">Thực tập sinh</option>
-                                        <option value="fresher">Fresher</option>
-                                        <option value="junior">Junior</option>
-                                        <option value="middle">Middle/Senior</option>
-                                        <option value="senior">Senior</option>
-                                        <option value="leader">Leader/Manager</option>
+                                        <option value="collaborator">Cộng tác viên</option>
+                                        <option value="official">Nhân viên chính thức</option>
+                                        <option value="parttime">Nhân viên part-time</option>
+                                        <option value="contract">Nhân viên hợp đồng</option>
+                                        <option value="probation">Nhân viên thử việc</option>
+                                        <option value="freelancer">Freelancer</option>
+                                        <option value="project_staff">Nhân viên dự án</option>
+                                        <option value="manager">Quản lý</option>
+                                        <option value="director">Giám đốc</option>
+                                        <option value="department_director">Giám đốc bộ phận</option>
+                                        <option value="team_leader">Trưởng nhóm</option>
                                     </select>
                                 </div>
+
 
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">

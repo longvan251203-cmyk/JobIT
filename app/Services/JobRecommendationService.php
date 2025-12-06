@@ -11,11 +11,12 @@ use Illuminate\Support\Facades\Log;
 class JobRecommendationService
 {
     // Trọng số cho từng yếu tố
-    const WEIGHT_SKILLS = 0.35;
+    const WEIGHT_SKILLS = 0.30;      // Giảm từ 0.35
+    const WEIGHT_POSITION = 0.15;    // MỚI - So sánh vị trí
     const WEIGHT_EXPERIENCE = 0.20;
     const WEIGHT_LOCATION = 0.15;
-    const WEIGHT_SALARY = 0.15;
-    const WEIGHT_LANGUAGE = 0.15;
+    const WEIGHT_SALARY = 0.10;      // Giảm từ 0.15
+    const WEIGHT_LANGUAGE = 0.10;    // Giảm từ 0.15
 
     /**
      * Tính điểm phù hợp giữa ứng viên và job
@@ -24,6 +25,7 @@ class JobRecommendationService
     {
         $scores = [
             'skills' => $this->calculateSkillsMatch($applicant, $job),
+            'position' => $this->calculatePositionMatch($applicant, $job), // MỚI
             'experience' => $this->calculateExperienceMatch($applicant, $job),
             'location' => $this->calculateLocationMatch($applicant, $job),
             'salary' => $this->calculateSalaryMatch($applicant, $job),
@@ -33,6 +35,7 @@ class JobRecommendationService
         // Tính tổng điểm có trọng số
         $totalScore =
             ($scores['skills']['score'] * self::WEIGHT_SKILLS) +
+            ($scores['position']['score'] * self::WEIGHT_POSITION) +
             ($scores['experience']['score'] * self::WEIGHT_EXPERIENCE) +
             ($scores['location']['score'] * self::WEIGHT_LOCATION) +
             ($scores['salary']['score'] * self::WEIGHT_SALARY) +
@@ -43,7 +46,209 @@ class JobRecommendationService
             'breakdown' => $scores
         ];
     }
+    /**
+     * So sánh Vị trí ứng tuyển
+     */
 
+    private function calculatePositionMatch(Applicant $applicant, JobPost $job): array
+    {
+        $applicantPosition = strtolower(trim($applicant->vitriungtuyen ?? ''));
+        $jobPosition = strtolower(trim($job->level ?? ''));
+
+        // ========== BƯỚC 1: REMOVE DIACRITICS TRƯỚC ==========
+        $normalizedApplicant = $this->removeDiacritics($applicantPosition);
+        $normalizedJob = $this->removeDiacritics($jobPosition);
+
+        Log::info('🧪 Position comparison START', [
+            'original_applicant' => $applicantPosition,
+            'original_job' => $jobPosition,
+            'normalized_applicant' => $normalizedApplicant,
+            'normalized_job' => $normalizedJob,
+        ]);
+
+        // ========== BƯỚC 2: CHECK EMPTY ==========
+        if (empty($applicantPosition)) {
+            Log::warning('⚠️ Applicant position is EMPTY');
+            return [
+                'score' => 70,
+                'reason' => 'Chưa cập nhật vị trí ứng tuyển',
+                'details' => [
+                    'applicant_position' => 'Chưa cập nhật',
+                    'job_position' => $job->level ?? 'Chưa rõ'
+                ]
+            ];
+        }
+
+        if (empty($jobPosition)) {
+            Log::warning('⚠️ Job position is EMPTY');
+            return [
+                'score' => 80,
+                'reason' => 'Công việc không giới hạn vị trí',
+                'details' => [
+                    'applicant_position' => $applicant->vitriungtuyen,
+                    'job_position' => 'Mọi cấp bậc'
+                ]
+            ];
+        }
+
+        // ========== BƯỚC 3: ĐỊNH NGHĨA VỊ TRÍ - TIẾNG VIỆT + TIẾNG ANH ==========
+        $positionLevels = [
+            // ===== TIẾNG VIỆT =====
+            'thuc tap sinh' => 0,
+            'cong tac vien' => 1,
+            'nhan vien thu viec' => 2,
+            'nhan vien part-time' => 2,
+            'freelancer' => 2,
+            'nhan vien chinh thuc' => 3,
+            'nhan vien hop dong' => 3,
+            'nhan vien du an' => 3,
+            'truong nhom' => 4,
+            'quan ly' => 5,
+            'giam doc bo phan' => 6,
+            'giam doc' => 7,
+            'tong giam doc' => 8,
+
+            // ===== TIẾNG ANH =====
+            'intern' => 0,
+            'internship' => 0,
+            'contract' => 1,
+            'contractor' => 1,
+            'freelance' => 2,
+            'part-time' => 2,
+            'parttime' => 2,
+            'junior' => 3,
+            'junior developer' => 3,
+            'junior engineer' => 3,
+            'staff' => 3,
+            'employee' => 3,
+            'mid-level' => 4,
+            'midlevel' => 4,
+            'mid' => 4,
+            'team lead' => 4,
+            'team leader' => 4,
+            'lead' => 4,
+            'leader' => 4,
+            'senior' => 5,
+            'senior developer' => 5,
+            'senior engineer' => 5,
+            'architect' => 5,
+            'tech lead' => 5,
+            'technical lead' => 5,
+            'manager' => 6,
+            'project manager' => 6,
+            'product manager' => 6,
+            'director' => 7,
+            'department director' => 7,
+            'chief' => 7,
+            'cto' => 8,
+            'ceo' => 8,
+            'vp' => 8,
+            'vice president' => 8,
+        ];
+
+        // ========== BƯỚC 4: LOOKUP VỊ TRÍ ==========
+        $applicantLevel = $positionLevels[$normalizedApplicant] ?? -1;
+        $jobLevel = $positionLevels[$normalizedJob] ?? -1;
+
+        Log::info('Position levels lookup:', [
+            'applicant_level' => $applicantLevel,
+            'job_level' => $jobLevel,
+            'applicant_found' => isset($positionLevels[$normalizedApplicant]),
+            'job_found' => isset($positionLevels[$normalizedJob]),
+            'available_keys' => array_slice(array_keys($positionLevels), 0, 10) // Hiển thị 10 key đầu
+        ]);
+
+        // ========== BƯỚC 5: NẾU CÓ EXACT STRING MATCH ==========
+        if ($normalizedApplicant === $normalizedJob) {
+            Log::info('✓ Exact string match found');
+            return [
+                'score' => 100,
+                'reason' => "✓ Vị trí khớp: {$job->level}",
+                'details' => [
+                    'applicant_position' => $applicant->vitriungtuyen,
+                    'job_position' => $job->level,
+                    'match_type' => 'exact_string'
+                ]
+            ];
+        }
+
+        // ========== BƯỚC 6: NẾU CÓ KEYWORD MATCH ==========
+        if ($this->hasCommonKeyword($normalizedApplicant, $normalizedJob)) {
+            Log::info('✓ Common keyword found');
+            return [
+                'score' => 90,
+                'reason' => "✓ Vị trí tương tự: {$applicant->vitriungtuyen} ↔ {$job->level}",
+                'details' => [
+                    'applicant_position' => $applicant->vitriungtuyen,
+                    'job_position' => $job->level,
+                    'match_type' => 'keyword_match'
+                ]
+            ];
+        }
+
+        // ========== BƯỚC 7: NẾU CÓ LEVEL MAPPING ==========
+        if ($applicantLevel >= 0 && $jobLevel >= 0) {
+            Log::info('✓ Level mapping found');
+
+            $diff = abs($applicantLevel - $jobLevel);
+            $score = 0;
+            $reason = '';
+
+            if ($applicantLevel === $jobLevel) {
+                $score = 100;
+                $reason = "✓ Vị trí phù hợp: {$job->level}";
+            } elseif ($diff === 1) {
+                $score = 95;
+                $reason = $applicantLevel > $jobLevel
+                    ? "Bạn có kinh nghiệm cao hơn 1 bậc"
+                    : "Có thể phát triển lên vị trí này";
+            } elseif ($diff === 2) {
+                $score = 85;
+                $reason = $applicantLevel > $jobLevel
+                    ? "Bạn có kinh nghiệm cao hơn 2 bậc"
+                    : "Cần thêm kinh nghiệm";
+            } else {
+                $score = 70;
+                $reason = "Chênh lệch {$diff} bậc";
+            }
+
+            Log::info('✓ Position match result:', [
+                'score' => $score,
+                'reason' => $reason,
+                'diff' => $diff,
+            ]);
+
+            return [
+                'score' => round($score, 2),
+                'reason' => $reason,
+                'details' => [
+                    'applicant_position' => $applicant->vitriungtuyen,
+                    'job_position' => $job->level,
+                    'applicant_level' => $applicantLevel,
+                    'job_level' => $jobLevel,
+                    'match_type' => 'level_mapping'
+                ]
+            ];
+        }
+
+        // ========== BƯỚC 8: NẾU KHÔNG MATCH ĐƯỢC ==========
+        Log::warning('⚠️ Cannot match position', [
+            'normalized_applicant' => $normalizedApplicant,
+            'normalized_job' => $normalizedJob,
+        ]);
+
+        return [
+            'score' => 75,
+            'reason' => 'Vị trí không thể so sánh - xem xét Skills và Kinh nghiệm',
+            'details' => [
+                'applicant_position' => $applicant->vitriungtuyen,
+                'job_position' => $job->level,
+                'normalized_applicant' => $normalizedApplicant,
+                'normalized_job' => $normalizedJob,
+                'match_type' => 'no_match_fallback'
+            ]
+        ];
+    }
     /**
      * 1. Tính độ phù hợp về KỸ NĂNG
      */
@@ -453,23 +658,156 @@ class JobRecommendationService
     /**
      * Loại bỏ dấu tiếng Việt
      */
-    private function removeDiacritics(string $str): string
+    /**
+     * Kiểm tra xem hai vị trí có từ khóa chung không
+     */
+    private function hasCommonKeyword(string $applicantPosition, string $jobPosition): bool
     {
-        $str = preg_replace('/[àáạảãâầấậẩẫăằắặẳẵ]/u', 'a', $str);
-        $str = preg_replace('/[èéẹẻẽêềếệểễ]/u', 'e', $str);
-        $str = preg_replace('/[ìíịỉĩ]/u', 'i', $str);
-        $str = preg_replace('/[òóọỏõôồốộổỗơờớợởỡ]/u', 'o', $str);
-        $str = preg_replace('/[ùúụủũưừứựửữ]/u', 'u', $str);
-        $str = preg_replace('/[ỳýỵỷỹ]/u', 'y', $str);
-        $str = preg_replace('/đ/u', 'd', $str);
-        return $str;
+        $keywords = [
+            'developer' => ['dev', 'developer', 'programmer', 'coder'],
+            'engineer' => ['engineer', 'kỹ sư', 'ky su'],
+            'designer' => ['designer', 'thiết kế', 'thiet ke'],
+            'manager' => ['manager', 'quản lý', 'quan ly'],
+            'leader' => ['lead', 'leader', 'trưởng', 'truong'],
+            'senior' => ['senior', 'cấp cao', 'cap cao'],
+            'junior' => ['junior', 'sinh viên', 'thực tập sinh'],
+        ];
+
+        foreach ($keywords as $keywordGroup) {
+            $applicantHasKeyword = false;
+            $jobHasKeyword = false;
+
+            foreach ($keywordGroup as $keyword) {
+                if (strpos($applicantPosition, $keyword) !== false) {
+                    $applicantHasKeyword = true;
+                }
+                if (strpos($jobPosition, $keyword) !== false) {
+                    $jobHasKeyword = true;
+                }
+            }
+
+            if ($applicantHasKeyword && $jobHasKeyword) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
+    /**
+     * Loại bỏ dấu tiếng Việt - FIXED HOÀN CHỈNH
+     */
+    private function removeDiacritics(string $str): string
+    {
+        $str = mb_strtolower($str, 'UTF-8');
+
+        // Bảng chuyển đổi HOÀN CHỈNH
+        $replacements = [
+            // Chữ a
+            'à' => 'a',
+            'á' => 'a',
+            'ạ' => 'a',
+            'ả' => 'a',
+            'ã' => 'a',
+            'â' => 'a',
+            'ầ' => 'a',
+            'ấ' => 'a',
+            'ậ' => 'a',
+            'ẩ' => 'a',
+            'ẫ' => 'a',
+            'ă' => 'a',
+            'ằ' => 'a',
+            'ắ' => 'a',
+            'ặ' => 'a',
+            'ẳ' => 'a',
+            'ẵ' => 'a',
+
+            // Chữ e
+            'è' => 'e',
+            'é' => 'e',
+            'ẹ' => 'e',
+            'ẻ' => 'e',
+            'ẽ' => 'e',
+            'ê' => 'e',
+            'ề' => 'e',
+            'ế' => 'e',
+            'ệ' => 'e',
+            'ể' => 'e',
+            'ễ' => 'e',
+
+            // Chữ i
+            'ì' => 'i',
+            'í' => 'i',
+            'ị' => 'i',
+            'ỉ' => 'i',
+            'ĩ' => 'i',
+
+            // Chữ o
+            'ò' => 'o',
+            'ó' => 'o',
+            'ọ' => 'o',
+            'ỏ' => 'o',
+            'õ' => 'o',
+            'ô' => 'o',
+            'ồ' => 'o',
+            'ố' => 'o',
+            'ộ' => 'o',
+            'ổ' => 'o',
+            'ỗ' => 'o',
+            'ơ' => 'o',
+            'ờ' => 'o',
+            'ớ' => 'o',
+            'ợ' => 'o',
+            'ở' => 'o',
+            'ỡ' => 'o',
+
+            // Chữ u - ✅ FIXED HOÀN CHỈNH
+            'ù' => 'u',
+            'ú' => 'u',
+            'ụ' => 'u',
+            'ủ' => 'u',
+            'ũ' => 'u',
+            'ư' => 'u',
+            'ừ' => 'u',
+            'ứ' => 'u',
+            'ự' => 'u',
+            'ử' => 'u',
+            'ữ' => 'u',
+
+            // Chữ y
+            'ỳ' => 'y',
+            'ý' => 'y',
+            'ỵ' => 'y',
+            'ỷ' => 'y',
+            'ỹ' => 'y',
+
+            // Chữ d
+            'đ' => 'd',
+        ];
+
+        return strtr($str, $replacements);
+    }
+    /**
+     * Tạo hoặc cập nhật recommendations cho ứng viên
+     */
     /**
      * Tạo hoặc cập nhật recommendations cho ứng viên
      */
     public function generateRecommendationsForApplicant(Applicant $applicant, $limit = 20): int
     {
+        Log::info('🔄 Generating recommendations', [
+            'applicant_id' => $applicant->id_uv,
+            'vitriungtuyen' => $applicant->vitriungtuyen,
+            'has_vitriungtuyen' => !empty($applicant->vitriungtuyen)
+        ]);
+
+        // ✅ XÓA TẤT CẢ RECOMMENDATIONS CŨ TRƯỚC
+        JobRecommendation::where('applicant_id', $applicant->id_uv)->delete();
+
+        Log::info('🗑️ Deleted old recommendations for applicant', [
+            'applicant_id' => $applicant->id_uv
+        ]);
+
         $activeJobs = JobPost::where('deadline', '>=', now())
             ->with(['hashtags', 'company'])
             ->get();
@@ -478,35 +816,53 @@ class JobRecommendationService
 
         foreach ($activeJobs as $job) {
             try {
+                Log::info('📊 Calculating match', [
+                    'job_id' => $job->job_id,
+                    'job_title' => $job->title,
+                    'applicant_vitriungtuyen' => $applicant->vitriungtuyen,
+                    'job_level' => $job->level
+                ]);
+
                 $matchData = $this->calculateMatchScore($applicant, $job);
                 $score = $matchData['score'];
 
+                Log::info('✅ Match calculated', [
+                    'job_id' => $job->job_id,
+                    'score' => $score,
+                    'position_score' => $matchData['breakdown']['position']['score'] ?? 'N/A',
+                    'position_reason' => $matchData['breakdown']['position']['reason'] ?? 'N/A'
+                ]);
+
                 // CHỈ lưu jobs có điểm >= 40
                 if ($score >= 40) {
-                    JobRecommendation::updateOrCreate(
-                        [
-                            'applicant_id' => $applicant->id_uv,
-                            'job_id' => $job->job_id
-                        ],
-                        [
-                            'score' => $score,
-                            'match_details' => json_encode($matchData['breakdown'])
-                        ]
-                    );
+                    // ✅ THAY ĐỔI: Dùng create() thay vì updateOrCreate()
+                    JobRecommendation::create([
+                        'applicant_id' => $applicant->id_uv,
+                        'job_id' => $job->job_id,
+                        'score' => $score,
+                        'match_details' => json_encode($matchData['breakdown']),
+                        'is_viewed' => false,
+                        'is_applied' => false
+                    ]);
                     $count++;
                 }
             } catch (\Exception $e) {
-                Log::error('Error generating recommendation', [
+                Log::error('❌ Error generating recommendation', [
                     'applicant_id' => $applicant->id_uv,
                     'job_id' => $job->job_id,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
+                    'line' => $e->getLine()
                 ]);
             }
         }
 
+        Log::info('🎉 Generation complete', [
+            'applicant_id' => $applicant->id_uv,
+            'total_recommendations' => $count
+        ]);
+
         return $count;
     }
-
     /**
      * Lấy danh sách gợi ý cho ứng viên
      */

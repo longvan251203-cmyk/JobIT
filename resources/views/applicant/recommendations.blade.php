@@ -528,6 +528,8 @@
 </head>
 
 <body>
+    {{-- Thêm vào đầu file recommendations.blade.php --}}
+
     <!-- Header -->
     <header class="main-header">
         <div class="container">
@@ -748,7 +750,27 @@
                             @endif
                         </div>
                         @endif
-
+                        <!-- Position Match -->
+                        @if(isset($details['position']) && is_array($details['position']))
+                        <div class="criteria-item">
+                            <div class="criteria-header">
+                                <div class="criteria-name">
+                                    <i class="bi bi-person-badge"></i>
+                                    Vị trí / Cấp bậc
+                                </div>
+                                <div class="criteria-score {{ $getScoreLevel($details['position']['score']) }}">
+                                    {{ number_format($details['position']['score'], 0) }}%
+                                </div>
+                            </div>
+                            <div class="progress-bar-wrapper">
+                                <div class="progress-fill {{ $getScoreLevel($details['position']['score']) }}"
+                                    style="width: {{ $details['position']['score'] }}% !important;"></div>
+                            </div>
+                            <div class="criteria-reason">
+                                {{ $details['position']['reason'] }}
+                            </div>
+                        </div>
+                        @endif
                         <!-- 2. Experience -->
                         @if(isset($details['experience']) && is_array($details['experience']))
                         <div class="criteria-item">

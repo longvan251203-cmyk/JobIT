@@ -639,7 +639,7 @@
                             <!-- Thông tin cá nhân -->
                             <div class="col-md-9">
                                 <h2 class="fw-bold mb-2">{{ $applicant->hoten_uv ?? 'Họ tên ứng viên' }}</h2>
-                                <p class="mb-3 opacity-90">{{ $applicant->chucdanh ?? 'Chưa cập nhật chức danh' }}</p>
+                                <p class="mb-3 opacity-90">{{ $applicant->vitritungtuyen ?? 'Chưa cập nhật chức danh' }}</p>
 
                                 <div class="d-flex flex-wrap gap-2 mb-3">
                                     <span class="info-tag-modern">
@@ -1211,6 +1211,348 @@
                         </div>
                     </div>
                     <!-- MODAL -->
+                    <!-- MODAL THÊM KỸ NĂNG -->
+                    <div class="modal fade" id="addKyNangModal" tabindex="-1" aria-labelledby="addKyNangModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content rounded-3 shadow">
+                                <div class="modal-header">
+                                    <h5 class="modal-title fw-bold" id="addKyNangModalLabel">
+                                        <i class="bi bi-lightbulb me-2"></i>Thêm Kỹ Năng
+                                    </h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+
+                                <form id="kyNangForm" action="{{ route('applicant.storeKyNang') }}" method="POST">
+                                    @csrf
+                                    <div class="modal-body">
+                                        <p class="text-muted mb-3">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            Thêm các kỹ năng bạn sở hữu và số năm kinh nghiệm
+                                        </p>
+
+                                        <!-- Danh sách kỹ năng đã chọn -->
+                                        <div id="selectedSkills" class="mb-3"></div>
+
+                                        <!-- Form nhập kỹ năng mới -->
+                                        <div class="border rounded p-3 bg-light">
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label fw-bold">
+                                                        Tên kỹ năng <span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="text"
+                                                        id="skillInput"
+                                                        class="form-control"
+                                                        placeholder="VD: Java, PHP, React..."
+                                                        list="skills-list">
+                                                    <datalist id="skills-list">
+                                                        <option value="Java">
+                                                        <option value="PHP">
+                                                        <option value="Python">
+                                                        <option value="JavaScript">
+                                                        <option value="React">
+                                                        <option value="Node.js">
+                                                        <option value="Laravel">
+                                                        <option value="SQL">
+                                                    </datalist>
+                                                </div>
+
+                                                <div class="col-md-6 mb-3">
+                                                    <label class="form-label fw-bold">
+                                                        Năm kinh nghiệm <span class="text-danger">*</span>
+                                                    </label>
+                                                    <select id="experienceSelect" class="form-select">
+                                                        <option value="">-- Chọn số năm --</option>
+                                                        <option value="0">
+                                                            < 1 năm</option>
+                                                        <option value="1">1 năm</option>
+                                                        <option value="2">2 năm</option>
+                                                        <option value="3">3 năm</option>
+                                                        <option value="4">4 năm</option>
+                                                        <option value="5">5 năm</option>
+                                                        <option value="6">6 năm</option>
+                                                        <option value="7">7 năm</option>
+                                                        <option value="8">8 năm</option>
+                                                        <option value="9">9 năm</option>
+                                                        <option value="10+">10+ năm</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <button type="button" class="btn btn-primary btn-sm" id="addSkillBtn">
+                                                <i class="bi bi-plus-lg"></i> Thêm
+                                            </button>
+                                        </div>
+
+                                        <!-- Hidden inputs -->
+                                        <div id="hiddenSkillInputs"></div>
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                        <button type="submit" class="btn btn-danger" id="submitKyNangBtn" disabled>
+                                            <i class="bi bi-check-lg"></i> Lưu
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- MODAL THÊM/SỬA DỰ ÁN -->
+                    <div class="modal fade" id="addDuAnModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-xl">
+                            <div class="modal-content rounded-3">
+                                <form id="duAnForm" method="POST" action="{{ route('duan.store') }}">
+                                    @csrf
+                                    <div class="modal-header">
+                                        <h5 class="modal-title fw-bold" id="addDuAnModalLabel">
+                                            <i class="bi bi-kanban me-2"></i>Dự án nổi bật
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    </div>
+
+                                    <div class="modal-body">
+                                        <!-- Tên dự án -->
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">
+                                                Tên dự án <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="text"
+                                                class="form-control"
+                                                name="ten_duan"
+                                                id="ten_duan"
+                                                placeholder="VD: Website Thương mại điện tử, Mobile App Banking..."
+                                                required>
+                                        </div>
+
+                                        <!-- Thời gian -->
+                                        <div class="row">
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label fw-bold">Tháng bắt đầu <span class="text-danger">*</span></label>
+                                                <select class="form-select" name="thang_bat_dau" id="thang_bat_dau" required>
+                                                    <option value="">Tháng</option>
+                                                    @for($i = 1; $i <= 12; $i++)
+                                                        <option value="{{ $i }}">Tháng {{ $i }}</option>
+                                                        @endfor
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label fw-bold">Năm bắt đầu <span class="text-danger">*</span></label>
+                                                <select class="form-select" name="nam_bat_dau" id="nam_bat_dau" required>
+                                                    <option value="">Năm</option>
+                                                    @for($year = date('Y'); $year >= 2000; $year--)
+                                                    <option value="{{ $year }}">{{ $year }}</option>
+                                                    @endfor
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label fw-bold">Tháng kết thúc</label>
+                                                <select class="form-select" name="thang_ket_thuc" id="thang_ket_thuc">
+                                                    <option value="">Tháng</option>
+                                                    @for($i = 1; $i <= 12; $i++)
+                                                        <option value="{{ $i }}">Tháng {{ $i }}</option>
+                                                        @endfor
+                                                </select>
+                                            </div>
+                                            <div class="col-md-3 mb-3">
+                                                <label class="form-label fw-bold">Năm kết thúc</label>
+                                                <select class="form-select" name="nam_ket_thuc" id="nam_ket_thuc">
+                                                    <option value="">Năm</option>
+                                                    @for($year = date('Y'); $year >= 2000; $year--)
+                                                    <option value="{{ $year }}">{{ $year }}</option>
+                                                    @endfor
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <!-- Checkbox đang làm -->
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input"
+                                                type="checkbox"
+                                                id="dang_lam"
+                                                name="dang_lam"
+                                                value="1">
+                                            <label class="form-check-label" for="dang_lam">
+                                                Dự án đang thực hiện
+                                            </label>
+                                        </div>
+
+                                        <!-- Mô tả dự án -->
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Mô tả dự án</label>
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <div class="alert alert-info py-2 mb-0 flex-grow-1 me-2">
+                                                    <i class="bi bi-lightbulb text-warning me-1"></i>
+                                                    <strong>Tips:</strong> Mô tả vai trò, công nghệ, kết quả đạt được
+                                                </div>
+                                                <button type="button"
+                                                    class="btn btn-sm btn-outline-primary"
+                                                    id="insertTemplateBtn">
+                                                    <i class="bi bi-file-earmark-text"></i> Chèn mẫu
+                                                </button>
+                                            </div>
+                                            <textarea class="form-control"
+                                                name="mota_duan"
+                                                id="mota_duan"
+                                                rows="12"
+                                                maxlength="1200"
+                                                placeholder="VD:
+- Mô tả: Website bán hàng trực tuyến với 50k+ sản phẩm
+- Vai trò: Full-stack Developer
+- Trách nhiệm:
+  ◦ Xây dựng API backend với Laravel
+  ◦ Phát triển giao diện với Vue.js
+- Công nghệ: PHP, Laravel, Vue.js, MySQL, Redis
+- Nhóm: 6 thành viên"></textarea>
+                                            <small class="text-muted">
+                                                <span id="mota_count">0</span>/1200 ký tự
+                                            </small>
+                                        </div>
+
+                                        <!-- Link website -->
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Link website/demo</label>
+                                            <input type="url"
+                                                class="form-control"
+                                                name="duongdan_website"
+                                                id="duongdan_website"
+                                                placeholder="https://example.com">
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                        <button type="submit" class="btn btn-danger" id="submitDuAnBtn">
+                                            <i class="bi bi-check-lg"></i> Lưu
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- MODAL THÊM/SỬA KINH NGHIỆM -->
+                    <div class="modal fade" id="addKinhNghiemModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-xl">
+                            <div class="modal-content rounded-3">
+                                <form id="kinhNghiemForm" method="POST" action="{{ route('kinhnghiem.store') }}">
+                                    @csrf
+                                    <div class="modal-header">
+                                        <h5 class="modal-title fw-bold" id="kinhNghiemModalLabel">
+                                            <i class="bi bi-briefcase me-2"></i>Kinh nghiệm làm việc
+                                        </h5>
+                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    </div>
+
+                                    <div class="modal-body">
+                                        <!-- Chức danh -->
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">
+                                                Chức danh <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="text"
+                                                class="form-control"
+                                                name="chucdanh"
+                                                id="kn_chucdanh"
+                                                placeholder="VD: Senior Developer, Team Leader..."
+                                                required>
+                                        </div>
+
+                                        <!-- Công ty -->
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">
+                                                Công ty <span class="text-danger">*</span>
+                                            </label>
+                                            <input type="text"
+                                                class="form-control"
+                                                name="congty"
+                                                id="kn_congty"
+                                                placeholder="VD: FPT Software, VNG Corporation..."
+                                                required>
+                                        </div>
+
+                                        <!-- Thời gian -->
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label fw-bold">
+                                                    Từ ngày <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="month"
+                                                    class="form-control"
+                                                    name="tu_ngay"
+                                                    id="kn_tuNgay"
+                                                    required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label fw-bold">Đến ngày</label>
+                                                <input type="month"
+                                                    class="form-control"
+                                                    name="den_ngay"
+                                                    id="kn_denNgay">
+                                            </div>
+                                        </div>
+
+                                        <!-- Checkbox đang làm việc -->
+                                        <div class="form-check mb-3">
+                                            <input class="form-check-input"
+                                                type="checkbox"
+                                                id="kn_dangLamViec"
+                                                name="dang_lam_viec"
+                                                value="1">
+                                            <label class="form-check-label" for="kn_dangLamViec">
+                                                Tôi đang làm việc tại đây
+                                            </label>
+                                        </div>
+
+                                        <!-- Mô tả công việc -->
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Mô tả công việc</label>
+                                            <div class="alert alert-info py-2 mb-2">
+                                                <i class="bi bi-lightbulb text-warning me-1"></i>
+                                                <strong>Tips:</strong> Mô tả trách nhiệm, thành tích, công nghệ sử dụng
+                                            </div>
+                                            <textarea class="form-control"
+                                                name="mota"
+                                                id="kn_mota"
+                                                rows="8"
+                                                maxlength="1000"
+                                                placeholder="VD:
+- Phát triển và maintain hệ thống backend
+- Quản lý team 5 developers
+- Tối ưu database, giảm 40% thời gian query
+- Công nghệ: PHP, Laravel, MySQL, Redis"></textarea>
+                                            <small class="text-muted">
+                                                <span id="mota_count">0</span>/1000 ký tự
+                                            </small>
+                                        </div>
+
+                                        <!-- Dự án tham gia -->
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Dự án đã tham gia</label>
+                                            <textarea class="form-control"
+                                                name="duan"
+                                                id="kn_duan"
+                                                rows="6"
+                                                maxlength="800"
+                                                placeholder="VD:
+- Dự án A: Hệ thống E-commerce (Laravel + Vue.js)
+- Dự án B: Mobile App Backend (Node.js + MongoDB)"></textarea>
+                                            <small class="text-muted">
+                                                <span id="duan_count">0</span>/800 ký tự
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                        <button type="submit" class="btn btn-danger" id="kinhNghiemSubmitBtn">
+                                            <i class="bi bi-check-lg"></i> Lưu
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                     <!-- MODAL THÊM/SỬA GIẢI THƯỞNG -->
                     <div class="modal fade" id="addGiaiThuongModal" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-xl">
@@ -1329,7 +1671,7 @@
                                                 {{ $applicant->hoten_uv ?? 'Họ tên ứng viên' }}
                                             </h5>
                                             <p class="mb-0 opacity-85">
-                                                <i class="bi bi-briefcase-fill me-1"></i>{{ $applicant->chucdanh ?? 'Chức danh' }}
+                                                <i class="bi bi-briefcase-fill me-1"></i>{{ $applicant->vitritungtuyen ?? 'Chức danh' }}
                                             </p>
                                         </div>
                                     </div>
@@ -1349,7 +1691,7 @@
                                                     alt="Avatar"
                                                     class="cv-avatar rounded-circle">
                                                 <h5 class="fw-bold mt-3 mb-1">{{ $applicant->hoten_uv ?? 'N/A' }}</h5>
-                                                <p class="text-muted small mb-0">{{ $applicant->chucdanh ?? 'N/A' }}</p>
+                                                <p class="text-muted small mb-0">{{ $applicant->vitritungtuyen ?? 'N/A' }}</p>
                                             </div>
 
                                             <hr class="my-3">
@@ -1672,9 +2014,9 @@
                                                     </div>
                                                     <!-- Chức danh -->
                                                     <div class="col-md-6 mb-3">
-                                                        <label for="chucdanh" class="form-label">Chức danh</label>
-                                                        <input type="text" class="form-control" name="chucdanh" id="chucdanh"
-                                                            value="{{ $applicant->chucdanh ?? '' }}">
+                                                        <label for="vitritungtuyen" class="form-label">Vị trí ứng tuyển</label>
+                                                        <input type="text" class="form-control" name="vitritungtuyen" id="vitritungtuyen"
+                                                            value="{{ $applicant->vitritungtuyen ?? '' }}">
                                                     </div>
                                                     <!-- Ngày sinh -->
                                                     <div class="col-md-6 mb-3">

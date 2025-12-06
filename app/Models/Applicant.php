@@ -17,7 +17,7 @@ class Applicant extends Model
     protected $fillable = [
         'user_id',
         'hoten_uv',
-        'chucdanh',
+        'vitriungtuyen',
         'ngaysinh',
         'sdt_uv',
         'gioitinh_uv',

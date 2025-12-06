@@ -978,7 +978,7 @@
                                     {{ $candidate->hoten_uv }}
                                 </h3>
                                 <p class="candidate-title">
-                                    {{ $candidate->chucdanh ?? 'Chưa cập nhật' }}
+                                    {{ $candidate->vitritungtuyen ?? 'Chưa cập nhật' }}
                                 </p>
 
                                 <div class="space-y-1 mb-3">
@@ -1255,7 +1255,7 @@
                         }
                         <div class="flex-1">
                             <h2 class="text-3xl font-bold text-gray-800 mb-2">${candidate.hoten_uv}</h2>
-                            <p class="text-xl text-purple-600 font-semibold mb-4">${candidate.chucdanh || 'Chưa cập nhật'}</p>
+                            <p class="text-xl text-purple-600 font-semibold mb-4">${candidate.vitritungtuyen || 'Chưa cập nhật'}</p>
                             <div class="grid grid-cols-2 gap-4 text-sm">
                                 ${candidate.sdt_uv ? `
                                 <div class="flex items-center text-gray-700">
@@ -1309,7 +1309,7 @@
                     <div class="space-y-4">
                         ${candidate.kinhnghiem.map(exp => `
                             <div class="border-l-4 border-purple-500 pl-4">
-                                <h4 class="font-semibold text-gray-800 text-lg">${exp.chuc_vu || exp.chucdanh || 'N/A'}</h4>
+                                <h4 class="font-semibold text-gray-800 text-lg">${exp.chuc_vu || exp.chucdanh|| 'N/A'}</h4>
                                 <p class="text-purple-600 font-medium">${exp.ten_cong_ty || exp.congty || 'N/A'}</p>
                                 <p class="text-sm text-gray-600 mb-2">
                                     ${exp.tu_ngay ? new Date(exp.tu_ngay).toLocaleDateString('vi-VN') : 'N/A'} - 

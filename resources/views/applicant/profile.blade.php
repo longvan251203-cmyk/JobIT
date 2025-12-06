@@ -55,7 +55,7 @@
                         <div class="card-body">
                             <h4 class="fw-bold mb-3">{{ Auth::user()->applicant->hoten_uv ?? 'Họ tên ứng viên' }}</h4>
                             <p class="mb-1"><i class="bi bi-envelope"></i> {{ Auth::user()->email ?? '' }}</p>
-                            <p class="text-muted"><i class="bi bi-briefcase"></i> {{ Auth::user()->applicant->chucdanh ?? 'Chưa cập nhật chức danh' }}</p>
+                            <p class="text-muted"><i class="bi bi-briefcase"></i> {{ Auth::user()->applicant->vitritungtuyen ?? 'Chưa cập nhật chức danh' }}</p>
                             <a href="{{ route('applicant.hoso') }}" class="btn btn-sm btn-outline-primary">Cập nhật thông tin</a>
                         </div>
                     </div>

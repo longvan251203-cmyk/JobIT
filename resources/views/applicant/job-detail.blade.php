@@ -818,7 +818,7 @@
                                         alt="Avatar" class="profile-avatar">
                                     <div class="profile-info flex-grow-1">
                                         <div class="profile-name">{{ $applicant->hoten_uv ?? 'Họ tên ứng viên' }}</div>
-                                        <div class="profile-title">{{ $applicant->chucdanh ?? 'Chức danh' }}</div>
+                                        <div class="profile-title">{{ $applicant->vitritungtuyen ?? 'Chức danh' }}</div>
                                         <div class="profile-contact">
                                             <div class="contact-item">
                                                 <i class="bi bi-envelope"></i>
