@@ -10,13 +10,13 @@ use Illuminate\Support\Facades\Log;
 
 class JobRecommendationService
 {
-    // Trọng số cho từng yếu tố
-    const WEIGHT_SKILLS = 0.30;      // Giảm từ 0.35
-    const WEIGHT_POSITION = 0.15;    // MỚI - So sánh vị trí
-    const WEIGHT_EXPERIENCE = 0.20;
-    const WEIGHT_LOCATION = 0.15;
-    const WEIGHT_SALARY = 0.10;      // Giảm từ 0.15
-    const WEIGHT_LANGUAGE = 0.10;    // Giảm từ 0.15
+    // ✅ TRỌNG SỐ MỚI - ƯU TIÊN LOCATION, KỸ NĂNG, VỊ TRÍ ỨNG TUYỂN
+    const WEIGHT_LOCATION = 0.35;       // ƯU TIÊN NHẤT - Địa điểm
+    const WEIGHT_SKILLS = 0.30;         // Quan trọng thứ 2 - Kỹ năng
+    const WEIGHT_POSITION = 0.20;       // Quan trọng thứ 3 - Vị trí ứng tuyển
+    const WEIGHT_EXPERIENCE = 0.08;     // Giảm xuống
+    const WEIGHT_SALARY = 0.04;         // Giảm xuống
+    const WEIGHT_LANGUAGE = 0.03;       // Ít quan trọng nhất
 
     /**
      * Tính điểm phù hợp giữa ứng viên và job
@@ -24,20 +24,20 @@ class JobRecommendationService
     public function calculateMatchScore(Applicant $applicant, JobPost $job): array
     {
         $scores = [
-            'skills' => $this->calculateSkillsMatch($applicant, $job),
-            'position' => $this->calculatePositionMatch($applicant, $job), // MỚI
-            'experience' => $this->calculateExperienceMatch($applicant, $job),
             'location' => $this->calculateLocationMatch($applicant, $job),
+            'skills' => $this->calculateSkillsMatch($applicant, $job),
+            'position' => $this->calculatePositionMatch($applicant, $job),
+            'experience' => $this->calculateExperienceMatch($applicant, $job),
             'salary' => $this->calculateSalaryMatch($applicant, $job),
             'language' => $this->calculateLanguageMatch($applicant, $job),
         ];
 
-        // Tính tổng điểm có trọng số
+        // Tính tổng điểm có trọng số - ƯU TIÊN LOCATION
         $totalScore =
+            ($scores['location']['score'] * self::WEIGHT_LOCATION) +
             ($scores['skills']['score'] * self::WEIGHT_SKILLS) +
             ($scores['position']['score'] * self::WEIGHT_POSITION) +
             ($scores['experience']['score'] * self::WEIGHT_EXPERIENCE) +
-            ($scores['location']['score'] * self::WEIGHT_LOCATION) +
             ($scores['salary']['score'] * self::WEIGHT_SALARY) +
             ($scores['language']['score'] * self::WEIGHT_LANGUAGE);
 
@@ -46,16 +46,354 @@ class JobRecommendationService
             'breakdown' => $scores
         ];
     }
+
+    /**
+     * ✅ LOCATION MATCH - CẢI TIẾN VỚI HỆ THỐNG KHOẢNG CÁCH
+     */
+    private function calculateLocationMatch(Applicant $applicant, JobPost $job): array
+    {
+        $applicantLocation = strtolower(trim($applicant->diachi_uv ?? ''));
+        $jobLocation = strtolower(trim($job->province ?? ''));
+
+        if (empty($applicantLocation) || empty($jobLocation)) {
+            return [
+                'score' => 50,
+                'reason' => 'Không đủ thông tin về địa điểm',
+                'details' => [
+                    'applicant_location' => $applicant->diachi_uv ?? 'Chưa cập nhật',
+                    'job_location' => $job->province ?? 'Chưa rõ'
+                ]
+            ];
+        }
+
+        // Kiểm tra remote
+        if (
+            stripos($job->working_type, 'remote') !== false ||
+            stripos($job->working_type, 'work from home') !== false
+        ) {
+            return [
+                'score' => 100,
+                'reason' => '✓ Làm việc remote - không giới hạn địa điểm',
+                'details' => [
+                    'applicant_location' => $applicant->diachi_uv,
+                    'job_location' => 'Remote',
+                    'working_type' => $job->working_type
+                ]
+            ];
+        }
+
+        // Chuẩn hóa địa điểm
+        $normalizedApplicant = $this->normalizeLocation($applicantLocation);
+        $normalizedJob = $this->normalizeLocation($jobLocation);
+
+        // ✅ TÍNH ĐIỂM DỰA TRÊN KHOẢNG CÁCH
+        $distance = $this->calculateProvinceDistance($normalizedApplicant, $normalizedJob);
+
+        $score = 0;
+        $reason = '';
+
+        switch ($distance) {
+            case 0:
+                // Cùng tỉnh/thành phố
+                $score = 100;
+                $reason = "✓ Cùng tỉnh/thành: {$job->province}";
+                break;
+            case 1:
+                // Tỉnh lân cận (cùng vùng)
+                $score = 85;
+                $reason = "Tỉnh lân cận: {$applicant->diachi_uv} → {$job->province} (Cùng vùng)";
+                break;
+            case 2:
+                // Cùng miền nhưng khác vùng
+                $score = 60;
+                $reason = "Cùng miền: {$applicant->diachi_uv} → {$job->province}";
+                break;
+            default:
+                // Khác miền
+                $score = 30;
+                $reason = "Khác miền: Bạn ở {$applicant->diachi_uv}, công việc tại {$job->province}";
+                break;
+        }
+
+        return [
+            'score' => round($score, 2),
+            'reason' => $reason,
+            'details' => [
+                'applicant_location' => $applicant->diachi_uv,
+                'job_location' => $job->province,
+                'normalized_applicant' => $normalizedApplicant,
+                'normalized_job' => $normalizedJob,
+                'distance_level' => $distance,
+                'is_same_province' => $distance === 0
+            ]
+        ];
+    }
+
+    /**
+     * ✅ HỆ THỐNG TÍNH KHOẢNG CÁCH GIỮA CÁC TỈNH THÀNH VIỆT NAM
+     * Distance Level:
+     * 0 = Cùng tỉnh
+     * 1 = Tỉnh lân cận (cùng vùng, gần nhau)
+     * 2 = Cùng miền
+     * 3 = Khác miền
+     */
+    private function calculateProvinceDistance(string $province1, string $province2): int
+    {
+        if ($province1 === $province2) {
+            return 0;
+        }
+
+        // ✅ ĐỊNH NGHĨA CẤU TRÚC ĐỊA LÝ VIỆT NAM
+        $regions = [
+            // MIỀN BẮC
+            'north' => [
+                // Đồng bằng sông Hồng
+                'red_river_delta' => [
+                    'hanoi',
+                    'haiphong',
+                    'hanam',
+                    'hungyen',
+                    'thaibình',
+                    'namdinh',
+                    'ninhbinh',
+                    'bacninh',
+                    'haduong',
+                    'vinhphuc',
+                    'bacgiang',
+                    'phuthy',
+                    'quangninh'
+                ],
+
+                // Tây Bắc
+                'northwest' => ['dienbien', 'laichau', 'sonla', 'hoabinh', 'laocai', 'yenbai'],
+
+                // Đông Bắc
+                'northeast' => ['hagiang', 'caobang', 'backan', 'tuyenquang', 'langson', 'thainguyen'],
+            ],
+
+            // MIỀN TRUNG
+            'central' => [
+                // Bắc Trung Bộ
+                'north_central' => ['thanhhoa', 'nghean', 'hatinh', 'quangbinh', 'quangtri', 'thuathienhue'],
+
+                // Duyên hải Nam Trung Bộ
+                'south_central_coast' => ['danang', 'quangnam', 'quangngai', 'binhdinh', 'phuyen', 'khanhhoa', 'ninhthuan', 'binhthuan'],
+
+                // Tây Nguyên
+                'highland' => ['kontum', 'gialai', 'daklak', 'daknong', 'lamdong'],
+            ],
+
+            // MIỀN NAM
+            'south' => [
+                // Đông Nam Bộ
+                'southeast' => [
+                    'hcm',
+                    'bienhoa',
+                    'vungtau',
+                    'binhduong',
+                    'dongnai',
+                    'tayninh',
+                    'binhphuoc',
+                    'longan'
+                ],
+
+                // Đồng bằng sông Cửu Long
+                'mekong_delta' => [
+                    'cantho',
+                    'longan',
+                    'tiengiang',
+                    'bentre',
+                    'travinh',
+                    'vinhlong',
+                    'angiang',
+                    'dongthap',
+                    'kiengiang',
+                    'camau',
+                    'haugiang',
+                    'soctrang',
+                    'baclieu'
+                ],
+            ],
+        ];
+
+        // ✅ TÌM VÙNG CỦA TỪNG TỈNH
+        $region1 = $this->findRegion($province1, $regions);
+        $region2 = $this->findRegion($province2, $regions);
+
+        if (!$region1 || !$region2) {
+            return 3; // Không xác định được → coi như khác miền
+        }
+
+        // Cùng vùng nhỏ (lân cận)
+        if (
+            $region1['sub_region'] === $region2['sub_region'] &&
+            $region1['sub_region'] !== null
+        ) {
+            return 1;
+        }
+
+        // Cùng miền
+        if ($region1['main_region'] === $region2['main_region']) {
+            return 2;
+        }
+
+        // Khác miền
+        return 3;
+    }
+
+    /**
+     * Tìm vùng của một tỉnh
+     */
+    private function findRegion(string $province, array $regions): ?array
+    {
+        foreach ($regions as $mainRegion => $subRegions) {
+            foreach ($subRegions as $subRegion => $provinces) {
+                if (in_array($province, $provinces)) {
+                    return [
+                        'main_region' => $mainRegion,
+                        'sub_region' => $subRegion
+                    ];
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Chuẩn hóa tên địa điểm - CẢI TIẾN
+     */
+    private function normalizeLocation(string $location): string
+    {
+        $normalized = strtolower(trim($location));
+
+        // Loại bỏ tiền tố
+        $normalized = preg_replace('/^(thành phố|tỉnh|tp\.?|thanh pho|tinh)\s+/ui', '', $normalized);
+
+        // Loại bỏ dấu
+        $normalized = $this->removeDiacritics($normalized);
+
+        $cityMap = [
+            // TP.HCM
+            'ho chi minh' => 'hcm',
+            'hcm' => 'hcm',
+            'sai gon' => 'hcm',
+            'saigon' => 'hcm',
+
+            // Hà Nội
+            'ha noi' => 'hanoi',
+            'hanoi' => 'hanoi',
+
+            // Đà Nẵng
+            'da nang' => 'danang',
+            'danang' => 'danang',
+
+            // Cần Thơ
+            'can tho' => 'cantho',
+            'cantho' => 'cantho',
+
+            // Hải Phòng
+            'hai phong' => 'haiphong',
+            'haiphong' => 'haiphong',
+
+            // Biên Hòa
+            'bien hoa' => 'bienhoa',
+            'bienhoa' => 'bienhoa',
+            'dong nai' => 'dongnai',
+            'dongnai' => 'dongnai',
+
+            // Vũng Tàu
+            'vung tau' => 'vungtau',
+            'vungtau' => 'vungtau',
+            'ba ria vung tau' => 'vungtau',
+            'ba ria' => 'vungtau',
+
+            // Các tỉnh khác (Bắc)
+            'hai duong' => 'haduong',
+            'bac ninh' => 'bacninh',
+            'vinh phuc' => 'vinhphuc',
+            'hung yen' => 'hungyen',
+            'ha nam' => 'hanam',
+            'nam dinh' => 'namdinh',
+            'thai binh' => 'thaibình',
+            'ninh binh' => 'ninhbinh',
+            'thanh hoa' => 'thanhhoa',
+            'nghe an' => 'nghean',
+            'ha tinh' => 'hatinh',
+            'quang binh' => 'quangbinh',
+
+            // Các tỉnh khác (Trung)
+            'quang tri' => 'quangtri',
+            'thua thien hue' => 'thuathienhue',
+            'hue' => 'thuathienhue',
+            'quang nam' => 'quangnam',
+            'quang ngai' => 'quangngai',
+            'binh dinh' => 'binhdinh',
+            'phu yen' => 'phuyen',
+            'khanh hoa' => 'khanhhoa',
+            'nha trang' => 'khanhhoa',
+            'ninh thuan' => 'ninhthuan',
+            'binh thuan' => 'binhthuan',
+
+            // Các tỉnh khác (Nam)
+            'binh duong' => 'binhduong',
+            'binh phuoc' => 'binhphuoc',
+            'tay ninh' => 'tayninh',
+            'long an' => 'longan',
+            'tien giang' => 'tiengiang',
+            'ben tre' => 'bentre',
+            'tra vinh' => 'travinh',
+            'vinh long' => 'vinhlong',
+            'dong thap' => 'dongthap',
+            'an giang' => 'angiang',
+            'kien giang' => 'kiengiang',
+            'hau giang' => 'haugiang',
+            'soc trang' => 'soctrang',
+            'bac lieu' => 'baclieu',
+            'ca mau' => 'camau',
+
+            // Tây Nguyên
+            'dak lak' => 'daklak',
+            'dak nong' => 'daknong',
+            'lam dong' => 'lamdong',
+            'gia lai' => 'gialai',
+            'kon tum' => 'kontum',
+
+            // Khác
+            'quang ninh' => 'quangninh',
+            'ha long' => 'quangninh',
+            'bac giang' => 'bacgiang',
+            'bac kan' => 'backan',
+            'cao bang' => 'caobang',
+            'ha giang' => 'hagiang',
+            'lang son' => 'langson',
+            'lao cai' => 'laocai',
+            'son la' => 'sonla',
+            'yen bai' => 'yenbai',
+            'dien bien' => 'dienbien',
+            'lai chau' => 'laichau',
+            'hoa binh' => 'hoabinh',
+            'thai nguyen' => 'thainguyen',
+            'tuyen quang' => 'tuyenquang',
+            'phu tho' => 'phuthy',
+        ];
+
+        foreach ($cityMap as $key => $value) {
+            if ($normalized === $key || strpos($normalized, $key) === 0) {
+                return $value;
+            }
+        }
+
+        return $normalized;
+    }
+
     /**
      * So sánh Vị trí ứng tuyển
      */
-
     private function calculatePositionMatch(Applicant $applicant, JobPost $job): array
     {
         $applicantPosition = strtolower(trim($applicant->vitriungtuyen ?? ''));
         $jobPosition = strtolower(trim($job->level ?? ''));
 
-        // ========== BƯỚC 1: REMOVE DIACRITICS TRƯỚC ==========
         $normalizedApplicant = $this->removeDiacritics($applicantPosition);
         $normalizedJob = $this->removeDiacritics($jobPosition);
 
@@ -66,7 +404,7 @@ class JobRecommendationService
             'normalized_job' => $normalizedJob,
         ]);
 
-        // ========== BƯỚC 2: CHECK EMPTY ==========
+        // CHECK EMPTY
         if (empty($applicantPosition)) {
             Log::warning('⚠️ Applicant position is EMPTY');
             return [
@@ -91,9 +429,8 @@ class JobRecommendationService
             ];
         }
 
-        // ========== BƯỚC 3: ĐỊNH NGHĨA VỊ TRÍ - TIẾNG VIỆT + TIẾNG ANH ==========
         $positionLevels = [
-            // ===== TIẾNG VIỆT =====
+            // TIẾNG VIỆT
             'thuc tap sinh' => 0,
             'cong tac vien' => 1,
             'nhan vien thu viec' => 2,
@@ -102,13 +439,14 @@ class JobRecommendationService
             'nhan vien chinh thuc' => 3,
             'nhan vien hop dong' => 3,
             'nhan vien du an' => 3,
+            'lap trinh vien' => 3,
             'truong nhom' => 4,
             'quan ly' => 5,
             'giam doc bo phan' => 6,
             'giam doc' => 7,
             'tong giam doc' => 8,
 
-            // ===== TIẾNG ANH =====
+            // TIẾNG ANH
             'intern' => 0,
             'internship' => 0,
             'contract' => 1,
@@ -146,21 +484,11 @@ class JobRecommendationService
             'vice president' => 8,
         ];
 
-        // ========== BƯỚC 4: LOOKUP VỊ TRÍ ==========
         $applicantLevel = $positionLevels[$normalizedApplicant] ?? -1;
         $jobLevel = $positionLevels[$normalizedJob] ?? -1;
 
-        Log::info('Position levels lookup:', [
-            'applicant_level' => $applicantLevel,
-            'job_level' => $jobLevel,
-            'applicant_found' => isset($positionLevels[$normalizedApplicant]),
-            'job_found' => isset($positionLevels[$normalizedJob]),
-            'available_keys' => array_slice(array_keys($positionLevels), 0, 10) // Hiển thị 10 key đầu
-        ]);
-
-        // ========== BƯỚC 5: NẾU CÓ EXACT STRING MATCH ==========
+        // EXACT MATCH
         if ($normalizedApplicant === $normalizedJob) {
-            Log::info('✓ Exact string match found');
             return [
                 'score' => 100,
                 'reason' => "✓ Vị trí khớp: {$job->level}",
@@ -172,9 +500,8 @@ class JobRecommendationService
             ];
         }
 
-        // ========== BƯỚC 6: NẾU CÓ KEYWORD MATCH ==========
+        // KEYWORD MATCH
         if ($this->hasCommonKeyword($normalizedApplicant, $normalizedJob)) {
-            Log::info('✓ Common keyword found');
             return [
                 'score' => 90,
                 'reason' => "✓ Vị trí tương tự: {$applicant->vitriungtuyen} ↔ {$job->level}",
@@ -186,10 +513,8 @@ class JobRecommendationService
             ];
         }
 
-        // ========== BƯỚC 7: NẾU CÓ LEVEL MAPPING ==========
+        // LEVEL MAPPING
         if ($applicantLevel >= 0 && $jobLevel >= 0) {
-            Log::info('✓ Level mapping found');
-
             $diff = abs($applicantLevel - $jobLevel);
             $score = 0;
             $reason = '';
@@ -212,12 +537,6 @@ class JobRecommendationService
                 $reason = "Chênh lệch {$diff} bậc";
             }
 
-            Log::info('✓ Position match result:', [
-                'score' => $score,
-                'reason' => $reason,
-                'diff' => $diff,
-            ]);
-
             return [
                 'score' => round($score, 2),
                 'reason' => $reason,
@@ -231,26 +550,20 @@ class JobRecommendationService
             ];
         }
 
-        // ========== BƯỚC 8: NẾU KHÔNG MATCH ĐƯỢC ==========
-        Log::warning('⚠️ Cannot match position', [
-            'normalized_applicant' => $normalizedApplicant,
-            'normalized_job' => $normalizedJob,
-        ]);
-
+        // FALLBACK
         return [
             'score' => 75,
             'reason' => 'Vị trí không thể so sánh - xem xét Skills và Kinh nghiệm',
             'details' => [
                 'applicant_position' => $applicant->vitriungtuyen,
                 'job_position' => $job->level,
-                'normalized_applicant' => $normalizedApplicant,
-                'normalized_job' => $normalizedJob,
                 'match_type' => 'no_match_fallback'
             ]
         ];
     }
+
     /**
-     * 1. Tính độ phù hợp về KỸ NĂNG
+     * Tính độ phù hợp về KỸ NĂNG
      */
     private function calculateSkillsMatch(Applicant $applicant, JobPost $job): array
     {
@@ -297,24 +610,22 @@ class JobRecommendationService
 
         $score = ($matchCount / $totalRequired) * 100;
 
-        // Bonus nếu có thêm kỹ năng
         $extraSkills = count($applicantSkills) - $totalRequired;
         if ($extraSkills > 0) {
             $bonus = min(10, $extraSkills * 2);
             $score = min(100, $score + $bonus);
         }
 
-        // Tạo lý do
         $reason = '';
         if ($matchCount == $totalRequired) {
-            $reason = "Bạn có đầy đủ {$totalRequired} kỹ năng yêu cầu";
+            $reason = "✓ Bạn có đầy đủ {$totalRequired} kỹ năng yêu cầu";
         } elseif ($matchCount > 0) {
             $reason = "Bạn có {$matchCount}/{$totalRequired} kỹ năng yêu cầu";
             if (!empty($missingSkills)) {
                 $reason .= ". Còn thiếu: " . implode(', ', array_slice($missingSkills, 0, 3));
             }
         } else {
-            $reason = "Bạn chưa có kỹ năng yêu cầu. Cần: " . implode(', ', array_slice($jobSkills, 0, 3));
+            $reason = "⚠ Bạn chưa có kỹ năng yêu cầu. Cần: " . implode(', ', array_slice($jobSkills, 0, 3));
         }
 
         return [
@@ -324,13 +635,15 @@ class JobRecommendationService
                 'applicant_skills' => $applicantSkills,
                 'required_skills' => $jobSkills,
                 'matched_skills' => array_values($matchedSkills),
-                'missing_skills' => array_values($missingSkills)
+                'missing_skills' => array_values($missingSkills),
+                'match_count' => $matchCount,
+                'total_required' => $totalRequired
             ]
         ];
     }
 
     /**
-     * 2. Tính độ phù hợp về KINH NGHIỆM
+     * Tính độ phù hợp về KINH NGHIỆM
      */
     private function calculateExperienceMatch(Applicant $applicant, JobPost $job): array
     {
@@ -366,7 +679,7 @@ class JobRecommendationService
             $excess = $applicantYears - $requiredYears;
             if ($excess <= 2) {
                 $score = 100;
-                $reason = "Bạn có {$applicantYears} năm kinh nghiệm, phù hợp với yêu cầu {$requiredExp['label']}";
+                $reason = "✓ Bạn có {$applicantYears} năm kinh nghiệm, phù hợp với yêu cầu {$requiredExp['label']}";
             } else {
                 $score = max(80, 100 - ($excess * 5));
                 $reason = "Bạn có {$applicantYears} năm kinh nghiệm, nhiều hơn yêu cầu {$requiredExp['label']}";
@@ -374,7 +687,7 @@ class JobRecommendationService
         } else {
             $shortfall = $requiredYears - $applicantYears;
             $score = max(0, 100 - ($shortfall * 25));
-            $reason = "Bạn có {$applicantYears} năm kinh nghiệm, còn thiếu " . round($shortfall, 1) . " năm so với yêu cầu {$requiredExp['label']}";
+            $reason = "⚠ Bạn có {$applicantYears} năm kinh nghiệm, còn thiếu " . round($shortfall, 1) . " năm";
         }
 
         return [
@@ -389,72 +702,11 @@ class JobRecommendationService
     }
 
     /**
-     * 3. Tính độ phù hợp về ĐỊA ĐIỂM - CHỈ CỘNG ĐIỂM KHI ĐÚNG TỈNH
-     */
-    private function calculateLocationMatch(Applicant $applicant, JobPost $job): array
-    {
-        $applicantLocation = strtolower(trim($applicant->diachi_uv ?? ''));
-        $jobLocation = strtolower(trim($job->province ?? ''));
-
-        if (empty($applicantLocation) || empty($jobLocation)) {
-            return [
-                'score' => 50,
-                'reason' => 'Không đủ thông tin về địa điểm',
-                'details' => [
-                    'applicant_location' => $applicant->diachi_uv ?? 'Chưa cập nhật',
-                    'job_location' => $job->province ?? 'Chưa rõ'
-                ]
-            ];
-        }
-
-        // Kiểm tra remote
-        if (stripos($job->working_type, 'remote') !== false) {
-            return [
-                'score' => 100,
-                'reason' => 'Làm việc remote - không giới hạn địa điểm',
-                'details' => [
-                    'applicant_location' => $applicant->diachi_uv,
-                    'job_location' => 'Remote',
-                    'working_type' => $job->working_type
-                ]
-            ];
-        }
-
-        // Chuẩn hóa địa điểm
-        $normalizedApplicant = $this->normalizeLocation($applicantLocation);
-        $normalizedJob = $this->normalizeLocation($jobLocation);
-
-        $score = 0;
-        $reason = '';
-
-        // ✅ FIXED: CHỈ CỘNG ĐIỂM KHI ĐÚNG TỈNH/THÀNH PHỐ
-        if ($normalizedApplicant === $normalizedJob) {
-            $score = 100;
-            $reason = "✓ Cùng tỉnh/thành phố: {$job->province}";
-        } else {
-            $score = 0; // ✅ KHÁC TỈNH = 0 ĐIỂM
-            $reason = "✗ Khác tỉnh/thành: Bạn ở {$applicant->diachi_uv}, công việc tại {$job->province}";
-        }
-
-        return [
-            'score' => round($score, 2),
-            'reason' => $reason,
-            'details' => [
-                'applicant_location' => $applicant->diachi_uv,
-                'job_location' => $job->province,
-                'normalized_applicant' => $normalizedApplicant,
-                'normalized_job' => $normalizedJob,
-                'is_match' => $normalizedApplicant === $normalizedJob
-            ]
-        ];
-    }
-
-    /**
-     * 4. Tính độ phù hợp về MỨC LƯƠNG
+     * Tính độ phù hợp về MỨC LƯƠNG
      */
     private function calculateSalaryMatch(Applicant $applicant, JobPost $job): array
     {
-        $expectedSalary = (float) $applicant->mucluong_mongmuon;
+        $expectedSalary = (float) ($applicant->mucluong_mongmuon ?? 0);
 
         if (!$expectedSalary) {
             return [
@@ -462,8 +714,8 @@ class JobRecommendationService
                 'reason' => 'Bạn chưa cập nhật mức lương mong muốn',
                 'details' => [
                     'expected_salary' => null,
-                    'job_min' => $job->salary_min,
-                    'job_max' => $job->salary_max
+                    'job_min' => $job->salary_min ?? 0,
+                    'job_max' => $job->salary_max ?? 0
                 ]
             ];
         }
@@ -479,8 +731,8 @@ class JobRecommendationService
             ];
         }
 
-        $jobMinSalary = (float) $job->salary_min;
-        $jobMaxSalary = (float) $job->salary_max;
+        $jobMinSalary = (float) ($job->salary_min ?? 0);
+        $jobMaxSalary = (float) ($job->salary_max ?? 0);
 
         if (!$jobMinSalary || !$jobMaxSalary) {
             return [
@@ -488,7 +740,7 @@ class JobRecommendationService
                 'reason' => 'Công việc chưa công bố mức lương',
                 'details' => [
                     'expected_salary' => $expectedSalary,
-                    'job_salary' => 'Chưa công bố'
+                    'salary_type' => 'Chưa công bố'
                 ]
             ];
         }
@@ -498,18 +750,17 @@ class JobRecommendationService
 
         if ($expectedSalary >= $jobMinSalary && $expectedSalary <= $jobMaxSalary) {
             $score = 100;
-            $reason = "✓ Mức lương mong muốn " . number_format($expectedSalary) . " VNĐ nằm trong khoảng " .
-                number_format($jobMinSalary) . " - " . number_format($jobMaxSalary) . " VNĐ";
+            $reason = "✓ Mức lương mong muốn phù hợp";
         } elseif ($expectedSalary < $jobMinSalary) {
             $diff = $jobMinSalary - $expectedSalary;
             $percent = ($diff / $jobMinSalary) * 100;
             $score = max(50, 100 - $percent);
-            $reason = "Mức lương mong muốn thấp hơn " . number_format($diff) . " VNĐ so với mức tối thiểu";
+            $reason = "Mức lương mong muốn thấp hơn mức tối thiểu";
         } else {
             $diff = $expectedSalary - $jobMaxSalary;
             $percent = ($diff / $jobMaxSalary) * 100;
             $score = max(30, 100 - ($percent * 2));
-            $reason = "⚠ Mức lương mong muốn cao hơn " . number_format($diff) . " VNĐ so với mức tối đa";
+            $reason = "⚠ Mức lương mong muốn cao hơn mức tối đa";
         }
 
         return [
@@ -518,15 +769,13 @@ class JobRecommendationService
             'details' => [
                 'expected_salary' => $expectedSalary,
                 'job_min' => $jobMinSalary,
-                'job_max' => $jobMaxSalary,
-                'formatted_expected' => number_format($expectedSalary) . ' VNĐ',
-                'formatted_range' => number_format($jobMinSalary) . ' - ' . number_format($jobMaxSalary) . ' VNĐ'
+                'job_max' => $jobMaxSalary
             ]
         ];
     }
 
     /**
-     * 5. Tính độ phù hợp về NGOẠI NGỮ
+     * Tính độ phù hợp về NGOẠI NGỮ
      */
     private function calculateLanguageMatch(Applicant $applicant, JobPost $job): array
     {
@@ -536,29 +785,20 @@ class JobRecommendationService
             return [
                 'score' => 50,
                 'reason' => 'Bạn chưa cập nhật ngoại ngữ',
-                'details' => [
-                    'languages' => [],
-                    'proficiency_levels' => []
-                ]
+                'details' => ['languages' => []]
             ];
         }
 
-        // Lấy danh sách ngoại ngữ với trình độ
         $languagesWithLevel = $applicant->ngoaiNgu()->get();
-
-        // Định nghĩa các ngôn ngữ quan trọng trong IT
         $priorityLanguages = ['Tiếng Anh', 'English'];
 
-        // Kiểm tra các ngôn ngữ
         $hasHighLevel = false;
         $hasIntermediate = false;
         $totalLanguages = count($languages);
 
         foreach ($languagesWithLevel as $lang) {
-            $langName = strtolower(trim($lang->ten_ngoai_ngu));
-            $proficiency = strtolower(trim($lang->trin_do ?? ''));
+            $proficiency = strtolower(trim($lang->trinh_do ?? ''));
 
-            // Kiểm tra ngôn ngữ ưu tiên và trình độ
             if (in_array($lang->ten_ngoai_ngu, $priorityLanguages)) {
                 if (in_array($proficiency, ['cao cap', 'cao cấp', 'advanced'])) {
                     $hasHighLevel = true;
@@ -568,19 +808,18 @@ class JobRecommendationService
             }
         }
 
-        // Tính điểm dựa trên trình độ và số lượng ngôn ngữ
         $score = 0;
         $reason = '';
 
         if ($hasHighLevel) {
             $score = 100;
-            $reason = "✓ Bạn có trình độ cao cấp - lợi thế lớn trong ngành IT";
+            $reason = "✓ Bạn có trình độ cao cấp - lợi thế lớn";
         } elseif ($hasIntermediate) {
             $score = 80;
-            $reason = "✓ Bạn có trình độ trung cấp - khá tốt cho công việc IT";
+            $reason = "✓ Bạn có trình độ trung cấp - khá tốt";
         } elseif ($totalLanguages > 0) {
             $score = 60;
-            $reason = "Bạn biết " . implode(', ', $languages) . " - cần nâng cao trình độ";
+            $reason = "Bạn biết " . implode(', ', $languages) . " - cần nâng cao";
         } else {
             $score = 50;
             $reason = "Chưa có thông tin ngoại ngữ";
@@ -599,78 +838,18 @@ class JobRecommendationService
     }
 
     /**
-     * Chuẩn hóa tên địa điểm - FIXED: Chuẩn hóa chính xác hơn
-     */
-    private function normalizeLocation(string $location): string
-    {
-        $normalized = strtolower(trim($location));
-
-        // Loại bỏ tiền tố
-        $normalized = preg_replace('/^(thành phố|tỉnh|tp\.?|thanh pho|tinh)\s*/ui', '', $normalized);
-
-        // Loại bỏ dấu
-        $normalized = $this->removeDiacritics($normalized);
-
-        // Map các tên thành phố phổ biến - CHÍNH XÁC
-        $cityMap = [
-            // TP.HCM
-            'ho chi minh' => 'hcm',
-            'hcm' => 'hcm',
-            'sai gon' => 'hcm',
-            'saigon' => 'hcm',
-
-            // Hà Nội
-            'ha noi' => 'hanoi',
-            'hanoi' => 'hanoi',
-
-            // Đà Nẵng
-            'da nang' => 'danang',
-            'danang' => 'danang',
-
-            // Cần Thơ
-            'can tho' => 'cantho',
-            'cantho' => 'cantho',
-
-            // Hải Phòng
-            'hai phong' => 'haiphong',
-            'haiphong' => 'haiphong',
-
-            // Biên Hòa
-            'bien hoa' => 'bienhoa',
-            'bienhoa' => 'bienhoa',
-
-            // Vũng Tàu
-            'vung tau' => 'vungtau',
-            'vungtau' => 'vungtau',
-            'ba ria vung tau' => 'vungtau',
-        ];
-
-        // Tìm match chính xác
-        foreach ($cityMap as $key => $value) {
-            if ($normalized === $key || strpos($normalized, $key) === 0) {
-                return $value;
-            }
-        }
-
-        return $normalized;
-    }
-
-    /**
-     * Loại bỏ dấu tiếng Việt
-     */
-    /**
-     * Kiểm tra xem hai vị trí có từ khóa chung không
+     * Kiểm tra từ khóa chung
      */
     private function hasCommonKeyword(string $applicantPosition, string $jobPosition): bool
     {
         $keywords = [
             'developer' => ['dev', 'developer', 'programmer', 'coder'],
-            'engineer' => ['engineer', 'kỹ sư', 'ky su'],
-            'designer' => ['designer', 'thiết kế', 'thiet ke'],
-            'manager' => ['manager', 'quản lý', 'quan ly'],
-            'leader' => ['lead', 'leader', 'trưởng', 'truong'],
-            'senior' => ['senior', 'cấp cao', 'cap cao'],
-            'junior' => ['junior', 'sinh viên', 'thực tập sinh'],
+            'engineer' => ['engineer', 'ky su'],
+            'designer' => ['designer', 'thiet ke'],
+            'manager' => ['manager', 'quan ly'],
+            'leader' => ['lead', 'leader', 'truong'],
+            'senior' => ['senior', 'cap cao'],
+            'junior' => ['junior', 'sinh vien', 'thuc tap'],
         ];
 
         foreach ($keywords as $keywordGroup) {
@@ -695,15 +874,13 @@ class JobRecommendationService
     }
 
     /**
-     * Loại bỏ dấu tiếng Việt - FIXED HOÀN CHỈNH
+     * Loại bỏ dấu tiếng Việt - HOÀN CHỈNH
      */
     private function removeDiacritics(string $str): string
     {
         $str = mb_strtolower($str, 'UTF-8');
 
-        // Bảng chuyển đổi HOÀN CHỈNH
         $replacements = [
-            // Chữ a
             'à' => 'a',
             'á' => 'a',
             'ạ' => 'a',
@@ -722,7 +899,6 @@ class JobRecommendationService
             'ẳ' => 'a',
             'ẵ' => 'a',
 
-            // Chữ e
             'è' => 'e',
             'é' => 'e',
             'ẹ' => 'e',
@@ -735,14 +911,12 @@ class JobRecommendationService
             'ể' => 'e',
             'ễ' => 'e',
 
-            // Chữ i
             'ì' => 'i',
             'í' => 'i',
             'ị' => 'i',
             'ỉ' => 'i',
             'ĩ' => 'i',
 
-            // Chữ o
             'ò' => 'o',
             'ó' => 'o',
             'ọ' => 'o',
@@ -761,7 +935,6 @@ class JobRecommendationService
             'ở' => 'o',
             'ỡ' => 'o',
 
-            // Chữ u - ✅ FIXED HOÀN CHỈNH
             'ù' => 'u',
             'ú' => 'u',
             'ụ' => 'u',
@@ -774,68 +947,43 @@ class JobRecommendationService
             'ử' => 'u',
             'ữ' => 'u',
 
-            // Chữ y
             'ỳ' => 'y',
             'ý' => 'y',
             'ỵ' => 'y',
             'ỷ' => 'y',
             'ỹ' => 'y',
-
-            // Chữ d
             'đ' => 'd',
         ];
 
         return strtr($str, $replacements);
     }
+
     /**
-     * Tạo hoặc cập nhật recommendations cho ứng viên
-     */
-    /**
-     * Tạo hoặc cập nhật recommendations cho ứng viên
+     * Tạo recommendations cho ứng viên
      */
     public function generateRecommendationsForApplicant(Applicant $applicant, $limit = 20): int
     {
         Log::info('🔄 Generating recommendations', [
             'applicant_id' => $applicant->id_uv,
             'vitriungtuyen' => $applicant->vitriungtuyen,
-            'has_vitriungtuyen' => !empty($applicant->vitriungtuyen)
         ]);
 
-        // ✅ XÓA TẤT CẢ RECOMMENDATIONS CŨ TRƯỚC
+        // XÓA TẤT CẢ CŨ
         JobRecommendation::where('applicant_id', $applicant->id_uv)->delete();
-
-        Log::info('🗑️ Deleted old recommendations for applicant', [
-            'applicant_id' => $applicant->id_uv
-        ]);
 
         $activeJobs = JobPost::where('deadline', '>=', now())
             ->with(['hashtags', 'company'])
+            ->limit(100)
             ->get();
 
         $count = 0;
 
         foreach ($activeJobs as $job) {
             try {
-                Log::info('📊 Calculating match', [
-                    'job_id' => $job->job_id,
-                    'job_title' => $job->title,
-                    'applicant_vitriungtuyen' => $applicant->vitriungtuyen,
-                    'job_level' => $job->level
-                ]);
-
                 $matchData = $this->calculateMatchScore($applicant, $job);
                 $score = $matchData['score'];
 
-                Log::info('✅ Match calculated', [
-                    'job_id' => $job->job_id,
-                    'score' => $score,
-                    'position_score' => $matchData['breakdown']['position']['score'] ?? 'N/A',
-                    'position_reason' => $matchData['breakdown']['position']['reason'] ?? 'N/A'
-                ]);
-
-                // CHỈ lưu jobs có điểm >= 40
                 if ($score >= 40) {
-                    // ✅ THAY ĐỔI: Dùng create() thay vì updateOrCreate()
                     JobRecommendation::create([
                         'applicant_id' => $applicant->id_uv,
                         'job_id' => $job->job_id,
@@ -845,26 +993,22 @@ class JobRecommendationService
                         'is_applied' => false
                     ]);
                     $count++;
+                    if ($count >= $limit) break;
                 }
             } catch (\Exception $e) {
-                Log::error('❌ Error generating recommendation', [
-                    'applicant_id' => $applicant->id_uv,
+                Log::error('❌ Lỗi tạo recommendation', [
                     'job_id' => $job->job_id,
-                    'error' => $e->getMessage(),
-                    'line' => $e->getLine()
+                    'error' => $e->getMessage()
                 ]);
             }
         }
 
-        Log::info('🎉 Generation complete', [
-            'applicant_id' => $applicant->id_uv,
-            'total_recommendations' => $count
-        ]);
-
+        Log::info('🎉 Tạo xong', ['total' => $count]);
         return $count;
     }
+
     /**
-     * Lấy danh sách gợi ý cho ứng viên
+     * Lấy recommendations
      */
     public function getRecommendationsForApplicant(Applicant $applicant, $limit = 10)
     {

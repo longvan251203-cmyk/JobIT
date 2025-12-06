@@ -639,7 +639,7 @@
                             <!-- Thông tin cá nhân -->
                             <div class="col-md-9">
                                 <h2 class="fw-bold mb-2">{{ $applicant->hoten_uv ?? 'Họ tên ứng viên' }}</h2>
-                                <p class="mb-3 opacity-90">{{ $applicant->vitritungtuyen ?? 'Chưa cập nhật chức danh' }}</p>
+                                <p class="mb-3 opacity-90">{{ $applicant->vitriungtuyen ?? 'Chưa cập nhật chức danh' }}</p>
 
                                 <div class="d-flex flex-wrap gap-2 mb-3">
                                     <span class="info-tag-modern">
@@ -1671,7 +1671,7 @@
                                                 {{ $applicant->hoten_uv ?? 'Họ tên ứng viên' }}
                                             </h5>
                                             <p class="mb-0 opacity-85">
-                                                <i class="bi bi-briefcase-fill me-1"></i>{{ $applicant->vitritungtuyen ?? 'Chức danh' }}
+                                                <i class="bi bi-briefcase-fill me-1"></i>{{ $applicant->vitriungtuyen ?? 'Chức danh' }}
                                             </p>
                                         </div>
                                     </div>
@@ -1691,7 +1691,7 @@
                                                     alt="Avatar"
                                                     class="cv-avatar rounded-circle">
                                                 <h5 class="fw-bold mt-3 mb-1">{{ $applicant->hoten_uv ?? 'N/A' }}</h5>
-                                                <p class="text-muted small mb-0">{{ $applicant->vitritungtuyen ?? 'N/A' }}</p>
+                                                <p class="text-muted small mb-0">{{ $applicant->vitriungtuyen ?? 'N/A' }}</p>
                                             </div>
 
                                             <hr class="my-3">
@@ -2014,9 +2014,9 @@
                                                     </div>
                                                     <!-- Chức danh -->
                                                     <div class="col-md-6 mb-3">
-                                                        <label for="vitritungtuyen" class="form-label">Vị trí ứng tuyển</label>
-                                                        <input type="text" class="form-control" name="vitritungtuyen" id="vitritungtuyen"
-                                                            value="{{ $applicant->vitritungtuyen ?? '' }}">
+                                                        <label for="vitriungtuyen" class="form-label">Vị trí ứng tuyển</label>
+                                                        <input type="text" class="form-control" name="vitriungtuyen" id="vitriungtuyen"
+                                                            value="{{ $applicant->vitriungtuyen ?? '' }}">
                                                     </div>
                                                     <!-- Ngày sinh -->
                                                     <div class="col-md-6 mb-3">
