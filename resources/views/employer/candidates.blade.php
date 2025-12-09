@@ -10,6 +10,35 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
+        /* ============ RECOMMENDED BADGE ANIMATION ============ */
+        @keyframes glow-pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(251, 191, 36, 0.6),
+                    0 0 40px rgba(251, 191, 36, 0.4),
+                    0 0 60px rgba(251, 191, 36, 0.2);
+            }
+
+            50% {
+                box-shadow: 0 0 30px rgba(251, 191, 36, 0.8),
+                    0 0 60px rgba(251, 191, 36, 0.6),
+                    0 0 90px rgba(251, 191, 36, 0.4);
+            }
+        }
+
+        .candidate-card:hover .absolute>div:first-child {
+            animation: glow-pulse 2s infinite;
+        }
+
+        /* Line clamp for job title */
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
         * {
@@ -556,7 +585,7 @@
                     <div class="search-input-container flex-1">
                         <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <circle cx="11" cy="11" r="8" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35A2.032 2.032 0 0118 14.158V11a6 6 0 10-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                         </svg>
                         <input type="text"
                             id="searchKeyword"
@@ -1073,9 +1102,133 @@
                     </div>
                     @endif
                 </div>
-            </main>
-        </div>
-    </div>
+
+                @php
+                Log::info('🎯 BLADE CHECK:', [
+                'isset' => isset($recommendedApplicants),
+                'is_array' => isset($recommendedApplicants) && is_array($recommendedApplicants),
+                'count' => isset($recommendedApplicants) ? count($recommendedApplicants) : 'N/A',
+                'data' => $recommendedApplicants ?? 'NOT SET'
+                ]);
+
+                $hasRecommendations = isset($recommendedApplicants) &&
+                is_array($recommendedApplicants) &&
+                count($recommendedApplicants) > 0;
+                @endphp
+
+                @if($hasRecommendations)
+                <div class="mt-12 pt-8 border-t-2 border-gray-200">
+                    <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl p-6 mb-6 border-2 border-purple-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h2 class="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
+                                    <div class="w-10 h-10 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+                                        <i class="bi bi-stars text-white"></i>
+                                    </div>
+                                    ⭐ Ứng viên được gợi ý cho bạn
+                                </h2>
+                                <p class="text-gray-600 ml-12">
+                                    <i class="bi bi-info-circle mr-1"></i>
+                                    {{ count($recommendedApplicants) }} ứng viên phù hợp nhất với các vị trí đang tuyển của công ty
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="candidates-grid">
+                        @forelse($recommendedApplicants as $item)
+                        @php
+                        $candidate = $item['applicant'];
+                        $matchScore = round($item['score']);
+                        $matchedJob = $item['job'];
+                        $matchDetails = $item['match_details'];
+                        @endphp
+
+                        <div class="candidate-card relative overflow-visible">
+                            <!-- Badge điểm match -->
+                            <div class="absolute -top-3 -right-3 z-10">
+                                <div class="relative">
+                                    <div class="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-2xl flex items-center gap-2 border-2 border-white animate-pulse">
+                                        <i class="bi bi-star-fill"></i>
+                                        <span>{{ $matchScore }}%</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card-header"></div>
+
+                            <div class="card-avatar">
+                                @if($candidate->avatar)
+                                <img src="{{ asset('assets/img/avt/' . $candidate->avatar) }}" alt="{{ $candidate->hoten_uv }}">
+                                @else
+                                <div class="w-full h-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-2xl font-bold">
+                                    {{ strtoupper(substr($candidate->hoten_uv, 0, 1)) }}
+                                </div>
+                                @endif
+                            </div>
+
+                            <div class="card-content">
+                                <h3 class="candidate-name">{{ $candidate->hoten_uv }}</h3>
+                                <p class="candidate-title">{{ $candidate->vitritungtuyen ?? 'Chưa cập nhật' }}</p>
+
+                                <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-3 mb-3 border-2 border-purple-200">
+                                    <p class="text-xs text-purple-700 font-bold mb-1 flex items-center gap-1">
+                                        <i class="bi bi-bullseye"></i>
+                                        Phù hợp với vị trí:
+                                    </p>
+                                    <p class="text-sm text-purple-900 font-semibold line-clamp-2">
+                                        {{ $matchedJob->tieude ?? 'N/A' }}
+                                    </p>
+                                </div>
+
+                                <div class="space-y-1 mb-3">
+                                    <div class="candidate-info flex items-center">
+                                        <i class="bi bi-geo-alt"></i>
+                                        <span class="truncate">{{ $candidate->diachi_uv ?? 'Chưa cập nhật' }}</span>
+                                    </div>
+                                    @if($candidate->kinhnghiem && $candidate->kinhnghiem->count() > 0)
+                                    <div class="candidate-info flex items-center">
+                                        <i class="bi bi-briefcase"></i>
+                                        <span>{{ $candidate->kinhnghiem->count() }} năm kinh nghiệm</span>
+                                    </div>
+                                    @endif
+                                </div>
+
+                                @if($candidate->kynang && $candidate->kynang->count() > 0)
+                                <div class="skill-tags">
+                                    @foreach($candidate->kynang->take(3) as $skill)
+                                    <span class="skill-tag">{{ $skill->ten_ky_nang }}</span>
+                                    @endforeach
+                                </div>
+                                @endif
+
+                                <button onclick="viewCV('{{ $candidate->id_uv }}')" class="btn-view-profile">
+                                    <i class="bi bi-eye mr-1"></i> Xem hồ sơ
+                                </button>
+                            </div>
+                        </div>
+                        @empty
+                        <div class="col-span-3 text-center py-8">
+                            <p class="text-gray-500">Chưa có ứng viên được gợi ý</p>
+                        </div>
+                        @endforelse
+                    </div>
+                </div>
+                @else
+                <!-- DEBUG khi không có dữ liệu -->
+                @if(env('APP_DEBUG'))
+                <div class="mt-8 p-4 bg-yellow-50 border-2 border-yellow-300 rounded-lg">
+                    <p class="text-yellow-800 font-semibold">🔧 DEBUG MODE:</p>
+                    <p class="text-yellow-700 text-sm mt-2">
+                        recommendedApplicants = <code>{{ isset($recommendedApplicants) ? json_encode($recommendedApplicants) : 'undefined' }}</code>
+                    </p>
+                </div>
+                @endif
+                @endif
+            </main> <!-- ✅ Đóng main tag ở đây -->
+
+        </div> <!-- Đóng grid 12 cols -->
+    </div> <!-- Đóng max-width container -->
 
     <!-- CV MODAL -->
     <div id="cvModal" class="hidden modal-overlay" onclick="closeModal(event)">

@@ -25,50 +25,46 @@
     <link href="{{ asset('assets/css/homeapp.css') }}" rel="stylesheet">
 </head>
 <style>
-    /* ✨ Style cho nút Gợi ý việc làm */
-    .btn-recommendations {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 10px 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* ========================================
+   RECOMMENDED JOBS - APPLY BUTTON COLORS
+======================================== */
+    .rec-btn-primary {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
         color: white;
-        border-radius: 8px;
-        text-decoration: none;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        position: relative;
-        margin-right: 12px;
-        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        flex: 2;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
 
-    .btn-recommendations:hover {
+    .rec-btn-primary:hover:not(:disabled):not(.applied) {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+        background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
     }
 
-    .btn-recommendations i {
-        font-size: 18px;
+    .rec-btn-primary:active:not(:disabled):not(.applied) {
+        transform: translateY(0);
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
     }
 
-    .btn-recommendations .badge-count {
-        position: absolute;
-        top: -8px;
-        right: -8px;
-        background: #ff4757;
-        color: white;
-        font-size: 11px;
-        font-weight: 600;
-        padding: 2px 6px;
-        border-radius: 10px;
-        min-width: 20px;
-        text-align: center;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        animation: pulse 2s infinite;
+    /* ✅ APPLIED STATE - XANH DƯƠNG */
+    .rec-btn-primary.applied {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+        cursor: not-allowed;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        opacity: 0.9;
     }
 
-    @keyframes pulse {
+    .rec-btn-primary.applied:hover {
+        transform: none;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+    }
+
+    .rec-btn-primary.applied i {
+        animation: checkPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes checkPulse {
 
         0%,
         100% {
@@ -80,29 +76,628 @@
         }
     }
 
-    /* Style cho badge nhỏ trong dropdown */
-    .badge-small {
-        background: #667eea;
-        color: white;
-        font-size: 10px;
-        padding: 2px 6px;
-        border-radius: 8px;
-        margin-left: 8px;
-        font-weight: 600;
+    /* ========================================
+   RECOMMENDED JOBS - ĐỒNG BỘ VỚI JOB BÌNH THƯỜNG
+======================================== */
+
+    /* Grid View - Recommended Jobs */
+    .recommended-jobs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
     }
 
-    /* Responsive */
+    /* Recommended Job Card - Đồng bộ với job-card-grid */
+    .recommended-job-card {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        border: 2px solid transparent;
+        cursor: pointer;
+        min-height: 420px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .recommended-job-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+        border-color: rgba(102, 126, 234, 0.3);
+    }
+
+    /* Match Badge - Đặt ở góc trên phải */
+    .match-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 1.1rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 10;
+    }
+
+    .match-badge.high-match {
+        background: linear-gradient(135deg, #11998e, #38ef7d);
+        color: white;
+    }
+
+    .match-badge.medium-match {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .match-badge.low-match {
+        background: linear-gradient(135deg, #fa709a, #fee140);
+        color: white;
+    }
+
+    /* Company Header - Đồng bộ với job-card-grid-header */
+    .rec-job-header {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding-right: 70px;
+        /* Space for match badge */
+    }
+
+    .rec-company-logo {
+        width: 64px;
+        height: 64px;
+        border-radius: 12px;
+        flex-shrink: 0;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        background: #f3f4f6;
+    }
+
+    .rec-company-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .rec-job-info {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .rec-job-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0 0 0.5rem 0;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .rec-company-name {
+        font-size: 0.9rem;
+        color: #718096;
+        margin: 0;
+        font-weight: 500;
+    }
+
+    /* Meta Information */
+    .rec-job-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .meta-item {
+        font-size: 0.85rem;
+        color: #4b5563;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .meta-item i {
+        color: #667eea;
+        font-size: 0.9rem;
+    }
+
+    /* Salary */
+    .rec-job-salary {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #10b981;
+        margin-bottom: 1rem;
+        padding: 0.75rem 1rem;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.05) 100%);
+        border-radius: 10px;
+        text-align: center;
+        border-left: 4px solid #10b981;
+    }
+
+    .rec-job-salary .negotiable {
+        color: #667eea;
+    }
+
+    /* Tags */
+    .rec-job-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        min-height: 36px;
+    }
+
+    .rec-tag {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.75rem;
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(102, 126, 234, 0.05) 100%);
+        color: #667eea;
+        border-radius: 16px;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .rec-tag.more {
+        background: linear-gradient(135deg, rgba(250, 112, 154, 0.1) 0%, rgba(250, 112, 154, 0.05) 100%);
+        color: #fa709a;
+    }
+
+    /* Deadline */
+    .rec-job-deadline {
+        font-size: 0.85rem;
+        color: #718096;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: auto;
+        padding-bottom: 1rem;
+    }
+
+    .rec-job-deadline i {
+        color: #fa709a;
+    }
+
+    /* Action Buttons */
+    .rec-job-actions {
+        display: flex;
+        gap: 0.6rem;
+        margin-top: auto;
+    }
+
+    .rec-btn {
+        padding: 0.75rem;
+        border: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-height: 44px;
+    }
+
+    .rec-btn-primary {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        flex: 1;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .rec-btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+    }
+
+    .rec-btn-primary.applied {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        cursor: not-allowed;
+        opacity: 0.9;
+    }
+
+    .rec-btn-detail {
+        width: 44px;
+        min-width: 44px;
+        padding: 0;
+        background: white;
+        color: #718096;
+        border: 2px solid #e5e7eb;
+    }
+
+    .rec-btn-detail:hover {
+        border-color: #667eea;
+        color: #667eea;
+        background: rgba(102, 126, 234, 0.05);
+    }
+
+    .rec-btn-icon {
+        width: 44px;
+        min-width: 44px;
+        padding: 0;
+        background: white;
+        color: #718096;
+        border: 2px solid #e5e7eb;
+    }
+
+    .rec-btn-icon:hover {
+        border-color: #ef4444;
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.05);
+    }
+
+    .rec-btn-icon.saved {
+        border-color: #ef4444;
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.08);
+    }
+
+    /* ========================================
+   RECOMMENDED DETAIL VIEW - 2 COLUMNS
+======================================== */
+    .recommended-detail-view {
+        display: grid;
+        grid-template-columns: 400px 1fr;
+        gap: 2rem;
+        margin-top: 2rem;
+        position: relative;
+    }
+
+    .back-to-grid-rec {
+        position: absolute;
+        top: -50px;
+        left: 0;
+        background: none;
+        border: none;
+        color: #667eea;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        z-index: 10;
+    }
+
+    .back-to-grid-rec:hover {
+        background: rgba(102, 126, 234, 0.1);
+    }
+
+    /* Left Column - Job List */
+    .rec-list-column {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        max-height: 800px;
+        overflow-y: auto;
+        position: sticky;
+        top: 100px;
+    }
+
+    .rec-list-header {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .rec-list-header h3 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .rec-list-header p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #718096;
+    }
+
+    #recJobsList {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    /* Job List Item - Đồng bộ với job-card */
+    .rec-job-list-item {
+        background: white;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 1.25rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        display: flex;
+        gap: 1rem;
+    }
+
+    .rec-job-list-item:hover,
+    .rec-job-list-item.active {
+        border-color: #667eea;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+        transform: translateX(4px);
+    }
+
+    .rec-job-list-item.active {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+    }
+
+    .rec-list-match-badge {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 900;
+        font-size: 1rem;
+        flex-shrink: 0;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+
+    .rec-job-list-item.high-match .rec-list-match-badge {
+        background: linear-gradient(135deg, #11998e, #38ef7d);
+    }
+
+    .rec-list-logo {
+        width: 56px;
+        height: 56px;
+        border-radius: 10px;
+        flex-shrink: 0;
+        overflow: hidden;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .rec-list-logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .rec-list-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .rec-list-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #1f2937;
+        margin: 0 0 0.4rem 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .rec-list-company {
+        font-size: 0.85rem;
+        color: #718096;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .rec-list-meta {
+        display: flex;
+        gap: 1rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.8rem;
+        color: #6b7280;
+    }
+
+    .rec-list-meta span {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .rec-list-meta i {
+        color: #667eea;
+    }
+
+    .rec-list-salary {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #10b981;
+    }
+
+    .rec-list-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .rec-list-apply,
+    .rec-list-save {
+        width: 40px;
+        height: 40px;
+        border: 2px solid #e5e7eb;
+        border-radius: 10px;
+        background: white;
+        color: #718096;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+    }
+
+    .rec-list-apply:hover {
+        border-color: #10b981;
+        color: #10b981;
+        background: rgba(16, 185, 129, 0.05);
+    }
+
+    .rec-list-save:hover {
+        border-color: #ef4444;
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.05);
+    }
+
+    .rec-list-save.saved {
+        border-color: #ef4444;
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.08);
+    }
+
+    /* Right Column - Job Detail */
+    .rec-detail-column {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        max-height: 800px;
+        overflow-y: auto;
+    }
+
+    .rec-job-detail-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 4rem 2rem;
+        text-align: center;
+        color: #9ca3af;
+        min-height: 400px;
+    }
+
+    .rec-job-detail-empty i {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+        opacity: 0.4;
+    }
+
+    /* Custom Scrollbar */
+    .rec-list-column::-webkit-scrollbar,
+    .rec-detail-column::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .rec-list-column::-webkit-scrollbar-track,
+    .rec-detail-column::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .rec-list-column::-webkit-scrollbar-thumb,
+    .rec-detail-column::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 10px;
+    }
+
+    .rec-list-column::-webkit-scrollbar-thumb:hover,
+    .rec-detail-column::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    /* ========================================
+   RESPONSIVE
+======================================== */
+    @media (max-width: 1400px) {
+        .recommended-jobs-grid {
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        }
+
+        .recommended-detail-view {
+            grid-template-columns: 360px 1fr;
+        }
+    }
+
+    @media (max-width: 1200px) {
+        .recommended-detail-view {
+            grid-template-columns: 340px 1fr;
+            gap: 1.5rem;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .recommended-jobs-grid {
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        }
+
+        .recommended-detail-view {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .rec-list-column {
+            max-height: 400px;
+            position: relative;
+            top: auto;
+            order: 2;
+        }
+
+        .rec-detail-column {
+            order: 1;
+        }
+
+        .back-to-grid-rec {
+            position: relative;
+            top: auto;
+            margin-bottom: 1rem;
+        }
+    }
+
     @media (max-width: 768px) {
-        .btn-recommendations span {
-            display: none;
+        .recommended-jobs-grid {
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
         }
 
-        .btn-recommendations {
-            padding: 10px 14px;
+        .recommended-job-card {
+            min-height: auto;
         }
 
-        .btn-recommendations i {
-            margin: 0;
+        .match-badge {
+            width: 55px;
+            height: 55px;
+            font-size: 1rem;
+        }
+
+        .rec-job-header {
+            padding-right: 60px;
+        }
+
+        .rec-job-list-item {
+            flex-wrap: wrap;
+        }
+
+        .rec-list-actions {
+            flex-direction: row;
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .match-badge {
+            width: 50px;
+            height: 50px;
+            font-size: 0.9rem;
+        }
+
+        .rec-btn {
+            font-size: 0.85rem;
+            padding: 0.65rem;
         }
     }
 </style>
@@ -1286,18 +1881,52 @@
         background: white;
         color: #718096;
         border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
     }
 
     .rec-btn-icon:hover {
-        border-color: #667eea;
-        color: #667eea;
-        background: rgba(102, 126, 234, 0.05);
-    }
-
-    .rec-btn-icon.saved {
         border-color: #ef4444;
         color: #ef4444;
         background: rgba(239, 68, 68, 0.05);
+    }
+
+    /* ✅ THÊM PHẦN NÀY: Style cho state đã lưu */
+    .rec-btn-icon.saved {
+        border-color: #ef4444;
+        color: #ef4444;
+        background: rgba(239, 68, 68, 0.08);
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+    }
+
+    .rec-btn-icon.saved:hover {
+        border-color: #dc2626;
+        color: #dc2626;
+        background: rgba(239, 68, 68, 0.15);
+    }
+
+    .rec-btn-icon.saved i {
+        animation: heartBeat 0.6s ease;
+    }
+
+    @keyframes heartBeat {
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        25% {
+            transform: scale(1.3);
+        }
+
+        50% {
+            transform: scale(1);
+        }
     }
 
     /* Match Indicator Line */
@@ -1578,77 +2207,110 @@
     <!-- Filter Section - Nâng cao -->
     <section class="filter-section">
         <div class="filter-container">
-            <!-- Dropdown Danh mục -->
+            <!-- 1. Dropdown Mức lương -->
             <div class="filter-dropdown-wrapper">
-                <button class="filter-btn" id="categoryFilterBtn">
-                    <i class="bi bi-folder"></i>
-                    <span>Tất cả danh mục</span>
+                <button class="filter-btn" id="salaryFilterBtn">
+                    <i class="bi bi-cash-coin"></i>
+                    <span>Mức lương</span>
                     <i class="bi bi-chevron-down ms-2"></i>
                 </button>
-                <div class="filter-dropdown-menu" id="categoryDropdown">
+                <div class="filter-dropdown-menu" id="salaryDropdown">
                     <label class="filter-checkbox-item">
-                        <input type="checkbox" name="category" value="all" checked>
-                        <span>Tất cả</span>
+                        <input type="checkbox" name="salary" value="all" checked>
+                        <span>-- Tất cả mức lương --</span>
                     </label>
                     <label class="filter-checkbox-item">
-                        <input type="checkbox" name="category" value="backend">
-                        <span>Backend Developer</span>
+                        <input type="checkbox" name="salary" value="under_5">
+                        <span>Dưới 5 triệu VNĐ</span>
                     </label>
                     <label class="filter-checkbox-item">
-                        <input type="checkbox" name="category" value="frontend">
-                        <span>Frontend Developer</span>
+                        <input type="checkbox" name="salary" value="5_10">
+                        <span>5 - 10 triệu VNĐ</span>
                     </label>
                     <label class="filter-checkbox-item">
-                        <input type="checkbox" name="category" value="fullstack">
-                        <span>Fullstack Developer</span>
+                        <input type="checkbox" name="salary" value="10_15">
+                        <span>10 - 15 triệu VNĐ</span>
                     </label>
                     <label class="filter-checkbox-item">
-                        <input type="checkbox" name="category" value="mobile">
-                        <span>Mobile Developer</span>
+                        <input type="checkbox" name="salary" value="15_20">
+                        <span>15 - 20 triệu VNĐ</span>
                     </label>
                     <label class="filter-checkbox-item">
-                        <input type="checkbox" name="category" value="devops">
-                        <span>DevOps Engineer</span>
+                        <input type="checkbox" name="salary" value="20_30">
+                        <span>20 - 30 triệu VNĐ</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="salary" value="30_plus">
+                        <span>Trên 30 triệu VNĐ</span>
                     </label>
                 </div>
             </div>
 
-            <!-- Dropdown Cấp bậc -->
+            <!-- 2. Dropdown Vị trí tuyển dụng -->
+            <!-- 2. Dropdown Vị trí tuyển dụng -->
             <div class="filter-dropdown-wrapper">
-                <button class="filter-btn" id="levelFilterBtn">
-                    <i class="bi bi-bar-chart"></i>
-                    <span>Cấp bậc</span>
+                <button class="filter-btn" id="positionFilterBtn">
+                    <i class="bi bi-briefcase"></i>
+                    <span>Vị trí tuyển dụng</span>
                     <i class="bi bi-chevron-down ms-2"></i>
                 </button>
-                <div class="filter-dropdown-menu" id="levelDropdown">
+                <div class="filter-dropdown-menu" id="positionDropdown">
                     <label class="filter-checkbox-item">
-                        <input type="checkbox" name="level" value="intern">
+                        <input type="checkbox" name="position" value="all" checked>
+                        <span>-- Tất cả vị trí --</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="position" value="Thực tập sinh">
                         <span>Thực tập sinh</span>
                     </label>
                     <label class="filter-checkbox-item">
-                        <input type="checkbox" name="level" value="fresher">
-                        <span>Fresher</span>
+                        <input type="checkbox" name="position" value="Cộng tác viên">
+                        <span>Cộng tác viên</span>
                     </label>
                     <label class="filter-checkbox-item">
-                        <input type="checkbox" name="level" value="junior">
-                        <span>Junior</span>
+                        <input type="checkbox" name="position" value="Nhân viên chính thức">
+                        <span>Nhân viên chính thức</span>
                     </label>
                     <label class="filter-checkbox-item">
-                        <input type="checkbox" name="level" value="middle">
-                        <span>Middle</span>
+                        <input type="checkbox" name="position" value="Nhân viên part-time">
+                        <span>Nhân viên part-time</span>
                     </label>
                     <label class="filter-checkbox-item">
-                        <input type="checkbox" name="level" value="senior">
-                        <span>Senior</span>
+                        <input type="checkbox" name="position" value="Nhân viên hợp đồng">
+                        <span>Nhân viên hợp đồng</span>
                     </label>
                     <label class="filter-checkbox-item">
-                        <input type="checkbox" name="level" value="leader">
-                        <span>Leader</span>
+                        <input type="checkbox" name="position" value="Nhân viên thử việc">
+                        <span>Nhân viên thử việc</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="position" value="Freelancer">
+                        <span>Freelancer</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="position" value="Nhân viên dự án">
+                        <span>Nhân viên dự án</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="position" value="Quản lý">
+                        <span>Quản lý</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="position" value="Giám đốc">
+                        <span>Giám đốc</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="position" value="Giám đốc bộ phận">
+                        <span>Giám đốc bộ phận</span>
+                    </label>
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="position" value="Trưởng nhóm">
+                        <span>Trưởng nhóm</span>
                     </label>
                 </div>
             </div>
 
-            <!-- Dropdown Kinh nghiệm -->
+            <!-- 3. Dropdown Kinh nghiệm -->
             <div class="filter-dropdown-wrapper">
                 <button class="filter-btn" id="experienceFilterBtn">
                     <i class="bi bi-award"></i>
@@ -1656,6 +2318,10 @@
                     <i class="bi bi-chevron-down ms-2"></i>
                 </button>
                 <div class="filter-dropdown-menu" id="experienceDropdown">
+                    <label class="filter-checkbox-item">
+                        <input type="checkbox" name="experience" value="all" checked>
+                        <span>-- Tất cả kinh nghiệm --</span>
+                    </label>
                     <label class="filter-checkbox-item">
                         <input type="checkbox" name="experience" value="no_experience">
                         <span>Không yêu cầu</span>
@@ -1666,42 +2332,15 @@
                     </label>
                     <label class="filter-checkbox-item">
                         <input type="checkbox" name="experience" value="1_2">
-                        <span>1-2 năm</span>
+                        <span>1 - 2 năm</span>
                     </label>
                     <label class="filter-checkbox-item">
                         <input type="checkbox" name="experience" value="2_5">
-                        <span>2-5 năm</span>
+                        <span>2 - 5 năm</span>
                     </label>
                     <label class="filter-checkbox-item">
                         <input type="checkbox" name="experience" value="5_plus">
                         <span>Trên 5 năm</span>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Dropdown Hình thức làm việc -->
-            <div class="filter-dropdown-wrapper">
-                <button class="filter-btn" id="workingTypeFilterBtn">
-                    <i class="bi bi-briefcase"></i>
-                    <span>Hình thức</span>
-                    <i class="bi bi-chevron-down ms-2"></i>
-                </button>
-                <div class="filter-dropdown-menu" id="workingTypeDropdown">
-                    <label class="filter-checkbox-item">
-                        <input type="checkbox" name="working_type" value="full_time">
-                        <span>Toàn thời gian</span>
-                    </label>
-                    <label class="filter-checkbox-item">
-                        <input type="checkbox" name="working_type" value="part_time">
-                        <span>Bán thời gian</span>
-                    </label>
-                    <label class="filter-checkbox-item">
-                        <input type="checkbox" name="working_type" value="remote">
-                        <span>Remote</span>
-                    </label>
-                    <label class="filter-checkbox-item">
-                        <input type="checkbox" name="working_type" value="freelance">
-                        <span>Freelance</span>
                     </label>
                 </div>
             </div>
@@ -1714,31 +2353,39 @@
         </div>
     </section>
     <!-- ========== OVERVIEW SECTION ========== tổng quan -->
+    <!-- ========== OVERVIEW SECTION ========== tổng quan -->
     <section class="overview-section">
         <div class="main-container">
             <div class="row g-4">
+                <!-- Total Jobs -->
                 <div class="col-md-3">
                     <div class="overview-card">
-                        <div class="overview-number">{{ $stats['total_jobs'] }}</div>
+                        <div class="overview-number">{{ $stats['total_jobs'] ?? 0 }}</div>
                         <div class="overview-label">Công việc IT</div>
                     </div>
                 </div>
+
+                <!-- Total Companies -->
                 <div class="col-md-3">
                     <div class="overview-card">
-                        <div class="overview-number">{{ $stats['total_companies'] }}</div>
+                        <div class="overview-number">{{ $stats['total_companies'] ?? 0 }}</div>
                         <div class="overview-label">Công ty hàng đầu</div>
                     </div>
                 </div>
+
+                <!-- Total Applicants (ĐÃ TÌMVIỆC) -->
                 <div class="col-md-3">
                     <div class="overview-card">
-                        <div class="overview-number">15,000+</div>
+                        <div class="overview-number">{{ $stats['total_applicants'] ?? 0 }}</div>
                         <div class="overview-label">Ứng viên đã tìm việc</div>
                     </div>
                 </div>
+
+                <!-- Total Applications (ĐÃ ỨNG TUYỂN) -->
                 <div class="col-md-3">
                     <div class="overview-card">
-                        <div class="overview-number">98%</div>
-                        <div class="overview-label">Tỷ lệ hài lòng</div>
+                        <div class="overview-number">{{ $stats['total_applications'] ?? 0 }}</div>
+                        <div class="overview-label">Hồ sơ ứng tuyển</div>
                     </div>
                 </div>
             </div>
@@ -1944,112 +2591,36 @@
     </div>
 
 
-    <!-- ========== RECOMMENDED JOBS SECTION (NEW) ========== -->
+    <!-- ========== RECOMMENDED JOBS SECTION (FIXED) ========== -->
     <div class="main-container">
-        <div class="featured-section">
+        <div class="featured-section" style="position: relative;">
             <div class="section-title-highlight">
                 <div class="section-subtitle">DÀNH CHO BẠN</div>
                 <h2>Các công việc được gợi ý</h2>
                 <p style="color: #718096; margin-top: 0.5rem;">Được cá nhân hóa dựa trên kỹ năng và kinh nghiệm của bạn</p>
             </div>
 
-            <!-- ✅ LOADING CONTAINER -->
-            <div id="recLoadingOverlay" style="display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.7); display: flex; align-items: center; justify-content: center; z-index: 100; border-radius: 20px;">
-                <div class="spinner-border text-primary"></div>
+            <!-- ✅ LOADING CONTAINER - ĐÃ SỬA -->
+            <div id="recLoadingOverlay" style="
+        display: none; 
+        position: absolute; 
+        top: 0; left: 0; right: 0; bottom: 0; 
+        background: rgba(255, 255, 255, 0.9); 
+        z-index: 100; 
+        border-radius: 20px;
+        align-items: center;
+        justify-content: center;
+    ">
+                <div style="text-align: center;">
+                    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
+                    <p style="margin-top: 1rem; font-weight: 600; color: #667eea;">Đang tải gợi ý...</p>
+                </div>
             </div>
 
             <!-- ✅ RECOMMENDED JOBS CONTAINER -->
             <div id="recommendedJobsContainer">
-                @if(Auth::check() && $recommendedJobs && $recommendedJobs->count() > 0)
-                <div class="recommended-jobs-grid" id="recJobsGrid">
-                    @foreach($recommendedJobs as $rec)
-                    @php
-                    $job = $rec->job;
-                    $matchScore = $rec->score ?? 0;
-                    $matchClass = $matchScore >= 80 ? 'high-match' : ($matchScore >= 60 ? 'medium-match' : 'low-match');
-                    @endphp
-
-                    <div class="recommended-job-card {{ $matchClass }}" data-job-id="{{ $job->job_id }}" data-rec-id="{{ $rec->id }}">
-                        <div class="match-badge {{ $matchClass }}">
-                            <div class="match-percentage">{{ number_format($matchScore, 0) }}%</div>
-                        </div>
-
-                        <div class="rec-job-header">
-                            <div class="rec-company-logo">
-                                @if($job->company && $job->company->logo)
-                                <img src="{{ asset('assets/img/' . $job->company->logo) }}" alt="{{ $job->company->tencty }}">
-                                @else
-                                <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667EEA, #764BA2); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1.5rem;">
-                                    {{ substr($job->company->tencty ?? 'C', 0, 1) }}
-                                </div>
-                                @endif
-                            </div>
-                            <div class="rec-job-info">
-                                <h4 class="rec-job-title">{{ Str::limit($job->title, 45) }}</h4>
-                                <p class="rec-company-name">{{ $job->company->tencty ?? 'Công ty' }}</p>
-                            </div>
-                        </div>
-
-                        <div class="rec-job-meta">
-                            <span class="meta-item">
-                                <i class="bi bi-geo-alt"></i>
-                                {{ $job->province }}
-                            </span>
-                            <span class="meta-item">
-                                <i class="bi bi-briefcase"></i>
-                                {{ ucfirst($job->level) }}
-                            </span>
-                        </div>
-
-                        <div class="rec-job-salary">
-                            @if($job->salary_min && $job->salary_max)
-                            {{ number_format($job->salary_min, 0, ',', '.') }} - {{ number_format($job->salary_max, 0, ',', '.') }} {{ strtoupper($job->salary_type) }}
-                            @else
-                            <span class="negotiable">Thỏa thuận</span>
-                            @endif
-                        </div>
-
-                        @if($job->hashtags && $job->hashtags->count() > 0)
-                        <div class="rec-job-tags">
-                            @foreach($job->hashtags->take(3) as $tag)
-                            <span class="rec-tag">{{ $tag->tag_name }}</span>
-                            @endforeach
-                            @if($job->hashtags->count() > 3)
-                            <span class="rec-tag more">+{{ $job->hashtags->count() - 3 }}</span>
-                            @endif
-                        </div>
-                        @endif
-
-                        <div class="rec-job-deadline">
-                            <i class="bi bi-clock-history"></i>
-                            Hạn: {{ \Carbon\Carbon::parse($job->deadline)->format('d/m/Y') }}
-                        </div>
-
-                        <div class="rec-job-actions">
-                            <button class="rec-btn rec-btn-primary" onclick="openApplyModal('{{ $job->job_id }}')">
-                                <i class="bi bi-send-fill"></i>
-                                Ứng tuyển
-                            </button>
-                            <button class="rec-btn rec-btn-icon save-btn-rec" data-job-id="{{ $job->job_id }}" title="Lưu công việc">
-                                <i class="bi bi-heart"></i>
-                            </button>
-                            <a href="{{ route('job.detail', $job->job_id) }}" class="rec-btn rec-btn-icon" title="Xem chi tiết">
-                                <i class="bi bi-arrow-right"></i>
-                            </a>
-                        </div>
-
-                        <div class="match-indicator {{ $matchClass }}"></div>
-                    </div>
-                    @endforeach
-                </div>
-
-                <div class="text-center mt-4">
-                    <a href="{{ route('applicant.recommendations') }}" class="btn-view-all">
-                        <i class="bi bi-stars"></i>
-                        <span>Xem tất cả gợi ý ({{ $recommendedJobs->count() }})</span>
-                        <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
+                @if(Auth::check() && isset($recommendedJobs) && $recommendedJobs && $recommendedJobs->count() > 0)
+                @include('applicant.partials.recommended-jobs-grid', ['recommendedJobs' => $recommendedJobs])
                 @else
                 <div class="rec-empty-state">
                     <div class="empty-icon">
@@ -2066,6 +2637,7 @@
             </div>
         </div>
     </div>
+
 
     <!-- ========== BLOG SECTION ========== -->
     <!-- ...existing code... -->
@@ -2428,17 +3000,15 @@
             const searchBtn = document.getElementById('searchBtn');
             const resetBtn = document.getElementById('resetFiltersBtn');
 
-            // Dropdown buttons
-            const categoryBtn = document.getElementById('categoryFilterBtn');
-            const levelBtn = document.getElementById('levelFilterBtn');
+            // DOM Elements - Cập nhật lại
+            const salaryBtn = document.getElementById('salaryFilterBtn');
+            const positionBtn = document.getElementById('positionFilterBtn');
             const experienceBtn = document.getElementById('experienceFilterBtn');
-            const workingTypeBtn = document.getElementById('workingTypeFilterBtn');
 
-            // Dropdown menus
-            const categoryDropdown = document.getElementById('categoryDropdown');
-            const levelDropdown = document.getElementById('levelDropdown');
+            const salaryDropdown = document.getElementById('salaryDropdown');
+            const positionDropdown = document.getElementById('positionDropdown');
             const experienceDropdown = document.getElementById('experienceDropdown');
-            const workingTypeDropdown = document.getElementById('workingTypeDropdown');
+
 
             // ========================================
             // USER DROPDOWN
@@ -2468,6 +3038,8 @@
                 if (!button) return;
 
                 const icon = button.querySelector('i');
+                const textSpan = button.querySelector('span');
+
                 button.classList.toggle('applied', hasApplied);
                 button.disabled = hasApplied;
                 button.title = hasApplied ? 'Bạn đã ứng tuyển công việc này' : 'Ứng tuyển ngay';
@@ -2477,13 +3049,9 @@
                     icon.classList.toggle('bi-check-circle-fill', hasApplied);
                 }
 
-                const textContent = hasApplied ? 'Đã ứng tuyển' : 'Ứng tuyển ngay';
-                const textNode = Array.from(button.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
-
-                if (textNode) {
-                    textNode.textContent = textContent;
-                } else {
-                    button.appendChild(document.createTextNode(textContent));
+                // ✅ Cập nhật text bên trong span
+                if (textSpan) {
+                    textSpan.textContent = hasApplied ? 'Đã ứng tuyển' : 'Ứng tuyển ngay';
                 }
             }
 
@@ -2496,6 +3064,13 @@
 
                 const detailBtn = document.querySelector(`.btn-apply-now[data-job-id="${jobId}"]`);
                 if (detailBtn) updateApplyButton(detailBtn, hasApplied);
+
+                // ✅ THÊM PHẦN NÀY: Cập nhật nút trong recommended jobs
+                const recCard = document.querySelector(`#recommendedJobsContainer .recommended-job-card[data-job-id="${jobId}"]`);
+                if (recCard) {
+                    const recBtn = recCard.querySelector('.rec-btn-primary');
+                    if (recBtn) updateApplyButton(recBtn, hasApplied);
+                }
             }
 
             function loadAppliedJobs() {
@@ -2539,8 +3114,10 @@
             }
 
             // ========================================
-            // SAVE BUTTON FUNCTIONS
+            // SAVE BUTTON FUNCTIONS - FIX TOÀN BỘ
             // ========================================
+
+            let savedJobsLoaded = false;
 
             function updateSaveButton(button, isSaved) {
                 if (!button) return;
@@ -2549,22 +3126,114 @@
                 button.classList.toggle('saved', isSaved);
 
                 if (icon) {
-                    icon.classList.toggle('bi-heart', !isSaved);
-                    icon.classList.toggle('bi-heart-fill', isSaved);
+                    icon.classList.remove('bi-heart', 'bi-heart-fill');
+                    if (isSaved) {
+                        icon.classList.add('bi-heart-fill');
+                    } else {
+                        icon.classList.add('bi-heart');
+                    }
+                }
+
+                button.title = isSaved ? 'Bỏ lưu công việc' : 'Lưu công việc';
+            }
+
+            function updateSaveButtonDirect(jobId) {
+                // Grid
+                const gridBtn = document.querySelector(`.job-card-grid[data-job-id="${jobId}"] .save-btn-grid`);
+                if (gridBtn) {
+                    const icon = gridBtn.querySelector('i');
+                    gridBtn.classList.add('saved');
+                    if (icon) {
+                        icon.classList.remove('bi-heart');
+                        icon.classList.add('bi-heart-fill');
+                    }
+                }
+
+                // List
+                const listBtn = document.querySelector(`.job-card[data-job-id="${jobId}"] .save-btn-small`);
+                if (listBtn) {
+                    const icon = listBtn.querySelector('i');
+                    listBtn.classList.add('saved');
+                    if (icon) {
+                        icon.classList.remove('bi-heart');
+                        icon.classList.add('bi-heart-fill');
+                    }
+                }
+
+                // Detail
+                const detailBtn = document.querySelector(`.save-btn-large[data-job-id="${jobId}"]`);
+                if (detailBtn) {
+                    const icon = detailBtn.querySelector('i');
+                    detailBtn.classList.add('saved');
+                    if (icon) {
+                        icon.classList.remove('bi-heart');
+                        icon.classList.add('bi-heart-fill');
+                    }
+                }
+
+                // Recommended
+                const recBtn = document.querySelector(`#recommendedJobsContainer .recommended-job-card[data-job-id="${jobId}"] .rec-btn-icon`);
+                if (recBtn) {
+                    const icon = recBtn.querySelector('i');
+                    recBtn.classList.add('saved');
+                    if (icon) {
+                        icon.classList.remove('bi-heart');
+                        icon.classList.add('bi-heart-fill');
+                    }
                 }
             }
 
             function syncSaveButtons(jobId, isSaved) {
-                ['job-card-grid', 'job-card', 'save-btn-large'].forEach(selector => {
-                    let btn;
-                    if (selector === 'save-btn-large') {
-                        btn = document.querySelector(`.${selector}[data-job-id="${jobId}"]`);
-                    } else {
-                        const card = document.querySelector(`.${selector}[data-job-id="${jobId}"]`);
-                        btn = card?.querySelector(selector === 'job-card-grid' ? '.save-btn-grid' : '.save-btn-small');
+                const gridCard = document.querySelector(`.job-card-grid[data-job-id="${jobId}"]`);
+                if (gridCard) {
+                    const gridBtn = gridCard.querySelector('.save-btn-grid');
+                    if (gridBtn) updateSaveButton(gridBtn, isSaved);
+                }
+
+                const listCard = document.querySelector(`.job-card[data-job-id="${jobId}"]`);
+                if (listCard) {
+                    const listBtn = listCard.querySelector('.save-btn-small');
+                    if (listBtn) updateSaveButton(listBtn, isSaved);
+                }
+
+                const detailBtn = document.querySelector(`.save-btn-large[data-job-id="${jobId}"]`);
+                if (detailBtn) {
+                    updateSaveButton(detailBtn, isSaved);
+                }
+
+                const recCard = document.querySelector(`#recommendedJobsContainer .recommended-job-card[data-job-id="${jobId}"]`);
+                if (recCard) {
+                    const recBtn = recCard.querySelector('.rec-btn-icon');
+                    if (recBtn) {
+                        updateSaveButton(recBtn, isSaved);
                     }
-                    if (btn) updateSaveButton(btn, isSaved);
-                });
+                }
+
+                console.log(`✅ Synced save status for job ${jobId}: ${isSaved ? 'Saved' : 'Unsaved'}`);
+            }
+
+            function loadSavedJobs() {
+                if (!checkAuth() || savedJobsLoaded) return;
+
+                savedJobsLoaded = true;
+
+                fetch('/api/saved-jobs', {
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.savedJobIds?.length) {
+                            console.log(`✅ Loaded ${data.savedJobIds.length} saved jobs`);
+                            data.savedJobIds.forEach(jobId => {
+                                updateSaveButtonDirect(jobId);
+                            });
+                        }
+                    })
+                    .catch(error => console.error('Error loading saved jobs:', error));
             }
 
             function handleSaveJob(jobId, isSaved, button) {
@@ -2590,10 +3259,19 @@
                     .then(response => response.json())
                     .then(data => {
                         if (data.success) {
-                            syncSaveButtons(jobId, !isSaved);
-                            showToast(data.message, isSaved ? 'info' : 'success');
+                            // ✅ DÙNG syncSaveButtons THAY VÌ CẬP NHẬT RIÊNG
+                            const newState = !isSaved;
+                            syncSaveButtons(jobId, newState);
+                            const message = newState ? 'Đã lưu công việc' : 'Đã bỏ lưu công việc';
+                            showToast(message, 'success');
+                            console.log(`✅ Job ${jobId} save status: ${newState}`);
                         } else {
-                            showToast(data.message || 'Có lỗi xảy ra!', 'error');
+                            if (data.code === 'ALREADY_SAVED') {
+                                syncSaveButtons(jobId, true);
+                                showToast('Bạn đã lưu công việc này rồi', 'info');
+                            } else {
+                                showToast(data.message || 'Có lỗi xảy ra!', 'error');
+                            }
                         }
                     })
                     .catch(error => {
@@ -2604,28 +3282,6 @@
                         button.disabled = false;
                     });
             }
-
-            function loadSavedJobs() {
-                if (!checkAuth()) return;
-
-                fetch('/api/saved-jobs', {
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success && data.savedJobIds?.length) {
-                            data.savedJobIds.forEach(jobId => {
-                                syncSaveButtons(jobId, true);
-                            });
-                        }
-                    })
-                    .catch(error => console.error('Error loading saved jobs:', error));
-            }
-
             // ========================================
             // VIEW SWITCHING
             // ========================================
@@ -2742,14 +3398,14 @@
                             <span class="job-detail-salary ${salaryClass}">${salaryHtml}</span>
                         </div>
                     </div>
-                    <div class="job-detail-actions">
-                        <button type="button" class="btn-apply-now" data-job-id="${job.job_id}">
-                            <i class="bi bi-send-fill me-2"></i>Ứng tuyển ngay
-                        </button>
-                        <button class="save-btn-large" title="Lưu công việc" data-job-id="${job.job_id}">
-                            <i class="bi bi-heart" style="font-size: 1.2rem;"></i>
-                        </button>
-                    </div>
+                      <div class="job-detail-actions">
+        <button type="button" class="btn-apply-now" data-job-id="${job.job_id}">
+            <i class="bi bi-send-fill me-2"></i><span>Ứng tuyển ngay</span>
+        </button>
+        <button class="save-btn-large" title="Lưu công việc" data-job-id="${job.job_id}">
+            <i class="bi bi-heart" style="font-size: 1.2rem;"></i>
+        </button>
+    </div>
                 </div>
                 <div class="job-detail-content">
                     <div class="detail-section">
@@ -2960,6 +3616,7 @@
                 attachSaveButtons();
                 loadSavedJobs();
                 loadAppliedJobs();
+                attachRecommendedJobsEvents();
             }
 
             window.attachJobCardEvents = attachJobCardEvents;
@@ -3103,7 +3760,7 @@
                         .then(data => {
                             if (data.success) {
                                 showToast(data.message, 'success');
-                                syncApplyButtons(jobId, true);
+                                syncApplyButtons(jobId, true); // ✅ THÊM DÒNG NÀY
 
                                 const modal = bootstrap.Modal.getInstance(applyJobModal);
                                 if (modal) modal.hide();
@@ -3157,12 +3814,18 @@
                 if (!menu) return;
 
                 const isShown = menu.classList.contains('show');
-                document.querySelectorAll('.filter-dropdown-menu').forEach(m => {
-                    m.classList.remove('show');
+
+                // ✅ DÙNG document.querySelectorAll THAY VÌ xóa tất cả
+                document.querySelectorAll('.filter-dropdown-menu.show').forEach(m => {
+                    if (m !== menu) m.classList.remove('show');
                 });
 
                 if (!isShown) {
                     menu.classList.add('show');
+                    console.log('✅ Dropdown opened');
+                } else {
+                    menu.classList.remove('show');
+                    console.log('❌ Dropdown closed');
                 }
             }
 
@@ -3174,21 +3837,18 @@
                 }
             });
 
+            // Filter buttons array - Cập nhật lại
             [{
-                    btn: categoryBtn,
-                    menu: categoryDropdown
+                    btn: salaryBtn,
+                    menu: salaryDropdown
                 },
                 {
-                    btn: levelBtn,
-                    menu: levelDropdown
+                    btn: positionBtn,
+                    menu: positionDropdown
                 },
                 {
                     btn: experienceBtn,
                     menu: experienceDropdown
-                },
-                {
-                    btn: workingTypeBtn,
-                    menu: workingTypeDropdown
                 }
             ].forEach(({
                 btn,
@@ -3200,6 +3860,25 @@
                         toggleDropdown(menu);
                     });
                 }
+            });
+
+            // ✅ THÊM PHẦN NÀY: Attach checkbox events
+            document.querySelectorAll('.filter-checkbox-item input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    // Handle "all" checkbox
+                    const filterName = this.name;
+                    if (this.value === 'all' && this.checked) {
+                        document.querySelectorAll(`input[name="${filterName}"]:not([value="all"])`).forEach(cb => {
+                            cb.checked = false;
+                        });
+                    } else if (this.value !== 'all' && this.checked) {
+                        const allCheckbox = document.querySelector(`input[name="${filterName}"][value="all"]`);
+                        if (allCheckbox) allCheckbox.checked = false;
+                    }
+
+                    collectFilters();
+                    performSearch();
+                });
             });
 
             // ========================================
@@ -3235,37 +3914,38 @@
                 }
             }
 
+            // Cập nhật collectFilters()
             function collectFilters() {
                 currentFilters = {
                     search: searchInput?.value.trim() || '',
                     location: locationSelect?.value || '',
-                    categories: Array.from(document.querySelectorAll('input[name="category"]:checked'))
+                    salary: Array.from(document.querySelectorAll('input[name="salary"]:checked'))
                         .filter(cb => cb.value !== 'all')
                         .map(cb => cb.value),
-                    levels: Array.from(document.querySelectorAll('input[name="level"]:checked'))
+                    positions: Array.from(document.querySelectorAll('input[name="position"]:checked'))
+                        .filter(cb => cb.value !== 'all')
                         .map(cb => cb.value),
                     experiences: Array.from(document.querySelectorAll('input[name="experience"]:checked'))
-                        .map(cb => cb.value),
-                    working_types: Array.from(document.querySelectorAll('input[name="working_type"]:checked'))
+                        .filter(cb => cb.value !== 'all')
                         .map(cb => cb.value)
                 };
 
-                updateFilterBadge(categoryBtn, currentFilters.categories.length);
-                updateFilterBadge(levelBtn, currentFilters.levels.length);
+                updateFilterBadge(salaryBtn, currentFilters.salary.length);
+                updateFilterBadge(positionBtn, currentFilters.positions.length);
                 updateFilterBadge(experienceBtn, currentFilters.experiences.length);
-                updateFilterBadge(workingTypeBtn, currentFilters.working_types.length);
 
                 return currentFilters;
             }
 
+            // Cập nhật hasActiveFilters()
             function hasActiveFilters(filters) {
                 return !!(filters.search ||
                     filters.location ||
-                    filters.categories.length > 0 ||
-                    filters.levels.length > 0 ||
-                    filters.experiences.length > 0 ||
-                    filters.working_types.length > 0);
+                    filters.salary.length > 0 ||
+                    filters.positions.length > 0 ||
+                    filters.experiences.length > 0);
             }
+
 
             function updateResultCount(total, locationMessage = '') {
                 const titleElement = document.querySelector('.section-title-highlight h2');
@@ -3334,12 +4014,21 @@
 
                 if (filters.search) params.append('search', filters.search);
                 if (filters.location) params.append('location', filters.location);
-                if (filters.categories.length) params.append('categories', filters.categories.join(','));
-                if (filters.levels.length) params.append('levels', filters.levels.join(','));
-                if (filters.experiences.length) params.append('experiences', filters.experiences.join(','));
-                if (filters.working_types.length) params.append('working_types', filters.working_types.join(','));
 
-                console.log('🔍 Searching with filters:', filters);
+                // ✅ FIX: Gửi salary với format đúng
+                if (filters.salary && filters.salary.length > 0) {
+                    params.append('salary_ranges', filters.salary.join(','));
+                    console.log('💰 Salary filters:', filters.salary.join(','));
+                }
+
+                if (filters.positions && filters.positions.length > 0) {
+                    params.append('positions', filters.positions.join(','));
+                }
+                if (filters.experiences && filters.experiences.length > 0) {
+                    params.append('experiences', filters.experiences.join(','));
+                }
+
+                console.log('🔍 Full search params:', params.toString());
 
                 fetch(`/api/jobs/search?${params.toString()}`, {
                         method: 'GET',
@@ -3351,31 +4040,31 @@
                     })
                     .then(response => response.json())
                     .then(data => {
+                        console.log('✅ API Response:', data);
+
                         if (data.success) {
                             if (gridView) gridView.innerHTML = data.html;
                             if (paginationWrapper) paginationWrapper.innerHTML = data.pagination || '';
 
-                            if (data.location_message) {
-                                const formattedMessage = data.location_message.replace(/tại (.+)$/, (match, location) => {
-                                    return `tại ${formatLocationDisplay(location)}`;
-                                });
-                                updateResultCount(data.total, formattedMessage);
-                            } else {
-                                updateResultCount(data.total, '');
-                            }
+                            const locationName = filters.location || '';
+                            const locationMsg = locationName ? `tại ${formatLocationDisplay(locationName)}` : '';
+                            updateResultCount(data.total, locationMsg);
 
                             setTimeout(() => {
                                 if (typeof window.attachJobCardEvents === 'function') {
                                     window.attachJobCardEvents();
-                                    console.log('✅ Events re-attached after search');
                                 }
                             }, 100);
 
+                            console.log(`✅ Found ${data.total} jobs`);
+
                             if (data.total === 0) {
                                 showToast('Không tìm thấy công việc phù hợp', 'info');
+                            } else {
+                                showToast(`Tìm thấy ${data.total} công việc`, 'success');
                             }
                         } else {
-                            showToast(data.message || 'Không tìm thấy kết quả', 'info');
+                            showToast(data.message || 'Tìm kiếm không thành công', 'error');
                         }
                     })
                     .catch(error => {
@@ -3386,7 +4075,6 @@
                         if (loadingOverlay) loadingOverlay.style.display = 'none';
                     });
             }
-
             // Search button
             if (searchBtn) {
                 searchBtn.addEventListener('click', () => performSearch());
@@ -3426,24 +4114,19 @@
                     performSearch();
                 });
             });
-
-            // Reset button
+            // Cập nhật Reset button
             if (resetBtn) {
                 resetBtn.addEventListener('click', function() {
                     if (searchInput) searchInput.value = '';
                     if (locationSelect) locationSelect.value = '';
 
                     document.querySelectorAll('.filter-checkbox-item input[type="checkbox"]').forEach(cb => {
-                        cb.checked = false;
+                        cb.checked = cb.value === 'all';
                     });
 
-                    const allCheckbox = document.querySelector('input[name="category"][value="all"]');
-                    if (allCheckbox) allCheckbox.checked = true;
-
-                    updateFilterBadge(categoryBtn, 0);
-                    updateFilterBadge(levelBtn, 0);
+                    updateFilterBadge(salaryBtn, 0);
+                    updateFilterBadge(positionBtn, 0);
                     updateFilterBadge(experienceBtn, 0);
-                    updateFilterBadge(workingTypeBtn, 0);
 
                     loadAllJobs();
                     showToast('Đã đặt lại bộ lọc', 'info');
@@ -3476,6 +4159,417 @@
                 });
             }
 
+            function attachRecommendedJobsEvents() {
+                attachRecommendedDetailButtons();
+
+                // Apply buttons for recommended jobs
+                document.querySelectorAll('#recommendedJobsContainer .rec-btn-primary').forEach(btn => {
+                    btn.removeEventListener('click', handleRecommendedApply);
+                    btn.addEventListener('click', handleRecommendedApply);
+                });
+
+                // Save buttons for recommended jobs
+                document.querySelectorAll('#recommendedJobsContainer .rec-btn-icon').forEach(btn => {
+                    btn.removeEventListener('click', handleRecommendedSave);
+                    btn.addEventListener('click', handleRecommendedSave);
+                });
+
+                // ✅ THÊM HANDLER CHO NÚT DETAIL (MŨI TEN)
+                document.querySelectorAll('#recommendedJobsContainer .rec-btn-detail').forEach(btn => {
+                    btn.removeEventListener('click', handleRecommendedDetailClick);
+                    btn.addEventListener('click', handleRecommendedDetailClick);
+                });
+
+            }
+
+            function attachRecommendedDetailButtons() {
+                // ✅ THÊM: Click vào card để xem chi tiết
+                document.querySelectorAll('#recommendedJobsContainer .recommended-job-card').forEach(card => {
+                    card.removeEventListener('click', handleRecommendedCardClick);
+                    card.addEventListener('click', handleRecommendedCardClick);
+                });
+            }
+            // ✅ THÊM FUNCTION NÀY: Handle click card
+            function handleRecommendedCardClick(e) {
+                // Bỏ qua nếu click vào nút
+                if (e.target.closest('.rec-btn-primary, .rec-btn-detail, .rec-btn-icon')) {
+                    return;
+                }
+
+                const jobId = this.getAttribute('data-job-id');
+                if (jobId) {
+                    console.log(`✅ Card clicked, opening detail for job ${jobId}`);
+                    showRecommendedDetailView(jobId);
+                }
+            }
+
+            // ✅ THÊM FUNCTION NÀY: Handle click nút mũi tên
+            function handleRecommendedDetailClick(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const card = this.closest('.recommended-job-card');
+                const jobId = card?.getAttribute('data-job-id');
+
+                if (jobId) {
+                    console.log(`✅ Opening recommended detail view for job ${jobId}`);
+                    showRecommendedDetailView(jobId);
+                }
+            }
+
+            function handleRecommendedApply(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (!checkAuth()) {
+                    showToast('Vui lòng đăng nhập để ứng tuyển!', 'error');
+                    setTimeout(() => window.location.href = '/login', 1500);
+                    return;
+                }
+
+                const card = this.closest('.recommended-job-card');
+                const jobId = card?.getAttribute('data-job-id');
+
+                if (!jobId) {
+                    showToast('Không xác định được công việc!', 'error');
+                    return;
+                }
+
+                if (this.classList.contains('applied')) {
+                    showToast('Bạn đã ứng tuyển công việc này rồi!', 'info');
+                    return;
+                }
+
+                window.currentJobId = jobId;
+
+                const modal = document.getElementById('applyJobModal');
+                if (modal) {
+                    const bsModal = new bootstrap.Modal(modal);
+                    bsModal.show();
+                }
+            }
+
+            function handleRecommendedSave(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (!checkAuth()) {
+                    showToast('Vui lòng đăng nhập để lưu công việc!', 'error');
+                    setTimeout(() => window.location.href = '/login', 1500);
+                    return;
+                }
+
+                const card = this.closest('.recommended-job-card');
+                const jobId = card?.getAttribute('data-job-id');
+
+                if (!jobId) {
+                    showToast('Không xác định được công việc!', 'error');
+                    return;
+                }
+
+                const isSaved = this.classList.contains('saved');
+                const button = this;
+                button.disabled = true;
+
+                const url = isSaved ? `/job/unsave/${jobId}` : `/job/save/${jobId}`;
+                const method = isSaved ? 'DELETE' : 'POST';
+
+                fetch(url, {
+                        method: method,
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // ✅ DÙNG syncSaveButtons THAY VÌ CẬP NHẬT RIÊNG
+                            const newState = !isSaved;
+                            syncSaveButtons(jobId, newState);
+                            const message = newState ? 'Đã lưu công việc' : 'Đã bỏ lưu công việc';
+                            showToast(message, 'success');
+                            console.log(`✅ Job ${jobId} save status: ${newState}`);
+                        } else {
+                            if (data.code === 'ALREADY_SAVED') {
+                                syncSaveButtons(jobId, true);
+                                showToast('Bạn đã lưu công việc này rồi', 'info');
+                            } else {
+                                showToast(data.message || 'Có lỗi xảy ra!', 'error');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('Có lỗi xảy ra khi lưu công việc!', 'error');
+                    })
+                    .finally(() => {
+                        button.disabled = false;
+                    });
+            }
+            // ========================================
+            // RECOMMENDED JOBS DETAIL VIEW
+            // ========================================
+
+            function showRecommendedGridView() {
+                const gridView = document.getElementById('recommendedJobsGrid');
+                const detailView = document.getElementById('recommendedDetailView');
+                const viewAll = document.querySelector('.btn-view-all');
+
+                if (gridView) gridView.style.display = 'grid';
+                if (detailView) detailView.style.display = 'none';
+                if (viewAll) viewAll.style.display = 'block';
+            }
+
+            function showRecommendedDetailView(jobId) {
+                const gridView = document.getElementById('recommendedJobsGrid');
+                const detailView = document.getElementById('recommendedDetailView');
+                const viewAll = document.querySelector('.btn-view-all');
+
+                if (gridView) gridView.style.display = 'none';
+                if (detailView) detailView.style.display = 'grid';
+                if (viewAll) viewAll.style.display = 'none';
+
+                // Set active item
+                document.querySelectorAll('.rec-job-list-item').forEach(item => {
+                    item.classList.toggle('active', item.getAttribute('data-job-id') == jobId);
+                });
+
+                loadRecommendedJobDetail(jobId);
+
+                // ✅ FIX: Scroll tới section recommended jobs CHÍNH XÁC
+                setTimeout(() => {
+                    const recommendedContainer = document.getElementById('recommendedJobsContainer');
+                    if (recommendedContainer) {
+                        // Lấy vị trí của container
+                        const containerRect = recommendedContainer.getBoundingClientRect();
+                        const containerTop = window.pageYOffset + containerRect.top;
+
+                        // Scroll tới container với offset 60px (phía trên header)
+                        window.scrollTo({
+                            top: containerTop - 60,
+                            behavior: 'smooth'
+                        });
+
+                        console.log(`✅ Scrolled to recommended container at ${containerTop - 60}px`);
+                    }
+                }, 100);
+            }
+
+            function loadRecommendedJobDetail(jobId) {
+                const detailColumn = document.getElementById('recDetailColumn');
+                if (!detailColumn) return;
+
+                detailColumn.innerHTML = `
+                    <div class="rec-job-detail-empty">
+                        <i class="bi bi-hourglass-split"></i>
+                        <p>Đang tải thông tin...</p>
+                    </div>
+                `;
+
+                fetch(`/api/jobs/${jobId}`)
+                    .then(response => response.json())
+                    .then(job => renderRecommendedJobDetail(job))
+                    .catch(error => {
+                        console.error('Error:', error);
+                        detailColumn.innerHTML = `
+                            <div class="rec-job-detail-empty">
+                                <i class="bi bi-exclamation-circle"></i>
+                                <p>Không thể tải thông tin</p>
+                            </div>
+                        `;
+                    });
+            }
+
+            function renderRecommendedJobDetail(job) {
+                const formatMoney = (num) => new Intl.NumberFormat('vi-VN').format(num);
+                const detailColumn = document.getElementById('recDetailColumn');
+
+                let salaryHtml = '';
+                if (job.salary_min && job.salary_max) {
+                    salaryHtml = `${formatMoney(job.salary_min)} - ${formatMoney(job.salary_max)} ${job.salary_type.toUpperCase()}`;
+                } else {
+                    salaryHtml = 'Thỏa thuận';
+                }
+
+                const logoHtml = job.company?.logo ?
+                    `<img src="/assets/img/${job.company.logo}" alt="Company Logo">` :
+                    `<div style="width: 100%; height: 100%; background: linear-gradient(135deg, #667EEA, #764BA2); display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; font-weight: bold;">${job.company?.tencty?.charAt(0) || 'C'}</div>`;
+
+                detailColumn.innerHTML = `
+                    <div class="job-detail-header">
+                        <div class="job-detail-company">
+                            <div class="company-logo-large">${logoHtml}</div>
+                            <div class="job-detail-title-section">
+                                <h2 class="job-detail-title">
+                                <a href="/job-detail/${job.job_id}" class="text-decoration-none text-dark hover-link-primary">
+                                    ${job.title}
+                                </a>
+                            </h2>
+                              <a  class="job-detail-company-name" style="text-decoration: none; color: inherit;">
+    ${job.company?.tencty || 'Công ty'}
+</a>
+                                <span class="job-detail-salary">${salaryHtml}</span>
+                            </div>
+                        </div>
+                        <div class="job-detail-actions">
+                            <button type="button" class="btn-apply-now" data-job-id="${job.job_id}">
+                                <i class="bi bi-send-fill me-2"></i><span>Ứng tuyển ngay</span>
+                            </button>
+                            <button class="save-btn-large" data-job-id="${job.job_id}" title="Lưu công việc">
+                                <i class="bi bi-heart" style="font-size: 1.2rem;"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="job-detail-content">
+                        <div class="detail-section">
+                            <h3 class="detail-section-title"><i class="bi bi-info-circle-fill"></i> Thông tin chung</h3>
+                            <div class="info-grid">
+                                <div class="info-item">
+                                    <div class="info-label"><i class="bi bi-briefcase"></i> Cấp bậc</div>
+                                    <div class="info-value">${job.level || 'N/A'}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label"><i class="bi bi-geo-alt"></i> Địa điểm</div>
+                                    <div class="info-value">${job.province || 'N/A'}</div>
+                                </div>
+                                <div class="info-item">
+                                    <div class="info-label"><i class="bi bi-calendar"></i> Hạn nộp</div>
+                                    <div class="info-value">${new Date(job.deadline).toLocaleDateString('vi-VN')}</div>
+                                </div>
+                            </div>
+                        </div>
+                        ${job.description ? `
+                        <div class="detail-section">
+                            <h3 class="detail-section-title"><i class="bi bi-file-text-fill"></i> Mô tả công việc</h3>
+                            <div class="job-description">${job.description.replace(/\n/g, '<br>')}</div>
+                        </div>
+                        ` : ''}
+                        ${job.requirements ? `
+                        <div class="detail-section">
+                            <h3 class="detail-section-title"><i class="bi bi-list-check"></i> Yêu cầu ứng viên</h3>
+                            <div class="job-description">${job.requirements.replace(/\n/g, '<br>')}</div>
+                        </div>
+                        ` : ''}
+                        ${job.benefits ? `
+                        <div class="detail-section">
+                            <h3 class="detail-section-title"><i class="bi bi-gift-fill"></i> Quyền lợi</h3>
+                            <div class="job-description">${job.benefits.replace(/\n/g, '<br>')}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+
+                // ✅ ATTACH BUTTONS BẰNG JAVASCRIPT, KHÔNG DÙNG ONCLICK
+                setTimeout(() => {
+                    const applyBtn = detailColumn.querySelector('.btn-apply-now');
+                    const saveBtn = detailColumn.querySelector('.save-btn-large');
+
+                    if (applyBtn) {
+                        applyBtn.addEventListener('click', function() {
+                            if (!checkAuth()) {
+                                showToast('Vui lòng đăng nhập để ứng tuyển!', 'error');
+                                setTimeout(() => window.location.href = '/login', 1500);
+                                return;
+                            }
+
+                            if (this.classList.contains('applied')) {
+                                showToast('Bạn đã ứng tuyển công việc này rồi!', 'info');
+                                return;
+                            }
+
+                            window.currentJobId = job.job_id;
+                            const modal = document.getElementById('applyJobModal');
+                            if (modal) {
+                                const bsModal = new bootstrap.Modal(modal);
+                                bsModal.show();
+                            }
+                        });
+                    }
+
+                    if (saveBtn) {
+                        saveBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            const isSaved = this.classList.contains('saved');
+                            handleSaveJob(job.job_id, isSaved, this);
+                        });
+                    }
+                }, 0);
+            }
+
+            // Back button handler
+            const backRecBtn = document.getElementById('backToRecGrid');
+            if (backRecBtn) {
+                backRecBtn.addEventListener('click', showRecommendedGridView);
+            }
+
+            function handleRecListItemClick(e) {
+                if (e.target.closest('.rec-list-apply, .rec-list-save')) {
+                    return;
+                }
+
+                const jobId = this.getAttribute('data-job-id');
+                if (jobId) {
+                    showRecommendedDetailView(jobId);
+                }
+            }
+
+            function handleRecListApply(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const item = this.closest('.rec-job-list-item');
+                const jobId = item?.getAttribute('data-job-id');
+
+                if (jobId) {
+                    window.currentJobId = jobId;
+                    const modal = document.getElementById('applyJobModal');
+                    if (modal) {
+                        const bsModal = new bootstrap.Modal(modal);
+                        bsModal.show();
+                    }
+                }
+            }
+
+            function handleRecListSave(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const item = this.closest('.rec-job-list-item');
+                const jobId = item?.getAttribute('data-job-id');
+                const isSaved = this.classList.contains('saved');
+
+                if (jobId) {
+                    handleSaveJob(jobId, isSaved, this);
+                }
+            }
+
+            // Call attach function when document ready
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(() => {
+                    attachRecommendedDetailButtons();
+                }, 300);
+            });
+
+            // Re-attach khi load thêm recommended jobs (nếu có)
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'childList') {
+                        setTimeout(() => {
+                            attachRecommendedDetailButtons();
+                        }, 200);
+                    }
+                });
+            });
+
+            const recommendedGrid = document.getElementById('recommendedJobsGrid');
+            if (recommendedGrid) {
+                observer.observe(recommendedGrid, {
+                    childList: true
+                });
+            }
+            window.attachRecommendedJobsEvents = attachRecommendedJobsEvents;
             // ========================================
             // INITIALIZE
             // ========================================

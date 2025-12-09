@@ -461,7 +461,7 @@
     background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
     padding: 60px 0;
     margin-bottom: 60px;
-    margin-top: 70px;
+    margin-top: 0 !important;
     border-radius: 12px;
 }
 

@@ -30,7 +30,7 @@ class JobRecommendationController extends Controller
             return redirect()->route('home')->with('error', 'Vui lòng hoàn thiện hồ sơ');
         }
 
-        // ✅ KIỂM TRA: Nếu chưa có recommendations, tạo mới
+        // ✅ Kiểm tra: Nếu chưa có recommendations, tạo mới
         $existingCount = JobRecommendation::where('applicant_id', $applicant->id_uv)->count();
 
         if ($existingCount === 0) {
@@ -94,13 +94,11 @@ class JobRecommendationController extends Controller
             Log::info('✅ Deleted old recommendations', ['count' => $oldCount]);
 
             // ========== BƯỚC 2: CLEAR CACHE ==========
-            // Xóa cache recommendations của user này
             $cacheKey = "recommendations_applicant_{$applicant->id_uv}";
             Cache::forget($cacheKey);
             Log::info('✅ Cache cleared', ['key' => $cacheKey]);
 
             // ========== BƯỚC 3: TẠO RECOMMENDATIONS MỚI ==========
-            // ✅ DÙNG DEPENDENCY INJECTION từ __construct
             $newCount = $this->recommendationService
                 ->generateRecommendationsForApplicant($applicant, 50);
 
@@ -110,11 +108,11 @@ class JobRecommendationController extends Controller
             ]);
 
             // ========== BƯỚC 4: LẤY DỮ LIỆU MỚI ==========
-            $recommendations = $this->recommendationService
+            $recommendedJobs = $this->recommendationService
                 ->getRecommendationsForApplicant($applicant, 20);
 
             // Parse JSON
-            $recommendations->transform(function ($rec) {
+            $recommendedJobs->transform(function ($rec) {
                 if (is_string($rec->match_details)) {
                     $rec->match_details_parsed = json_decode($rec->match_details, true);
                 } else {
@@ -125,22 +123,23 @@ class JobRecommendationController extends Controller
 
             // ========== BƯỚC 5: TÍNH THỐNG KÊ ==========
             $stats = [
-                'total' => $recommendations->count(),
-                'high_match' => $recommendations->where('score', '>=', 80)->count(),
-                'medium_match' => $recommendations->where('score', '>=', 60)->where('score', '<', 80)->count(),
-                'low_match' => $recommendations->where('score', '<', 60)->count(),
-                'not_viewed' => $recommendations->where('is_viewed', false)->count(),
+                'total' => $recommendedJobs->count(),
+                'high_match' => $recommendedJobs->where('score', '>=', 80)->count(),
+                'medium_match' => $recommendedJobs->where('score', '>=', 60)->where('score', '<', 80)->count(),
+                'low_match' => $recommendedJobs->where('score', '<', 60)->count(),
+                'not_viewed' => $recommendedJobs->where('is_viewed', false)->count(),
             ];
 
             // ========== BƯỚC 6: RENDER HTML MỚI ==========
+            // ✅ FIX: Dùng đúng tên biến $recommendedJobs thay vì $recommendations
             $html = view('applicant.partials.recommendations-list', [
-                'recommendations' => $recommendations,
+                'recommendedJobs' => $recommendedJobs,  // ← ĐÃ SỬA
                 'stats' => $stats
             ])->render();
 
             Log::info('✅ Refresh completed successfully', [
                 'new_count' => $newCount,
-                'displayed_count' => $recommendations->count(),
+                'displayed_count' => $recommendedJobs->count(),
                 'stats' => $stats
             ]);
 
@@ -148,8 +147,8 @@ class JobRecommendationController extends Controller
                 'success' => true,
                 'message' => "✅ Đã cập nhật {$newCount} công việc phù hợp",
                 'count' => $newCount,
-                'displayed_count' => $recommendations->count(),
-                'recommendations' => $recommendations,
+                'displayed_count' => $recommendedJobs->count(),
+                'recommendations' => $recommendedJobs,
                 'stats' => $stats,
                 'html' => $html // ✅ THÊM HTML để frontend render
             ]);
@@ -167,6 +166,7 @@ class JobRecommendationController extends Controller
             ], 500);
         }
     }
+
 
     /**
      * Đánh dấu đã xem recommendation
@@ -226,16 +226,15 @@ class JobRecommendationController extends Controller
             // ========== XÓA CŨ, TẠO MỚI ==========
             JobRecommendation::where('applicant_id', $applicant->id_uv)->delete();
 
-            // ✅ DÙNG DEPENDENCY INJECTION
             $count = $this->recommendationService
                 ->generateRecommendationsForApplicant($applicant, 50);
 
             // ========== LẤY DỮ LIỆU MỚI ==========
-            $recommendations = $this->recommendationService
+            $recommendedJobs = $this->recommendationService
                 ->getRecommendationsForApplicant($applicant, 20);
 
             // Parse JSON
-            $recommendations->transform(function ($rec) {
+            $recommendedJobs->transform(function ($rec) {
                 if (is_string($rec->match_details)) {
                     $rec->match_details_parsed = json_decode($rec->match_details, true);
                 } else {
@@ -246,16 +245,16 @@ class JobRecommendationController extends Controller
 
             // ========== TÍNH STATS ==========
             $stats = [
-                'total' => $recommendations->count(),
-                'high_match' => $recommendations->where('score', '>=', 80)->count(),
-                'not_viewed' => $recommendations->where('is_viewed', false)->count(),
+                'total' => $recommendedJobs->count(),
+                'high_match' => $recommendedJobs->where('score', '>=', 80)->count(),
+                'not_viewed' => $recommendedJobs->where('is_viewed', false)->count(),
             ];
 
             return response()->json([
                 'success' => true,
                 'message' => "✅ Đã cập nhật lại {$count} công việc phù hợp",
                 'count' => $count,
-                'recommendations' => $recommendations,
+                'recommendations' => $recommendedJobs,
                 'stats' => $stats
             ]);
         } catch (\Exception $e) {
@@ -271,7 +270,7 @@ class JobRecommendationController extends Controller
     }
 
     /**
-     * Lấy recommendations dạng HTML cho home page
+     * ✅ Lấy recommendations dạng HTML cho home page
      */
     public function getRecommendedJobsForHome()
     {
@@ -285,7 +284,7 @@ class JobRecommendationController extends Controller
 
             $applicant = Auth::user()->applicant;
 
-            // ✅ DÙNG DEPENDENCY INJECTION
+            // Lấy 6 gợi ý top
             $recommendedJobs = $this->recommendationService
                 ->getRecommendationsForApplicant($applicant, 6);
 
@@ -310,6 +309,10 @@ class JobRecommendationController extends Controller
                 'count' => $recommendedJobs->count()
             ]);
         } catch (\Exception $e) {
+            Log::error('❌ Error getting recommendations for home', [
+                'error' => $e->getMessage()
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Lỗi: ' . $e->getMessage()

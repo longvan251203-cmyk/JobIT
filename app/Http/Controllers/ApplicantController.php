@@ -869,7 +869,6 @@ class ApplicantController extends Controller
         return view('applicant.my-jobs', compact('applications', 'savedJobs', 'applicant'));
     }
 
-    // Lưu công việc
     public function saveJob($jobId)
     {
         try {
@@ -878,32 +877,52 @@ class ApplicantController extends Controller
             if (!$applicant) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Vui lòng cập nhật thông tin cá nhân trước!'
-                ], 403);
+                    'message' => 'Không xác định được ứng viên'
+                ], 401);
             }
 
-            // Kiểm tra đã lưu chưa
+            // ✅ KIỂM TRA CHÍNH XÁC: Dùng id_uv
             $exists = SavedJob::where('applicant_id', $applicant->id_uv)
-                ->where('job_id', $jobId)
+                ->where('job_id', (int)$jobId)
                 ->exists();
 
             if ($exists) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Bạn đã lưu công việc này rồi!'
+                    'message' => 'Bạn đã lưu công việc này rồi',
+                    'code' => 'ALREADY_SAVED'
                 ], 422);
             }
 
             SavedJob::create([
+                'applicant_id' => $applicant->id_uv,
+                'job_id' => (int)$jobId
+            ]);
+
+            Log::info('Job saved', [
                 'applicant_id' => $applicant->id_uv,
                 'job_id' => $jobId
             ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Đã lưu công việc!'
+                'message' => 'Đã lưu công việc thành công'
             ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() === '23000') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bạn đã lưu công việc này rồi',
+                    'code' => 'ALREADY_SAVED'
+                ], 422);
+            }
+            Log::error('Save job error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi lưu công việc'
+            ], 500);
         } catch (\Exception $e) {
+            Log::error('Save job error: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
@@ -911,28 +930,36 @@ class ApplicantController extends Controller
         }
     }
 
-    // Bỏ lưu công việc
     public function unsaveJob($jobId)
     {
         try {
             $applicant = Auth::user()->applicant;
 
+            if (!$applicant) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không xác định được ứng viên'
+                ], 401);
+            }
+
             $deleted = SavedJob::where('applicant_id', $applicant->id_uv)
                 ->where('job_id', $jobId)
                 ->delete();
 
-            if ($deleted) {
+            if (!$deleted) {
                 return response()->json([
-                    'success' => true,
-                    'message' => 'Đã bỏ lưu công việc!'
-                ]);
+                    'success' => false,
+                    'message' => 'Công việc này không được lưu'
+                ], 404);
             }
 
             return response()->json([
-                'success' => false,
-                'message' => 'Không tìm thấy công việc đã lưu!'
-            ], 404);
+                'success' => true,
+                'message' => 'Đã bỏ lưu công việc'
+            ]);
         } catch (\Exception $e) {
+            Log::error('Unsave job error: ' . $e->getMessage());
+
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra: ' . $e->getMessage()

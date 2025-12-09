@@ -8,6 +8,9 @@ use App\Models\JobPost;
 use App\Models\HocVan;
 use App\Models\KinhNghiem;
 use App\Models\JobRecommendation;
+use App\Models\Applicant;
+use App\Models\Application;
+use App\Models\Company;
 use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
@@ -16,7 +19,6 @@ class HomeController extends Controller
     {
         $jobs = JobPost::with(['company', 'hashtags', 'detail'])->get();
 
-        // Trả về home.blade.php cho route gốc '/'
         return view('home', [
             'jobs' => $jobs,
             'showLogin' => $request->get('showLogin', false),
@@ -26,24 +28,35 @@ class HomeController extends Controller
     // Phương thức Dashboard của Applicant
     public function applicantDashboard(Request $request)
     {
-        // ✅ Sử dụng scope ->active()
+        // ✅ Lấy jobs với pagination
         $jobs = JobPost::with(['company', 'hashtags', 'detail'])
-            ->active() // 🎯 THAY 2 DÒNG WHERE BẰNG 1 SCOPE
+            ->active()
             ->orderBy('created_at', 'desc')
             ->paginate(12);
 
+        // ✅ CẬP NHẬT: Lấy dữ liệu thực từ database
         $stats = [
-            'total_jobs' => JobPost::active()->count(), // 🎯 DÙNG SCOPE
-            'total_companies' => JobPost::active()      // 🎯 DÙNG SCOPE
+            // Tổng công việc đang hoạt động
+            'total_jobs' => JobPost::active()->count(),
+
+            // Tổng công ty có công việc
+            'total_companies' => JobPost::active()
                 ->distinct('companies_id')
                 ->count('companies_id'),
-            'total_applicants' => 15000,
-            'satisfaction_rate' => 98,
+
+            // ✅ THÊM: Tổng ứng viên đã hoàn thành hồ sơ
+            'total_applicants' => Applicant::whereNotNull('hoten_uv')
+                ->whereNotNull('sdt_uv')
+                ->count(),
+
+            // ✅ THÊM: Tổng hồ sơ ứng tuyển
+            'total_applications' => Application::count(),
         ];
 
+        // ✅ Top Companies
         $topCompanies = JobPost::with('company')
             ->select('companies_id', DB::raw('COUNT(*) as job_count'))
-            ->active() // 🎯 DÙNG SCOPE
+            ->active()
             ->groupBy('companies_id')
             ->orderBy('job_count', 'desc')
             ->limit(12)
@@ -55,25 +68,24 @@ class HomeController extends Controller
                 ];
             });
 
-        // ✅ THÊM PHẦN NÀY - Recommended Jobs
-        $recommendedJobs = collect();
+        // ✅ Recommended Jobs
+        $recommendedJobs = null;
 
         if (Auth::check() && Auth::user()->applicant) {
-            $applicantId = Auth::user()->applicant->id_uv; // hoặc id tùy theo cấu trúc model của bạn
+            $applicantId = Auth::user()->applicant->id_uv;
 
             $recommendedJobs = JobRecommendation::where('applicant_id', $applicantId)
                 ->where('score', '>=', 60)
                 ->orderBy('score', 'desc')
                 ->with('job.company', 'job.hashtags')
-                ->take(6)
-                ->get();
+                ->paginate(6);
         }
 
         return view('applicant.homeapp', [
             'jobs' => $jobs,
             'stats' => $stats,
             'topCompanies' => $topCompanies,
-            'recommendedJobs' => $recommendedJobs, // ✅ Thêm dòng này
+            'recommendedJobs' => $recommendedJobs,
         ]);
     }
 }

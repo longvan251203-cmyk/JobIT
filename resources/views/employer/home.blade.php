@@ -1788,7 +1788,7 @@
 
             // Populate form with job data
             function populateEditForm(job) {
-                console.log('📝 Populating form with:', job); // Debug log
+                console.log('📝 Populating form with:', job);
 
                 // Basic info
                 document.getElementById('edit_job_id').value = job.job_id;
@@ -1816,31 +1816,36 @@
                 document.getElementById('edit_deadline').value = job.deadline || '';
                 document.getElementById('edit_address_detail').value = job.address_detail || '';
 
-                // ⭐ QUAN TRỌNG: Khởi tạo location selects TRƯỚC KHI set value
-                const provinceName = job.province || '';
-                const districtName = job.district || '';
+                // ⭐ FIX LOCATION: Lấy dữ liệu location từ database
+                const provinceName = job.province || ''; // ✅ Đây là TÊN tỉnh từ DB
+                const districtName = job.district || ''; // ✅ Đây là TÊN huyện từ DB
 
-                console.log('🌍 Initializing locations with:', {
+                console.log('🌍 Location data from database:', {
                     provinceName,
                     districtName
                 });
 
-                // ⭐ FIX: Gọi hàm init location và đợi hoàn thành
-                if (typeof window.initEditModalLocations === 'function') {
-                    window.initEditModalLocations(provinceName, districtName)
-                        .then(success => {
-                            if (success) {
-                                console.log('✅ Location selects initialized in populateEditForm');
-                            } else {
-                                console.error('❌ Failed to initialize location selects');
-                            }
-                        })
-                        .catch(error => {
-                            console.error('❌ Error initializing locations:', error);
-                        });
-                } else {
-                    console.error('❌ window.initEditModalLocations is not defined!');
+                // ⭐ QUAN TRỌNG: Reset editLocationManager trước khi khởi tạo
+                if (typeof window.editLocationManager !== 'undefined') {
+                    console.log('🔄 Resetting editLocationManager...');
+                    window.editLocationManager.reset();
                 }
+
+                // ⭐ Khởi tạo location manager và đợi hoàn thành
+                setTimeout(async () => {
+                    console.log('🚀 Initializing location manager after modal opens...');
+
+                    if (typeof window.initEditModalLocations !== 'undefined') {
+                        try {
+                            await window.initEditModalLocations(provinceName, districtName);
+                            console.log('✅ Locations initialized in edit modal');
+                        } catch (error) {
+                            console.error('❌ Error initializing locations:', error);
+                        }
+                    } else {
+                        console.error('❌ initEditModalLocations not available');
+                    }
+                }, 500);
 
                 // Detail fields (from job.detail)
                 if (job.detail) {
@@ -2089,6 +2094,19 @@
                         alert('❌ Không thể kết nối đến server: ' + error.message);
                         resetUpdateButton();
                     });
+                // Trong function submitEditForm(), trước fetch
+
+                console.log('📤 Form data being submitted:');
+                console.log('Province value:', document.getElementById('edit_province').value);
+                console.log('District value:', document.getElementById('edit_district').value);
+
+                // ✅ Đảm bảo là tên, không phải code
+                const province = document.getElementById('edit_province').value;
+                const district = document.getElementById('edit_district').value;
+
+                if (!/^[A-Z]/.test(province)) {
+                    console.warn('⚠️ Province value looks like code, not name!');
+                }
             }
 
             function resetUpdateButton() {
@@ -3162,6 +3180,19 @@
                 console.log('✅ Found province and district select elements');
                 return true;
             }
+            // Thêm method này vào EditLocationManager class (khoảng dòng 5500)
+            reset() {
+                if (this.provinceSelect) {
+                    this.provinceSelect.innerHTML = '<option value="">-- Chọn tỉnh/thành phố --</option>';
+                    this.provinceSelect.disabled = false;
+                }
+                if (this.districtSelect) {
+                    this.districtSelect.innerHTML = '<option value="">-- Chọn quận/huyện --</option>';
+                    this.districtSelect.disabled = false;
+                }
+                this.isInitialized = false;
+                console.log('🔄 EditLocationManager reset');
+            }
 
             // Khởi tạo với dữ liệu hiện tại
             async initialize(currentProvince = '', currentDistrict = '') {
@@ -3195,86 +3226,110 @@
             }
 
             // Load danh sách provinces
-            async loadProvinces(selectedProvince = '') {
+
+            // Thay thế EditLocationManager.loadProvinces, khoảng dòng 3170
+
+            // Trong class EditLocationManager, thay thế method loadProvinces (khoảng dòng 3260):
+            async loadProvinces(currentProvince = '') {
                 console.log('📋 Loading provinces...');
 
-                // Hiển thị loading
                 this.provinceSelect.innerHTML = '<option value="">⏳ Đang tải...</option>';
                 this.provinceSelect.disabled = true;
 
-                // Fetch data
                 const provinces = await editLocationAPI.getProvinces();
-
-                // Sort theo tên
                 provinces.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
 
-                // Clear và populate
-                this.provinceSelect.innerHTML = '<option value="">-- Chọn tỉnh/thành phố --</option>';
+                // ✅ FIX: Xóa innerHTML cũ và thêm option mới một cách sạch
+                const fragment = document.createDocumentFragment();
 
-                provinces.forEach(province => {
+                // Thêm option default
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = '-- Chọn tỉnh/thành phố --';
+                fragment.appendChild(defaultOption);
+
+                let selectedIndex = 0;
+
+                provinces.forEach((province, index) => {
                     const option = document.createElement('option');
-                    option.value = province.name;
+                    option.value = province.name; // ✅ Value là TÊN
                     option.textContent = province.name;
                     option.dataset.code = province.code;
 
-                    // Auto-select nếu match
-                    if (this.matchProvinceName(province.name, selectedProvince)) {
+                    if (this.matchProvinceName(province.name, currentProvince)) {
                         option.selected = true;
+                        selectedIndex = index + 1; // +1 vì có default option
                         console.log('✅ Auto-selected province:', province.name);
                     }
 
-                    this.provinceSelect.appendChild(option);
+                    fragment.appendChild(option);
                 });
 
-                // Enable select
+                // ✅ Thay thế innerHTML một lần với fragment
+                this.provinceSelect.innerHTML = '';
+                this.provinceSelect.appendChild(fragment);
                 this.provinceSelect.disabled = false;
+                this.provinceSelect.selectedIndex = selectedIndex;
+
                 console.log('✅ Provinces loaded:', provinces.length);
             }
 
-            // Load danh sách districts
-            async loadDistricts(provinceCode, selectedDistrict = '') {
+            // Trong class EditLocationManager, thay thế method loadDistricts (khoảng dòng 3290):
+            async loadDistricts(provinceCode, selectedDistrictName = '') {
                 console.log('📋 Loading districts for province code:', provinceCode);
 
-                // Hiển thị loading
                 this.districtSelect.innerHTML = '<option value="">⏳ Đang tải...</option>';
                 this.districtSelect.disabled = true;
 
-                // Fetch data
                 const districts = await editLocationAPI.getDistricts(provinceCode);
-
-                // Sort theo tên
                 districts.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
 
-                // Clear và populate
-                this.districtSelect.innerHTML = '<option value="">-- Chọn quận/huyện --</option>';
+                // ✅ FIX: Dùng DocumentFragment
+                const fragment = document.createDocumentFragment();
 
-                districts.forEach(district => {
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = '-- Chọn quận/huyện --';
+                fragment.appendChild(defaultOption);
+
+                let selectedIndex = 0;
+
+                districts.forEach((district, index) => {
                     const option = document.createElement('option');
-                    option.value = district.name;
+                    option.value = district.name; // ✅ Value là TÊN
                     option.textContent = district.name;
 
-                    // Auto-select nếu match
-                    if (this.matchDistrictName(district.name, selectedDistrict)) {
+                    if (this.matchDistrictName(district.name, selectedDistrictName)) {
                         option.selected = true;
+                        selectedIndex = index + 1;
                         console.log('✅ Auto-selected district:', district.name);
                     }
 
-                    this.districtSelect.appendChild(option);
+                    fragment.appendChild(option);
                 });
 
-                // Enable select
+                // ✅ Thay thế innerHTML một lần với fragment
+                this.districtSelect.innerHTML = '';
+                this.districtSelect.appendChild(fragment);
                 this.districtSelect.disabled = false;
+                this.districtSelect.selectedIndex = selectedIndex;
+
                 console.log('✅ Districts loaded:', districts.length);
+            }
+
+            // ✅ FIX: Cập nhật để lấy code từ TÊN
+            getProvinceCode(provinceName) {
+                const option = Array.from(this.provinceSelect.options).find(opt =>
+                    this.matchProvinceName(opt.textContent, provinceName)
+                );
+                return option?.dataset?.code || null;
             }
 
             // Setup event listeners
             setupEventListeners() {
-                // Remove old listener bằng cách clone node
-                const newProvinceSelect = this.provinceSelect.cloneNode(true);
-                this.provinceSelect.parentNode.replaceChild(newProvinceSelect, this.provinceSelect);
-                this.provinceSelect = newProvinceSelect;
 
-                // Add new listener
+
+
                 this.provinceSelect.addEventListener('change', async (e) => {
                     const selectedOption = e.target.options[e.target.selectedIndex];
                     const provinceCode = selectedOption?.dataset?.code;
@@ -3294,13 +3349,7 @@
                 console.log('✅ Event listeners setup complete');
             }
 
-            // Helper: Lấy province code từ tên
-            getProvinceCode(provinceName) {
-                const option = Array.from(this.provinceSelect.options).find(opt =>
-                    this.matchProvinceName(opt.value, provinceName)
-                );
-                return option?.dataset?.code || null;
-            }
+
 
             // Helper: So sánh tên province (case-insensitive, ignore accents)
             matchProvinceName(name1, name2) {
@@ -3346,11 +3395,14 @@
         // ============================================
         // COMPANY INFO LOCATION MANAGER
         // ============================================
+        // Thay thế CompanyLocationManager class (khoảng dòng 3330)
+
         class CompanyLocationManager {
             constructor() {
                 this.provinceSelect = null;
                 this.districtSelect = null;
                 this.isInitialized = false;
+                this.provinceCodeToName = {}; // ✅ Map code -> name
             }
 
             getElements() {
@@ -3381,7 +3433,7 @@
 
                 // Load districts nếu có province
                 if (currentProvince) {
-                    const provinceCode = this.getProvinceCode(currentProvince);
+                    const provinceCode = this.getProvinceCodeByName(currentProvince);
                     if (provinceCode) {
                         await this.loadDistricts(provinceCode, currentDistrict);
                     }
@@ -3394,8 +3446,7 @@
                 console.log('✅ CompanyLocationManager initialized successfully');
                 return true;
             }
-
-            async loadProvinces(selectedProvince = '') {
+            async loadProvinces(selectedProvinceName = '') {
                 console.log('📋 Loading company provinces...');
 
                 this.provinceSelect.innerHTML = '<option value="">⏳ Đang tải...</option>';
@@ -3404,27 +3455,49 @@
                 const provinces = await editLocationAPI.getProvinces();
                 provinces.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
 
-                this.provinceSelect.innerHTML = '<option value="">-- Chọn tỉnh/thành phố --</option>';
+                // ✅ Build map từ code -> name
+                this.provinceCodeToName = {};
+                provinces.forEach(p => {
+                    this.provinceCodeToName[p.code] = p.name;
+                });
 
-                provinces.forEach(province => {
+                // ✅ FIX: Dùng DocumentFragment
+                const fragment = document.createDocumentFragment();
+
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = '-- Chọn tỉnh/thành phố --';
+                fragment.appendChild(defaultOption);
+
+                let selectedIndex = 0;
+
+                provinces.forEach((province, index) => {
                     const option = document.createElement('option');
-                    option.value = province.name;
+                    option.value = province.name; // ✅ Value là TÊN
                     option.textContent = province.name;
                     option.dataset.code = province.code;
 
-                    if (this.matchName(province.name, selectedProvince)) {
+                    if (this.matchName(province.name, selectedProvinceName)) {
                         option.selected = true;
-                        console.log('✅ Auto-selected company province:', province.name);
+                        selectedIndex = index + 1;
+                        console.log('✅ Auto-selected province:', province.name);
                     }
 
-                    this.provinceSelect.appendChild(option);
+                    fragment.appendChild(option);
                 });
 
+                // ✅ Thay thế innerHTML một lần với fragment
+                this.provinceSelect.innerHTML = '';
+                this.provinceSelect.appendChild(fragment);
                 this.provinceSelect.disabled = false;
+                this.provinceSelect.selectedIndex = selectedIndex;
+
                 console.log('✅ Company provinces loaded:', provinces.length);
             }
 
-            async loadDistricts(provinceCode, selectedDistrict = '') {
+            // Trong class CompanyLocationManager, thay thế method loadDistricts (khoảng dòng 3420):
+
+            async loadDistricts(provinceCode, selectedDistrictName = '') {
                 console.log('📋 Loading company districts for province code:', provinceCode);
 
                 this.districtSelect.innerHTML = '<option value="">⏳ Đang tải...</option>';
@@ -3433,36 +3506,49 @@
                 const districts = await editLocationAPI.getDistricts(provinceCode);
                 districts.sort((a, b) => a.name.localeCompare(b.name, 'vi'));
 
-                this.districtSelect.innerHTML = '<option value="">-- Chọn quận/huyện --</option>';
+                // ✅ FIX: Dùng DocumentFragment
+                const fragment = document.createDocumentFragment();
 
-                districts.forEach(district => {
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = '-- Chọn quận/huyện --';
+                fragment.appendChild(defaultOption);
+
+                let selectedIndex = 0;
+
+                districts.forEach((district, index) => {
                     const option = document.createElement('option');
-                    option.value = district.name;
+                    option.value = district.name; // ✅ Value là TÊN
                     option.textContent = district.name;
 
-                    if (this.matchName(district.name, selectedDistrict)) {
+                    if (this.matchName(district.name, selectedDistrictName)) {
                         option.selected = true;
-                        console.log('✅ Auto-selected company district:', district.name);
+                        selectedIndex = index + 1;
+                        console.log('✅ Auto-selected district:', district.name);
                     }
 
-                    this.districtSelect.appendChild(option);
+                    fragment.appendChild(option);
                 });
 
+                // ✅ Thay thế innerHTML một lần với fragment
+                this.districtSelect.innerHTML = '';
+                this.districtSelect.appendChild(fragment);
                 this.districtSelect.disabled = false;
+                this.districtSelect.selectedIndex = selectedIndex;
+
                 console.log('✅ Company districts loaded:', districts.length);
             }
 
             setupEventListeners() {
-                const newProvinceSelect = this.provinceSelect.cloneNode(true);
-                this.provinceSelect.parentNode.replaceChild(newProvinceSelect, this.provinceSelect);
-                this.provinceSelect = newProvinceSelect;
+
 
                 this.provinceSelect.addEventListener('change', async (e) => {
+                    const selectedProvinceName = e.target.value; // ✅ Là tên
                     const selectedOption = e.target.options[e.target.selectedIndex];
                     const provinceCode = selectedOption?.dataset?.code;
 
                     console.log('🔄 Company province changed:', {
-                        name: selectedOption?.value,
+                        name: selectedProvinceName,
                         code: provinceCode
                     });
 
@@ -3476,7 +3562,8 @@
                 console.log('✅ Company event listeners setup complete');
             }
 
-            getProvinceCode(provinceName) {
+            // ✅ Lấy code dựa vào tên tỉnh
+            getProvinceCodeByName(provinceName) {
                 const option = Array.from(this.provinceSelect.options).find(opt =>
                     this.matchName(opt.value, provinceName)
                 );
@@ -3498,9 +3585,7 @@
             }
         }
 
-        // Khởi tạo manager instance
         window.companyLocationManager = new CompanyLocationManager();
-
         console.log('✅ CompanyLocationManager class loaded');
     </script>
     <!-- THÊM SAU window.companyLocationManager = new CompanyLocationManager(); -->
@@ -3967,6 +4052,10 @@
 
         })();
     </script>
+    // Thêm vào cuối file, trước thẻ
+</body>
+
+
 </body>
 
 </html>

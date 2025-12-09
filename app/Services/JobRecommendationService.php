@@ -1018,4 +1018,76 @@ class JobRecommendationService
             ->limit($limit)
             ->get();
     }
+    /**
+     * ✅ LẤY ỨNG VIÊN PHÙ HỢP CHO CÔNG TY (Chiều ngược lại)
+     * Tìm ứng viên phù hợp nhất với các job đang tuyển của công ty
+     */
+
+    public function getRecommendedApplicantsForCompany($companyId, $limit = 12): array
+    {
+        try {
+            Log::info('🔍 getRecommendedApplicantsForCompany START', ['company_id' => $companyId]);
+
+            // Lấy tất cả job của công ty đang active
+            $activeJobs = JobPost::where('companies_id', $companyId)
+                ->where('status', 'active')
+                ->where('deadline', '>=', now())
+                ->get();
+
+            Log::info('📋 Active jobs found', ['count' => $activeJobs->count()]);
+
+            if ($activeJobs->isEmpty()) {
+                Log::warning('⚠️ No active jobs found for company');
+                return [];
+            }
+
+            // Lấy tất cả ứng viên
+            $allApplicants = Applicant::with(['kynang', 'hocvan', 'kinhnghiem', 'ngoaiNgu'])
+                ->get();
+
+            Log::info('👥 All applicants found', ['count' => $allApplicants->count()]);
+
+            $recommendations = [];
+
+            // Tính điểm match cho từng ứng viên với từng job
+            foreach ($allApplicants as $applicant) {
+                foreach ($activeJobs as $job) {
+                    $matchData = $this->calculateMatchScore($applicant, $job);
+                    $score = $matchData['score'];  // ✅ SỬA: Dùng 'score'
+
+                    // Chỉ lưu những match > 50%
+                    if ($score >= 50) {  // ✅ SỬA: Kiểm tra 'score'
+                        $recommendations[] = [
+                            'applicant' => $applicant,
+                            'job' => $job,
+                            'score' => $score,  // ✅ SỬA: Dùng biến $score
+                            'match_details' => $matchData['breakdown']  // ✅ Thêm breakdown
+                        ];
+                    }
+                }
+            }
+
+            Log::info('✅ Recommendations generated', ['total' => count($recommendations)]);
+
+            // Sắp xếp theo điểm cao nhất
+            usort($recommendations, function ($a, $b) {
+                return $b['score'] <=> $a['score'];
+            });
+
+            // Lấy top N
+            $result = array_slice($recommendations, 0, $limit);
+
+            Log::info('🎉 Final result', ['count' => count($result)]);
+
+            return $result;
+        } catch (\Exception $e) {
+            Log::error('❌ Error in getRecommendedApplicantsForCompany', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return [];
+        }
+    }
 }

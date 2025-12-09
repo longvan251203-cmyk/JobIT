@@ -1135,11 +1135,12 @@ class JobController extends Controller
                 });
             }
 
-            // ========== FILTER BY LEVEL ==========
-            if ($request->filled('levels')) {
+            // ========== FILTER BY POSITIONS (VỊ TRÍ TUYỂN DỤNG) ==========
+            if ($request->filled('positions')) {
                 $hasFilters = true;
-                $levels = explode(',', $request->input('levels'));
-                $query->whereIn('level', $levels);
+                $positions = explode(',', $request->input('positions'));
+                $query->whereIn('level', $positions);  // ✅ DÙNG 'level' COLUMN
+                Log::info('✅ Position filter applied', ['positions' => $positions]);
             }
 
             // ========== FILTER BY EXPERIENCE ==========
@@ -1148,6 +1149,78 @@ class JobController extends Controller
                 $experiences = explode(',', $request->input('experiences'));
                 $query->whereIn('experience', $experiences);
             }
+            // ========== FILTER BY SALARY - FIXED VERSION ==========
+            if ($request->filled('salary_ranges')) {
+                $hasFilters = true;
+                $ranges = explode(',', $request->input('salary_ranges'));
+
+                $query->where(function ($q) use ($ranges) {
+                    foreach ($ranges as $range) {
+                        $range = trim($range);
+
+                        switch ($range) {
+                            // ✅ Dưới 5 triệu: job_max < 5M HOẶC job_min < 5M
+                            case 'under_5':
+                                $q->orWhere(function ($subQ) {
+                                    $subQ->where('salary_max', '<', 5000000)
+                                        ->orWhere('salary_min', '<', 5000000);
+                                });
+                                break;
+
+                            // ✅ 5-10 triệu: job range OVERLAP với 5-10M
+                            // VD: job 8-15M vẫn match vì 8M nằm trong 5-10M hoặc > 5M
+                            case '5_10':
+                                $q->orWhere(function ($subQ) {
+                                    $subQ->whereNotNull('salary_min')
+                                        ->whereNotNull('salary_max')
+                                        ->where('salary_min', '<', 10000000)  // job_min < 10M
+                                        ->where('salary_max', '>=', 5000000); // job_max >= 5M
+                                });
+                                break;
+
+                            // ✅ 10-15 triệu
+                            case '10_15':
+                                $q->orWhere(function ($subQ) {
+                                    $subQ->whereNotNull('salary_min')
+                                        ->whereNotNull('salary_max')
+                                        ->where('salary_min', '<', 15000000)
+                                        ->where('salary_max', '>=', 10000000);
+                                });
+                                break;
+
+                            // ✅ 15-20 triệu
+                            case '15_20':
+                                $q->orWhere(function ($subQ) {
+                                    $subQ->whereNotNull('salary_min')
+                                        ->whereNotNull('salary_max')
+                                        ->where('salary_min', '<', 20000000)
+                                        ->where('salary_max', '>=', 15000000);
+                                });
+                                break;
+
+                            // ✅ 20-30 triệu
+                            case '20_30':
+                                $q->orWhere(function ($subQ) {
+                                    $subQ->whereNotNull('salary_min')
+                                        ->whereNotNull('salary_max')
+                                        ->where('salary_min', '<', 30000000)
+                                        ->where('salary_max', '>=', 20000000);
+                                });
+                                break;
+
+                            // ✅ Trên 30 triệu: job_min >= 30M HOẶC job_max >= 30M
+                            case '30_plus':
+                                $q->orWhere(function ($subQ) {
+                                    $subQ->where('salary_min', '>=', 30000000)
+                                        ->orWhere('salary_max', '>=', 30000000);
+                                });
+                                break;
+                        }
+                    }
+                });
+
+                Log::info('✅ Salary filter applied', ['ranges' => $ranges]);
+            }
 
             // ========== FILTER BY WORKING TYPE ==========
             if ($request->filled('working_types')) {
@@ -1155,6 +1228,7 @@ class JobController extends Controller
                 $workingTypes = explode(',', $request->input('working_types'));
                 $query->whereIn('working_type', $workingTypes);
             }
+
 
             // ========== APPLY STATUS & DEADLINE FILTERS ==========
             if ($hasFilters) {

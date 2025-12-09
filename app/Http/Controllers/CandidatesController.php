@@ -2,183 +2,283 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Applicant;
+use App\Services\JobRecommendationService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class CandidatesController extends Controller
 {
+    protected $recommendationService;
+
+    public function __construct(JobRecommendationService $recommendationService)
+    {
+        $this->recommendationService = $recommendationService;
+    }
+
+    /**
+     * ✅ Hiển thị danh sách ứng viên + gợi ý
+     */
     public function index(Request $request)
     {
-        // Start query với relationships
-        $query = Applicant::with([
-            'kynang',
-            'hocvan',
-            'kinhnghiem',
-            'ngoaiNgu',
-            'user'
-        ]);
+        try {
+            Log::info('🔍 CandidatesController@index - START', [
+                'user_id' => Auth::id(),
+                'filters' => $request->all()
+            ]);
 
-        // ============ SEARCH BY KEYWORD ============
-        if ($request->filled('keyword')) {
-            $keyword = $request->keyword;
-            $query->where(function ($q) use ($keyword) {
-                $q->where('hoten_uv', 'LIKE', "%{$keyword}%")
-                    ->orWhere('vitritungtuyen', 'LIKE', "%{$keyword}%")
-                    ->orWhere('gioithieu', 'LIKE', "%{$keyword}%")
-                    ->orWhereHas('kynang', function ($q) use ($keyword) {
-                        $q->where('ten_ky_nang', 'LIKE', "%{$keyword}%");
-                    });
-            });
-        }
+            // ============ QUERY ỨNG VIÊN VỚI FILTER ============
+            $query = Applicant::with(['kynang', 'hocvan', 'kinhnghiem', 'ngoaiNgu', 'user']);
 
-        // ============ FILTER BY LOCATION (MỚI) ============
-        if ($request->filled('location')) {
-            $location = $request->location;
-            $query->where('diachi_uv', 'LIKE', "%{$location}%");
-        }
+            // Filter keyword (tên, vị trí, kỹ năng)
+            if ($request->filled('keyword')) {
+                $keyword = $request->keyword;
+                $query->where(function ($q) use ($keyword) {
+                    $q->where('hoten_uv', 'like', "%{$keyword}%")
+                        ->orWhere('vitriungtuyen', 'like', "%{$keyword}%")
+                        ->orWhereHas('kynang', function ($subQ) use ($keyword) {
+                            $subQ->where('ten_ky_nang', 'like', "%{$keyword}%");
+                        });
+                });
+            }
 
-        // ============ FILTER BY EXPERIENCE ============
-        if ($request->filled('experience')) {
-            $experiences = $request->experience;
-            $query->where(function ($q) use ($experiences) {
-                foreach ($experiences as $exp) {
-                    if ($exp === '0') {
-                        $q->orWhereDoesntHave('kinhnghiem');
-                    } elseif ($exp === '0-1') {
-                        $q->orWhereHas('kinhnghiem', function ($q) {
-                            $q->havingRaw('COUNT(*) < 1');
-                        });
-                    } elseif ($exp === '1-3') {
-                        $q->orWhereHas('kinhnghiem', function ($q) {
-                            $q->havingRaw('COUNT(*) BETWEEN 1 AND 3');
-                        });
-                    } elseif ($exp === '3-5') {
-                        $q->orWhereHas('kinhnghiem', function ($q) {
-                            $q->havingRaw('COUNT(*) BETWEEN 3 AND 5');
-                        });
-                    } elseif ($exp === '5+') {
-                        $q->orWhereHas('kinhnghiem', function ($q) {
-                            $q->havingRaw('COUNT(*) > 5');
-                        });
+            // Filter location
+            if ($request->filled('location')) {
+                $query->where('diachi_uv', 'like', '%' . $request->location . '%');
+            }
+
+            // Filter experience
+            if ($request->filled('experience')) {
+                $experiences = $request->experience;
+                $query->where(function ($q) use ($experiences) {
+                    foreach ($experiences as $exp) {
+                        if ($exp === '0') {
+                            $q->orWhereDoesntHave('kinhnghiem');
+                        } elseif ($exp === '0-1') {
+                            $q->orWhereHas('kinhnghiem', function ($subQ) {
+                                $subQ->havingRaw('COUNT(*) <= 1');
+                            });
+                        } elseif ($exp === '1-3') {
+                            $q->orWhereHas('kinhnghiem', function ($subQ) {
+                                $subQ->havingRaw('COUNT(*) BETWEEN 1 AND 3');
+                            });
+                        } elseif ($exp === '3-5') {
+                            $q->orWhereHas('kinhnghiem', function ($subQ) {
+                                $subQ->havingRaw('COUNT(*) BETWEEN 3 AND 5');
+                            });
+                        } elseif ($exp === '5+') {
+                            $q->orWhereHas('kinhnghiem', function ($subQ) {
+                                $subQ->havingRaw('COUNT(*) > 5');
+                            });
+                        }
                     }
-                }
-            });
-        }
+                });
+            }
 
-        // ============ FILTER BY EDUCATION ============
-        if ($request->filled('education')) {
-            $educations = $request->education;
-            $query->whereHas('hocvan', function ($q) use ($educations) {
-                $q->whereIn('trinhdo', $educations);
-            });
-        }
+            // Filter education
+            if ($request->filled('education')) {
+                $query->whereHas('hocvan', function ($q) use ($request) {
+                    $q->whereIn('trinh_do', $request->education);
+                });
+            }
 
-        // ============ FILTER BY SALARY ============
-        if ($request->filled('salary')) {
-            $salaries = $request->salary;
-            $query->where(function ($q) use ($salaries) {
-                foreach ($salaries as $salary) {
-                    if ($salary === '0-10') {
-                        $q->orWhere('mucluong_mongmuon', '<', 10000000);
-                    } elseif ($salary === '10-15') {
-                        $q->orWhereBetween('mucluong_mongmuon', [10000000, 15000000]);
-                    } elseif ($salary === '15-20') {
-                        $q->orWhereBetween('mucluong_mongmuon', [15000000, 20000000]);
-                    } elseif ($salary === '20-30') {
-                        $q->orWhereBetween('mucluong_mongmuon', [20000000, 30000000]);
-                    } elseif ($salary === '30+') {
-                        $q->orWhere('mucluong_mongmuon', '>', 30000000);
+            // Filter salary
+            if ($request->filled('salary')) {
+                $salaries = $request->salary;
+                $query->where(function ($q) use ($salaries) {
+                    foreach ($salaries as $salary) {
+                        [$min, $max] = explode('-', $salary . '-999');
+                        if ($max === '999') {
+                            $q->orWhere('mucluong_mongmuon', '>=', $min * 1000000);
+                        } else {
+                            $q->orWhereBetween('mucluong_mongmuon', [$min * 1000000, $max * 1000000]);
+                        }
                     }
+                });
+            }
+
+            // Filter language
+            if ($request->filled('language')) {
+                $query->whereHas('ngoaiNgu', function ($q) use ($request) {
+                    $q->whereIn('ten_ngoai_ngu', $request->language);
+                });
+            }
+
+            // Filter gender
+            if ($request->filled('gender')) {
+                $query->where('gioitinh_uv', $request->gender);
+            }
+
+            // Filter skills
+            if ($request->filled('skills')) {
+                $query->whereHas('kynang', function ($q) use ($request) {
+                    $q->whereIn('ten_ky_nang', $request->skills);
+                });
+            }
+
+            // Sort
+            switch ($request->get('sort', 'newest')) {
+                case 'experience':
+                    $query->withCount('kinhnghiem')->orderByDesc('kinhnghiem_count');
+                    break;
+                case 'education':
+                    $query->leftJoin('hocvan', 'applicants.id_uv', '=', 'hocvan.applicant_id')
+                        ->orderByRaw("CASE 
+                            WHEN hocvan.trinh_do = 'Tiến sĩ' THEN 5
+                            WHEN hocvan.trinh_do = 'Thạc sĩ' THEN 4
+                            WHEN hocvan.trinh_do = 'Đại học' THEN 3
+                            WHEN hocvan.trinh_do = 'Cao đẳng' THEN 2
+                            ELSE 1
+                        END DESC")
+                        ->select('applicants.*');
+                    break;
+                default:
+                    $query->orderByDesc('created_at');
+            }
+
+            $candidates = $query->paginate(12);
+
+            Log::info('✅ Candidates query completed', ['total' => $candidates->total()]);
+
+            // ============ LẤY GỢI Ý ỨNG VIÊN PHÙ HỢP ============
+            $recommendedApplicants = [];
+
+            // ✅ ĐÚNG - Sửa lại trong CandidatesController@index (dòng 45-75)
+            if (Auth::check() && Auth::user()->employer) {
+                try {
+                    $employer = Auth::user()->employer;
+
+                    // ✅ Load relationship để chắc chắn
+                    $employer->load('company');
+
+                    $companyId = null;
+
+                    // Thử lấy từ field companies_id
+                    if (isset($employer->companies_id)) {
+                        $companyId = $employer->companies_id;
+                    }
+                    // Hoặc từ relationship
+                    elseif ($employer->company && $employer->company->id) {
+                        $companyId = $employer->company->id;
+                    }
+
+                    Log::info('✅ Company ID found:', ['companies_id' => $companyId]);
+
+                    if ($companyId) {
+                        $recommendedApplicants = $this->recommendationService
+                            ->getRecommendedApplicantsForCompany($companyId, 12);
+
+                        Log::info('✅ Recommendations result:', [
+                            'count' => count($recommendedApplicants),
+                            'sample' => !empty($recommendedApplicants) ?
+                                ['score' => $recommendedApplicants[0]['score'] ?? 'N/A'] :
+                                'EMPTY'
+                        ]);
+                    } else {
+                        Log::warning('⚠️ Company ID is NULL - No recommendations');
+                        $recommendedApplicants = [];
+                    }
+                } catch (\Exception $e) {
+                    Log::error('❌ Error getting recommendations', [
+                        'message' => $e->getMessage(),
+                        'line' => $e->getLine()
+                    ]);
+                    $recommendedApplicants = [];
                 }
-            });
+            } else {
+                $recommendedApplicants = [];
+            }
+            return view('employer.candidates', compact('candidates', 'recommendedApplicants'));
+        } catch (\Exception $e) {
+            Log::error('❌ Error in CandidatesController@index', [
+                'error' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            // Trả về view với data rỗng nếu có lỗi
+            return view('employer.candidates', [
+                'candidates' => Applicant::with(['kynang', 'hocvan', 'kinhnghiem', 'ngoaiNgu', 'user'])
+                    ->orderByDesc('created_at')
+                    ->paginate(12),
+                'recommendedApplicants' => []
+            ]);
         }
-
-        // ============ FILTER BY LANGUAGE ============
-        if ($request->filled('language')) {
-            $languages = $request->language;
-            $query->whereHas('ngoaiNgu', function ($q) use ($languages) {
-                $q->whereIn('ten_ngoai_ngu', $languages);
-            });
-        }
-
-        // ============ FILTER BY GENDER ============
-        if ($request->filled('gender')) {
-            $query->where('gioitinh_uv', $request->gender);
-        }
-
-        // ============ FILTER BY SKILLS ============
-        if ($request->filled('skills')) {
-            $skills = $request->skills;
-            $query->whereHas('kynang', function ($q) use ($skills) {
-                $q->whereIn('ten_ky_nang', $skills);
-            });
-        }
-
-        // ============ SORTING ============
-        $sortBy = $request->get('sort', 'newest');
-        switch ($sortBy) {
-            case 'experience':
-                $query->withCount('kinhnghiem')->orderBy('kinhnghiem_count', 'desc');
-                break;
-            case 'education':
-                $query->join('hoc_van', 'applicants.id_uv', '=', 'hoc_van.applicant_id')
-                    ->orderByRaw("FIELD(hoc_van.trinhdo, 'Tiến sĩ', 'Thạc sĩ', 'Đại học', 'Cao đẳng', 'Trung cấp')")
-                    ->select('applicants.*');
-                break;
-            default: // newest
-                $query->orderBy('applicants.created_at', 'desc');
-                break;
-        }
-
-        // Pagination
-        $candidates = $query->paginate(12)->withQueryString();
-
-        return view('employer.candidates', compact('candidates'));
     }
 
-    // ============ VIEW CANDIDATE DETAIL ============
+    /**
+     * ✅ Xem chi tiết CV ứng viên (JSON)
+     */
     public function show($id)
     {
-        $candidate = Applicant::with([
-            'kynang',
-            'hocvan',
-            'kinhnghiem',
-            'ngoaiNgu',
-            'duan',
-            'chungchi',
-            'giaithuong',
-            'user'
-        ])->findOrFail($id);
+        try {
+            $candidate = Applicant::with([
+                'kynang',
+                'hocvan',
+                'kinhnghiem',
+                'ngoaiNgu',
+                'user'
+            ])->findOrFail($id);
 
-        return response()->json($candidate);
+            return response()->json($candidate);
+        } catch (\Exception $e) {
+            Log::error('❌ Error in CandidatesController@show', [
+                'id' => $id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'error' => 'Không tìm thấy ứng viên'
+            ], 404);
+        }
     }
 
-    // ============ DOWNLOAD CV ============
+    /**
+     * ✅ Download CV
+     */
     public function downloadCV($id)
     {
-        $candidate = Applicant::findOrFail($id);
+        try {
+            $candidate = Applicant::findOrFail($id);
 
-        if (!$candidate->cv) {
-            return back()->with('error', 'Ứng viên chưa tải lên CV');
+            // TODO: Implement PDF generation logic
+            // For now, redirect to profile
+            return redirect()->route('employer.candidates.show', $id)
+                ->with('info', 'Chức năng tải CV đang được phát triển');
+        } catch (\Exception $e) {
+            Log::error('❌ Error downloading CV', [
+                'id' => $id,
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->route('employer.candidates')
+                ->with('error', 'Không thể tải CV');
         }
-
-        $filePath = public_path('assets/cv/' . $candidate->cv);
-
-        if (!file_exists($filePath)) {
-            return back()->with('error', 'File CV không tồn tại');
-        }
-
-        return response()->download($filePath);
     }
 
-    // ============ CONTACT CANDIDATE ============
+    /**
+     * ✅ Liên hệ ứng viên
+     */
     public function contact($id)
     {
-        $candidate = Applicant::with('user')->findOrFail($id);
+        try {
+            $candidate = Applicant::with('user')->findOrFail($id);
 
-        // Redirect đến trang liên hệ hoặc gửi email
-        return redirect()->route('employer.messages.create', [
-            'recipient_id' => $candidate->user_id
-        ]);
+            // TODO: Implement contact/messaging system
+            // For now, show email
+            return redirect()->route('employer.candidates')
+                ->with('success', "Email ứng viên: {$candidate->user->email}");
+        } catch (\Exception $e) {
+            Log::error('❌ Error contacting candidate', [
+                'id' => $id,
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->route('employer.candidates')
+                ->with('error', 'Không thể liên hệ ứng viên');
+        }
     }
 }

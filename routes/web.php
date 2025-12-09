@@ -348,6 +348,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/employer/candidates/{id}', [EmployerController::class, 'viewCandidateCV'])->name('employer.candidate.view');
     Route::get('/employer/candidates/{id}/download-cv', [ApplicantController::class, 'downloadCV'])->name('employer.candidate.downloadCV');
 });
+
 // ✅ Thêm route update mức lương
 Route::middleware(['auth'])->group(function () {
     Route::post('/applicant/update-muc-luong', [ApplicantController::class, 'updateMucLuong'])
@@ -379,22 +380,25 @@ Route::middleware(['auth'])->prefix('employer')->name('employer.')->group(functi
 
 
 
-Route::middleware(['auth'])->group(function () {  // ← Chỉ giữ 'auth'
+Route::middleware(['auth'])->group(function () {
 
+    // ✅ Trang recommendations
     Route::get('/applicant/recommendations', [JobRecommendationController::class, 'index'])
         ->name('applicant.recommendations');
 
+    // ✅ Refresh recommendations
     Route::post('/applicant/recommendations/refresh', [JobRecommendationController::class, 'refresh'])
         ->name('applicant.recommendations.refresh');
 
+    // ✅ Mark as viewed
     Route::post('/applicant/recommendations/{id}/viewed', [JobRecommendationController::class, 'markAsViewed'])
         ->name('applicant.recommendations.viewed');
 
-    // API recalculate recommendations
+    // ✅ Recalculate after profile update
     Route::post('/recommendations/recalculate', [JobRecommendationController::class, 'recalculateAfterProfileUpdate'])
         ->name('recommendations.recalculate');
 
-    // API: Lấy recommendations dạng HTML cho home page
+    // ✅ API: Lấy recommendations cho home page (QUAN TRỌNG)
     Route::get('/api/recommendations/home', [JobRecommendationController::class, 'getRecommendedJobsForHome'])
         ->name('api.recommendations.home');
 });
