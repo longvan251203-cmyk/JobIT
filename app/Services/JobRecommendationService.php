@@ -7,6 +7,7 @@ use App\Models\JobPost;
 use App\Models\JobRecommendation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class JobRecommendationService
 {
@@ -1026,68 +1027,228 @@ class JobRecommendationService
     public function getRecommendedApplicantsForCompany($companyId, $limit = 12): array
     {
         try {
-            Log::info('🔍 getRecommendedApplicantsForCompany START', ['company_id' => $companyId]);
+            Log::info('🔍 START: Recommend applicants for company', [
+                'company_id' => $companyId,
+                'limit' => $limit
+            ]);
 
-            // Lấy tất cả job của công ty đang active
-            $activeJobs = JobPost::where('companies_id', $companyId)
-                ->where('status', 'active')
-                ->where('deadline', '>=', now())
-                ->get();
+            // ✅ CACHE 30 phút
+            $cacheKey = "recommended_applicants_v2_company_{$companyId}_limit_{$limit}";
 
-            Log::info('📋 Active jobs found', ['count' => $activeJobs->count()]);
-
-            if ($activeJobs->isEmpty()) {
-                Log::warning('⚠️ No active jobs found for company');
-                return [];
-            }
-
-            // Lấy tất cả ứng viên
-            $allApplicants = Applicant::with(['kynang', 'hocvan', 'kinhnghiem', 'ngoaiNgu'])
-                ->get();
-
-            Log::info('👥 All applicants found', ['count' => $allApplicants->count()]);
-
-            $recommendations = [];
-
-            // Tính điểm match cho từng ứng viên với từng job
-            foreach ($allApplicants as $applicant) {
-                foreach ($activeJobs as $job) {
-                    $matchData = $this->calculateMatchScore($applicant, $job);
-                    $score = $matchData['score'];  // ✅ SỬA: Dùng 'score'
-
-                    // Chỉ lưu những match > 50%
-                    if ($score >= 50) {  // ✅ SỬA: Kiểm tra 'score'
-                        $recommendations[] = [
-                            'applicant' => $applicant,
-                            'job' => $job,
-                            'score' => $score,  // ✅ SỬA: Dùng biến $score
-                            'match_details' => $matchData['breakdown']  // ✅ Thêm breakdown
-                        ];
-                    }
-                }
-            }
-
-            Log::info('✅ Recommendations generated', ['total' => count($recommendations)]);
-
-            // Sắp xếp theo điểm cao nhất
-            usort($recommendations, function ($a, $b) {
-                return $b['score'] <=> $a['score'];
+            return Cache::remember($cacheKey, 1800, function () use ($companyId, $limit) {
+                return $this->calculateRecommendedApplicantsV2($companyId, $limit);
             });
-
-            // Lấy top N
-            $result = array_slice($recommendations, 0, $limit);
-
-            Log::info('🎉 Final result', ['count' => count($result)]);
-
-            return $result;
         } catch (\Exception $e) {
             Log::error('❌ Error in getRecommendedApplicantsForCompany', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
+                'line' => $e->getLine()
             ]);
             return [];
         }
+    }
+
+    /**
+     * ✅ TÍNH TOÁN THỰC TẾ - VERSION 2
+     */
+    private function calculateRecommendedApplicantsV2($companyId, $limit): array
+    {
+        // ========== BƯỚC 1: LẤY JOBS ĐANG ACTIVE ==========
+        $activeJobs = JobPost::where('companies_id', $companyId)
+            ->where('status', 'active')
+            ->where('deadline', '>=', now())
+            ->with(['hashtags'])
+            ->get();
+
+        Log::info('📋 Active jobs found', ['count' => $activeJobs->count()]);
+
+        if ($activeJobs->isEmpty()) {
+            Log::warning('⚠️ No active jobs for company');
+            return [];
+        }
+
+        // ========== BƯỚC 2: LẤY ỨNG VIÊN PHÙ HỢP ==========
+        $applicants = Applicant::whereNotNull('vitriungtuyen')
+            ->whereNotNull('diachi_uv')
+            ->whereHas('kynang')
+            ->with(['kynang', 'hocvan', 'kinhnghiem', 'ngoaiNgu', 'user'])
+            ->limit(500) // Tăng lên để có nhiều lựa chọn hơn
+            ->get();
+
+        Log::info('👥 Eligible applicants found', ['count' => $applicants->count()]);
+
+        if ($applicants->isEmpty()) {
+            Log::warning('⚠️ No eligible applicants found');
+            return [];
+        }
+
+        // ========== BƯỚC 3: TÍNH ĐIỂM CHO TỪNG ỨNG VIÊN VỚI TẤT CẢ JOB ==========
+        $recommendations = [];
+
+        foreach ($applicants as $applicant) {
+            $applicantJobMatches = []; // Lưu tất cả job phù hợp với ứng viên này
+            $bestScore = 0;
+            $bestJob = null;
+
+            // Tính điểm với TỪNG job
+            foreach ($activeJobs as $job) {
+                $matchData = $this->calculateMatchScore($applicant, $job);
+                $score = $matchData['score'];
+
+                // ✅ CHỈ LƯU JOB CÓ ĐIỂM >= 60%
+                if ($score >= 60) {
+                    $applicantJobMatches[] = [
+                        'job' => $job,
+                        'score' => $score,
+                        'match_details' => $matchData['breakdown']
+                    ];
+
+                    // Cập nhật best match
+                    if ($score > $bestScore) {
+                        $bestScore = $score;
+                        $bestJob = $job;
+                    }
+                }
+            }
+
+            // ✅ CHỈ THÊM ỨNG VIÊN NẾU CÓ ÍT NHẤT 1 JOB PHÙ HỢP
+            if (!empty($applicantJobMatches)) {
+                // Sắp xếp job theo điểm giảm dần
+                usort($applicantJobMatches, function ($a, $b) {
+                    return $b['score'] <=> $a['score'];
+                });
+
+                $recommendations[] = [
+                    'applicant' => $applicant,
+                    'best_score' => $bestScore, // Điểm cao nhất
+                    'best_job' => $bestJob, // Job phù hợp nhất
+                    'matched_jobs' => $applicantJobMatches, // TẤT CẢ các job phù hợp
+                    'total_matches' => count($applicantJobMatches)
+                ];
+            }
+        }
+
+        Log::info('✅ Calculations completed', [
+            'total_recommendations' => count($recommendations)
+        ]);
+
+        // ========== BƯỚC 4: SẮP XẾP VÀ LẤY TOP ==========
+        // Sắp xếp theo: 1) Số lượng job match, 2) Best score
+        usort($recommendations, function ($a, $b) {
+            if ($a['total_matches'] !== $b['total_matches']) {
+                return $b['total_matches'] <=> $a['total_matches'];
+            }
+            return $b['best_score'] <=> $a['best_score'];
+        });
+
+        $result = array_slice($recommendations, 0, $limit);
+
+        Log::info('🎉 Final recommendations', [
+            'count' => count($result),
+            'top_score' => $result[0]['best_score'] ?? 'N/A',
+            'top_matches' => $result[0]['total_matches'] ?? 'N/A'
+        ]);
+
+        return $result;
+    }
+
+    /**
+     * ✅ API: LẤY DANH SÁCH JOB PHÙ HỢP CHO MỘT ỨNG VIÊN CỤ THỂ
+     * Dùng khi nhấn nút "Mời" trên UI
+     */
+    public function getMatchedJobsForApplicant($companyId, $applicantId): array
+    {
+        try {
+            Log::info('🔍 Get matched jobs for applicant', [
+                'company_id' => $companyId,
+                'applicant_id' => $applicantId
+            ]);
+
+            // Lấy ứng viên
+            $applicant = Applicant::with(['kynang', 'hocvan', 'kinhnghiem', 'ngoaiNgu', 'user'])
+                ->findOrFail($applicantId);
+
+            // Lấy jobs đang active của công ty
+            $activeJobs = JobPost::where('companies_id', $companyId)
+                ->where('status', 'active')
+                ->where('deadline', '>=', now())
+                ->with(['hashtags', 'company'])
+                ->get();
+
+            $matchedJobs = [];
+
+            // Tính điểm với từng job
+            foreach ($activeJobs as $job) {
+                $matchData = $this->calculateMatchScore($applicant, $job);
+                $score = $matchData['score'];
+
+                // Chỉ lưu job có điểm >= 60%
+                if ($score >= 60) {
+                    $matchedJobs[] = [
+                        'job' => $job,
+                        'score' => $score,
+                        'match_details' => $matchData['breakdown'],
+                        // Thêm thông tin bổ sung
+                        'received_count' => $this->getJobReceivedCount($job->job_id),
+                        'is_full' => $this->isJobFull($job->job_id, $job->quantity)
+                    ];
+                }
+            }
+
+            // Sắp xếp theo điểm giảm dần
+            usort($matchedJobs, function ($a, $b) {
+                return $b['score'] <=> $a['score'];
+            });
+
+            Log::info('✅ Matched jobs found', [
+                'applicant_id' => $applicantId,
+                'total_matches' => count($matchedJobs)
+            ]);
+
+            return $matchedJobs;
+        } catch (\Exception $e) {
+            Log::error('❌ Error getting matched jobs', [
+                'message' => $e->getMessage()
+            ]);
+            return [];
+        }
+    }
+
+    /**
+     * Đếm số lượng ứng viên đã nhận cho job
+     */
+    private function getJobReceivedCount($jobId): int
+    {
+        return DB::table('job_applications')
+            ->where('job_id', $jobId)
+            ->whereIn('status', ['accepted', 'pending'])
+            ->count();
+    }
+
+    /**
+     * Kiểm tra job đã đủ số lượng chưa
+     */
+    private function isJobFull($jobId, $quantity): bool
+    {
+        $receivedCount = $this->getJobReceivedCount($jobId);
+        return $receivedCount >= $quantity;
+    }
+
+    /**
+     * ✅ XÓA CACHE KHI CẬP NHẬT
+     */
+    public function clearCompanyRecommendationsCache($companyId): void
+    {
+        $keys = [
+            "recommended_applicants_v2_company_{$companyId}_limit_12",
+            "recommended_applicants_v2_company_{$companyId}_limit_20",
+            "recommended_applicants_v2_company_{$companyId}_limit_50",
+        ];
+
+        foreach ($keys as $key) {
+            Cache::forget($key);
+        }
+
+        Log::info('🗑️ Cache cleared for company', ['company_id' => $companyId]);
     }
 }

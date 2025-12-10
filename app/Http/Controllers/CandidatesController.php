@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Applicant;
+use App\Models\JobPost;
+use App\Models\JobInvitation;
 use App\Services\JobRecommendationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,12 +31,15 @@ class CandidatesController extends Controller
                 'filters' => $request->all()
             ]);
 
-            // ============ QUERY ỨNG VIÊN VỚI FILTER ============
-            $query = Applicant::with(['kynang', 'hocvan', 'kinhnghiem', 'ngoaiNgu', 'user']);
+            // ============ BƯỚC 1: TẠO QUERY FILTER (CHƯA EAGER LOAD) ============
+            // ❌ KHÔNG dùng with() ngay lúc này
+            $query = Applicant::query();
 
-            // Filter keyword (tên, vị trí, kỹ năng)
+            // ✅ Filter keyword
             if ($request->filled('keyword')) {
                 $keyword = $request->keyword;
+                Log::info('Applying keyword filter:', ['keyword' => $keyword]);
+
                 $query->where(function ($q) use ($keyword) {
                     $q->where('hoten_uv', 'like', "%{$keyword}%")
                         ->orWhere('vitriungtuyen', 'like', "%{$keyword}%")
@@ -44,125 +49,185 @@ class CandidatesController extends Controller
                 });
             }
 
-            // Filter location
+            // ✅ Filter location (hoạt động giống như trước)
             if ($request->filled('location')) {
-                $query->where('diachi_uv', 'like', '%' . $request->location . '%');
+                $location = $request->location;
+                Log::info('Applying location filter:', ['location' => $location]);
+                $query->where('diachi_uv', 'like', '%' . $location . '%');
             }
 
-            // Filter experience
+            // ✅ Filter experience
             if ($request->filled('experience')) {
-                $experiences = $request->experience;
+                $experiences = is_array($request->experience)
+                    ? $request->experience
+                    : [$request->experience];
+                Log::info('Applying experience filter:', ['experiences' => $experiences]);
+
                 $query->where(function ($q) use ($experiences) {
                     foreach ($experiences as $exp) {
                         if ($exp === '0') {
                             $q->orWhereDoesntHave('kinhnghiem');
                         } elseif ($exp === '0-1') {
                             $q->orWhereHas('kinhnghiem', function ($subQ) {
-                                $subQ->havingRaw('COUNT(*) <= 1');
+                                $subQ->selectRaw('DISTINCT applicant_id')
+                                    ->havingRaw('SUM(TIMESTAMPDIFF(YEAR, tu_ngay, IFNULL(den_ngay, NOW()))) < 1');
                             });
                         } elseif ($exp === '1-3') {
                             $q->orWhereHas('kinhnghiem', function ($subQ) {
-                                $subQ->havingRaw('COUNT(*) BETWEEN 1 AND 3');
+                                $subQ->selectRaw('DISTINCT applicant_id')
+                                    ->havingRaw('SUM(TIMESTAMPDIFF(YEAR, tu_ngay, IFNULL(den_ngay, NOW()))) BETWEEN 1 AND 3');
                             });
                         } elseif ($exp === '3-5') {
                             $q->orWhereHas('kinhnghiem', function ($subQ) {
-                                $subQ->havingRaw('COUNT(*) BETWEEN 3 AND 5');
+                                $subQ->selectRaw('DISTINCT applicant_id')
+                                    ->havingRaw('SUM(TIMESTAMPDIFF(YEAR, tu_ngay, IFNULL(den_ngay, NOW()))) BETWEEN 3 AND 5');
                             });
                         } elseif ($exp === '5+') {
                             $q->orWhereHas('kinhnghiem', function ($subQ) {
-                                $subQ->havingRaw('COUNT(*) > 5');
+                                $subQ->selectRaw('DISTINCT applicant_id')
+                                    ->havingRaw('SUM(TIMESTAMPDIFF(YEAR, tu_ngay, IFNULL(den_ngay, NOW()))) >= 5');
                             });
                         }
                     }
                 });
             }
 
-            // Filter education
+            // ✅ Filter education
             if ($request->filled('education')) {
-                $query->whereHas('hocvan', function ($q) use ($request) {
-                    $q->whereIn('trinh_do', $request->education);
+                $educations = is_array($request->education)
+                    ? $request->education
+                    : [$request->education];
+                Log::info('Applying education filter:', ['educations' => $educations]);
+
+                $query->whereHas('hocvan', function ($q) use ($educations) {
+                    $q->whereIn('trinh_do', $educations);
                 });
             }
 
-            // Filter salary
+            // ✅ Filter salary
             if ($request->filled('salary')) {
-                $salaries = $request->salary;
+                $salaries = is_array($request->salary)
+                    ? $request->salary
+                    : [$request->salary];
+                Log::info('Applying salary filter:', ['salaries' => $salaries]);
+
                 $query->where(function ($q) use ($salaries) {
                     foreach ($salaries as $salary) {
-                        [$min, $max] = explode('-', $salary . '-999');
-                        if ($max === '999') {
-                            $q->orWhere('mucluong_mongmuon', '>=', $min * 1000000);
-                        } else {
-                            $q->orWhereBetween('mucluong_mongmuon', [$min * 1000000, $max * 1000000]);
+                        if (strpos($salary, '+') !== false) {
+                            $min = (int)str_replace('+', '', $salary) * 1000000;
+                            $q->orWhere('mucluong_mongmuon', '>=', $min);
+                        } elseif (strpos($salary, '-') !== false) {
+                            [$min, $max] = explode('-', $salary);
+                            $minVal = (int)$min * 1000000;
+                            $maxVal = (int)$max * 1000000;
+                            $q->orWhereBetween('mucluong_mongmuon', [$minVal, $maxVal]);
                         }
                     }
                 });
             }
 
-            // Filter language
+            // ✅ Filter language
             if ($request->filled('language')) {
-                $query->whereHas('ngoaiNgu', function ($q) use ($request) {
-                    $q->whereIn('ten_ngoai_ngu', $request->language);
+                $languages = is_array($request->language)
+                    ? $request->language
+                    : [$request->language];
+                Log::info('Applying language filter:', ['languages' => $languages]);
+
+                $query->whereHas('ngoaiNgu', function ($q) use ($languages) {
+                    $q->whereIn('ten_ngoai_ngu', $languages);
                 });
             }
 
-            // Filter gender
-            if ($request->filled('gender')) {
-                $query->where('gioitinh_uv', $request->gender);
-            }
-
-            // Filter skills
+            // ✅ Filter skills
             if ($request->filled('skills')) {
-                $query->whereHas('kynang', function ($q) use ($request) {
-                    $q->whereIn('ten_ky_nang', $request->skills);
+                $skills = is_array($request->skills)
+                    ? $request->skills
+                    : [$request->skills];
+                Log::info('Applying skills filter:', ['skills' => $skills]);
+
+                $query->whereHas('kynang', function ($q) use ($skills) {
+                    $q->whereIn('ten_ky_nang', $skills);
                 });
             }
 
-            // Sort
-            switch ($request->get('sort', 'newest')) {
-                case 'experience':
-                    $query->withCount('kinhnghiem')->orderByDesc('kinhnghiem_count');
-                    break;
-                case 'education':
-                    $query->leftJoin('hocvan', 'applicants.id_uv', '=', 'hocvan.applicant_id')
-                        ->orderByRaw("CASE 
-                            WHEN hocvan.trinh_do = 'Tiến sĩ' THEN 5
-                            WHEN hocvan.trinh_do = 'Thạc sĩ' THEN 4
-                            WHEN hocvan.trinh_do = 'Đại học' THEN 3
-                            WHEN hocvan.trinh_do = 'Cao đẳng' THEN 2
-                            ELSE 1
-                        END DESC")
-                        ->select('applicants.*');
-                    break;
-                default:
-                    $query->orderByDesc('created_at');
+            // ✅ Filter gender
+            if ($request->filled('gender') && $request->gender !== '') {
+                $gender = $request->gender;
+                Log::info('Applying gender filter:', ['gender' => $gender]);
+                $query->where('gioitinh_uv', $gender);
             }
 
-            $candidates = $query->paginate(12);
+            // ============ BƯỚC 2: XỬ LÝ SORT (CÓ THỂ CÓ JOIN) ============
+            $sortBy = $request->get('sort', 'newest');
+            Log::info('Applying sort:', ['sort' => $sortBy]);
+
+            if ($sortBy === 'experience') {
+                // ❌ LỖI: Join sau khi filter sẽ làm lệch dữ liệu
+                // ✅ FIX: Tạo subquery để lấy total experience
+                $query->withCount([
+                    'kinhnghiem as total_exp' => function ($q) {
+                        $q->selectRaw('COALESCE(SUM(TIMESTAMPDIFF(YEAR, tu_ngay, IFNULL(den_ngay, NOW()))), 0)');
+                    }
+                ])->orderByDesc('total_exp');
+            } elseif ($sortBy === 'education') {
+                // ✅ FIX: Sử dụng withMax() thay vì join
+                $query->with([
+                    'hocvan' => function ($q) {
+                        $q->selectRaw('applicant_id, MAX(CASE 
+                            WHEN trinh_do = "Tiến sĩ" THEN 5
+                            WHEN trinh_do = "Thạc sĩ" THEN 4
+                            WHEN trinh_do = "Đại học" THEN 3
+                            WHEN trinh_do = "Cao đẳng" THEN 2
+                            ELSE 1
+                        END) as edu_level')
+                            ->groupBy('applicant_id');
+                    }
+                ]);
+                // Sắp xếp sau paginate (không thể sắp xếp raw field trước paginate)
+            } else {
+                $query->orderByDesc('applicants.created_at');
+            }
+
+            // ============ DEBUG SQL ============
+            Log::debug('SQL Query before paginate:', [
+                'sql' => $query->toSql(),
+                'bindings' => $query->getBindings()
+            ]);
+
+            // ============ BƯỚC 3: PAGINATE ============
+            $candidates = $query->distinct()  // ✅ DISTINCT để tránh duplicate
+                ->paginate(12)
+                ->appends($request->except('page'));
+
+            // ============ BƯỚC 4: EAGER LOAD SAU PAGINATE ============
+            // ✅ Load relationship TRONG paginated results
+            $candidateIds = $candidates->pluck('id_uv')->toArray();
+
+            if (!empty($candidateIds)) {
+                $relationships = Applicant::whereIn('id_uv', $candidateIds)
+                    ->with(['kynang', 'hocvan', 'kinhnghiem', 'ngoaiNgu', 'user'])
+                    ->get()
+                    ->keyBy('id_uv');
+
+                // Map relationships vào paginated results
+                foreach ($candidates as $candidate) {
+                    if (isset($relationships[$candidate->id_uv])) {
+                        $candidate->setRelations($relationships[$candidate->id_uv]->getRelations());
+                    }
+                }
+            }
 
             Log::info('✅ Candidates query completed', ['total' => $candidates->total()]);
 
-            // ============ LẤY GỢI Ý ỨNG VIÊN PHÙ HỢP ============
+            // ============ LẤY GỢI Ý ỨNG VIÊN ============
             $recommendedApplicants = [];
 
-            // ✅ ĐÚNG - Sửa lại trong CandidatesController@index (dòng 45-75)
             if (Auth::check() && Auth::user()->employer) {
                 try {
                     $employer = Auth::user()->employer;
-
-                    // ✅ Load relationship để chắc chắn
                     $employer->load('company');
 
-                    $companyId = null;
-
-                    // Thử lấy từ field companies_id
-                    if (isset($employer->companies_id)) {
-                        $companyId = $employer->companies_id;
-                    }
-                    // Hoặc từ relationship
-                    elseif ($employer->company && $employer->company->id) {
-                        $companyId = $employer->company->id;
-                    }
+                    $companyId = $employer->companies_id ?? $employer->company->id ?? null;
 
                     Log::info('✅ Company ID found:', ['companies_id' => $companyId]);
 
@@ -171,13 +236,10 @@ class CandidatesController extends Controller
                             ->getRecommendedApplicantsForCompany($companyId, 12);
 
                         Log::info('✅ Recommendations result:', [
-                            'count' => count($recommendedApplicants),
-                            'sample' => !empty($recommendedApplicants) ?
-                                ['score' => $recommendedApplicants[0]['score'] ?? 'N/A'] :
-                                'EMPTY'
+                            'count' => count($recommendedApplicants)
                         ]);
                     } else {
-                        Log::warning('⚠️ Company ID is NULL - No recommendations');
+                        Log::warning('⚠️ Company ID is NULL');
                         $recommendedApplicants = [];
                     }
                 } catch (\Exception $e) {
@@ -187,9 +249,8 @@ class CandidatesController extends Controller
                     ]);
                     $recommendedApplicants = [];
                 }
-            } else {
-                $recommendedApplicants = [];
             }
+
             return view('employer.candidates', compact('candidates', 'recommendedApplicants'));
         } catch (\Exception $e) {
             Log::error('❌ Error in CandidatesController@index', [
@@ -199,7 +260,6 @@ class CandidatesController extends Controller
                 'trace' => $e->getTraceAsString()
             ]);
 
-            // Trả về view với data rỗng nếu có lỗi
             return view('employer.candidates', [
                 'candidates' => Applicant::with(['kynang', 'hocvan', 'kinhnghiem', 'ngoaiNgu', 'user'])
                     ->orderByDesc('created_at')
@@ -244,8 +304,6 @@ class CandidatesController extends Controller
         try {
             $candidate = Applicant::findOrFail($id);
 
-            // TODO: Implement PDF generation logic
-            // For now, redirect to profile
             return redirect()->route('employer.candidates.show', $id)
                 ->with('info', 'Chức năng tải CV đang được phát triển');
         } catch (\Exception $e) {
@@ -267,8 +325,6 @@ class CandidatesController extends Controller
         try {
             $candidate = Applicant::with('user')->findOrFail($id);
 
-            // TODO: Implement contact/messaging system
-            // For now, show email
             return redirect()->route('employer.candidates')
                 ->with('success', "Email ứng viên: {$candidate->user->email}");
         } catch (\Exception $e) {
@@ -279,6 +335,221 @@ class CandidatesController extends Controller
 
             return redirect()->route('employer.candidates')
                 ->with('error', 'Không thể liên hệ ứng viên');
+        }
+    }
+
+    //  * ✅ Kiểm tra xem ứng viên đã được mời cho job chưa
+    //  */
+    public function checkInvitationStatus($candidateId, $jobId)
+    {
+        try {
+            $invitation = JobInvitation::where('applicant_id', $candidateId)
+                ->where('job_id', $jobId)
+                ->whereIn('status', ['pending', 'accepted'])
+                ->first();
+
+            return response()->json([
+                'success' => true,
+                'invited' => $invitation ? true : false,
+                'status' => $invitation?->status ?? null,
+                'invited_at' => $invitation?->invited_at ?? null
+            ]);
+        } catch (\Exception $e) {
+            Log::error('❌ Error checking invitation', [
+                'error' => $e->getMessage(),
+                'candidate_id' => $candidateId,
+                'job_id' => $jobId
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+    /**
+     * ✅ Lấy danh sách jobs active chưa đủ ứng viên
+     */
+
+
+    public function getActiveUnfilled()
+    {
+        try {
+            $employer = Auth::user()->employer;
+            $companiesId = $employer->companies_id;
+
+            if (!$companiesId && $employer->company) {
+                $companiesId = $employer->company->companies_id;
+            }
+
+            if (!$companiesId) {
+                Log::warning('⚠️ No companies_id found for employer', [
+                    'employer_id' => $employer->id
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Công ty chưa được cấu hình. Vui lòng liên hệ quản trị viên.'
+                ], 400);
+            }
+
+            // ✅ LẤY DANH SÁCH JOBS + CHECK LỜI MỜI
+            $jobs = JobPost::where('companies_id', $companiesId)
+                ->where('status', 'active')
+                ->where('deadline', '>=', now()->toDateString())
+                ->with(['applications' => function ($query) {
+                    $query->select('job_id');
+                }])
+                ->get()
+                ->map(function ($job) use ($companiesId) {
+                    $location = [];
+                    if ($job->province) $location[] = $job->province;
+                    if ($job->district) $location[] = $job->district;
+
+                    return [
+                        'id' => $job->job_id,
+                        'job_title' => $job->title,
+                        'location' => implode(', ', $location) ?: 'Không xác định',
+                        'salary_min' => $job->salary_min ? number_format($job->salary_min, 0, ',', '.') : null,
+                        'salary_max' => $job->salary_max ? number_format($job->salary_max, 0, ',', '.') : null,
+                        'quantity' => $job->recruitment_count ?? 0,
+                        'deadline' => $job->deadline,
+                        'received_count' => $job->applications->count(),
+                        'required_skills' => $job->requirements ? array_filter(array_map('trim', explode(',', $job->requirements))) : []
+                    ];
+                });
+
+            Log::info('✅ Jobs fetched successfully', [
+                'count' => $jobs->count(),
+                'companies_id' => $companiesId
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'jobs' => $jobs
+            ]);
+        } catch (\Exception $e) {
+            Log::error('❌ Error getting active unfilled jobs', [
+                'error' => $e->getMessage(),
+                'line' => $e->getLine()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Không thể lấy danh sách vị trí: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * ✅ Gửi lời mời ứng viên cho vị trí
+     */
+    public function sendInvite($candidateId)
+    {
+        try {
+            $request = request();
+            $employer = Auth::user()->employer;
+            $jobId = $request->input('job_id');
+
+            Log::info('📧 Processing invite', [
+                'candidate_id' => $candidateId,
+                'job_id' => $jobId,
+                'employer_id' => $employer->id,
+                'companies_id' => $employer->companies_id
+            ]);
+
+            // ============ VALIDATE JOB ============
+            $job = JobPost::where('job_id', $jobId)
+                ->where('companies_id', $employer->companies_id)
+                ->first();
+
+            if (!$job) {
+                Log::warning('⚠️ Job not found', [
+                    'job_id' => $jobId,
+                    'companies_id' => $employer->companies_id
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Vị trí tuyển dụng không tồn tại hoặc không thuộc về công ty bạn'
+                ], 404);
+            }
+
+            // ============ VALIDATE CANDIDATE ============
+            $candidate = Applicant::find($candidateId);
+
+            if (!$candidate) {
+                Log::warning('⚠️ Candidate not found', ['candidate_id' => $candidateId]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ứng viên không tồn tại'
+                ], 404);
+            }
+
+            // ============ CHECK DUPLICATE INVITATION ============
+            $existingInvite = JobInvitation::where('applicant_id', $candidateId)
+                ->where('job_id', $jobId)
+                ->whereIn('status', ['pending', 'accepted'])
+                ->first();
+
+            if ($existingInvite) {
+                Log::warning('⚠️ Invitation already exists', [
+                    'invitation_id' => $existingInvite->id,
+                    'status' => $existingInvite->status
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bạn đã gửi lời mời cho ứng viên này cho vị trí này rồi'
+                ], 409);
+            }
+
+            // ============ CREATE INVITATION ============
+            $invitation = JobInvitation::create([
+                'job_id' => $jobId,
+                'applicant_id' => $candidateId,
+                'company_id' => $employer->companies_id,
+                'status' => 'pending',
+                'message' => $request->input('message', ''),
+                'invited_at' => now()
+            ]);
+
+            Log::info('✅ Invitation created successfully', [
+                'invitation_id' => $invitation->id,
+                'job_id' => $jobId,
+                'candidate_id' => $candidateId
+            ]);
+
+            // ============ OPTIONAL: SEND EMAIL NOTIFICATION ============
+            // try {
+            //     $candidate->load('user');
+            //     $job_detail = $job->load('company');
+            //     // Mail::send(new InvitationMail($invitation, $candidate, $job));
+            //     Log::info('✅ Invitation email sent');
+            // } catch (\Exception $e) {
+            //     Log::warning('⚠️ Could not send email notification', [
+            //         'error' => $e->getMessage()
+            //     ]);
+            // }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã gửi lời mời thành công',
+                'invitation_id' => $invitation->id
+            ]);
+        } catch (\Exception $e) {
+            Log::error('❌ Error sending invite', [
+                'error' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'candidate_id' => $candidateId ?? 'unknown',
+                'job_id' => $jobId ?? 'unknown'
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
         }
     }
 }

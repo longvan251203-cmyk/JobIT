@@ -891,109 +891,328 @@
                     $jobPosts = $employer && $employer->company
                     ? \App\Models\JobPost::where('companies_id', $employer->company->companies_id)
                     ->with('detail')
-                    ->withCount('applications') // ✅ đếm số ứng viên
+                    ->withCount('applications')
                     ->orderBy('job_id', 'desc')
                     ->get()
                     : collect();
 
-                    @endphp
+                    // ✅ PHÂN LOẠI JOBS
+                    $activeJobs = $jobPosts->filter(function($job) {
+                    return strtotime($job->deadline) >= time()
+                    && (is_null($job->recruitment_count) || $job->applications_count < $job->recruitment_count);
+                        });
 
-                    @if($jobPosts->count() > 0)
-                    <div class="space-y-4">
-                        @foreach($jobPosts as $job)
-                        <div class="p-6 border border-gray-200 rounded-xl hover:shadow-lg transition-all">
-                            <div class="flex items-start justify-between">
-                                <div class="flex-1">
-                                    <a href="{{ route('job.applicants', $job->job_id) }}"
-                                        class="text-lg font-semibold text-gray-800 mb-2 hover:text-purple-600 transition-colors">
-                                        {{ $job->title }}
-                                    </a>
-                                    <div class="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                                        @if(strtotime($job->deadline) >= time())
-                                        <span class="px-3 py-1 rounded-full font-medium bg-green-100 text-green-700">
-                                            Đang tuyển
-                                        </span>
-                                        @else
-                                        <span class="px-3 py-1 rounded-full font-medium bg-red-100 text-red-700">
-                                            Hết hạn
-                                        </span>
-                                        @endif
-                                        <span>{{ $job->applications_count }} ứng viên</span>
+                        $expiredJobs = $jobPosts->filter(function($job) {
+                        return strtotime($job->deadline) < time();
+                            });
 
-                                        <!-- <span>0 lượt xem</span> -->
-                                        <span>{{ date('d/m/Y', strtotime($job->deadline)) }}</span>
-                                    </div>
-                                    <div class="flex gap-2 flex-wrap">
-                                        <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">
-                                            {{ ucfirst($job->level) }}
-                                        </span>
-                                        <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">
-                                            {{ ucfirst($job->working_type) }}
-                                        </span>
-                                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs">
-                                            {{ $job->province }}
-                                        </span>
-                                        @if($job->salary_type === 'negotiable')
-                                        <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs">
-                                            Thỏa thuận
-                                        </span>
-                                        @else
-                                        <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs">
-                                            {{ number_format($job->salary_min) }} - {{ number_format($job->salary_max) }}
-                                            {{ strtoupper($job->salary_type) }}
-                                        </span>
-                                        @endif
+                            $fulfilledJobs=$jobPosts->filter(function($job) {
+                            return strtotime($job->deadline) >= time()
+                            && $job->applications_count >= $job->recruitment_count;
+                            });
+
+                            @endphp
+
+                            <!-- STATS SECTION -->
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                                <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border-l-4 border-green-500">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm text-gray-600 font-medium">Đang tuyển</p>
+                                            <p class="text-3xl font-bold text-green-600">{{ $activeJobs->count() }}</p>
+                                        </div>
+                                        <svg class="w-10 h-10 text-green-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
                                     </div>
                                 </div>
-                                <div class="flex gap-2 ml-4">
-                                    <a href="{{ route('job.detail', $job->job_id) }}"
-                                        class="p-2 hover:bg-blue-50 rounded-lg transition-colors"
-                                        title="Xem chi tiết">
-                                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+
+                                <div class="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-lg p-4 border-l-4 border-orange-500">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm text-gray-600 font-medium">Đã đủ số lượng</p>
+                                            <p class="text-3xl font-bold text-orange-600">{{ $fulfilledJobs->count() }}</p>
+                                        </div>
+                                        <svg class="w-10 h-10 text-orange-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                         </svg>
-                                    </a>
-                                    <button data-job-id="{{ $job->job_id }}"
-                                        class="btn-edit-job p-2 hover:bg-purple-50 rounded-lg transition-colors"
-                                        title="Sửa">
-                                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    </div>
+                                </div>
+
+                                <div class="bg-gradient-to-br from-red-50 to-pink-50 rounded-lg p-4 border-l-4 border-red-500">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm text-gray-600 font-medium">Hết hạn</p>
+                                            <p class="text-3xl font-bold text-red-600">{{ $expiredJobs->count() }}</p>
+                                        </div>
+                                        <svg class="w-10 h-10 text-red-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                         </svg>
-                                    </button>
-                                    <button data-job-id="{{ $job->job_id }}"
-                                        data-job-title="{{ $job->title }}"
-                                        class="btn-delete-job p-2 hover:bg-red-50 rounded-lg transition-colors"
-                                        title="Xóa">
-                                        <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    </div>
+                                </div>
+
+                                <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-4 border-l-4 border-blue-500">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm text-gray-600 font-medium">Tổng cộng</p>
+                                            <p class="text-3xl font-bold text-blue-600">{{ $jobPosts->count() }}</p>
+                                        </div>
+                                        <svg class="w-10 h-10 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                         </svg>
-                                    </button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        @endforeach
-                    </div>
-                    @else
-                    <div class="text-center py-16">
-                        <svg class="w-24 h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                        </svg>
-                        <p class="text-gray-500 text-lg mb-4">Chưa có tin tuyển dụng nào</p>
-                        <a href="{{ url('/employer/postjob') }}"
-                            class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                            </svg>
-                            Đăng tin tuyển dụng đầu tiên
-                        </a>
-                    </div>
-                    @endif
+
+                            <!-- TAB NAVIGATION -->
+                            <div class="flex gap-2 mb-6 border-b border-gray-200">
+                                <button class="job-tab-btn active px-4 py-3 font-semibold text-green-600 border-b-2 border-green-600 transition-all"
+                                    data-tab="active">
+                                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    Đang tuyển ({{ $activeJobs->count() }})
+                                </button>
+                                <button class="job-tab-btn px-4 py-3 font-semibold text-orange-600 border-b-2 border-transparent hover:border-orange-600 transition-all"
+                                    data-tab="fulfilled">
+                                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    Đã đủ ({{ $fulfilledJobs->count() }})
+                                </button>
+                                <button class="job-tab-btn px-4 py-3 font-semibold text-red-600 border-b-2 border-transparent hover:border-red-600 transition-all"
+                                    data-tab="expired">
+                                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    Hết hạn ({{ $expiredJobs->count() }})
+                                </button>
+                            </div>
+
+                            <!-- JOBS LIST -->
+                            @if($jobPosts->count() > 0)
+
+                            <!-- ACTIVE JOBS TAB -->
+
+                            <div id="tab-active" class="job-tab-content space-y-4">
+                                @forelse($activeJobs as $job)
+                                <div class="p-6 border border-green-200 rounded-xl hover:shadow-lg transition-all bg-gradient-to-r from-green-50 to-transparent">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-3 mb-2">
+                                                <span class="px-3 py-1 rounded-full font-semibold bg-green-100 text-green-700 text-sm inline-flex items-center gap-1">
+                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                                                    </svg>
+                                                    Đang tuyển
+                                                </span>
+                                            </div>
+                                            <a href="{{ route('job.applicants', $job->job_id) }}"
+                                                class="text-lg font-semibold text-gray-800 mb-2 hover:text-green-600 transition-colors">
+                                                {{ $job->title }}
+                                            </a>
+                                            <div class="flex items-center gap-4 text-sm text-gray-600 mb-3 flex-wrap">
+                                                <span class="flex items-center gap-1">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857m0 0a5.002 5.002 0 00-9.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                    </svg>
+                                                    {{ $job->applications_count }} ứng viên
+                                                </span>
+
+                                                <!-- ✅ THÊM: Số người đã mời -->
+                                                @php
+                                                $invitedCount = \App\Models\JobInvitation::where('job_id', $job->job_id)
+                                                ->whereIn('status', ['pending', 'accepted'])
+                                                ->count();
+                                                @endphp
+
+                                                <span class="flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-semibold">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                                                    </svg>
+                                                    Đã mời: {{ $invitedCount }}
+                                                </span>
+
+                                                <span class="flex items-center gap-1">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                    </svg>
+                                                    Hạn: {{ date('d/m/Y', strtotime($job->deadline)) }}
+                                                </span>
+                                                <span class="flex items-center gap-1">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                                    </svg>
+                                                    Còn {{ $job->recruitment_count - $job->applications_count }} vị trí
+                                                </span>
+                                            </div>
+                                            <div class="flex gap-2 flex-wrap">
+                                                <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                                                    {{ ucfirst($job->level) }}
+                                                </span>
+                                                <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                                                    {{ ucfirst($job->working_type) }}
+                                                </span>
+                                                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                                                    {{ $job->province }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-2 ml-4">
+                                            <a href="{{ route('job.detail', $job->job_id) }}" class="p-2 hover:bg-green-100 rounded-lg transition-colors" title="Xem chi tiết">
+                                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                </svg>
+                                            </a>
+                                            <button data-job-id="{{ $job->job_id }}" class="btn-edit-job p-2 hover:bg-purple-100 rounded-lg transition-colors" title="Sửa">
+                                                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                                </svg>
+                                            </button>
+                                            <button data-job-id="{{ $job->job_id }}" data-job-title="{{ $job->title }}" class="btn-delete-job p-2 hover:bg-red-100 rounded-lg transition-colors" title="Xóa">
+                                                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                @empty
+                                <div class="text-center py-8 text-gray-500">
+                                    <svg class="w-12 h-12 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <p class="font-medium">Chưa có tin đang tuyển</p>
+                                </div>
+                                @endforelse
+                            </div>
+
+                            <!-- FULFILLED JOBS TAB -->
+                            <div id="tab-fulfilled" class="job-tab-content space-y-4 hidden">
+                                @forelse($fulfilledJobs as $job)
+                                <div class="p-6 border border-orange-200 rounded-xl hover:shadow-lg transition-all bg-gradient-to-r from-orange-50 to-transparent opacity-75">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-3 mb-2">
+                                                <span class="px-3 py-1 rounded-full font-semibold bg-orange-100 text-orange-700 text-sm inline-flex items-center gap-1">
+                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5.951-1.488 5.951 1.488a1 1 0 001.169-1.409l-7-14z"></path>
+                                                    </svg>
+                                                    Đã đủ số lượng
+                                                </span>
+                                            </div>
+                                            <a href="{{ route('job.applicants', $job->job_id) }}"
+                                                class="text-lg font-semibold text-gray-800 mb-2 hover:text-orange-600 transition-colors">
+                                                {{ $job->title }}
+                                            </a>
+                                            <div class="flex items-center gap-4 text-sm text-gray-600 mb-3 flex-wrap">
+                                                <span class="flex items-center gap-1">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857m0 0a5.002 5.002 0 00-9.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                    </svg>
+                                                    {{ $job->applications_count }}/{{ $job->recruitment_count }} ứng viên
+                                                </span>
+                                                <span class="flex items-center gap-1">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                    </svg>
+                                                    Hạn: {{ date('d/m/Y', strtotime($job->deadline)) }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-2 ml-4">
+                                            <a href="{{ route('job.detail', $job->job_id) }}" class="p-2 hover:bg-orange-100 rounded-lg transition-colors" title="Xem chi tiết">
+                                                <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @empty
+                                <div class="text-center py-8 text-gray-500">
+                                    <svg class="w-12 h-12 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <p class="font-medium">Chưa có tin đã đủ số lượng</p>
+                                </div>
+                                @endforelse
+                            </div>
+
+                            <!-- EXPIRED JOBS TAB -->
+                            <div id="tab-expired" class="job-tab-content space-y-4 hidden">
+                                @forelse($expiredJobs as $job)
+                                <div class="p-6 border border-red-200 rounded-xl hover:shadow-lg transition-all bg-gradient-to-r from-red-50 to-transparent opacity-75">
+                                    <div class="flex items-start justify-between">
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-3 mb-2">
+                                                <span class="px-3 py-1 rounded-full font-semibold bg-red-100 text-red-700 text-sm inline-flex items-center gap-1">
+                                                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                                                    </svg>
+                                                    Hết hạn
+                                                </span>
+                                            </div>
+                                            <a href="{{ route('job.detail', $job->job_id) }}"
+                                                class="text-lg font-semibold text-gray-800 mb-2 hover:text-red-600 transition-colors">
+                                                {{ $job->title }}
+                                            </a>
+                                            <div class="flex items-center gap-4 text-sm text-gray-600 mb-3 flex-wrap">
+                                                <span class="flex items-center gap-1">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857m0 0a5.002 5.002 0 00-9.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                                    </svg>
+                                                    {{ $job->applications_count }} ứng viên
+                                                </span>
+                                                <span class="flex items-center gap-1 text-red-600">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                    </svg>
+                                                    Hết hạn: {{ date('d/m/Y', strtotime($job->deadline)) }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-2 ml-4">
+                                            <a href="{{ route('job.detail', $job->job_id) }}" class="p-2 hover:bg-red-100 rounded-lg transition-colors" title="Xem chi tiết">
+                                                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                                </svg>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                @empty
+                                <div class="text-center py-8 text-gray-500">
+                                    <svg class="w-12 h-12 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4v.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <p class="font-medium">Chưa có tin hết hạn</p>
+                                </div>
+                                @endforelse
+                            </div>
+
+                            @else
+                            <div class="text-center py-16">
+                                <svg class="w-24 h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                </svg>
+                                <p class="text-gray-500 text-lg mb-4">Chưa có tin tuyển dụng nào</p>
+                                <a href="{{ url('/employer/postjob') }}"
+                                    class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                    </svg>
+                                    Đăng tin tuyển dụng đầu tiên
+                                </a>
+                            </div>
+                            @endif
                 </div>
             </div>
 
@@ -4052,7 +4271,45 @@
 
         })();
     </script>
-    // Thêm vào cuối file, trước thẻ
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.job-tab-btn');
+            const tabContents = document.querySelectorAll('.job-tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+
+                    // Remove active class from all buttons
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('active', 'border-green-600', 'border-orange-600', 'border-red-600');
+                        btn.classList.add('border-transparent');
+                    });
+
+                    // Hide all tab contents
+                    tabContents.forEach(content => {
+                        content.classList.add('hidden');
+                    });
+
+                    // Add active class to clicked button
+                    this.classList.add('border-b-2');
+                    if (tabName === 'active') {
+                        this.classList.add('border-green-600', 'text-green-600');
+                    } else if (tabName === 'fulfilled') {
+                        this.classList.add('border-orange-600', 'text-orange-600');
+                    } else if (tabName === 'expired') {
+                        this.classList.add('border-red-600', 'text-red-600');
+                    }
+
+                    // Show selected tab content
+                    const selectedTab = document.getElementById(`tab-${tabName}`);
+                    if (selectedTab) {
+                        selectedTab.classList.remove('hidden');
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 
 

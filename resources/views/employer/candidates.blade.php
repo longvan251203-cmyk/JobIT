@@ -8,6 +8,217 @@
     <title>Tìm kiếm ứng viên - JobIT</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        /* ============ RECOMMENDED BADGE ENHANCED ANIMATION ============ */
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes glow-pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(251, 191, 36, 0.6),
+                    0 0 40px rgba(251, 191, 36, 0.4),
+                    0 0 60px rgba(251, 191, 36, 0.2);
+            }
+
+            50% {
+                box-shadow: 0 0 30px rgba(251, 191, 36, 0.8),
+                    0 0 60px rgba(251, 191, 36, 0.6),
+                    0 0 90px rgba(251, 191, 36, 0.4);
+            }
+        }
+
+        /* Hover effect trên recommended cards */
+        .candidate-card:has(.bg-gradient-to-r.from-yellow-400):hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(251, 191, 36, 0.3);
+        }
+
+        /* Progress bar animation */
+        @keyframes progressFill {
+            from {
+                width: 0%;
+            }
+        }
+
+        .candidate-card .bg-gradient-to-r.from-orange-400 {
+            animation: progressFill 1s ease-out;
+        }
+
+        /* Line clamp cho job title */
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        /* Animate.css fallback */
+        .animate__animated {
+            animation-duration: 0.8s;
+        }
+
+        .animate__fadeInUp {
+            animation-name: fadeInUp;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    <style>
+        .btn-invite {
+            width: 100%;
+            padding: 0.625rem;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-invite::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-invite:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.35);
+        }
+
+        .btn-invite:hover::before {
+            left: 100%;
+        }
+
+        .btn-invite:active {
+            transform: translateY(0);
+        }
+
+        /* Responsive buttons container */
+        .btn-container {
+            display: flex;
+            gap: 0.5rem;
+            flex-direction: column;
+        }
+
+        @media (max-width: 768px) {
+            .btn-container {
+                flex-direction: column;
+            }
+
+            .btn-invite {
+                width: 100%;
+            }
+        }
+
+        /* ============ RECOMMENDED BADGE ENHANCED ANIMATION ============ */
+        @keyframes spin {
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes glow-pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 20px rgba(251, 191, 36, 0.6),
+                    0 0 40px rgba(251, 191, 36, 0.4),
+                    0 0 60px rgba(251, 191, 36, 0.2);
+            }
+
+            50% {
+                box-shadow: 0 0 30px rgba(251, 191, 36, 0.8),
+                    0 0 60px rgba(251, 191, 36, 0.6),
+                    0 0 90px rgba(251, 191, 36, 0.4);
+            }
+        }
+
+        /* Hover effect trên recommended cards */
+        .candidate-card:has(.bg-gradient-to-r.from-yellow-400):hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(251, 191, 36, 0.3);
+        }
+
+        /* Progress bar animation */
+        @keyframes progressFill {
+            from {
+                width: 0%;
+            }
+        }
+
+        .candidate-card .bg-gradient-to-r.from-orange-400 {
+            animation: progressFill 1s ease-out;
+        }
+
+        /* Line clamp cho job title */
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Animate.css fallback */
+        .animate__animated {
+            animation-duration: 0.8s;
+        }
+
+        .animate__fadeInUp {
+            animation-name: fadeInUp;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 
     <style>
         /* ============ RECOMMENDED BADGE ANIMATION ============ */
@@ -563,13 +774,212 @@
                 border-top: 1px solid #e5e7eb;
             }
         }
+
+        /* ========================================
+        FILTER DROPDOWN HORIZONTAL STYLES
+        ======================================== */
+        .filter-section {
+            background: #f9fafb;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .filter-dropdown-wrapper {
+            position: relative;
+            display: inline-block;
+        }
+
+        .filter-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .filter-btn:hover {
+            border-color: #667eea;
+            background: #f3f4f6;
+            transform: translateY(-1px);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .filter-btn.btn-reset {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border-color: #ef4444;
+            margin-left: auto;
+        }
+
+        .filter-btn.btn-reset:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .filter-btn i:last-child {
+            transition: transform 0.3s ease;
+            font-size: 0.8rem;
+        }
+
+        .filter-btn.active i:last-child {
+            transform: rotate(180deg);
+        }
+
+        /* Dropdown Menu */
+        /* Dropdown Menu */
+        .filter-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 0.5rem;
+            min-width: 280px;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+            border: 1px solid #f0f0f0;
+        }
+
+        .filter-dropdown-menu.show {
+            max-height: 500px !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            overflow-y: auto !important;
+            display: block !important;
+        }
+
+        .filter-checkbox-item {
+            display: flex !important;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            margin: 0;
+            background: transparent;
+        }
+
+        .filter-checkbox-item:hover {
+            background: #f8f9ff;
+        }
+
+        .filter-checkbox-item input[type="checkbox"],
+        .filter-checkbox-item input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            min-width: 18px;
+            margin-right: 0.75rem;
+            cursor: pointer;
+            accent-color: #667eea;
+            border-radius: 4px;
+        }
+
+        .filter-checkbox-item span {
+            font-size: 0.95rem;
+            color: #1f2937;
+            flex: 1;
+            user-select: none;
+        }
+
+        .filter-checkbox-item input:checked+span {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        /* Custom Scrollbar */
+        .filter-dropdown-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .filter-dropdown-menu::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .filter-dropdown-menu::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .filter-dropdown-menu::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        #skillSearch {
+            padding: 0.75rem 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin: 0.5rem;
+            width: calc(100% - 2rem);
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        #skillSearch:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .filter-btn {
+                font-size: 0.85rem;
+                padding: 0.65rem 1rem;
+            }
+
+            .filter-dropdown-menu {
+                min-width: 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .filter-section {
+                padding: 1rem 0;
+            }
+
+            .filter-btn {
+                font-size: 0.8rem;
+                padding: 0.6rem 0.9rem;
+            }
+
+            .filter-dropdown-menu {
+                min-width: 200px;
+                left: auto;
+                right: 0;
+            }
+
+            .filter-btn.btn-reset {
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+        }
     </style>
+
 </head>
 
 <body>
 
-    <!-- HEADER -->
-    <!-- HEADER -->
+
     <!-- HEADER -->
     <header class="main-header sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 py-4">
@@ -738,236 +1148,249 @@
         </div>
     </header>
 
+    <!-- FILTER SECTION NGANG - NỀN TẢNG -->
+    <!-- FILTER SECTION NGANG - Form Thực -->
+    <section class="filter-section" style="background: #f9fafb; padding: 1.5rem 0; border-bottom: 1px solid #e5e7eb;">
+        <div class="max-w-7xl mx-auto px-6">
+            <form id="filterForm" method="GET" action="{{ route('employer.candidates') }}" class="flex items-center gap-3 flex-wrap">
+
+                <!-- 1. Experience Filter -->
+                <div class="filter-dropdown-wrapper relative">
+                    <button type="button" class="filter-btn" id="experienceFilterBtn">
+                        <i class="bi bi-briefcase"></i>
+                        <span>Kinh nghiệm</span>
+                        <i class="bi bi-chevron-down ms-2"></i>
+                    </button>
+                    <div class="filter-dropdown-menu" id="experienceDropdown">
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="experience[]" value="0" {{ in_array('0', (array)request('experience'), true) ? 'checked' : '' }}>
+                            <span>Chưa có kinh nghiệm</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="experience[]" value="0-1" {{ in_array('0-1', (array)request('experience'), true) ? 'checked' : '' }}>
+                            <span>Dưới 1 năm</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="experience[]" value="1-3" {{ in_array('1-3', (array)request('experience'), true) ? 'checked' : '' }}>
+                            <span>1 - 3 năm</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="experience[]" value="3-5" {{ in_array('3-5', (array)request('experience'), true) ? 'checked' : '' }}>
+                            <span>3 - 5 năm</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="experience[]" value="5+" {{ in_array('5+', (array)request('experience'), true) ? 'checked' : '' }}>
+                            <span>Trên 5 năm</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 2. Education Filter -->
+                <div class="filter-dropdown-wrapper relative">
+                    <button type="button" class="filter-btn" id="educationFilterBtn">
+                        <i class="bi bi-mortarboard"></i>
+                        <span>Trình độ</span>
+                        <i class="bi bi-chevron-down ms-2"></i>
+                    </button>
+                    <div class="filter-dropdown-menu" id="educationDropdown">
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="education[]" value="Trung cấp" {{ in_array('Trung cấp', (array)request('education'), true) ? 'checked' : '' }}>
+                            <span>Trung cấp</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="education[]" value="Cao đẳng" {{ in_array('Cao đẳng', (array)request('education'), true) ? 'checked' : '' }}>
+                            <span>Cao đẳng</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="education[]" value="Đại học" {{ in_array('Đại học', (array)request('education'), true) ? 'checked' : '' }}>
+                            <span>Đại học</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="education[]" value="Thạc sĩ" {{ in_array('Thạc sĩ', (array)request('education'), true) ? 'checked' : '' }}>
+                            <span>Thạc sĩ</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="education[]" value="Tiến sĩ" {{ in_array('Tiến sĩ', (array)request('education'), true) ? 'checked' : '' }}>
+                            <span>Tiến sĩ</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 3. Salary Filter -->
+                <div class="filter-dropdown-wrapper relative">
+                    <button type="button" class="filter-btn" id="salaryFilterBtn">
+                        <i class="bi bi-cash-stack"></i>
+                        <span>Mức lương</span>
+                        <i class="bi bi-chevron-down ms-2"></i>
+                    </button>
+                    <div class="filter-dropdown-menu" id="salaryDropdown">
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="salary[]" value="0-10" {{ in_array('0-10', (array)request('salary'), true) ? 'checked' : '' }}>
+                            <span>Dưới 10 triệu</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="salary[]" value="10-15" {{ in_array('10-15', (array)request('salary'), true) ? 'checked' : '' }}>
+                            <span>10 - 15 triệu</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="salary[]" value="15-20" {{ in_array('15-20', (array)request('salary'), true) ? 'checked' : '' }}>
+                            <span>15 - 20 triệu</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="salary[]" value="20-30" {{ in_array('20-30', (array)request('salary'), true) ? 'checked' : '' }}>
+                            <span>20 - 30 triệu</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="salary[]" value="30+" {{ in_array('30+', (array)request('salary'), true) ? 'checked' : '' }}>
+                            <span>Trên 30 triệu</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 4. Language Filter -->
+                <div class="filter-dropdown-wrapper relative">
+                    <button type="button" class="filter-btn" id="languageFilterBtn">
+                        <i class="bi bi-translate"></i>
+                        <span>Ngoại ngữ</span>
+                        <i class="bi bi-chevron-down ms-2"></i>
+                    </button>
+                    <div class="filter-dropdown-menu" id="languageDropdown">
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="language[]" value="Tiếng Anh" {{ in_array('Tiếng Anh', (array)request('language'), true) ? 'checked' : '' }}>
+                            <span>Tiếng Anh</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="language[]" value="Tiếng Nhật" {{ in_array('Tiếng Nhật', (array)request('language'), true) ? 'checked' : '' }}>
+                            <span>Tiếng Nhật</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="language[]" value="Tiếng Hàn" {{ in_array('Tiếng Hàn', (array)request('language'), true) ? 'checked' : '' }}>
+                            <span>Tiếng Hàn</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="language[]" value="Tiếng Trung" {{ in_array('Tiếng Trung', (array)request('language'), true) ? 'checked' : '' }}>
+                            <span>Tiếng Trung</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="language[]" value="Tiếng Pháp" {{ in_array('Tiếng Pháp', (array)request('language'), true) ? 'checked' : '' }}>
+                            <span>Tiếng Pháp</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 5. Gender Filter -->
+                <div class="filter-dropdown-wrapper relative">
+                    <button type="button" class="filter-btn" id="genderFilterBtn">
+                        <i class="bi bi-gender-ambiguous"></i>
+                        <span>Giới tính</span>
+                        <i class="bi bi-chevron-down ms-2"></i>
+                    </button>
+                    <div class="filter-dropdown-menu" id="genderDropdown">
+                        <label class="filter-checkbox-item">
+                            <input type="radio" name="gender" value="" {{ !request('gender') ? 'checked' : '' }}>
+                            <span>Tất cả</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="radio" name="gender" value="Nam" {{ request('gender') == 'Nam' ? 'checked' : '' }}>
+                            <span>Nam</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="radio" name="gender" value="Nữ" {{ request('gender') == 'Nữ' ? 'checked' : '' }}>
+                            <span>Nữ</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 6. Skills Filter -->
+                <div class="filter-dropdown-wrapper relative">
+                    <button type="button" class="filter-btn" id="skillsFilterBtn">
+                        <i class="bi bi-lightbulb"></i>
+                        <span>Kỹ năng</span>
+                        <i class="bi bi-chevron-down ms-2"></i>
+                    </button>
+                    <div class="filter-dropdown-menu" id="skillsDropdown" style="max-height: 400px; overflow-y: auto;">
+                        <input type="text" id="skillSearch" placeholder="Tìm kỹ năng..."
+                            style="padding: 0.75rem 1rem; border: 1px solid #e5e7eb; border-radius: 8px; margin: 0.5rem; width: calc(100% - 2rem);">
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="skills[]" value="PHP" {{ in_array('PHP', (array)request('skills'), true) ? 'checked' : '' }}>
+                            <span>PHP</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="skills[]" value="JavaScript" {{ in_array('JavaScript', (array)request('skills'), true) ? 'checked' : '' }}>
+                            <span>JavaScript</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="skills[]" value="Laravel" {{ in_array('Laravel', (array)request('skills'), true) ? 'checked' : '' }}>
+                            <span>Laravel</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="skills[]" value="React" {{ in_array('React', (array)request('skills'), true) ? 'checked' : '' }}>
+                            <span>React</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="skills[]" value="Vue.js" {{ in_array('Vue.js', (array)request('skills'), true) ? 'checked' : '' }}>
+                            <span>Vue.js</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="skills[]" value="Node.js" {{ in_array('Node.js', (array)request('skills'), true) ? 'checked' : '' }}>
+                            <span>Node.js</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="skills[]" value="Python" {{ in_array('Python', (array)request('skills'), true) ? 'checked' : '' }}>
+                            <span>Python</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="skills[]" value="Java" {{ in_array('Java', (array)request('skills'), true) ? 'checked' : '' }}>
+                            <span>Java</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="skills[]" value="C#" {{ in_array('C#', (array)request('skills'), true) ? 'checked' : '' }}>
+                            <span>C#</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="skills[]" value="Angular" {{ in_array('Angular', (array)request('skills'), true) ? 'checked' : '' }}>
+                            <span>Angular</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="skills[]" value="SQL" {{ in_array('SQL', (array)request('skills'), true) ? 'checked' : '' }}>
+                            <span>SQL</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="skills[]" value="MongoDB" {{ in_array('MongoDB', (array)request('skills'), true) ? 'checked' : '' }}>
+                            <span>MongoDB</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="skills[]" value="Docker" {{ in_array('Docker', (array)request('skills'), true) ? 'checked' : '' }}>
+                            <span>Docker</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="skills[]" value="AWS" {{ in_array('AWS', (array)request('skills'), true) ? 'checked' : '' }}>
+                            <span>AWS</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Hidden fields cho search & location -->
+                <input type="hidden" name="keyword" id="keywordInput" value="{{ request('keyword') }}">
+                <input type="hidden" name="location" id="locationInput" value="{{ request('location') }}">
+
+                <!-- Reset Button -->
+                <button type="reset" onclick="resetFilters()" class="filter-btn btn-reset" style="margin-left: auto;">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    Đặt lại
+                </button>
+            </form>
+        </div>
+    </section>
+
     <!-- MAIN CONTENT -->
     <div class="max-w-7xl mx-auto px-6 py-8">
         <div class="grid grid-cols-12 gap-6">
 
-            <!-- FILTER SIDEBAR -->
-            <aside class="col-span-12 lg:col-span-3">
-                <div class="filter-panel sticky top-24">
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-lg font-bold text-gray-800">Bộ lọc</h3>
-                        <button onclick="resetFilters()" class="text-sm text-purple-600 hover:text-purple-700 font-semibold">
-                            Đặt lại
-                        </button>
-                    </div>
-
-                    <form id="filterForm">
-                        <!-- Kinh nghiệm -->
-                        <div class="filter-section">
-                            <div class="filter-title">
-                                <i class="bi bi-briefcase text-purple-600"></i> Kinh nghiệm
-                            </div>
-                            <div class="space-y-2">
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="experience[]" value="0" {{ in_array('0', request('experience', [])) ? 'checked' : '' }}>
-                                    <span>Chưa có kinh nghiệm</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="experience[]" value="0-1" {{ in_array('0-1', request('experience', [])) ? 'checked' : '' }}>
-                                    <span>Dưới 1 năm</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="experience[]" value="1-3" {{ in_array('1-3', request('experience', [])) ? 'checked' : '' }}>
-                                    <span>1 - 3 năm</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="experience[]" value="3-5" {{ in_array('3-5', request('experience', [])) ? 'checked' : '' }}>
-                                    <span>3 - 5 năm</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="experience[]" value="5+" {{ in_array('5+', request('experience', [])) ? 'checked' : '' }}>
-                                    <span>Trên 5 năm</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Trình độ học vấn -->
-                        <div class="filter-section">
-                            <div class="filter-title">
-                                <i class="bi bi-mortarboard text-purple-600"></i> Trình độ
-                            </div>
-                            <div class="space-y-2">
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="education[]" value="Trung cấp" {{ in_array('Trung cấp', request('education', [])) ? 'checked' : '' }}>
-                                    <span>Trung cấp</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="education[]" value="Cao đẳng" {{ in_array('Cao đẳng', request('education', [])) ? 'checked' : '' }}>
-                                    <span>Cao đẳng</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="education[]" value="Đại học" {{ in_array('Đại học', request('education', [])) ? 'checked' : '' }}>
-                                    <span>Đại học</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="education[]" value="Thạc sĩ" {{ in_array('Thạc sĩ', request('education', [])) ? 'checked' : '' }}>
-                                    <span>Thạc sĩ</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="education[]" value="Tiến sĩ" {{ in_array('Tiến sĩ', request('education', [])) ? 'checked' : '' }}>
-                                    <span>Tiến sĩ</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Mức lương mong muốn -->
-                        <div class="filter-section">
-                            <div class="filter-title">
-                                <i class="bi bi-cash-stack text-purple-600"></i> Mức lương (triệu VNĐ)
-                            </div>
-                            <div class="space-y-2">
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="salary[]" value="0-10" {{ in_array('0-10', request('salary', [])) ? 'checked' : '' }}>
-                                    <span>Dưới 10 triệu</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="salary[]" value="10-15" {{ in_array('10-15', request('salary', [])) ? 'checked' : '' }}>
-                                    <span>10 - 15 triệu</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="salary[]" value="15-20" {{ in_array('15-20', request('salary', [])) ? 'checked' : '' }}>
-                                    <span>15 - 20 triệu</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="salary[]" value="20-30" {{ in_array('20-30', request('salary', [])) ? 'checked' : '' }}>
-                                    <span>20 - 30 triệu</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="salary[]" value="30+" {{ in_array('30+', request('salary', [])) ? 'checked' : '' }}>
-                                    <span>Trên 30 triệu</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Ngoại ngữ -->
-                        <div class="filter-section">
-                            <div class="filter-title">
-                                <i class="bi bi-translate text-purple-600"></i> Ngoại ngữ
-                            </div>
-                            <div class="space-y-2">
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="language[]" value="Tiếng Anh" {{ in_array('Tiếng Anh', request('language', [])) ? 'checked' : '' }}>
-                                    <span>Tiếng Anh</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="language[]" value="Tiếng Nhật" {{ in_array('Tiếng Nhật', request('language', [])) ? 'checked' : '' }}>
-                                    <span>Tiếng Nhật</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="language[]" value="Tiếng Hàn" {{ in_array('Tiếng Hàn', request('language', [])) ? 'checked' : '' }}>
-                                    <span>Tiếng Hàn</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="language[]" value="Tiếng Trung" {{ in_array('Tiếng Trung', request('language', [])) ? 'checked' : '' }}>
-                                    <span>Tiếng Trung</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="language[]" value="Tiếng Pháp" {{ in_array('Tiếng Pháp', request('language', [])) ? 'checked' : '' }}>
-                                    <span>Tiếng Pháp</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Giới tính -->
-                        <div class="filter-section">
-                            <div class="filter-title">
-                                <i class="bi bi-gender-ambiguous text-purple-600"></i> Giới tính
-                            </div>
-                            <div class="space-y-2">
-                                <label class="radio-item">
-                                    <input type="radio" name="gender" value="" {{ !request('gender') ? 'checked' : '' }}>
-                                    <span>Tất cả</span>
-                                </label>
-                                <label class="radio-item">
-                                    <input type="radio" name="gender" value="Nam" {{ request('gender') == 'Nam' ? 'checked' : '' }}>
-                                    <span>Nam</span>
-                                </label>
-                                <label class="radio-item">
-                                    <input type="radio" name="gender" value="Nữ" {{ request('gender') == 'Nữ' ? 'checked' : '' }}>
-                                    <span>Nữ</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <!-- Kỹ năng -->
-                        <div class="filter-section">
-                            <div class="filter-title">
-                                <i class="bi bi-lightbulb text-purple-600"></i> Kỹ năng
-                            </div>
-                            <input type="text"
-                                id="skillSearch"
-                                placeholder="Tìm kỹ năng..."
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm mb-3 focus:outline-none focus:border-purple-500">
-                            <div class="space-y-2 max-h-64 overflow-y-auto" id="skillsList">
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="skills[]" value="PHP" {{ in_array('PHP', request('skills', [])) ? 'checked' : '' }}>
-                                    <span>PHP</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="skills[]" value="JavaScript" {{ in_array('JavaScript', request('skills', [])) ? 'checked' : '' }}>
-                                    <span>JavaScript</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="skills[]" value="Laravel" {{ in_array('Laravel', request('skills', [])) ? 'checked' : '' }}>
-                                    <span>Laravel</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="skills[]" value="React" {{ in_array('React', request('skills', [])) ? 'checked' : '' }}>
-                                    <span>React</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="skills[]" value="Vue.js" {{ in_array('Vue.js', request('skills', [])) ? 'checked' : '' }}>
-                                    <span>Vue.js</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="skills[]" value="Node.js" {{ in_array('Node.js', request('skills', [])) ? 'checked' : '' }}>
-                                    <span>Node.js</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="skills[]" value="Python" {{ in_array('Python', request('skills', [])) ? 'checked' : '' }}>
-                                    <span>Python</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="skills[]" value="Java" {{ in_array('Java', request('skills', [])) ? 'checked' : '' }}>
-                                    <span>Java</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="skills[]" value="C#" {{ in_array('C#', request('skills', [])) ? 'checked' : '' }}>
-                                    <span>C#</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="skills[]" value="Angular" {{ in_array('Angular', request('skills', [])) ? 'checked' : '' }}>
-                                    <span>Angular</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="skills[]" value="SQL" {{ in_array('SQL', request('skills', [])) ? 'checked' : '' }}>
-                                    <span>SQL</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="skills[]" value="MongoDB" {{ in_array('MongoDB', request('skills', [])) ? 'checked' : '' }}>
-                                    <span>MongoDB</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="skills[]" value="Docker" {{ in_array('Docker', request('skills', [])) ? 'checked' : '' }}>
-                                    <span>Docker</span>
-                                </label>
-                                <label class="checkbox-item">
-                                    <input type="checkbox" name="skills[]" value="AWS" {{ in_array('AWS', request('skills', [])) ? 'checked' : '' }}>
-                                    <span>AWS</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <button type="button" onclick="applyFilters()" class="w-full py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg transition-all mt-4">
-                            <i class="bi bi-funnel mr-2"></i> Áp dụng bộ lọc
-                        </button>
-                    </form>
-                </div>
-            </aside>
+            <!-- ❌ XÓA FILTER SIDEBAR - ĐÃ CHUYỂN LÊN TRÊN -->
 
             <!-- CANDIDATES GRID -->
-            <main class="col-span-12 lg:col-span-9">
+            <main class="col-span-12">
                 <!-- Result Info -->
                 <div class="bg-white rounded-xl shadow-sm p-4 mb-6 flex items-center justify-between">
                     <div>
@@ -993,36 +1416,31 @@
                             <div class="card-header"></div>
 
                             <div class="card-avatar">
-                                @if($candidate->avatar)
-                                <img src="{{ asset('assets/img/avt/' . $candidate->avatar) }}" alt="{{ $candidate->hoten_uv }}">
-                                @else
-                                <div class="w-full h-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-2xl font-bold">
-                                    {{ strtoupper(substr($candidate->hoten_uv, 0, 1)) }}
-                                </div>
-                                @endif
+                                <img src="{{ $candidate->avatar ? asset('assets/img/avt/'.$candidate->avatar) : asset('assets/img/avt/default-avatar.png') }}"
+                                    alt="{{ $candidate->hoten_uv }}">
                             </div>
 
                             <div class="card-content">
-                                <h3 class="candidate-name">
-                                    {{ $candidate->hoten_uv }}
-                                </h3>
-                                <p class="candidate-title">
-                                    {{ $candidate->vitritungtuyen ?? 'Chưa cập nhật' }}
-                                </p>
+                                <h3 class="candidate-name">{{ $candidate->hoten_uv }}</h3>
+                                <p class="candidate-title">{{ $candidate->vitriungtuyen ?? 'Chưa cập nhật' }}</p>
 
                                 <div class="space-y-1 mb-3">
-                                    <div class="candidate-info flex items-center">
+                                    @if($candidate->diachi_uv)
+                                    <div class="candidate-info">
                                         <i class="bi bi-geo-alt"></i>
-                                        <span class="truncate">{{ $candidate->diachi_uv ?? 'Chưa cập nhật' }}</span>
+                                        <span class="truncate">{{ $candidate->diachi_uv }}</span>
                                     </div>
+                                    @endif
+
                                     @if($candidate->kinhnghiem && $candidate->kinhnghiem->count() > 0)
-                                    <div class="candidate-info flex items-center">
+                                    <div class="candidate-info">
                                         <i class="bi bi-briefcase"></i>
                                         <span>{{ $candidate->kinhnghiem->count() }} năm kinh nghiệm</span>
                                     </div>
                                     @endif
+
                                     @if($candidate->hocvan && $candidate->hocvan->first())
-                                    <div class="candidate-info flex items-center">
+                                    <div class="candidate-info">
                                         <i class="bi bi-mortarboard"></i>
                                         <span>{{ $candidate->hocvan->first()->trinh_do ?? 'Đại học' }}</span>
                                     </div>
@@ -1040,9 +1458,15 @@
                                 </div>
                                 @endif
 
-                                <button onclick="viewCV('{{ $candidate->id_uv }}')" class="btn-view-profile">
-                                    <i class="bi bi-eye mr-1"></i> Xem hồ sơ
-                                </button>
+                                <!-- ✅ THÊM CONTAINER CHO 2 NÚTTON -->
+                                <div class="btn-container" style="display: flex; gap: 0.5rem; flex-direction: column; margin-top: auto;">
+                                    <button onclick="viewCV('{{ $candidate->id_uv }}')" class="btn-view-profile">
+                                        <i class="bi bi-eye mr-1"></i> Xem hồ sơ
+                                    </button>
+                                    <button onclick="inviteCandidate('{{ $candidate->id_uv }}')" class="btn-invite">
+                                        <i class="bi bi-person-plus-fill"></i> Mời ứng viên
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         @endforeach
@@ -1095,269 +1519,434 @@
                     @else
                     <div class="empty-state">
                         <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0114 0z" />
                         </svg>
                         <h3 class="text-2xl font-bold text-gray-800 mb-2">Không tìm thấy ứng viên</h3>
                         <p class="text-gray-600">Vui lòng thử lại với bộ lọc khác</p>
                     </div>
                     @endif
                 </div>
+                <!-- Gợi ý ứng viên -->
+                <!-- Gợi ý ứng viên -->
+                @if(!empty($recommendedApplicants) && count($recommendedApplicants) > 0)
+                <div class="mb-8 animate__animated animate__fadeInUp mt-12">
+                    {{-- Header với Badge Gradient --}}
+                    <div class="bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-500 rounded-2xl p-6 mb-6 shadow-xl relative overflow-hidden">
+                        {{-- Animated Background Pattern --}}
+                        <div class="absolute inset-0 opacity-10 top-8">
+                            <div class="absolute w-96 h-96 -top-48 -right-48 bg-white rounded-full"></div>
+                            <div class="absolute w-64 h-64 -bottom-32 -left-32 bg-white rounded-full"></div>
+                        </div>
 
-                @php
-                Log::info('🎯 BLADE CHECK:', [
-                'isset' => isset($recommendedApplicants),
-                'is_array' => isset($recommendedApplicants) && is_array($recommendedApplicants),
-                'count' => isset($recommendedApplicants) ? count($recommendedApplicants) : 'N/A',
-                'data' => $recommendedApplicants ?? 'NOT SET'
-                ]);
-
-                $hasRecommendations = isset($recommendedApplicants) &&
-                is_array($recommendedApplicants) &&
-                count($recommendedApplicants) > 0;
-                @endphp
-
-                @if($hasRecommendations)
-                <div class="mt-12 pt-8 border-t-2 border-gray-200">
-                    <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl p-6 mb-6 border-2 border-purple-200">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <h2 class="text-2xl font-bold text-gray-800 mb-2 flex items-center gap-2">
-                                    <div class="w-10 h-10 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-                                        <i class="bi bi-stars text-white"></i>
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-3">
+                                    {{-- Icon với Animation --}}
+                                    <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg animate-bounce">
+                                        <i class="bi bi-star-fill text-yellow-500 text-2xl"></i>
                                     </div>
-                                    ⭐ Ứng viên được gợi ý cho bạn
-                                </h2>
-                                <p class="text-gray-600 ml-12">
-                                    <i class="bi bi-info-circle mr-1"></i>
-                                    {{ count($recommendedApplicants) }} ứng viên phù hợp nhất với các vị trí đang tuyển của công ty
-                                </p>
+                                    <div>
+                                        <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                                            🎯 Ứng viên được đề xuất
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-white text-orange-600 shadow-md">
+                                                {{ count($recommendedApplicants) }} người
+                                            </span>
+                                        </h2>
+                                        <p class="text-white/90 text-sm mt-1">
+                                            Dựa trên các vị trí đang tuyển dụng của công ty bạn
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {{-- View All Button --}}
+                                <button onclick="toggleRecommendedSection()"
+                                    class="px-6 py-2.5 bg-white text-orange-600 rounded-xl font-semibold hover:shadow-2xl transition-all duration-300 transform hover:scale-105">
+                                    <i class="bi bi-eye mr-2"></i>
+                                    Xem tất cả
+                                </button>
                             </div>
                         </div>
                     </div>
 
-                    <div class="candidates-grid">
-                        @forelse($recommendedApplicants as $item)
-                        @php
-                        $candidate = $item['applicant'];
-                        $matchScore = round($item['score']);
-                        $matchedJob = $item['job'];
-                        $matchDetails = $item['match_details'];
-                        @endphp
-
-                        <div class="candidate-card relative overflow-visible">
-                            <!-- Badge điểm match -->
-                            <div class="absolute -top-3 -right-3 z-10">
+                    {{-- Recommended Candidates Grid --}}
+                    <div id="recommendedCandidatesGrid" class="candidates-grid mb-6">
+                        @foreach($recommendedApplicants as $rec)
+                        <div class="candidate-card relative">
+                            {{-- ⭐ RECOMMENDED BADGE - Nổi bật hơn --}}
+                            <div class="absolute top-3 right-3 z-20">
                                 <div class="relative">
-                                    <div class="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white px-4 py-2 rounded-full text-sm font-bold shadow-2xl flex items-center gap-2 border-2 border-white animate-pulse">
-                                        <i class="bi bi-star-fill"></i>
-                                        <span>{{ $matchScore }}%</span>
+                                    {{-- Glow Effect --}}
+                                    <div class="absolute inset-0 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full blur-lg opacity-60 animate-pulse"></div>
+
+                                    {{-- Badge Content --}}
+                                    <div class="relative bg-gradient-to-r from-yellow-400 via-orange-400 to-pink-500 text-white px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1.5 shadow-xl">
+                                        <i class="bi bi-star-fill animate-spin" style="animation: spin 3s linear infinite;"></i>
+                                        <span>{{ round($rec['best_score']) }}% Match</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="card-header"></div>
+                            {{-- Card Header với Gradient --}}
+                            <div class="card-header" style="background: linear-gradient(135deg, #f59e0b 0%, #ec4899 100%);"></div>
 
+                            {{-- Avatar --}}
                             <div class="card-avatar">
-                                @if($candidate->avatar)
-                                <img src="{{ asset('assets/img/avt/' . $candidate->avatar) }}" alt="{{ $candidate->hoten_uv }}">
+                                @if($rec['applicant']->avatar)
+                                <img src="{{ asset('assets/img/avt/' . $rec['applicant']->avatar) }}"
+                                    alt="{{ $rec['applicant']->hoten_uv }}"
+                                    class="w-full h-full object-cover">
                                 @else
-                                <div class="w-full h-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-2xl font-bold">
-                                    {{ strtoupper(substr($candidate->hoten_uv, 0, 1)) }}
+                                <div class="w-full h-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-white text-2xl font-bold">
+                                    {{ strtoupper(substr($rec['applicant']->hoten_uv, 0, 1)) }}
                                 </div>
                                 @endif
                             </div>
 
+                            {{-- Card Content --}}
                             <div class="card-content">
-                                <h3 class="candidate-name">{{ $candidate->hoten_uv }}</h3>
-                                <p class="candidate-title">{{ $candidate->vitritungtuyen ?? 'Chưa cập nhật' }}</p>
+                                <h3 class="candidate-name">
+                                    {{ $rec['applicant']->hoten_uv }}
+                                </h3>
+                                <p class="candidate-title">
+                                    {{ $rec['applicant']->vitriungtuyen ?? 'Chưa cập nhật' }}
+                                </p>
 
-                                <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-3 mb-3 border-2 border-purple-200">
-                                    <p class="text-xs text-purple-700 font-bold mb-1 flex items-center gap-1">
-                                        <i class="bi bi-bullseye"></i>
-                                        Phù hợp với vị trí:
-                                    </p>
-                                    <p class="text-sm text-purple-900 font-semibold line-clamp-2">
-                                        {{ $matchedJob->tieude ?? 'N/A' }}
-                                    </p>
-                                </div>
+                                {{-- Match Score Breakdown --}}
+                                <div class="bg-gradient-to-r from-orange-50 to-pink-50 rounded-lg p-3 mb-3">
+                                    <div class="text-xs space-y-1.5">
+                                        {{-- Location Match --}}
+                                        @if(isset($rec['matched_jobs'][0]['match_details']['location']))
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-gray-600 flex items-center gap-1">
+                                                <i class="bi bi-geo-alt text-orange-500"></i>
+                                                Địa điểm
+                                            </span>
+                                            <div class="flex items-center gap-1">
+                                                <div class="w-16 bg-gray-200 rounded-full h-1.5">
+                                                    <div class="bg-gradient-to-r from-orange-400 to-pink-500 h-1.5 rounded-full"
+                                                        style="width: {{ $rec['matched_jobs'][0]['match_details']['location']['score'] }}%;"></div>
+                                                </div>
+                                                <span class="font-bold text-orange-600 text-xs">
+                                                    {{ round($rec['matched_jobs'][0]['match_details']['location']['score']) }}%
+                                                </span>
+                                            </div>
+                                        </div>
+                                        @endif
 
-                                <div class="space-y-1 mb-3">
-                                    <div class="candidate-info flex items-center">
-                                        <i class="bi bi-geo-alt"></i>
-                                        <span class="truncate">{{ $candidate->diachi_uv ?? 'Chưa cập nhật' }}</span>
+                                        {{-- Skills Match --}}
+                                        @if(isset($rec['matched_jobs'][0]['match_details']['skills']))
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-gray-600 flex items-center gap-1">
+                                                <i class="bi bi-lightbulb text-orange-500"></i>
+                                                Kỹ năng
+                                            </span>
+                                            <div class="flex items-center gap-1">
+                                                <div class="w-16 bg-gray-200 rounded-full h-1.5">
+                                                    <div class="bg-gradient-to-r from-orange-400 to-pink-500 h-1.5 rounded-full"
+                                                        style="width: {{ $rec['matched_jobs'][0]['match_details']['skills']['score'] }}%"></div>
+                                                </div>
+                                                <span class="font-bold text-orange-600 text-xs">
+                                                    {{ round($rec['matched_jobs'][0]['match_details']['skills']['score']) }}%
+                                                </span>
+                                            </div>
+                                        </div>
+                                        @endif
+
+                                        {{-- Position Match --}}
+                                        @if(isset($rec['matched_jobs'][0]['match_details']['position']))
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-gray-600 flex items-center gap-1">
+                                                <i class="bi bi-briefcase text-orange-500"></i>
+                                                Vị trí
+                                            </span>
+                                            <div class="flex items-center gap-1">
+                                                <div class="w-16 bg-gray-200 rounded-full h-1.5">
+                                                    <div class="bg-gradient-to-r from-orange-400 to-pink-500 h-1.5 rounded-full"
+                                                        style="width: {{ $rec['matched_jobs'][0]['match_details']['position']['score'] }}%"></div>
+                                                </div>
+                                                <span class="font-bold text-orange-600 text-xs">
+                                                    {{ round($rec['matched_jobs'][0]['match_details']['position']['score']) }}%
+                                                </span>
+                                            </div>
+                                        </div>
+                                        @endif
                                     </div>
-                                    @if($candidate->kinhnghiem && $candidate->kinhnghiem->count() > 0)
-                                    <div class="candidate-info flex items-center">
-                                        <i class="bi bi-briefcase"></i>
-                                        <span>{{ $candidate->kinhnghiem->count() }} năm kinh nghiệm</span>
-                                    </div>
-                                    @endif
                                 </div>
 
-                                @if($candidate->kynang && $candidate->kynang->count() > 0)
-                                <div class="skill-tags">
-                                    @foreach($candidate->kynang->take(3) as $skill)
-                                    <span class="skill-tag">{{ $skill->ten_ky_nang }}</span>
-                                    @endforeach
-                                </div>
-                                @endif
-
-                                <button onclick="viewCV('{{ $candidate->id_uv }}')" class="btn-view-profile">
+                                <button onclick="viewCV('{{ $rec['applicant']->id_uv }}')" class="btn-view-profile">
                                     <i class="bi bi-eye mr-1"></i> Xem hồ sơ
                                 </button>
                             </div>
                         </div>
-                        @empty
-                        <div class="col-span-3 text-center py-8">
-                            <p class="text-gray-500">Chưa có ứng viên được gợi ý</p>
-                        </div>
-                        @endforelse
+                        @endforeach
                     </div>
                 </div>
-                @else
-                <!-- DEBUG khi không có dữ liệu -->
-                @if(env('APP_DEBUG'))
-                <div class="mt-8 p-4 bg-yellow-50 border-2 border-yellow-300 rounded-lg">
-                    <p class="text-yellow-800 font-semibold">🔧 DEBUG MODE:</p>
-                    <p class="text-yellow-700 text-sm mt-2">
-                        recommendedApplicants = <code>{{ isset($recommendedApplicants) ? json_encode($recommendedApplicants) : 'undefined' }}</code>
-                    </p>
-                </div>
                 @endif
-                @endif
-            </main> <!-- ✅ Đóng main tag ở đây -->
+            </main>
+        </div>
+    </div>
 
-        </div> <!-- Đóng grid 12 cols -->
-    </div> <!-- Đóng max-width container -->
-
-    <!-- CV MODAL -->
-    <div id="cvModal" class="hidden modal-overlay" onclick="closeModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
+    <!-- MODAL XEM CV -->
+    <div id="cvModal" class="modal-overlay hidden" onclick="closeModal(event)">
+        <div class="modal-content">
             <div class="modal-header">
-                <h3 class="text-2xl font-bold">Hồ sơ ứng viên</h3>
-                <button onclick="closeModal()" class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/20 transition-all">
-                    <i class="bi bi-x-lg text-2xl"></i>
+                <h3 class="text-lg font-semibold">Hồ sơ ứng viên</h3>
+                <button onclick="closeModal(event)" class="text-white">
+                    <i class="bi bi-x-lg"></i>
                 </button>
             </div>
-            <div class="modal-body" id="cvContent">
-                <div class="loading">
-                    <div class="spinner"></div>
-                </div>
+            <div id="cvContent" class="modal-body">
+                <!-- Nội dung CV sẽ được nạp qua AJAX -->
             </div>
-            <div class="bg-gray-50 px-6 py-4 flex items-center justify-end gap-3">
-                <button onclick="downloadCV()" class="px-6 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-100 transition-all font-semibold">
+            <div class="p-4 border-t border-gray-200">
+                <button onclick="downloadCV()" class="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-semibold hover:shadow-md transition-all">
                     <i class="bi bi-download mr-2"></i> Tải CV
                 </button>
-                <button onclick="contactCandidate()" class="px-6 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all font-semibold">
-                    <i class="bi bi-envelope mr-2"></i> Liên hệ
+                <button onclick="contactCandidate()" class="ml-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-semibold hover:shadow-md transition-all">
+                    <i class="bi bi-chat-dots mr-2"></i> Liên hệ
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- MODAL GỬI THÔNG TIN TUYỂN DỤNG -->
+    <div id="inviteModal" class="modal-overlay hidden" onclick="closeInviteModal(event)">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="text-lg font-semibold">Mời ứng viên</h3>
+                <button onclick="closeInviteModal(event)" class="text-white">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="inviteJobsList" class="space-y-4">
+                    <!-- Danh sách job sẽ được nạp qua AJAX -->
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-200">
+                <button onclick="closeInviteModal(event)" class="w-full px-4 py-2 bg-gray-200 rounded-lg font-semibold hover:bg-gray-300 transition-all">
+                    Đóng
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT CHÍNH -->
+    <!-- THAY THẾ PHẦN SCRIPT CHÍNH (từ dòng <script> cuối cùng) -->
+
     <script>
         let currentCandidateId = null;
+        let currentInviteCandidate = null;
 
-        // Profile menu toggle
-        document.getElementById('btnProfile')?.addEventListener('click', function(e) {
-            e.stopPropagation();
-            document.getElementById('profileMenu').classList.toggle('hidden');
+        // ============ KHỞI ĐỘNG FILTER DROPDOWN ============
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeFilterDropdowns();
+            initializeRecommendedCards();
+            restoreFilterStates();
         });
 
-        document.addEventListener('click', function(e) {
-            const menu = document.getElementById('profileMenu');
-            if (menu && !menu.contains(e.target) && !document.getElementById('btnProfile').contains(e.target)) {
-                menu.classList.add('hidden');
-            }
-        });
+        // ============ KHỞI TẠO FILTER DROPDOWNS ============
+        function initializeFilterDropdowns() {
+            const filterButtons = document.querySelectorAll('[id$="FilterBtn"]');
 
-        // Search function - CHỈ TÌM KHI NHẤN NÚT
-        function searchCandidates() {
-            const keyword = document.getElementById('searchKeyword').value.trim();
-            const location = document.getElementById('locationFilter').value.trim();
+            // Thêm sự kiện click cho mỗi button
+            filterButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleDropdown(this);
+                });
+            });
 
-            const url = new URL("{{ route('employer.candidates') }}");
-
-            // Thêm keyword nếu có
-            if (keyword) {
-                url.searchParams.set('keyword', keyword);
-            }
-
-            // Thêm location nếu có
-            if (location) {
-                url.searchParams.set('location', location);
-            }
-
-            // Giữ lại các filter đã chọn
-            const formData = new FormData(document.getElementById('filterForm'));
-            for (let [key, value] of formData.entries()) {
-                if (value) {
-                    url.searchParams.append(key, value);
+            // Đóng dropdown khi click ngoài
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.filter-dropdown-wrapper')) {
+                    closeAllDropdowns();
                 }
-            }
+            });
 
-            // Giữ lại sort
-            const sortBy = document.getElementById('sortBy')?.value;
-            if (sortBy) {
-                url.searchParams.set('sort', sortBy);
-            }
+            // ✅ FIX: Ngăn dropdown đóng khi click vào bên trong
+            document.querySelectorAll('.filter-dropdown-menu').forEach(menu => {
+                menu.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            });
 
-            window.location.href = url.toString();
+            // ✅ FIX: Submit form khi thay đổi checkbox/radio
+            document.querySelectorAll('.filter-dropdown-menu input[type="checkbox"], .filter-dropdown-menu input[type="radio"]').forEach(input => {
+                input.addEventListener('change', function(e) {
+                    e.stopPropagation();
+                    updateFilterButtonState(this);
+
+                    // ✅ Delay để user có thể chọn nhiều checkbox
+                    clearTimeout(window.filterSubmitTimeout);
+                    window.filterSubmitTimeout = setTimeout(() => {
+                        applyFiltersAuto();
+                    }, 800); // 800ms delay
+                });
+            });
+
+            // Skill search
+            const skillSearch = document.getElementById('skillSearch');
+            if (skillSearch) {
+                skillSearch.addEventListener('input', function(e) {
+                    e.stopPropagation();
+                    const query = this.value.toLowerCase();
+                    document.querySelectorAll('#skillsDropdown .filter-checkbox-item').forEach(item => {
+                        const text = item.textContent.toLowerCase();
+                        item.style.display = text.includes(query) ? 'flex' : 'none';
+                    });
+                });
+
+                skillSearch.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                });
+            }
         }
 
-        // ============ SORT - GIỮ LẠI CÁC FILTER KHI SORT ============
-        function sortCandidates() {
-            const sortBy = document.getElementById('sortBy').value;
-            const url = new URL(window.location.href);
-            url.searchParams.set('sort', sortBy);
-            window.location.href = url.toString();
+        // ============ TOGGLE DROPDOWN ============
+        function toggleDropdown(btn) {
+            const dropdownId = btn.id.replace('FilterBtn', 'Dropdown');
+            const menu = document.getElementById(dropdownId);
+
+            if (!menu) {
+                console.warn(`❌ Không tìm thấy dropdown: ${dropdownId}`);
+                return;
+            }
+
+            const isCurrentlyOpen = menu.classList.contains('show');
+
+            // Đóng các dropdown khác
+            document.querySelectorAll('.filter-dropdown-menu.show').forEach(m => {
+                if (m !== menu) {
+                    m.classList.remove('show');
+                }
+            });
+
+            // Đóng các button khác
+            document.querySelectorAll('[id$="FilterBtn"]').forEach(b => {
+                if (b !== btn && !b.classList.contains('btn-reset')) {
+                    b.classList.remove('active');
+                }
+            });
+
+            // Toggle dropdown hiện tại
+            if (isCurrentlyOpen) {
+                menu.classList.remove('show');
+                btn.classList.remove('active');
+            } else {
+                menu.classList.add('show');
+                btn.classList.add('active');
+            }
         }
 
-        // ============ APPLY FILTERS - CẬP NHẬT ============
-        function applyFilters() {
-            const form = document.getElementById('filterForm');
-            const formData = new FormData(form);
+        // ============ ĐÓNG TẤT CẢ DROPDOWNS ============
+        function closeAllDropdowns() {
+            document.querySelectorAll('.filter-dropdown-menu').forEach(m => {
+                m.classList.remove('show');
+            });
+            document.querySelectorAll('[id$="FilterBtn"]:not(.btn-reset)').forEach(btn => {
+                const dropdown = document.getElementById(btn.id.replace('FilterBtn', 'Dropdown'));
+                if (dropdown) {
+                    const hasChecked = dropdown.querySelector('input:checked');
+                    if (hasChecked) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                }
+            });
+        }
+
+        // ============ CẬP NHẬT FILTER BUTTON STATE ============
+        function updateFilterButtonState(input) {
+            const dropdown = input.closest('.filter-dropdown-menu');
+            const button = dropdown?.parentElement.querySelector('.filter-btn');
+
+            if (dropdown && button) {
+                const hasChecked = dropdown.querySelector('input:checked');
+                button.classList.toggle('active', !!hasChecked);
+            }
+        }
+
+        // ============ RESTORE FILTER BUTTON STATES ============
+        function restoreFilterStates() {
+            const filterButtons = [{
+                    id: 'experienceFilterBtn',
+                    name: 'experience[]'
+                },
+                {
+                    id: 'educationFilterBtn',
+                    name: 'education[]'
+                },
+                {
+                    id: 'salaryFilterBtn',
+                    name: 'salary[]'
+                },
+                {
+                    id: 'languageFilterBtn',
+                    name: 'language[]'
+                },
+                {
+                    id: 'genderFilterBtn',
+                    name: 'gender'
+                },
+                {
+                    id: 'skillsFilterBtn',
+                    name: 'skills[]'
+                }
+            ];
+
+            filterButtons.forEach(btn => {
+                const element = document.getElementById(btn.id);
+                if (element) {
+                    const hasChecked = document.querySelector(`input[name="${btn.name}"]:checked`);
+                    if (hasChecked) {
+                        element.classList.add('active');
+                    }
+                }
+            });
+        }
+
+        // ============ APPLY FILTERS - TỰ ĐỘNG ============
+        function applyFiltersAuto() {
             const params = new URLSearchParams();
 
-            // Add all form data từ filter
-            for (let [key, value] of formData.entries()) {
-                if (value) {
-                    params.append(key, value);
-                }
+            // Keyword & Location
+            const keyword = document.getElementById('searchKeyword')?.value || '';
+            const location = document.getElementById('locationFilter')?.value || '';
+            if (keyword) params.append('keyword', keyword);
+            if (location) params.append('location', location);
+
+            // ✅ FIX: Lấy đúng giá trị từ checkbox
+            ['experience', 'education', 'salary', 'language', 'skills'].forEach(filterName => {
+                document.querySelectorAll(`input[name="${filterName}[]"]:checked`).forEach(el => {
+                    params.append(`${filterName}[]`, el.value);
+                });
+            });
+
+            // Gender (radio)
+            const genderSelected = document.querySelector('input[name="gender"]:checked');
+            if (genderSelected && genderSelected.value) {
+                params.append('gender', genderSelected.value);
             }
 
-            // Add search keyword (nếu có)
-            const keyword = document.getElementById('searchKeyword').value.trim();
-            if (keyword) {
-                params.set('keyword', keyword);
-            }
-
-            // Add location (nếu có)
-            const location = document.getElementById('locationFilter').value.trim();
-            if (location) {
-                params.set('location', location);
-            }
-
-            // Add sort if exists
+            // Sort
             const sortBy = document.getElementById('sortBy')?.value;
-            if (sortBy) {
-                params.set('sort', sortBy);
-            }
+            if (sortBy) params.append('sort', sortBy);
 
-            window.location.href = `{{ route('employer.candidates') }}?${params.toString()}`;
+            // Navigate
+            const queryString = params.toString();
+            const url = `{{ route('employer.candidates') }}${queryString ? '?' + queryString : ''}`;
+
+            console.log('🔄 Applying filters:', url);
+            window.location.href = url;
         }
 
-        /// ============ RESET FILTERS - CẬP NHẬT ============
-        function resetFilters() {
-            // Reset form
-            document.getElementById('filterForm').reset();
-
-            // Reset search inputs
-            document.getElementById('searchKeyword').value = '';
-            document.getElementById('locationFilter').value = '';
-
-            // Redirect về trang không filter
-            window.location.href = "{{ route('employer.candidates') }}";
+        // ============ SEARCH CANDIDATES ============
+        function searchCandidates() {
+            clearTimeout(window.filterSubmitTimeout);
+            applyFiltersAuto();
         }
 
         // ============ ENTER KEY SEARCH ============
@@ -1368,14 +1957,61 @@
             }
         });
 
-        // Pagination
+        // ============ LOCATION CHANGE ============
+        document.getElementById('locationFilter')?.addEventListener('change', function() {
+            searchCandidates();
+        });
+
+        // ============ RESET FILTERS ============
+        function resetFilters(event) {
+            if (event) {
+                event.preventDefault();
+            }
+
+            // Xóa tất cả input
+            document.getElementById('searchKeyword').value = '';
+            document.getElementById('locationFilter').value = '';
+
+            // Xóa tất cả checkbox/radio
+            document.querySelectorAll(
+                'input[name="experience[]"],' +
+                'input[name="education[]"],' +
+                'input[name="salary[]"],' +
+                'input[name="language[]"],' +
+                'input[name="gender"],' +
+                'input[name="skills[]"]'
+            ).forEach(el => {
+                el.checked = false;
+            });
+
+            // Reset button states
+            document.querySelectorAll('.filter-btn:not(.btn-reset)').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Đóng dropdowns
+            closeAllDropdowns();
+
+            // Reload trang
+            setTimeout(() => {
+                window.location.href = '{{ route("employer.candidates") }}';
+            }, 100);
+        }
+
+        // ============ PAGINATION ============
         function goToPage(page) {
             const url = new URL(window.location.href);
             url.searchParams.set('page', page);
             window.location.href = url.toString();
         }
 
-        // View CV
+        // ============ SORT CANDIDATES ============
+        function sortCandidates() {
+            clearTimeout(window.filterSubmitTimeout);
+            applyFiltersAuto();
+        }
+
+        // ============ VIEW CV ============
         function viewCV(candidateId) {
             currentCandidateId = candidateId;
             const modal = document.getElementById('cvModal');
@@ -1385,15 +2021,20 @@
             content.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
 
             fetch(`/employer/candidates/${candidateId}`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
                 .then(data => {
                     content.innerHTML = generateCVHTML(data);
                 })
                 .catch(error => {
-                    content.innerHTML = '<div class="text-center text-red-600 py-8">Có lỗi xảy ra khi tải dữ liệu</div>';
+                    console.error('❌ Error:', error);
+                    content.innerHTML = '<div class="text-center text-red-600 py-8">❌ Có lỗi xảy ra khi tải dữ liệu</div>';
                 });
         }
 
+        // ============ GENERATE CV HTML ============
         function generateCVHTML(candidate) {
             return `
             <div class="space-y-6">
@@ -1401,14 +2042,14 @@
                 <div class="cv-section">
                     <div class="flex items-start gap-6">
                         ${candidate.avatar 
-                            ? `<img src="/assets/img/avt/${candidate.avatar}" class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg">`
+                            ? `<img src="/assets/img/avt/${candidate.avatar}" class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg" alt="${candidate.hoten_uv}">`
                             : `<div class="w-32 h-32 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-4xl font-bold border-4 border-white shadow-lg">
                                 ${candidate.hoten_uv.charAt(0)}
                               </div>`
                         }
                         <div class="flex-1">
-                            <h2 class="text-3xl font-bold text-gray-800 mb-2">${candidate.hoten_uv}</h2>
-                            <p class="text-xl text-purple-600 font-semibold mb-4">${candidate.vitritungtuyen || 'Chưa cập nhật'}</p>
+                            <h2 class="text-3xl font-bold text-gray-800 mb-2">${candidate.hoten_uv || 'N/A'}</h2>
+                            <p class="text-xl text-purple-600 font-semibold mb-4">${candidate.vitriungtuyen || 'Chưa cập nhật'}</p>
                             <div class="grid grid-cols-2 gap-4 text-sm">
                                 ${candidate.sdt_uv ? `
                                 <div class="flex items-center text-gray-700">
@@ -1462,13 +2103,13 @@
                     <div class="space-y-4">
                         ${candidate.kinhnghiem.map(exp => `
                             <div class="border-l-4 border-purple-500 pl-4">
-                                <h4 class="font-semibold text-gray-800 text-lg">${exp.chuc_vu || exp.chucdanh|| 'N/A'}</h4>
+                                <h4 class="font-semibold text-gray-800 text-lg">${exp.chuc_vu || exp.chucdanh || 'N/A'}</h4>
                                 <p class="text-purple-600 font-medium">${exp.ten_cong_ty || exp.congty || 'N/A'}</p>
                                 <p class="text-sm text-gray-600 mb-2">
                                     ${exp.tu_ngay ? new Date(exp.tu_ngay).toLocaleDateString('vi-VN') : 'N/A'} - 
                                     ${exp.dang_lam_viec ? 'Hiện tại' : (exp.den_ngay ? new Date(exp.den_ngay).toLocaleDateString('vi-VN') : 'N/A')}
                                 </p>
-                                ${exp.mo_ta || exp.mota ? `<p class="text-gray-700">${(exp.mo_ta || exp.mota).replace(/\\n/g, '<br>')}</p>` : ''}
+                                ${exp.mo_ta || exp.mota ? `<p class="text-gray-700">${(exp.mo_ta || exp.mota).replace(/\n/g, '<br>')}</p>` : ''}
                             </div>
                         `).join('')}
                     </div>
@@ -1538,47 +2179,299 @@
             </div>
         `;
         }
-
+        // ============ CLOSE MODAL CV ============
         function closeModal(event) {
-            if (!event || event.target.id === 'cvModal') {
+            // Nếu click vào nút X hoặc click vào overlay
+            if (!event || event.target.id === 'cvModal' || event.currentTarget?.id === 'cvModal') {
                 document.getElementById('cvModal').classList.add('hidden');
                 currentCandidateId = null;
             }
         }
 
+
+        // ============ DOWNLOAD CV ============
         function downloadCV() {
             if (!currentCandidateId) return;
             window.location.href = `/employer/candidates/${currentCandidateId}/download-cv`;
         }
 
+        // ============ CONTACT CANDIDATE ============
         function contactCandidate() {
             if (!currentCandidateId) return;
             window.location.href = `/employer/candidates/${currentCandidateId}/contact`;
         }
 
-        // Enter key search - CHỈ KHI NHẤN ENTER
-        document.getElementById('searchKeyword')?.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchCandidates();
-            }
-        });
-        // ============ SKILL SEARCH FILTER ============
-        document.getElementById('skillSearch')?.addEventListener('input', function(e) {
-            const search = e.target.value.toLowerCase();
-            const items = document.querySelectorAll('#skillsList .checkbox-item');
-
-            items.forEach(item => {
-                const text = item.textContent.toLowerCase();
-                item.style.display = text.includes(search) ? 'flex' : 'none';
+        // ============ RECOMMENDED CARDS ============
+        function initializeRecommendedCards() {
+            const recommendedCards = document.querySelectorAll('.candidate-card:has(.bg-gradient-to-r)');
+            recommendedCards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
             });
-        });
+        }
 
-        // Location select change - KHÔNG TỰ ĐỘNG, CHỈ LÀM HIGHLIGHT
-        document.getElementById('locationFilter')?.addEventListener('change', function(e) {
-            // Chỉ highlight lựa chọn, không tự động tìm
-            console.log('Location selected:', this.value);
-        });
+        function toggleRecommendedSection() {
+            const grid = document.getElementById('recommendedCandidatesGrid');
+            const btn = event.target.closest('button');
+
+            if (!grid || !btn) return;
+
+            if (grid.style.display === 'none') {
+                grid.style.display = 'grid';
+                btn.innerHTML = '<i class="bi bi-eye mr-2"></i> Xem tất cả';
+            } else {
+                grid.style.display = 'none';
+                btn.innerHTML = '<i class="bi bi-eye-slash mr-2"></i> Ẩn bớt';
+            }
+        }
+        // ============ INVITE FUNCTIONS ============
+        // ============ INVITE FUNCTIONS ============
+        function inviteCandidate(candidateId) {
+            currentInviteCandidate = candidateId;
+            const modal = document.getElementById('inviteModal');
+            const jobsList = document.getElementById('inviteJobsList');
+
+            modal.classList.remove('hidden');
+            jobsList.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+            fetch(`/employer/jobs/active-unfilled`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to fetch jobs');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.jobs && data.jobs.length > 0) {
+                        // ✅ FIX: Hiển thị jobs NGAY với invitationMap = {}
+                        // Sau đó check status ở background
+                        jobsList.innerHTML = generateJobsListHTML(data.jobs, {}, candidateId);
+
+                        // ✅ Check invitation status song song (không block)
+                        checkAllInvitationStatus(candidateId, data.jobs)
+                            .then(invitationMap => {
+                                // ✅ Re-render với status mới
+                                jobsList.innerHTML = generateJobsListHTML(data.jobs, invitationMap, candidateId);
+                            });
+                    } else {
+                        jobsList.innerHTML = `
+            <div class="empty-state">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" class="w-16 h-16 mx-auto mb-4 text-gray-300">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0114 0z" />
+                </svg>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Không có vị trí nào còn hạn</h3>
+                <p class="text-gray-600">Hiện tại bạn không có vị trí nào cần tuyển dụng</p>
+            </div>
+        `;
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error:', error);
+                    jobsList.innerHTML = '<div class="text-center text-red-600 py-8">❌ Có lỗi xảy ra khi tải danh sách vị trí</div>';
+                });
+        }
+
+        // ✅ CHECK TẤT CẢ LỜI MỜI - PARALLEL thay vì sequential
+        async function checkAllInvitationStatus(candidateId, jobs) {
+            const invitationMap = {};
+
+            // ✅ Promise.all thay vì for loop (nhanh hơn 10x)
+            const promises = jobs.map(job =>
+                fetch(`/employer/candidates/${candidateId}/job/${job.id}/invitation-status`)
+                .then(response => response.json())
+                .then(data => {
+                    invitationMap[job.id] = data.invited;
+                })
+                .catch(error => {
+                    console.error(`❌ Error checking invitation for job ${job.id}:`, error);
+                    invitationMap[job.id] = false;
+                })
+            );
+
+            await Promise.all(promises);
+            return invitationMap;
+        }
+        // ✅ CHECK TẤT CẢ LỜI MỜI
+        async function checkAllInvitationStatus(candidateId, jobs) {
+            const invitationMap = {};
+
+            for (const job of jobs) {
+                try {
+                    const response = await fetch(`/employer/candidates/${candidateId}/job/${job.id}/invitation-status`);
+                    const data = await response.json();
+                    invitationMap[job.id] = data.invited;
+                } catch (error) {
+                    console.error(`❌ Error checking invitation for job ${job.id}:`, error);
+                    invitationMap[job.id] = false;
+                }
+            }
+
+            return invitationMap;
+        }
+
+        // ✅ GENERATE JOBS LIST - THÊM PARAM invitationMap
+        function generateJobsListHTML(jobs, invitationMap = {}, candidateId) {
+            return `
+    <div class="space-y-4">
+        ${jobs.map(job => {
+            const isInvited = invitationMap[job.id] ?? false;
+            return `
+            <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 border-l-4 border-purple-500 hover:shadow-md transition-all">
+                <div class="flex items-start justify-between gap-4">
+                    <div class="flex-1">
+                        <h4 class="text-lg font-bold text-gray-800 mb-2">${job.job_title || 'N/A'}</h4>
+                        
+                        <div class="grid grid-cols-2 gap-3 mb-3">
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="bi bi-geo-alt text-purple-600 mr-2"></i>
+                                <span>${job.location || 'Không xác định'}</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="bi bi-cash-stack text-purple-600 mr-2"></i>
+                                <span>${job.salary_min ? job.salary_min + ' - ' + job.salary_max + ' VNĐ' : 'Thỏa thuận'}</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="bi bi-people text-purple-600 mr-2"></i>
+                                <span>${job.quantity || 0} vị trí</span>
+                            </div>
+                            <div class="flex items-center text-sm text-gray-600">
+                                <i class="bi bi-hourglass-split text-purple-600 mr-2"></i>
+                                <span>Hết hạn: ${formatDate(job.deadline)}</span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="flex items-center justify-between mb-1">
+                                <span class="text-xs font-semibold text-gray-700">
+                                    Đã nhận: <span class="text-purple-600">${job.received_count || 0}</span>/${job.quantity || 0}
+                                </span>
+                                <span class="text-xs font-bold text-purple-600">
+                                    ${job.quantity ? Math.round((job.received_count || 0) / job.quantity * 100) : 0}%
+                                </span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-300" 
+                                    style="width: ${job.quantity ? Math.round((job.received_count || 0) / job.quantity * 100) : 0}%">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap gap-2">
+                            ${(job.required_skills || []).slice(0, 3).map(skill => `
+                                <span class="inline-block px-2.5 py-1 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full">
+                                    ${skill}
+                                </span>
+                            `).join('')}
+                            ${(job.required_skills || []).length > 3 ? `
+                                <span class="inline-block px-2.5 py-1 bg-gray-200 text-gray-700 text-xs font-semibold rounded-full">
+                                    +${(job.required_skills || []).length - 3}
+                                </span>
+                            ` : ''}
+                        </div>
+                    </div>
+
+                    ${isInvited ? `
+                        <button disabled class="px-6 py-3 bg-gray-400 text-white rounded-lg font-semibold text-sm flex items-center gap-2 flex-shrink-0 cursor-not-allowed opacity-75">
+                            <i class="bi bi-check-circle"></i>
+                            <span>Đã mời</span>
+                        </button>
+                    ` : `
+                        <button onclick="confirmInvite(${job.id}, '${job.job_title.replace(/'/g, "\\'")}')"
+                            class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-semibold text-sm hover:shadow-lg transition-all transform hover:scale-105 flex items-center gap-2 flex-shrink-0">
+                            <i class="bi bi-person-plus-fill"></i>
+                            <span>Mời</span>
+                        </button>
+                    `}
+                </div>
+            </div>
+        `}
+        ).join('')}
+    </div>
+`;
+        }
+
+        // ✅ CONFIRM INVITE - CẬP NHẬT BUTTON NGAY
+        function confirmInvite(jobId, jobTitle) {
+            if (!currentInviteCandidate) return;
+
+            if (!confirm(`Bạn chắc chắn muốn mời ứng viên cho vị trí "${jobTitle}" không?`)) {
+                return;
+            }
+
+            fetch(`/employer/candidates/${currentInviteCandidate}/invite`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        job_id: jobId
+                    })
+                })
+                .then(response => {
+                    console.log('📡 Response status:', response.status);
+                    console.log('📡 Response ok:', response.ok);
+
+                    // ✅ FIX: Check response.ok TRƯỚC khi .json()
+                    if (!response.ok) {
+                        return response.json().then(data => {
+                            throw new Error(data.message || 'Network response was not ok');
+                        });
+                    }
+
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('✅ Success response:', data);
+
+                    if (data.success) {
+                        alert('✅ Đã gửi lời mời thành công!');
+
+                        // ✅ CẬP NHẬT BUTTON THÀNH "ĐÃ MỜI"
+                        const inviteBtn = document.querySelector(
+                            `button[onclick*="confirmInvite(${jobId}"]`
+                        );
+
+                        if (inviteBtn) {
+                            inviteBtn.disabled = true;
+                            inviteBtn.className = 'px-6 py-3 bg-gray-400 text-white rounded-lg font-semibold text-sm flex items-center gap-2 flex-shrink-0 cursor-not-allowed opacity-75';
+                            inviteBtn.innerHTML = '<i class="bi bi-check-circle"></i><span>Đã mời</span>';
+                            inviteBtn.onclick = null;
+                        }
+
+                        closeInviteModal();
+                        currentInviteCandidate = null;
+                    } else {
+                        alert('❌ Lỗi: ' + (data.message || 'Không thể gửi lời mời'));
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Catch error:', error);
+                    alert('❌ ' + error.message);
+                });
+        }
+        // ============ INVITE FUNCTIONS ============
+        function formatDate(dateString) {
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('vi-VN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                });
+            } catch (e) {
+                return dateString || 'N/A';
+            }
+        }
+
+
+        // ============ CLOSE MODAL INVITE ============
+        function closeInviteModal(event) {
+            // Nếu click vào nút X hoặc click vào overlay
+            if (!event || event.target.id === 'inviteModal' || event.currentTarget?.id === 'inviteModal') {
+                document.getElementById('inviteModal').classList.add('hidden');
+                currentInviteCandidate = null;
+            }
+        }
     </script>
+
 </body>
 
 </html>

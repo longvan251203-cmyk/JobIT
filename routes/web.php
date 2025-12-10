@@ -10,6 +10,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\EmployerController;
 use App\Http\Controllers\JobRecommendationController;
+use App\Http\Controllers\EmployerCandidatesController;
 
 // ==================== TRANG CHỦ ====================
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -343,11 +344,7 @@ Route::middleware(['auth', 'employer'])->group(function () {
 
     // ...existing routes...
 });
-Route::middleware('auth')->group(function () {
-    Route::get('/employer/candidates', [EmployerController::class, 'searchCandidates'])->name('employer.candidates');
-    Route::get('/employer/candidates/{id}', [EmployerController::class, 'viewCandidateCV'])->name('employer.candidate.view');
-    Route::get('/employer/candidates/{id}/download-cv', [ApplicantController::class, 'downloadCV'])->name('employer.candidate.downloadCV');
-});
+
 
 // ✅ Thêm route update mức lương
 Route::middleware(['auth'])->group(function () {
@@ -372,33 +369,30 @@ Route::middleware(['auth'])->prefix('employer')->name('employer.')->group(functi
 
     // Download CV
     Route::get('/candidates/{id}/download-cv', [CandidatesController::class, 'downloadCV'])->name('candidates.download');
-
+    // Check invitation status
+    Route::get(
+        '/candidates/{candidateId}/job/{jobId}/invitation-status',
+        [CandidatesController::class, 'checkInvitationStatus']
+    );
     // Liên hệ ứng viên
     Route::get('/candidates/{id}/contact', [CandidatesController::class, 'contact'])->name('candidates.contact');
+    // Job Invitations ✅ THÊM 2 ROUTE NÀY
+    Route::get('/jobs/active-unfilled', [CandidatesController::class, 'getActiveUnfilled']);
+    Route::post('/candidates/{candidateId}/invite', [CandidatesController::class, 'sendInvite']);
 });
 // Thêm vào routes/web.php
 
 
 
-Route::middleware(['auth'])->group(function () {
 
-    // ✅ Trang recommendations
-    Route::get('/applicant/recommendations', [JobRecommendationController::class, 'index'])
-        ->name('applicant.recommendations');
 
-    // ✅ Refresh recommendations
-    Route::post('/applicant/recommendations/refresh', [JobRecommendationController::class, 'refresh'])
-        ->name('applicant.recommendations.refresh');
+// ✅ Thêm route kiểm tra có thể hủy không
+Route::middleware('auth')->group(function () {
+    // ... các route khác ...
 
-    // ✅ Mark as viewed
-    Route::post('/applicant/recommendations/{id}/viewed', [JobRecommendationController::class, 'markAsViewed'])
-        ->name('applicant.recommendations.viewed');
+    // Kiểm tra trạng thái hủy
+    Route::get('/application/{id}/can-cancel', [ApplicationController::class, 'canCancelApplication']);
 
-    // ✅ Recalculate after profile update
-    Route::post('/recommendations/recalculate', [JobRecommendationController::class, 'recalculateAfterProfileUpdate'])
-        ->name('recommendations.recalculate');
-
-    // ✅ API: Lấy recommendations cho home page (QUAN TRỌNG)
-    Route::get('/api/recommendations/home', [JobRecommendationController::class, 'getRecommendedJobsForHome'])
-        ->name('api.recommendations.home');
+    // Hủy ứng tuyển
+    Route::delete('/application/{id}/cancel', [ApplicationController::class, 'cancel']);
 });
