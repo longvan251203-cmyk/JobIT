@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Applicant;
 use App\Models\JobPost;
 use App\Models\JobInvitation;
+use App\Models\Notification;
 use App\Services\JobRecommendationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -100,7 +101,7 @@ class CandidatesController extends Controller
                 Log::info('Applying education filter:', ['educations' => $educations]);
 
                 $query->whereHas('hocvan', function ($q) use ($educations) {
-                    $q->whereIn('trinh_do', $educations);
+                    $q->whereIn('trinhdo', $educations);
                 });
             }
 
@@ -109,23 +110,40 @@ class CandidatesController extends Controller
                 $salaries = is_array($request->salary)
                     ? $request->salary
                     : [$request->salary];
+
                 Log::info('Applying salary filter:', ['salaries' => $salaries]);
 
                 $query->where(function ($q) use ($salaries) {
                     foreach ($salaries as $salary) {
-                        if (strpos($salary, '+') !== false) {
-                            $min = (int)str_replace('+', '', $salary) * 1000000;
-                            $q->orWhere('mucluong_mongmuon', '>=', $min);
-                        } elseif (strpos($salary, '-') !== false) {
-                            [$min, $max] = explode('-', $salary);
-                            $minVal = (int)$min * 1000000;
-                            $maxVal = (int)$max * 1000000;
-                            $q->orWhereBetween('mucluong_mongmuon', [$minVal, $maxVal]);
+                        // ✅ FIX: Parse giá trị mục lương từ string
+                        if ($salary === 'Thỏa thuận') {
+                            // Tìm những người chưa cập nhật mức lương hoặc mức lương = 0
+                            $q->orWhere('mucluong_mongmuon', '=', 0)
+                                ->orWhereNull('mucluong_mongmuon');
+                        } elseif ($salary === 'Dưới 3 triệu') {
+                            $q->orWhereBetween('mucluong_mongmuon', [0, 3000000]);
+                        } elseif ($salary === '3-5 triệu') {
+                            $q->orWhereBetween('mucluong_mongmuon', [3000000, 5000000]);
+                        } elseif ($salary === '5-7 triệu') {
+                            $q->orWhereBetween('mucluong_mongmuon', [5000000, 7000000]);
+                        } elseif ($salary === '7-10 triệu') {
+                            $q->orWhereBetween('mucluong_mongmuon', [7000000, 10000000]);
+                        } elseif ($salary === '10-12 triệu') {
+                            $q->orWhereBetween('mucluong_mongmuon', [10000000, 12000000]);
+                        } elseif ($salary === '12-15 triệu') {
+                            $q->orWhereBetween('mucluong_mongmuon', [12000000, 15000000]);
+                        } elseif ($salary === '15-20 triệu') {
+                            $q->orWhereBetween('mucluong_mongmuon', [15000000, 20000000]);
+                        } elseif ($salary === '20-25 triệu') {
+                            $q->orWhereBetween('mucluong_mongmuon', [20000000, 25000000]);
+                        } elseif ($salary === '25-30 triệu') {
+                            $q->orWhereBetween('mucluong_mongmuon', [25000000, 30000000]);
+                        } elseif ($salary === 'Trên 30 triệu') {
+                            $q->orWhere('mucluong_mongmuon', '>=', 30000000);
                         }
                     }
                 });
             }
-
             // ✅ Filter language
             if ($request->filled('language')) {
                 $languages = is_array($request->language)
@@ -280,7 +298,9 @@ class CandidatesController extends Controller
                 'hocvan',
                 'kinhnghiem',
                 'ngoaiNgu',
-                'user'
+                'user',
+                'chungchi',  // ✅ Thêm
+                'giaithuong'
             ])->findOrFail($id);
 
             return response()->json($candidate);
@@ -400,6 +420,7 @@ class CandidatesController extends Controller
                 ->with(['applications' => function ($query) {
                     $query->select('job_id');
                 }])
+
                 ->get()
                 ->map(function ($job) use ($companiesId) {
                     $location = [];
@@ -461,6 +482,7 @@ class CandidatesController extends Controller
             // ============ VALIDATE JOB ============
             $job = JobPost::where('job_id', $jobId)
                 ->where('companies_id', $employer->companies_id)
+                ->with('company') // ✅ Eager load company
                 ->first();
 
             if (!$job) {
@@ -476,7 +498,7 @@ class CandidatesController extends Controller
             }
 
             // ============ VALIDATE CANDIDATE ============
-            $candidate = Applicant::find($candidateId);
+            $candidate = Applicant::with('user')->find($candidateId);
 
             if (!$candidate) {
                 Log::warning('⚠️ Candidate not found', ['candidate_id' => $candidateId]);
@@ -485,6 +507,15 @@ class CandidatesController extends Controller
                     'success' => false,
                     'message' => 'Ứng viên không tồn tại'
                 ], 404);
+            }
+
+            if (!$candidate->user_id) {
+                Log::error('❌ Candidate has no user_id', ['candidate_id' => $candidateId]);
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ứng viên chưa có tài khoản người dùng'
+                ], 400);
             }
 
             // ============ CHECK DUPLICATE INVITATION ============
@@ -515,22 +546,59 @@ class CandidatesController extends Controller
                 'invited_at' => now()
             ]);
 
+            // ✅ Load relationships cho notification
+            $invitation->load(['job.company', 'applicant']);
+
             Log::info('✅ Invitation created successfully', [
                 'invitation_id' => $invitation->id,
                 'job_id' => $jobId,
                 'candidate_id' => $candidateId
             ]);
 
-            // ============ OPTIONAL: SEND EMAIL NOTIFICATION ============
+            // ============ 🔔 TẠO THÔNG BÁO CHO ỨNG VIÊN ============
+            try {
+                // Ensure company is loaded with fresh data
+                $company = $job->company;
+                if (!$company) {
+                    $job->load('company');
+                    $company = $job->company;
+                }
+
+                $companyName = $company?->tencty ?? 'Công ty không xác định';
+
+                Notification::create([
+                    'user_id' => $candidate->user_id,
+                    'type' => 'job_invitation',
+                    'message' => "Bạn nhận được lời mời ứng tuyển vị trí {$job->title} từ {$companyName}",
+                    'data' => [
+                        'invitation_id' => $invitation->id,
+                        'job_id' => $jobId,
+                        'company_name' => $companyName,
+                        'job_title' => $job->title,
+                        'applicant_id' => $candidateId
+                    ],
+                    'is_read' => false
+                ]);
+
+                Log::info('✅ Notification created for applicant', [
+                    'user_id' => $candidate->user_id,
+                    'invitation_id' => $invitation->id
+                ]);
+            } catch (\Exception $e) {
+                Log::error('❌ Failed to create notification', [
+                    'error' => $e->getMessage(),
+                    'user_id' => $candidate->user_id
+                ]);
+                // Không throw error, vì invitation đã tạo thành công
+            }
+
+            // ============ OPTIONAL: SEND EMAIL ============
             // try {
-            //     $candidate->load('user');
-            //     $job_detail = $job->load('company');
-            //     // Mail::send(new InvitationMail($invitation, $candidate, $job));
-            //     Log::info('✅ Invitation email sent');
+            //     Mail::to($candidate->user->email)
+            //         ->send(new JobInvitationMail($invitation));
+            //     Log::info('✅ Email sent to applicant');
             // } catch (\Exception $e) {
-            //     Log::warning('⚠️ Could not send email notification', [
-            //         'error' => $e->getMessage()
-            //     ]);
+            //     Log::warning('⚠️ Could not send email', ['error' => $e->getMessage()]);
             // }
 
             return response()->json([

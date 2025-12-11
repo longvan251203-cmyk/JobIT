@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\Auth;
 
 class NotificationController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth')->only(['applicantNotifications', 'applicantUnreadCount', 'markAsRead', 'markAllAsRead', 'delete']);
+    }
+
     /**
      * ✅ LẤY DANH SÁCH THÔNG BÁO
      */
@@ -85,6 +90,53 @@ class NotificationController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Đã xóa thông báo'
+        ]);
+    }
+
+    /**
+     * ✅ LẤY CHI TIẾT THÔNG BÁO
+     */
+    public function show($id)
+    {
+        $notification = Notification::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        return response()->json([
+            'success' => true,
+            'id' => $notification->id,
+            'type' => $notification->type,
+            'message' => $notification->message,
+            'data' => $notification->data,
+            'is_read' => $notification->is_read,
+            'created_at' => $notification->created_at
+        ]);
+    }
+
+    /**
+     * ✅ HIỂN THỊ TRANG THÔNG BÁO CHO APPLICANT
+     */
+    public function applicantNotifications()
+    {
+        $notifications = Notification::where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->paginate(20);
+
+        return view('applicant.notifications', compact('notifications'));
+    }
+
+    /**
+     * ✅ LẤY SỐ THÔNG BÁO CHƯA ĐỌC (API)
+     */
+    public function applicantUnreadCount()
+    {
+        $count = Notification::where('user_id', Auth::id())
+            ->where('is_read', false)
+            ->count();
+
+        return response()->json([
+            'success' => true,
+            'count' => $count
         ]);
     }
 }

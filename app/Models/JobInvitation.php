@@ -40,7 +40,7 @@ class JobInvitation extends Model
      */
     public function job()
     {
-        return $this->belongsTo(JobPost::class, 'job_id', 'id');
+        return $this->belongsTo(JobPost::class, 'job_id', 'job_id');
     }
 
     /**

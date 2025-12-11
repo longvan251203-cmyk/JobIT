@@ -11,6 +11,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\EmployerController;
 use App\Http\Controllers\JobRecommendationController;
 use App\Http\Controllers\EmployerCandidatesController;
+use App\Http\Controllers\ApplicantNotificationController;
 
 // ==================== TRANG CHỦ ====================
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -54,7 +55,24 @@ Route::get('/job/{id}', [JobController::class, 'show'])->name('job.detail');
 
 // ==================== APPLICANT (ỨNG VIÊN) ====================
 Route::prefix('applicant')->middleware(['auth'])->group(function () {
+    // ✅ THÊM ROUTE THÔNG BÁO CHO APPLICANT
+    Route::get('/api/notifications', [NotificationController::class, 'index'])
+        ->name('applicant.notifications.api');
 
+    Route::get('/api/notifications/{id}', [NotificationController::class, 'show'])
+        ->name('applicant.notifications.show');
+
+    Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount'])
+        ->name('applicant.notifications.unread');
+
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])
+        ->name('applicant.notifications.read');
+
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])
+        ->name('applicant.notifications.readAll');
+
+    Route::delete('/notifications/{id}', [NotificationController::class, 'delete'])
+        ->name('applicant.notifications.delete');
     // Hồ sơ cá nhân
     Route::get('/profile', [ApplicantController::class, 'showProfileDetail'])->name('applicant.profile');
     Route::get('/hoso', [ApplicantController::class, 'showProfileDetail'])->name('applicant.hoso');
@@ -395,4 +413,52 @@ Route::middleware('auth')->group(function () {
 
     // Hủy ứng tuyển
     Route::delete('/application/{id}/cancel', [ApplicationController::class, 'cancel']);
+});
+
+Route::middleware(['auth'])->group(function () {
+    // Gợi ý việc làm
+    Route::get('/recommendations', [JobRecommendationController::class, 'index'])
+        ->name('applicant.recommendations');
+
+    Route::post('/recommendations/refresh', [JobRecommendationController::class, 'refresh'])
+        ->name('applicant.recommendations.refresh');
+
+    Route::post('/recommendations/{id}/viewed', [JobRecommendationController::class, 'markAsViewed'])
+        ->name('applicant.recommendations.viewed');
+    Route::post('/recommendations/recalculate', [JobRecommendationController::class, 'recalculate'])
+        ->name('recommendations.recalculate');
+});
+// ========== APPLICANT NOTIFICATION ROUTES ==========
+Route::prefix('applicant')->middleware(['auth'])->name('applicant.')->group(function () {
+
+    // Trang thông báo
+    Route::get('/notifications', [ApplicantNotificationController::class, 'index'])
+        ->name('notifications');
+
+    // API endpoints
+    Route::prefix('api/notifications')->group(function () {
+        // Lấy danh sách thông báo (JSON)
+        Route::get('/', [ApplicantNotificationController::class, 'getNotifications'])
+            ->name('notifications.get');
+
+        // Đếm số chưa đọc
+        Route::get('/unread-count', [ApplicantNotificationController::class, 'unreadCount'])
+            ->name('notifications.unread-count');
+
+        // Đánh dấu đã đọc
+        Route::post('/{id}/read', [ApplicantNotificationController::class, 'markAsRead'])
+            ->name('notifications.mark-read');
+
+        // Đánh dấu tất cả đã đọc
+        Route::post('/read-all', [ApplicantNotificationController::class, 'markAllAsRead'])
+            ->name('notifications.mark-all-read');
+
+        // Xóa thông báo
+        Route::delete('/{id}', [ApplicantNotificationController::class, 'delete'])
+            ->name('notifications.delete');
+
+        // Lấy chi tiết lời mời
+        Route::get('/invitation/{invitationId}', [ApplicantNotificationController::class, 'getInvitationDetail'])
+            ->name('notifications.invitation-detail');
+    });
 });

@@ -7,8 +7,239 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Tìm kiếm ứng viên - JobIT</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- ✅ BOOTSTRAP CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <style>
+        /* ============ NÚT MỜI - DISABLED STATE ============ */
+        .btn-invite:disabled,
+        button[disabled] {
+            opacity: 0.6 !important;
+            cursor: not-allowed !important;
+            transform: none !important;
+            box-shadow: none !important;
+            background-color: #9ca3af !important;
+        }
+
+        button[disabled]:hover {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Tooltip hover */
+        button[disabled][title] {
+            position: relative;
+        }
+
+        button[disabled][title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #374151;
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            z-index: 10;
+            margin-bottom: 0.5rem;
+        }
+
+        /* ✅ CV MODAL STYLING */
+        .cv-modal-content {
+            border-radius: 24px !important;
+            border: none !important;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        .cv-modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+            border: none !important;
+            border-radius: 24px 24px 0 0 !important;
+            color: white;
+        }
+
+        .cv-modal-body {
+            background: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .cv-sidebar {
+            background: white;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .cv-avatar {
+            border: 5px solid #667eea;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .cv-section-title {
+            color: #1f2937;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+            font-weight: 700;
+            font-size: 1.05rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .cv-info-item {
+            padding: 12px 0;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .cv-info-item:last-child {
+            border-bottom: none;
+        }
+
+        .cv-info-item i {
+            color: #667eea;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .cv-info-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .cv-info-value {
+            font-size: 0.9rem;
+            color: #1f2937;
+            font-weight: 500;
+        }
+
+        .cv-content-section {
+            margin-bottom: 28px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .cv-content-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .cv-timeline-item {
+            padding-left: 20px;
+            border-left: 3px solid #667eea;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 16px;
+        }
+
+        .cv-timeline-item:last-child {
+            padding-bottom: 0;
+        }
+
+        .cv-timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -8px;
+            top: 4px;
+            width: 12px;
+            height: 12px;
+            background: #667eea;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #667eea;
+        }
+
+        .cv-job-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 6px;
+        }
+
+        .cv-company {
+            font-size: 0.95rem;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .cv-date {
+            font-size: 0.85rem;
+            color: #6b7280;
+            margin-bottom: 12px;
+        }
+
+        .cv-description {
+            font-size: 0.9rem;
+            color: #374151;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .cv-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            margin-right: 8px;
+            margin-bottom: 10px;
+            display: inline-block;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .cv-modal-footer {
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            border-radius: 0 0 24px 24px;
+            padding: 20px 24px;
+        }
+
+        .cv-modal-footer .btn {
+            border-radius: 10px;
+            font-weight: 600;
+            padding: 10px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .cv-modal-footer .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+
+        .cv-modal-footer .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        @media print {
+
+            .cv-modal-header,
+            .cv-modal-footer {
+                display: none !important;
+            }
+
+            .cv-modal-body {
+                background: white !important;
+                max-height: none !important;
+            }
+        }
+
         /* ============ RECOMMENDED BADGE ENHANCED ANIMATION ============ */
         @keyframes spin {
             from {
@@ -57,6 +288,7 @@
         .line-clamp-2 {
             display: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -194,6 +426,7 @@
         .line-clamp-2 {
             display: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -246,6 +479,7 @@
         .line-clamp-2 {
             display: -webkit-box;
             -webkit-line-clamp: 2;
+            line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
@@ -1205,17 +1439,11 @@
                             <input type="checkbox" name="education[]" value="Đại học" {{ in_array('Đại học', (array)request('education'), true) ? 'checked' : '' }}>
                             <span>Đại học</span>
                         </label>
-                        <label class="filter-checkbox-item">
-                            <input type="checkbox" name="education[]" value="Thạc sĩ" {{ in_array('Thạc sĩ', (array)request('education'), true) ? 'checked' : '' }}>
-                            <span>Thạc sĩ</span>
-                        </label>
-                        <label class="filter-checkbox-item">
-                            <input type="checkbox" name="education[]" value="Tiến sĩ" {{ in_array('Tiến sĩ', (array)request('education'), true) ? 'checked' : '' }}>
-                            <span>Tiến sĩ</span>
-                        </label>
+
                     </div>
                 </div>
 
+                <!-- 3. Salary Filter -->
                 <!-- 3. Salary Filter -->
                 <div class="filter-dropdown-wrapper relative">
                     <button type="button" class="filter-btn" id="salaryFilterBtn">
@@ -1225,24 +1453,48 @@
                     </button>
                     <div class="filter-dropdown-menu" id="salaryDropdown">
                         <label class="filter-checkbox-item">
-                            <input type="checkbox" name="salary[]" value="0-10" {{ in_array('0-10', (array)request('salary'), true) ? 'checked' : '' }}>
-                            <span>Dưới 10 triệu</span>
+                            <input type="checkbox" name="salary[]" value="Thỏa thuận" {{ in_array('Thỏa thuận', (array)request('salary'), true) ? 'checked' : '' }}>
+                            <span>Thỏa thuận</span>
                         </label>
                         <label class="filter-checkbox-item">
-                            <input type="checkbox" name="salary[]" value="10-15" {{ in_array('10-15', (array)request('salary'), true) ? 'checked' : '' }}>
-                            <span>10 - 15 triệu</span>
+                            <input type="checkbox" name="salary[]" value="Dưới 3 triệu" {{ in_array('Dưới 3 triệu', (array)request('salary'), true) ? 'checked' : '' }}>
+                            <span>Dưới 3 triệu VNĐ</span>
                         </label>
                         <label class="filter-checkbox-item">
-                            <input type="checkbox" name="salary[]" value="15-20" {{ in_array('15-20', (array)request('salary'), true) ? 'checked' : '' }}>
-                            <span>15 - 20 triệu</span>
+                            <input type="checkbox" name="salary[]" value="3-5 triệu" {{ in_array('3-5 triệu', (array)request('salary'), true) ? 'checked' : '' }}>
+                            <span>3 - 5 triệu VNĐ</span>
                         </label>
                         <label class="filter-checkbox-item">
-                            <input type="checkbox" name="salary[]" value="20-30" {{ in_array('20-30', (array)request('salary'), true) ? 'checked' : '' }}>
-                            <span>20 - 30 triệu</span>
+                            <input type="checkbox" name="salary[]" value="5-7 triệu" {{ in_array('5-7 triệu', (array)request('salary'), true) ? 'checked' : '' }}>
+                            <span>5 - 7 triệu VNĐ</span>
                         </label>
                         <label class="filter-checkbox-item">
-                            <input type="checkbox" name="salary[]" value="30+" {{ in_array('30+', (array)request('salary'), true) ? 'checked' : '' }}>
-                            <span>Trên 30 triệu</span>
+                            <input type="checkbox" name="salary[]" value="7-10 triệu" {{ in_array('7-10 triệu', (array)request('salary'), true) ? 'checked' : '' }}>
+                            <span>7 - 10 triệu VNĐ</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="salary[]" value="10-12 triệu" {{ in_array('10-12 triệu', (array)request('salary'), true) ? 'checked' : '' }}>
+                            <span>10 - 12 triệu VNĐ</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="salary[]" value="12-15 triệu" {{ in_array('12-15 triệu', (array)request('salary'), true) ? 'checked' : '' }}>
+                            <span>12 - 15 triệu VNĐ</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="salary[]" value="15-20 triệu" {{ in_array('15-20 triệu', (array)request('salary'), true) ? 'checked' : '' }}>
+                            <span>15 - 20 triệu VNĐ</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="salary[]" value="20-25 triệu" {{ in_array('20-25 triệu', (array)request('salary'), true) ? 'checked' : '' }}>
+                            <span>20 - 25 triệu VNĐ</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="salary[]" value="25-30 triệu" {{ in_array('25-30 triệu', (array)request('salary'), true) ? 'checked' : '' }}>
+                            <span>25 - 30 triệu VNĐ</span>
+                        </label>
+                        <label class="filter-checkbox-item">
+                            <input type="checkbox" name="salary[]" value="Trên 30 triệu" {{ in_array('Trên 30 triệu', (array)request('salary'), true) ? 'checked' : '' }}>
+                            <span>Trên 30 triệu VNĐ</span>
                         </label>
                     </div>
                 </div>
@@ -1442,7 +1694,7 @@
                                     @if($candidate->hocvan && $candidate->hocvan->first())
                                     <div class="candidate-info">
                                         <i class="bi bi-mortarboard"></i>
-                                        <span>{{ $candidate->hocvan->first()->trinh_do ?? 'Đại học' }}</span>
+                                        <span>{{ $candidate->hocvan->first()->trinhdo ?? $candidate->hocvan->first()->trinh_do ?? 'Chưa cập nhật' }}</span>
                                     </div>
                                     @endif
                                 </div>
@@ -1457,6 +1709,8 @@
                                     @endif
                                 </div>
                                 @endif
+
+
 
                                 <!-- ✅ THÊM CONTAINER CHO 2 NÚTTON -->
                                 <div class="btn-container" style="display: flex; gap: 0.5rem; flex-direction: column; margin-top: auto;">
@@ -1476,15 +1730,15 @@
                     <div class="pagination">
                         <!-- Previous Button -->
                         <button
-                            onclick="goToPage({{ $candidates->currentPage() - 1 }})"
-                            class="pagination-btn"
+                            data-page="{{ $candidates->currentPage() - 1 }}"
+                            class="pagination-btn pagination-prev"
                             {{ $candidates->onFirstPage() ? 'disabled' : '' }}>
                             <i class="bi bi-chevron-left"></i>
                         </button>
 
                         <!-- First Page -->
                         @if($candidates->currentPage() > 3)
-                        <button onclick="goToPage(1)" class="pagination-btn">1</button>
+                        <button data-page="1" class="pagination-btn pagination-link">1</button>
                         @if($candidates->currentPage() > 4)
                         <span class="pagination-dots">...</span>
                         @endif
@@ -1493,8 +1747,8 @@
                         <!-- Page Numbers -->
                         @for($i = max(1, $candidates->currentPage() - 2); $i <= min($candidates->lastPage(), $candidates->currentPage() + 2); $i++)
                             <button
-                                onclick="goToPage({{ $i }})"
-                                class="pagination-btn {{ $i == $candidates->currentPage() ? 'active' : '' }}">
+                                data-page="{{ $i }}"
+                                class="pagination-btn pagination-link {{ $i == $candidates->currentPage() ? 'active' : '' }}">
                                 {{ $i }}
                             </button>
                             @endfor
@@ -1504,13 +1758,13 @@
                                 @if($candidates->currentPage() < $candidates->lastPage() - 3)
                                     <span class="pagination-dots">...</span>
                                     @endif
-                                    <button onclick="goToPage({{ $candidates->lastPage() }})" class="pagination-btn">{{ $candidates->lastPage() }}</button>
+                                    <button data-page="{{ $candidates->lastPage() }}" class="pagination-btn pagination-link">{{ $candidates->lastPage() }}</button>
                                     @endif
 
                                     <!-- Next Button -->
                                     <button
-                                        onclick="goToPage({{ $candidates->currentPage() + 1 }})"
-                                        class="pagination-btn"
+                                        data-page="{{ $candidates->currentPage() + 1 }}"
+                                        class="pagination-btn pagination-next"
                                         {{ !$candidates->hasMorePages() ? 'disabled' : '' }}>
                                         <i class="bi bi-chevron-right"></i>
                                     </button>
@@ -1624,7 +1878,7 @@
                                             <div class="flex items-center gap-1">
                                                 <div class="w-16 bg-gray-200 rounded-full h-1.5">
                                                     <div class="bg-gradient-to-r from-orange-400 to-pink-500 h-1.5 rounded-full"
-                                                        style="width: {{ $rec['matched_jobs'][0]['match_details']['location']['score'] }}%;"></div>
+                                                        data-score="{{ round($rec['matched_jobs'][0]['match_details']['location']['score']) }}"></div>
                                                 </div>
                                                 <span class="font-bold text-orange-600 text-xs">
                                                     {{ round($rec['matched_jobs'][0]['match_details']['location']['score']) }}%
@@ -1643,7 +1897,7 @@
                                             <div class="flex items-center gap-1">
                                                 <div class="w-16 bg-gray-200 rounded-full h-1.5">
                                                     <div class="bg-gradient-to-r from-orange-400 to-pink-500 h-1.5 rounded-full"
-                                                        style="width: {{ $rec['matched_jobs'][0]['match_details']['skills']['score'] }}%"></div>
+                                                        data-score="{{ round($rec['matched_jobs'][0]['match_details']['skills']['score']) }}"></div>
                                                 </div>
                                                 <span class="font-bold text-orange-600 text-xs">
                                                     {{ round($rec['matched_jobs'][0]['match_details']['skills']['score']) }}%
@@ -1662,7 +1916,7 @@
                                             <div class="flex items-center gap-1">
                                                 <div class="w-16 bg-gray-200 rounded-full h-1.5">
                                                     <div class="bg-gradient-to-r from-orange-400 to-pink-500 h-1.5 rounded-full"
-                                                        style="width: {{ $rec['matched_jobs'][0]['match_details']['position']['score'] }}%"></div>
+                                                        data-score="{{ round($rec['matched_jobs'][0]['match_details']['position']['score']) }}"></div>
                                                 </div>
                                                 <span class="font-bold text-orange-600 text-xs">
                                                     {{ round($rec['matched_jobs'][0]['match_details']['position']['score']) }}%
@@ -1673,7 +1927,7 @@
                                     </div>
                                 </div>
 
-                                <button onclick="viewCV('{{ $rec['applicant']->id_uv }}')" class="btn-view-profile">
+                                <button data-candidate-id="{{ $rec['applicant']->id_uv }}" class="btn-view-profile btn-view-cv-rec">
                                     <i class="bi bi-eye mr-1"></i> Xem hồ sơ
                                 </button>
                             </div>
@@ -1686,29 +1940,78 @@
         </div>
     </div>
 
-    <!-- MODAL XEM CV -->
-    <div id="cvModal" class="modal-overlay hidden" onclick="closeModal(event)">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="text-lg font-semibold">Hồ sơ ứng viên</h3>
-                <button onclick="closeModal(event)" class="text-white">
-                    <i class="bi bi-x-lg"></i>
-                </button>
-            </div>
-            <div id="cvContent" class="modal-body">
-                <!-- Nội dung CV sẽ được nạp qua AJAX -->
-            </div>
-            <div class="p-4 border-t border-gray-200">
-                <button onclick="downloadCV()" class="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-semibold hover:shadow-md transition-all">
-                    <i class="bi bi-download mr-2"></i> Tải CV
-                </button>
-                <button onclick="contactCandidate()" class="ml-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white rounded-lg font-semibold hover:shadow-md transition-all">
-                    <i class="bi bi-chat-dots mr-2"></i> Liên hệ
-                </button>
+    <div class="modal fade" id="viewCVModalEmployer" tabindex="-1" aria-labelledby="viewCVLabelEmployer" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content cv-modal-content">
+
+                <!-- ✅ HEADER CV -->
+                <div class="modal-header cv-modal-header">
+                    <div class="d-flex align-items-center gap-3 flex-grow-1">
+                        <img id="cvAvatarImg"
+                            src=""
+                            alt="Avatar"
+                            class="cv-avatar rounded-circle">
+                        <div class="text-white">
+                            <h5 class="modal-title fw-bold mb-0" id="viewCVLabelEmployer"></h5>
+                            <p class="mb-0 opacity-85">
+                                <i class="bi bi-briefcase-fill me-1"></i><span id="cvPosition"></span>
+                            </p>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- ✅ BODY CV -->
+                <div class="modal-body cv-modal-body p-0" style="max-height: 80vh; overflow-y: auto;">
+                    <div class="row g-0">
+
+                        <!-- ===== CỘT TRÁI: SIDEBAR ===== -->
+                        <div class="col-md-3 cv-sidebar p-4 border-end">
+
+                            <!-- Avatar -->
+                            <div class="text-center mb-4">
+                                <img id="cvSidebarAvatar"
+                                    src=""
+                                    alt="Avatar"
+                                    class="cv-avatar rounded-circle">
+                                <h5 class="fw-bold mt-3 mb-1" id="cvNameSidebar"></h5>
+                                <p class="text-muted small mb-0" id="cvPositionSidebar"></p>
+                            </div>
+
+                            <hr class="my-3">
+
+                            <!-- ===== THÔNG TIN LIÊN HỆ ===== -->
+                            <h6 class="cv-section-title">Thông tin</h6>
+                            <div id="cvContactInfo"></div>
+
+                            <!-- ===== NGOẠI NGỮ ===== -->
+                            <div id="cvLanguagesSection"></div>
+
+                        </div>
+
+                        <!-- ===== CỘT PHẢI: NỘI DUNG CV ===== -->
+                        <div class="col-md-9 p-4">
+                            <div id="cvContent"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ✅ FOOTER CV -->
+                <div class="modal-footer cv-modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg me-1"></i>Đóng
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" onclick="window.print()">
+                        <i class="bi bi-printer me-1"></i>In CV
+                    </button>
+                    <button type="button" class="btn btn-primary" id="downloadCVBtn">
+                        <i class="bi bi-download me-1"></i>Tải PDF
+                    </button>
+                </div>
+
             </div>
         </div>
     </div>
-
     <!-- MODAL GỬI THÔNG TIN TUYỂN DỤNG -->
     <div id="inviteModal" class="modal-overlay hidden" onclick="closeInviteModal(event)">
         <div class="modal-content">
@@ -1730,7 +2033,7 @@
             </div>
         </div>
     </div>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- SCRIPT CHÍNH -->
     <!-- THAY THẾ PHẦN SCRIPT CHÍNH (từ dòng <script> cuối cùng) -->
 
@@ -1743,6 +2046,34 @@
             initializeFilterDropdowns();
             initializeRecommendedCards();
             restoreFilterStates();
+
+            // ✅ Thêm event listener cho pagination buttons
+            document.querySelectorAll('.pagination-btn[data-page]').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const page = this.getAttribute('data-page');
+                    if (page) {
+                        goToPage(parseInt(page));
+                    }
+                });
+            });
+
+            // ✅ Thêm event listener cho recommended CV buttons
+            document.querySelectorAll('.btn-view-cv-rec').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const candidateId = this.getAttribute('data-candidate-id');
+                    if (candidateId) {
+                        viewCV(candidateId);
+                    }
+                });
+            });
+
+            // ✅ Áp dụng width từ data-score attribute cho progress bars
+            document.querySelectorAll('[data-score]').forEach(el => {
+                const score = el.getAttribute('data-score');
+                if (score) {
+                    el.style.width = score + '%';
+                }
+            });
         });
 
         // ============ KHỞI TẠO FILTER DROPDOWNS ============
@@ -1912,17 +2243,41 @@
         function applyFiltersAuto() {
             const params = new URLSearchParams();
 
-            // Keyword & Location
-            const keyword = document.getElementById('searchKeyword')?.value || '';
-            const location = document.getElementById('locationFilter')?.value || '';
+            // ✅ FIX: Lấy keyword & location từ input
+            const keyword = document.getElementById('searchKeyword')?.value?.trim() || '';
+            const location = document.getElementById('locationFilter')?.value?.trim() || '';
+
+            console.log('📤 Sending params:', {
+                keyword,
+                location
+            });
+
             if (keyword) params.append('keyword', keyword);
             if (location) params.append('location', location);
 
-            // ✅ FIX: Lấy đúng giá trị từ checkbox
-            ['experience', 'education', 'salary', 'language', 'skills'].forEach(filterName => {
-                document.querySelectorAll(`input[name="${filterName}[]"]:checked`).forEach(el => {
-                    params.append(`${filterName}[]`, el.value);
-                });
+            // Experience filter
+            document.querySelectorAll('input[name="experience[]"]:checked').forEach(el => {
+                params.append('experience[]', el.value);
+            });
+
+            // Education filter
+            document.querySelectorAll('input[name="education[]"]:checked').forEach(el => {
+                params.append('education[]', el.value);
+            });
+
+            // Salary filter
+            document.querySelectorAll('input[name="salary[]"]:checked').forEach(el => {
+                params.append('salary[]', el.value);
+            });
+
+            // Language filter
+            document.querySelectorAll('input[name="language[]"]:checked').forEach(el => {
+                params.append('language[]', el.value);
+            });
+
+            // Skills filter
+            document.querySelectorAll('input[name="skills[]"]:checked').forEach(el => {
+                params.append('skills[]', el.value);
             });
 
             // Gender (radio)
@@ -1939,14 +2294,30 @@
             const queryString = params.toString();
             const url = `{{ route('employer.candidates') }}${queryString ? '?' + queryString : ''}`;
 
-            console.log('🔄 Applying filters:', url);
+            console.log('🔄 Full URL:', url);
             window.location.href = url;
         }
 
-        // ============ SEARCH CANDIDATES ============
+
         function searchCandidates() {
+            // ✅ FIX: Capture search values từ input fields
+            const keyword = document.getElementById('searchKeyword')?.value?.trim() || '';
+            const location = document.getElementById('locationFilter')?.value?.trim() || '';
+
+            console.log('🔍 Search values captured:', {
+                keyword,
+                location
+            });
+
+            // ✅ Cập nhật hidden input
+            document.getElementById('keywordInput').value = keyword;
+            document.getElementById('locationInput').value = location;
+
+            // ✅ Gọi hàm apply filters
             clearTimeout(window.filterSubmitTimeout);
-            applyFiltersAuto();
+            window.filterSubmitTimeout = setTimeout(() => {
+                applyFiltersAuto();
+            }, 300);
         }
 
         // ============ ENTER KEY SEARCH ============
@@ -2013,171 +2384,51 @@
 
         // ============ VIEW CV ============
         function viewCV(candidateId) {
+            viewCVEmployer(candidateId);
+        }
+        // ============ VIEW CV EMPLOYER - MAIN FUNCTION ============
+        function viewCVEmployer(candidateId) {
             currentCandidateId = candidateId;
-            const modal = document.getElementById('cvModal');
-            const content = document.getElementById('cvContent');
+            const modal = document.getElementById('viewCVModalEmployer');
 
+            if (!modal) {
+                console.error('❌ Modal not found: viewCVModalEmployer');
+                return;
+            }
+
+            // Show modal immediately
             modal.classList.remove('hidden');
-            content.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
 
+            // Load data
             fetch(`/employer/candidates/${candidateId}`)
                 .then(response => {
-                    if (!response.ok) throw new Error('Network response was not ok');
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
                     return response.json();
                 })
                 .then(data => {
-                    content.innerHTML = generateCVHTML(data);
+                    generateEmployerCVHTML(data);
+                    // Initialize Bootstrap modal only after content is loaded
+                    const bootstrapModal = new bootstrap.Modal(modal);
+                    bootstrapModal.show();
                 })
                 .catch(error => {
-                    console.error('❌ Error:', error);
-                    content.innerHTML = '<div class="text-center text-red-600 py-8">❌ Có lỗi xảy ra khi tải dữ liệu</div>';
+                    console.error('❌ Error loading CV:', error);
+                    modal.classList.add('hidden');
+                    alert('❌ Có lỗi xảy ra khi tải CV: ' + error.message);
                 });
         }
+        // ============ OPTIMIZE: Debounce search ============
+        const searchDebounce = debounce(() => applyFiltersAuto(), 500);
 
-        // ============ GENERATE CV HTML ============
-        function generateCVHTML(candidate) {
-            return `
-            <div class="space-y-6">
-                <!-- Profile Header -->
-                <div class="cv-section">
-                    <div class="flex items-start gap-6">
-                        ${candidate.avatar 
-                            ? `<img src="/assets/img/avt/${candidate.avatar}" class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg" alt="${candidate.hoten_uv}">`
-                            : `<div class="w-32 h-32 rounded-full bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center text-white text-4xl font-bold border-4 border-white shadow-lg">
-                                ${candidate.hoten_uv.charAt(0)}
-                              </div>`
-                        }
-                        <div class="flex-1">
-                            <h2 class="text-3xl font-bold text-gray-800 mb-2">${candidate.hoten_uv || 'N/A'}</h2>
-                            <p class="text-xl text-purple-600 font-semibold mb-4">${candidate.vitriungtuyen || 'Chưa cập nhật'}</p>
-                            <div class="grid grid-cols-2 gap-4 text-sm">
-                                ${candidate.sdt_uv ? `
-                                <div class="flex items-center text-gray-700">
-                                    <i class="bi bi-telephone mr-2"></i>
-                                    ${candidate.sdt_uv}
-                                </div>
-                                ` : ''}
-                                ${candidate.user && candidate.user.email ? `
-                                <div class="flex items-center text-gray-700">
-                                    <i class="bi bi-envelope mr-2"></i>
-                                    ${candidate.user.email}
-                                </div>
-                                ` : ''}
-                                ${candidate.diachi_uv ? `
-                                <div class="flex items-center text-gray-700">
-                                    <i class="bi bi-geo-alt mr-2"></i>
-                                    ${candidate.diachi_uv}
-                                </div>
-                                ` : ''}
-                                ${candidate.gioitinh_uv ? `
-                                <div class="flex items-center text-gray-700">
-                                    <i class="bi bi-gender-ambiguous mr-2"></i>
-                                    ${candidate.gioitinh_uv}
-                                </div>
-                                ` : ''}
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                ${candidate.gioithieu ? `
-                <div class="cv-section">
-                    <div class="cv-section-title">
-                        <div class="cv-section-icon">
-                            <i class="bi bi-person"></i>
-                        </div>
-                        Giới thiệu bản thân
-                    </div>
-                    <p class="text-gray-700 leading-relaxed">${candidate.gioithieu}</p>
-                </div>
-                ` : ''}
 
-                ${candidate.kinhnghiem && candidate.kinhnghiem.length > 0 ? `
-                <div class="cv-section">
-                    <div class="cv-section-title">
-                        <div class="cv-section-icon">
-                            <i class="bi bi-briefcase"></i>
-                        </div>
-                        Kinh nghiệm làm việc
-                    </div>
-                    <div class="space-y-4">
-                        ${candidate.kinhnghiem.map(exp => `
-                            <div class="border-l-4 border-purple-500 pl-4">
-                                <h4 class="font-semibold text-gray-800 text-lg">${exp.chuc_vu || exp.chucdanh || 'N/A'}</h4>
-                                <p class="text-purple-600 font-medium">${exp.ten_cong_ty || exp.congty || 'N/A'}</p>
-                                <p class="text-sm text-gray-600 mb-2">
-                                    ${exp.tu_ngay ? new Date(exp.tu_ngay).toLocaleDateString('vi-VN') : 'N/A'} - 
-                                    ${exp.dang_lam_viec ? 'Hiện tại' : (exp.den_ngay ? new Date(exp.den_ngay).toLocaleDateString('vi-VN') : 'N/A')}
-                                </p>
-                                ${exp.mo_ta || exp.mota ? `<p class="text-gray-700">${(exp.mo_ta || exp.mota).replace(/\n/g, '<br>')}</p>` : ''}
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-                ` : ''}
-
-                ${candidate.hocvan && candidate.hocvan.length > 0 ? `
-                <div class="cv-section">
-                    <div class="cv-section-title">
-                        <div class="cv-section-icon">
-                            <i class="bi bi-mortarboard"></i>
-                        </div>
-                        Học vấn
-                    </div>
-                    <div class="space-y-4">
-                        ${candidate.hocvan.map(edu => `
-                            <div class="border-l-4 border-blue-500 pl-4">
-                                <h4 class="font-semibold text-gray-800">${edu.ten_truong || edu.truong || 'N/A'}</h4>
-                                <p class="text-blue-600 font-medium">${edu.trinh_do || edu.trinhdo || 'N/A'} - ${edu.chuyen_nganh || edu.nganh || ''}</p>
-                                <p class="text-sm text-gray-600">
-                                    ${edu.tu_ngay ? new Date(edu.tu_ngay).toLocaleDateString('vi-VN') : 'N/A'} - 
-                                    ${edu.dang_hoc ? 'Hiện tại' : (edu.den_ngay ? new Date(edu.den_ngay).toLocaleDateString('vi-VN') : 'N/A')}
-                                </p>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-                ` : ''}
-
-                ${candidate.kynang && candidate.kynang.length > 0 ? `
-                <div class="cv-section">
-                    <div class="cv-section-title">
-                        <div class="cv-section-icon">
-                            <i class="bi bi-lightbulb"></i>
-                        </div>
-                        Kỹ năng
-                    </div>
-                    <div class="flex flex-wrap gap-2">
-                        ${candidate.kynang.map(skill => `
-                            <span class="skill-tag">
-                                ${skill.ten_ky_nang}
-                                ${skill.nam_kinh_nghiem ? ` (${skill.nam_kinh_nghiem == 0 ? '<1 năm' : skill.nam_kinh_nghiem + ' năm'})` : ''}
-                            </span>
-                        `).join('')}
-                    </div>
-                </div>
-                ` : ''}
-
-                ${candidate.ngoai_ngu && candidate.ngoai_ngu.length > 0 ? `
-                <div class="cv-section">
-                    <div class="cv-section-title">
-                        <div class="cv-section-icon">
-                            <i class="bi bi-translate"></i>
-                        </div>
-                        Ngoại ngữ
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        ${candidate.ngoai_ngu.map(lang => `
-                            <div class="flex items-center justify-between p-3 bg-white rounded-lg">
-                                <span class="font-medium">${lang.ten_ngoai_ngu}</span>
-                                <span class="text-sm text-gray-600">${lang.trinh_do}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-                ` : ''}
-            </div>
-        `;
+        // ============ DEBOUNCE UTILITY ============
+        function debounce(func, delay) {
+            let timeoutId;
+            return function(...args) {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => func.apply(this, args), delay);
+            };
         }
         // ============ CLOSE MODAL CV ============
         function closeModal(event) {
@@ -2288,105 +2539,166 @@
             await Promise.all(promises);
             return invitationMap;
         }
-        // ✅ CHECK TẤT CẢ LỜI MỜI
-        async function checkAllInvitationStatus(candidateId, jobs) {
-            const invitationMap = {};
-
-            for (const job of jobs) {
-                try {
-                    const response = await fetch(`/employer/candidates/${candidateId}/job/${job.id}/invitation-status`);
-                    const data = await response.json();
-                    invitationMap[job.id] = data.invited;
-                } catch (error) {
-                    console.error(`❌ Error checking invitation for job ${job.id}:`, error);
-                    invitationMap[job.id] = false;
-                }
-            }
-
-            return invitationMap;
-        }
 
         // ✅ GENERATE JOBS LIST - THÊM PARAM invitationMap
+        // ============ OPTIMIZE: Memoize generateJobsListHTML ============
+        const memoizedJobsHTML = {};
+
         function generateJobsListHTML(jobs, invitationMap = {}, candidateId) {
-            return `
-    <div class="space-y-4">
+            const cacheKey = `${candidateId}-${JSON.stringify(invitationMap)}`;
+
+            if (memoizedJobsHTML[cacheKey]) {
+                return memoizedJobsHTML[cacheKey];
+            }
+
+            const html = `
+    <div class="space-y-4" id="jobsList">
         ${jobs.map(job => {
             const isInvited = invitationMap[job.id] ?? false;
-            return `
-            <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 border-l-4 border-purple-500 hover:shadow-md transition-all">
-                <div class="flex items-start justify-between gap-4">
-                    <div class="flex-1">
-                        <h4 class="text-lg font-bold text-gray-800 mb-2">${job.job_title || 'N/A'}</h4>
-                        
-                        <div class="grid grid-cols-2 gap-3 mb-3">
-                            <div class="flex items-center text-sm text-gray-600">
-                                <i class="bi bi-geo-alt text-purple-600 mr-2"></i>
-                                <span>${job.location || 'Không xác định'}</span>
-                            </div>
-                            <div class="flex items-center text-sm text-gray-600">
-                                <i class="bi bi-cash-stack text-purple-600 mr-2"></i>
-                                <span>${job.salary_min ? job.salary_min + ' - ' + job.salary_max + ' VNĐ' : 'Thỏa thuận'}</span>
-                            </div>
-                            <div class="flex items-center text-sm text-gray-600">
-                                <i class="bi bi-people text-purple-600 mr-2"></i>
-                                <span>${job.quantity || 0} vị trí</span>
-                            </div>
-                            <div class="flex items-center text-sm text-gray-600">
-                                <i class="bi bi-hourglass-split text-purple-600 mr-2"></i>
-                                <span>Hết hạn: ${formatDate(job.deadline)}</span>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <div class="flex items-center justify-between mb-1">
-                                <span class="text-xs font-semibold text-gray-700">
-                                    Đã nhận: <span class="text-purple-600">${job.received_count || 0}</span>/${job.quantity || 0}
-                                </span>
-                                <span class="text-xs font-bold text-purple-600">
-                                    ${job.quantity ? Math.round((job.received_count || 0) / job.quantity * 100) : 0}%
-                                </span>
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-2">
-                                <div class="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-300" 
-                                    style="width: ${job.quantity ? Math.round((job.received_count || 0) / job.quantity * 100) : 0}%">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="flex flex-wrap gap-2">
-                            ${(job.required_skills || []).slice(0, 3).map(skill => `
-                                <span class="inline-block px-2.5 py-1 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full">
-                                    ${skill}
-                                </span>
-                            `).join('')}
-                            ${(job.required_skills || []).length > 3 ? `
-                                <span class="inline-block px-2.5 py-1 bg-gray-200 text-gray-700 text-xs font-semibold rounded-full">
-                                    +${(job.required_skills || []).length - 3}
-                                </span>
-                            ` : ''}
-                        </div>
-                    </div>
-
-                    ${isInvited ? `
-                        <button disabled class="px-6 py-3 bg-gray-400 text-white rounded-lg font-semibold text-sm flex items-center gap-2 flex-shrink-0 cursor-not-allowed opacity-75">
-                            <i class="bi bi-check-circle"></i>
-                            <span>Đã mời</span>
-                        </button>
-                    ` : `
-                        <button onclick="confirmInvite(${job.id}, '${job.job_title.replace(/'/g, "\\'")}')"
-                            class="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-semibold text-sm hover:shadow-lg transition-all transform hover:scale-105 flex items-center gap-2 flex-shrink-0">
-                            <i class="bi bi-person-plus-fill"></i>
-                            <span>Mời</span>
-                        </button>
-                    `}
-                </div>
-            </div>
-        `}
-        ).join('')}
+            return generateJobCard(job, isInvited, candidateId);
+        }).join('')}
     </div>
-`;
+    `;
+
+            memoizedJobsHTML[cacheKey] = html;
+
+            // ✅ Thêm event listeners sau khi render
+            setTimeout(() => {
+                const jobsList = document.getElementById('jobsList');
+                if (jobsList) {
+                    jobsList.querySelectorAll('.btn-invite-job').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const jobId = btn.getAttribute('data-job-id');
+                            const jobTitle = btn.getAttribute('data-job-title');
+                            confirmInvite(jobId, jobTitle);
+                        });
+                    });
+                }
+            }, 0);
+
+            return html;
         }
 
+        function generateJobCard(job, isInvited, candidateId) {
+            const skillsHTML = (job.required_skills || []).slice(0, 3)
+                .map(skill => `<span class="inline-block px-2.5 py-1 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full">${skill}</span>`)
+                .join('');
+
+            const moreSkills = Math.max(0, (job.required_skills || []).length - 3);
+            // ✅ FIX: Kiểm tra xem job đã đủ số lượng không
+            const isFilled = job.quantity && job.received_count && job.received_count >= job.quantity;
+            // ✅ Xác định trạng thái nút
+            let buttonHTML = '';
+            if (isFilled) {
+                // ❌ TRẠNG THÁI 1: Job đã đủ - Disable nút
+                buttonHTML = `
+            <button disabled 
+                class="px-6 py-3 bg-gray-400 text-white rounded-lg font-semibold text-sm flex items-center gap-2 flex-shrink-0 cursor-not-allowed opacity-60" 
+                title="Vị trí này đã đủ ${job.received_count}/${job.quantity} ứng viên">
+                <i class="bi bi-check2-circle"></i>
+                <span>Đã đủ</span>
+            </button>
+        `;
+            } else if (isInvited) {
+                // ⚪ TRẠNG THÁI 2: Đã mời rồi - Disable nút
+                buttonHTML = `
+            <button disabled 
+                class="px-6 py-3 bg-gray-400 text-white rounded-lg font-semibold text-sm flex items-center gap-2 flex-shrink-0 cursor-not-allowed opacity-75" 
+                title="Bạn đã mời ứng viên này cho vị trí này">
+                <i class="bi bi-check-circle"></i>
+                <span>Đã mời</span>
+            </button>
+        `;
+            } else {
+                // ✅ TRẠNG THÁI 3: Có thể mời - Active nút
+                const jobIdEscaped = job.id;
+                const jobTitleEscaped = escapeHtml(job.job_title).replace(/'/g, "\\'");
+                buttonHTML = `
+            <button data-job-id="${jobIdEscaped}" data-job-title="${jobTitleEscaped}" class="btn-invite-job px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-semibold text-sm hover:shadow-lg transition-all transform hover:scale-105 flex items-center gap-2 flex-shrink-0">
+                <i class="bi bi-person-plus-fill"></i>
+                <span>Mời</span>
+            </button>
+        `;
+            }
+
+            return `
+        <div class="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 border-l-4 border-purple-500 hover:shadow-md transition-all">
+            <div class="flex items-start justify-between gap-4">
+                <div class="flex-1">
+                    <h4 class="text-lg font-bold text-gray-800 mb-2">${escapeHtml(job.job_title)}</h4>
+                    
+                    <div class="grid grid-cols-2 gap-3 mb-3 text-sm text-gray-600">
+                        <div><i class="bi bi-geo-alt text-purple-600 mr-2"></i>${escapeHtml(job.location)}</div>
+                        <div><i class="bi bi-cash-stack text-purple-600 mr-2"></i>${formatSalary(job)}</div>
+                        <div><i class="bi bi-people text-purple-600 mr-2"></i>${job.quantity || 0} vị trí</div>
+                        <div><i class="bi bi-hourglass-split text-purple-600 mr-2"></i>Hết: ${formatDate(job.deadline)}</div>
+                    </div>
+
+                    <div class="mb-3">
+                        ${generateProgressBar(job)}
+                    </div>
+
+                    <!-- ✅ CẢNH BÁO KHI JOB ĐÃ ĐỦ -->
+                    ${isFilled ? `
+                        <div class="mb-3 p-2 bg-yellow-100 border-l-4 border-yellow-500 rounded">
+                            <p class="text-xs text-yellow-800 font-semibold flex items-center gap-1">
+                                <i class="bi bi-info-circle"></i>
+                                Vị trí này đã đủ số lượng ứng viên (${job.received_count}/${job.quantity})
+                            </p>
+                        </div>
+                    ` : ''}
+
+                    <div class="flex flex-wrap gap-2">
+                        ${skillsHTML}
+                        ${moreSkills > 0 ? `<span class="inline-block px-2.5 py-1 bg-gray-200 text-gray-700 text-xs font-semibold rounded-full">+${moreSkills}</span>` : ''}
+                    </div>
+                </div>
+
+                <!-- ✅ NÚT MỜI (ĐÃ CẬP NHẬT) -->
+                ${buttonHTML}
+            </div>
+        </div>
+    `;
+
+
+
+        }
+
+        function generateProgressBar(job) {
+            const percent = job.quantity ? Math.round((job.received_count || 0) / job.quantity * 100) : 0;
+            return `
+        <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-semibold text-gray-700">Đã nhận: <span class="text-purple-600">${job.received_count || 0}</span>/${job.quantity || 0}</span>
+            <span class="text-xs font-bold text-purple-600">${percent}%</span>
+        </div>
+        <div class="w-full bg-gray-200 rounded-full h-2">
+            <div class="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-300" style="width: ${percent}%"></div>
+        </div>
+    `;
+        }
+
+        function formatSalary(job) {
+            return job.salary_min ? `${job.salary_min} - ${job.salary_max} VNĐ` : 'Thỏa thuận';
+        }
+
+        function formatDate(dateString) {
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('vi-VN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                });
+            } catch (e) {
+                return dateString || 'N/A';
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
         // ✅ CONFIRM INVITE - CẬP NHẬT BUTTON NGAY
         function confirmInvite(jobId, jobTitle) {
             if (!currentInviteCandidate) return;
@@ -2447,20 +2759,6 @@
                     alert('❌ ' + error.message);
                 });
         }
-        // ============ INVITE FUNCTIONS ============
-        function formatDate(dateString) {
-            try {
-                const date = new Date(dateString);
-                return date.toLocaleDateString('vi-VN', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit'
-                });
-            } catch (e) {
-                return dateString || 'N/A';
-            }
-        }
-
 
         // ============ CLOSE MODAL INVITE ============
         function closeInviteModal(event) {
@@ -2471,7 +2769,228 @@
             }
         }
     </script>
+    <!-- ✅ SCRIPT XỬ LÝ MODAL CV -->
+    <script>
+        // ✅ GENERATE CV HTML CHO EMPLOYER
+        // Thay thế hàm generateEmployerCVHTML hiện tại
 
+        function generateEmployerCVHTML(candidate) {
+            // Header & Sidebar Info
+            document.getElementById('viewCVLabelEmployer').textContent = candidate.hoten_uv || 'N/A';
+            document.getElementById('cvPosition').textContent = candidate.vitriungtuyen || 'N/A';
+
+            const avatarUrl = candidate.avatar ?
+                `/assets/img/avt/${candidate.avatar}` :
+                `/assets/img/avt/default-avatar.png`;
+
+            document.getElementById('cvAvatarImg').src = avatarUrl;
+            document.getElementById('cvSidebarAvatar').src = avatarUrl;
+            document.getElementById('cvNameSidebar').textContent = candidate.hoten_uv || 'N/A';
+            document.getElementById('cvPositionSidebar').textContent = candidate.vitriungtuyen || 'N/A';
+
+            // Contact Info
+            let contactHTML = '';
+            if (candidate.user && candidate.user.email) {
+                contactHTML += `
+            <div class="cv-info-item">
+                <i class="bi bi-envelope"></i>
+                <div>
+                    <small class="cv-info-label">Email</small>
+                    <small class="cv-info-value">${candidate.user.email}</small>
+                </div>
+            </div>
+        `;
+            }
+            if (candidate.sdt_uv) {
+                contactHTML += `
+            <div class="cv-info-item">
+                <i class="bi bi-telephone"></i>
+                <div>
+                    <small class="cv-info-label">Điện thoại</small>
+                    <small class="cv-info-value">${candidate.sdt_uv}</small>
+                </div>
+            </div>
+        `;
+            }
+            if (candidate.diachi_uv) {
+                contactHTML += `
+            <div class="cv-info-item">
+                <i class="bi bi-geo-alt"></i>
+                <div>
+                    <small class="cv-info-label">Địa chỉ</small>
+                    <small class="cv-info-value">${candidate.diachi_uv}</small>
+                </div>
+            </div>
+        `;
+            }
+            document.getElementById('cvContactInfo').innerHTML = contactHTML;
+
+            // Languages Section
+            let languagesHTML = '';
+            if (candidate.ngoai_ngu && candidate.ngoai_ngu.length > 0) {
+                languagesHTML = `
+            <hr class="my-3">
+            <h6 class="cv-section-title">Ngoại ngữ</h6>
+        `;
+                candidate.ngoai_ngu.forEach(lang => {
+                    languagesHTML += `
+                <div class="cv-info-item">
+                    <i class="bi bi-translate"></i>
+                    <div>
+                        <small class="cv-info-label">${lang.ten_ngoai_ngu}</small>
+                        <small class="cv-info-value">${lang.trinh_do}</small>
+                    </div>
+                </div>
+            `;
+                });
+            }
+            document.getElementById('cvLanguagesSection').innerHTML = languagesHTML;
+
+            // Main Content
+            let contentHTML = '';
+
+            // Giới thiệu
+            if (candidate.gioithieu) {
+                contentHTML += `
+            <div class="cv-content-section">
+                <h5 class="cv-section-title">
+                    <i class="bi bi-person me-2"></i>Giới thiệu bản thân
+                </h5>
+                <p class="cv-description">${candidate.gioithieu.replace(/\n/g, '<br>')}</p>
+            </div>
+        `;
+            }
+
+            // Kinh nghiệm
+            if (candidate.kinhnghiem && candidate.kinhnghiem.length > 0) {
+                contentHTML += `<div class="cv-content-section">
+            <h5 class="cv-section-title">
+                <i class="bi bi-briefcase me-2"></i>Kinh nghiệm làm việc
+            </h5>`;
+                candidate.kinhnghiem.forEach(exp => {
+                    contentHTML += `
+                <div class="cv-timeline-item">
+                    <div class="cv-job-title">${exp.chucdanh || 'N/A'}</div>
+                    <div class="cv-company">${exp.congty || 'N/A'}</div>
+                    <div class="cv-date">
+                        <i class="bi bi-calendar-event me-1"></i>
+                        ${new Date(exp.tu_ngay).toLocaleDateString('vi-VN', {year: 'numeric', month: '2-digit'})} -
+                        ${exp.dang_lam_viec ? '<span class="badge bg-success text-white">Hiện tại</span>' : new Date(exp.den_ngay).toLocaleDateString('vi-VN', {year: 'numeric', month: '2-digit'})}
+                    </div>
+                    ${exp.mota ? `<div class="cv-description"><strong>Mô tả:</strong><br>${exp.mota.replace(/\n/g, '<br>')}</div>` : ''}
+                    ${exp.duan ? `<div class="cv-description"><strong>Dự án:</strong><br>${exp.duan.replace(/\n/g, '<br>')}</div>` : ''}
+                </div>
+            `;
+                });
+                contentHTML += `</div>`;
+            }
+
+            // Học vấn
+            if (candidate.hocvan && candidate.hocvan.length > 0) {
+                contentHTML += `<div class="cv-content-section">
+            <h5 class="cv-section-title">
+                <i class="bi bi-mortarboard me-2"></i>Học vấn
+            </h5>`;
+                candidate.hocvan.forEach(edu => {
+                    contentHTML += `
+                <div class="cv-timeline-item">
+                    <div class="cv-job-title">${edu.truong || 'N/A'}</div>
+                    <div class="cv-date">
+                        ${edu.nganh || 'N/A'} - 
+                        <span class="cv-badge" style="background: #e3f2fd; color: #1976d2;">
+                            ${edu.trinhdo || edu.trinh_do || 'N/A'}
+                        </span>
+                    </div>
+                </div>
+            `;
+                });
+                contentHTML += `</div>`;
+            }
+
+            // Kỹ năng
+            if (candidate.kynang && candidate.kynang.length > 0) {
+                contentHTML += `<div class="cv-content-section">
+            <h5 class="cv-section-title">
+                <i class="bi bi-lightbulb me-2"></i>Kỹ năng
+            </h5>
+            <div class="d-flex flex-wrap gap-2">`;
+                candidate.kynang.forEach(skill => {
+                    contentHTML += `<span class="cv-badge">${skill.ten_ky_nang} (${skill.nam_kinh_nghiem == 0 ? '< 1 năm' : skill.nam_kinh_nghiem + ' năm'})</span>`;
+                });
+                contentHTML += `</div></div>`;
+            }
+
+            // ✅ Dự án nổi bật
+            if (candidate.duan && candidate.duan.length > 0) {
+                contentHTML += `<div class="cv-content-section">
+            <h5 class="cv-section-title">
+                <i class="bi bi-kanban me-2"></i>Dự án nổi bật
+            </h5>`;
+                candidate.duan.forEach(da => {
+                    contentHTML += `
+                <div class="cv-timeline-item">
+                    <div class="cv-job-title">${da.ten_duan || 'N/A'}</div>
+                    <div class="cv-date">
+                        <i class="bi bi-calendar-event me-1"></i>
+                        ${new Date(da.ngay_bat_dau).toLocaleDateString('vi-VN', {year: 'numeric', month: '2-digit'})} -
+                        ${da.dang_lam ? '<span class="badge bg-success text-white">Hiện tại</span>' : new Date(da.ngay_ket_thuc).toLocaleDateString('vi-VN', {year: 'numeric', month: '2-digit'})}
+                    </div>
+                    ${da.mota_duan ? `<div class="cv-description mb-2">${da.mota_duan.replace(/\n/g, '<br>')}</div>` : ''}
+                    ${da.duongdan_website ? `<p class="mb-0"><a href="${da.duongdan_website}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="bi bi-box-arrow-up-right me-1"></i>Xem dự án</a></p>` : ''}
+                </div>
+            `;
+                });
+                contentHTML += `</div>`;
+            }
+
+            // ✅ Chứng chỉ
+            if (candidate.chungchi && candidate.chungchi.length > 0) {
+                contentHTML += `<div class="cv-content-section">
+            <h5 class="cv-section-title">
+                <i class="bi bi-award me-2"></i>Chứng chỉ
+            </h5>`;
+                candidate.chungchi.forEach(cc => {
+                    contentHTML += `
+                <div class="cv-timeline-item">
+                    <div class="cv-job-title">${cc.ten_chungchi || 'N/A'}</div>
+                    <div class="cv-company">${cc.to_chuc || 'N/A'}</div>
+                    <div class="cv-date">
+                        <i class="bi bi-calendar me-1"></i>${new Date(cc.thoigian).toLocaleDateString('vi-VN', {year: 'numeric', month: '2-digit'})}
+                    </div>
+                    ${cc.mo_ta ? `<div class="cv-description mb-2">${cc.mo_ta.replace(/\n/g, '<br>')}</div>` : ''}
+                    ${cc.link_chungchi ? `<p class="mb-0"><a href="${cc.link_chungchi}" target="_blank" class="btn btn-sm btn-outline-warning"><i class="bi bi-box-arrow-up-right me-1"></i>Xem chứng chỉ</a></p>` : ''}
+                </div>
+            `;
+                });
+                contentHTML += `</div>`;
+            }
+
+            // ✅ Giải thưởng
+            if (candidate.giaithuong && candidate.giaithuong.length > 0) {
+                contentHTML += `<div class="cv-content-section">
+            <h5 class="cv-section-title">
+                <i class="bi bi-trophy me-2"></i>Giải thưởng
+            </h5>`;
+                candidate.giaithuong.forEach(gt => {
+                    contentHTML += `
+                <div class="cv-timeline-item">
+                    <div class="cv-job-title">
+                        <i class="bi bi-trophy-fill text-warning me-2"></i>${gt.ten_giaithuong || 'N/A'}
+                    </div>
+                    <div class="cv-company">${gt.to_chuc || 'N/A'}</div>
+                    <div class="cv-date">
+                        <i class="bi bi-calendar-event me-1"></i>${new Date(gt.thoigian).toLocaleDateString('vi-VN', {year: 'numeric', month: '2-digit'})}
+                    </div>
+                    ${gt.mo_ta ? `<div class="cv-description">${gt.mo_ta.replace(/\n/g, '<br>')}</div>` : ''}
+                </div>
+            `;
+                });
+                contentHTML += `</div>`;
+            }
+
+            document.getElementById('cvContent').innerHTML = contentHTML;
+        }
+    </script>
 </body>
 
 </html>

@@ -132,7 +132,7 @@ class ApplicationController extends Controller
             }
 
             // Lấy thông tin job
-            $job = JobPost::findOrFail($request->job_id);
+            $job = JobPost::where('job_id', $request->job_id)->firstOrFail();
 
             // Kiểm tra đã ứng tuyển chưa
             $existingApplication = Application::where('job_id', $request->job_id)
@@ -319,11 +319,7 @@ class ApplicationController extends Controller
     public function jobApplicants($jobId)
     {
         try {
-            $job = JobPost::with('company')->findOrFail($jobId);
-
-            if (Auth::user()->user_id != $job->company->user_id) {
-                abort(403);
-            }
+            $job = JobPost::with('company')->where('job_id', $jobId)->firstOrFail();
 
             $applications = Application::with(['applicant', 'job'])
                 ->where('job_id', $jobId)

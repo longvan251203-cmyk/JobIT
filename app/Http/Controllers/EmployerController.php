@@ -73,7 +73,7 @@ class EmployerController extends Controller
      */
     public function showJobApplicants($jobId)
     {
-        $job = JobPost::findOrFail($jobId);
+        $job = JobPost::where('job_id', $jobId)->firstOrFail();
 
         // Lấy danh sách ứng viên với thông tin chi tiết
         $applications = Application::with(['applicant', 'company'])

@@ -2112,12 +2112,9 @@
                                             <label class="form-label fw-bold">Trình độ <span class="text-danger">*</span></label>
                                             <select name="trinhdo" class="form-select" required>
                                                 <option value="">-- Chọn trình độ --</option>
+                                                <option value="Trung cấp">Trung cấp</option>
                                                 <option value="Cao đẳng">Cao đẳng</option>
-                                                <option value="Cử nhân">Cử nhân</option>
-                                                <option value="Kỹ sư">Kỹ sư</option>
-                                                <option value="Thạc sĩ">Thạc sĩ</option>
-                                                <option value="Tiến sĩ">Tiến sĩ</option>
-                                                <option value="Khác">Khác</option>
+                                                <option value="Đại học">Đại học</option>
                                             </select>
                                         </div>
                                         <div class="mb-3">

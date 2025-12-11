@@ -480,6 +480,50 @@
                 width: 75% !important;
             }
         }
+
+        /* ========================================
+   2 NÚT CHẤP NHẬN/TỪ CHỐI LỜI MỜI
+======================================== */
+        .invitation-response-buttons {
+            display: flex;
+            gap: 0.75rem;
+            width: 100%;
+        }
+
+        .invitation-response-buttons .btn {
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            flex: 1;
+        }
+
+        .invitation-response-buttons .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .invitation-response-buttons .btn-success:hover {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .invitation-response-buttons .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .invitation-response-buttons .btn-danger:hover {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+        }
+
+        .invitation-response-buttons .btn i {
+            margin-right: 0.5rem;
+        }
     </style>
 </head>
 
@@ -751,6 +795,8 @@
                 <form id="applyJobForm" action="{{ route('application.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" name="job_id" id="modalJobId" value="{{ $job->job_id }}">
+                    <input type="hidden" name="invitation_id" id="modalInvitationId" value="">
+                    <input type="hidden" name="accept_invitation" id="modalAcceptInvitation" value="0">
 
                     <div class="modal-body p-4">
                         <!-- Step 1: Chọn cách ứng tuyển -->
@@ -932,14 +978,14 @@
                     type === 'info' ? 'bi-info-circle-fill' : 'bi-heart-fill';
 
                 toast.style.cssText = `
-                position: fixed; top: 80px; right: 20px;
-                background: ${bgColor}; color: white;
-                padding: 1rem 1.5rem; border-radius: 12px;
-                box-shadow: 0 8px 24px rgba(0,0,0,0.25);
-                z-index: 9999; animation: slideInRight 0.3s ease;
-                display: flex; align-items: center; gap: 0.75rem;
-                font-weight: 500; min-width: 280px;
-            `;
+            position: fixed; top: 80px; right: 20px;
+            background: ${bgColor}; color: white;
+            padding: 1rem 1.5rem; border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+            z-index: 9999; animation: slideInRight 0.3s ease;
+            display: flex; align-items: center; gap: 0.75rem;
+            font-weight: 500; min-width: 280px;
+        `;
 
                 toast.innerHTML = `<i class="bi ${icon}" style="font-size: 1.2rem;"></i><span>${message}</span>`;
                 document.body.appendChild(toast);
@@ -954,15 +1000,15 @@
                 const style = document.createElement('style');
                 style.id = 'toast-animations';
                 style.textContent = `
-                @keyframes slideInRight {
-                    from { transform: translateX(400px); opacity: 0; }
-                    to { transform: translateX(0); opacity: 1; }
-                }
-                @keyframes slideOutRight {
-                    from { transform: translateX(0); opacity: 1; }
-                    to { transform: translateX(400px); opacity: 0; }
-                }
-            `;
+            @keyframes slideInRight {
+                from { transform: translateX(400px); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(400px); opacity: 0; }
+            }
+        `;
                 document.head.appendChild(style);
             }
 
@@ -972,19 +1018,123 @@
                 return isLoggedIn && isLoggedIn.content === 'true';
             }
 
-            // ========== CẬP NHẬT NÚT ỨNG TUYỂN - GIỐNG HOMEAPP ==========
-            function updateApplyButton(button, hasApplied) {
+            // ========== CẬP NHẬT NÚT ỨNG TUYỂN ==========
+            function updateApplyButton(button, hasApplied, isInvited = false, invitationStatus = null, invitationId = null) {
                 if (!button) return;
+
+                console.log(`🔍 updateApplyButton:`, {
+                    hasApplied,
+                    isInvited,
+                    invitationStatus,
+                    invitationId
+                });
+
+                // ✅ XỬ LÝ LỜI MỜI PENDING: HIỂN THỊ 2 NÚT
+                if (isInvited && invitationStatus === 'pending') {
+                    console.log(`🎯 Creating 2 invitation buttons (Accept/Reject)`);
+
+                    // Tìm container để thay thế
+                    const buttonParent = button.parentElement;
+                    if (!buttonParent) return;
+
+                    // Xóa group nút cũ nếu có
+                    const oldGroup = buttonParent.querySelector('.invitation-response-buttons');
+                    if (oldGroup) {
+                        oldGroup.remove();
+                    }
+
+                    // Ẩn button chính
+                    button.style.display = 'none';
+
+                    // Tạo wrapper chứa 2 nút
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'invitation-response-buttons';
+                    const jobId = button.getAttribute('data-job-id');
+
+                    // Tạo nút Chấp nhận
+                    const acceptBtn = document.createElement('button');
+                    acceptBtn.type = 'button';
+                    acceptBtn.className = 'btn btn-success';
+                    acceptBtn.setAttribute('data-invitation-id', invitationId);
+                    acceptBtn.setAttribute('data-job-id', jobId);
+                    acceptBtn.innerHTML = '<i class="bi bi-check-lg"></i><span>Chấp nhận</span>';
+
+                    // Tạo nút Từ chối
+                    const rejectBtn = document.createElement('button');
+                    rejectBtn.type = 'button';
+                    rejectBtn.className = 'btn btn-danger';
+                    rejectBtn.setAttribute('data-invitation-id', invitationId);
+                    rejectBtn.setAttribute('data-job-id', jobId);
+                    rejectBtn.innerHTML = '<i class="bi bi-x-lg"></i><span>Từ chối</span>';
+
+                    // Gắn event listeners
+                    acceptBtn.addEventListener('click', function(e) {
+                        handleAcceptInvitationButton(this, e);
+                    });
+
+                    rejectBtn.addEventListener('click', function(e) {
+                        handleRejectInvitationButton(this, e);
+                    });
+
+                    wrapper.appendChild(acceptBtn);
+                    wrapper.appendChild(rejectBtn);
+                    button.parentElement.insertBefore(wrapper, button.nextSibling);
+                    return;
+                }
+
+                // ✅ Xóa group nút nếu chuyển từ pending sang trạng thái khác
+                const buttonParent = button.parentElement;
+                if (buttonParent) {
+                    const oldGroup = buttonParent.querySelector('.invitation-response-buttons');
+                    if (oldGroup) oldGroup.remove();
+                }
+
+                // Hiển thị nút chính lại
+                button.style.display = '';
 
                 const icon = button.querySelector('i');
 
-                if (hasApplied) {
+                if (isInvited && invitationStatus === 'accepted') {
+                    button.classList.add('applied');
+                    button.disabled = true;
+                    button.title = 'Bạn đã chấp nhận lời mời';
+
+                    if (icon) {
+                        icon.classList.remove('bi-send-fill', 'fa-paper-plane');
+                        icon.classList.add('bi-check-circle-fill');
+                    }
+
+                    button.childNodes.forEach(node => {
+                        if (node.nodeType === Node.TEXT_NODE) {
+                            node.remove();
+                        }
+                    });
+                    button.appendChild(document.createTextNode('Đã chấp nhận'));
+
+                } else if (isInvited && invitationStatus === 'rejected') {
+                    button.classList.add('applied');
+                    button.disabled = true;
+                    button.title = 'Bạn đã từ chối lời mời';
+
+                    if (icon) {
+                        icon.classList.remove('bi-send-fill', 'fa-paper-plane');
+                        icon.classList.add('bi-x-circle-fill');
+                    }
+
+                    button.childNodes.forEach(node => {
+                        if (node.nodeType === Node.TEXT_NODE) {
+                            node.remove();
+                        }
+                    });
+                    button.appendChild(document.createTextNode('Đã từ chối'));
+
+                } else if (hasApplied) {
                     button.classList.add('applied');
                     button.disabled = true;
                     button.title = 'Bạn đã ứng tuyển công việc này';
 
                     if (icon) {
-                        icon.classList.remove('bi-send-fill', 'fa-paper-plane');
+                        icon.classList.remove('bi-send-fill', 'fa-paper-plane', 'bi-x-circle-fill');
                         icon.classList.add('bi-check-circle-fill');
                     }
 
@@ -1001,7 +1151,7 @@
                     button.title = 'Ứng tuyển ngay';
 
                     if (icon) {
-                        icon.classList.remove('bi-check-circle-fill');
+                        icon.classList.remove('bi-check-circle-fill', 'bi-x-circle-fill');
                         icon.classList.add('bi-send-fill', 'fa-paper-plane');
                     }
 
@@ -1014,23 +1164,51 @@
                 }
             }
 
-            // ========== ĐỒNG BỘ NÚT ỨNG TUYỂN - GIỐNG HOMEAPP ==========
-            function syncApplyButtons(jobId, hasApplied) {
-                // Detail view - tìm nút theo data-job-id
-                const detailBtn = document.querySelector(`button[data-job-id="${jobId}"].apply-button`);
-                if (detailBtn) updateApplyButton(detailBtn, hasApplied);
+            // ========== ĐỒNG BỘ NÚT ỨNG TUYỂN ==========
+            function syncApplyButtons(jobId, hasApplied, isInvited = false, invitationStatus = null, invitationId = null) {
+                console.log(`🔍 syncApplyButtons called:`, {
+                    jobId,
+                    hasApplied,
+                    isInvited,
+                    invitationStatus,
+                    invitationId
+                });
+
+                // Detail view - tìm nút bằng ID
+                const detailBtn = document.getElementById('openApplyModal');
+                console.log(`🔎 Looking for button #openApplyModal:`, detailBtn);
+
+                if (detailBtn) {
+                    const btnJobId = detailBtn.getAttribute('data-job-id');
+                    console.log(`✅ Found button with data-job-id="${btnJobId}", comparing with jobId="${jobId}"`);
+
+                    // ✅ CẬP NHẬT NÚT CHO JOB HIỆN TẠI
+                    if (btnJobId == jobId) {
+                        console.log(`✅ Job IDs match! Updating button...`);
+                        updateApplyButton(detailBtn, hasApplied, isInvited, invitationStatus, invitationId);
+                    } else {
+                        console.log(`⚠️ Job IDs don't match, skipping: "${btnJobId}" !== "${jobId}"`);
+                    }
+                } else {
+                    console.log(`❌ Button not found`);
+                }
 
                 // Grid view nếu có
                 const gridCard = document.querySelector(`.job-card-grid[data-job-id="${jobId}"]`);
                 if (gridCard) {
                     const gridBtn = gridCard.querySelector('.btn-apply-now');
-                    if (gridBtn) updateApplyButton(gridBtn, hasApplied);
+                    if (gridBtn) updateApplyButton(gridBtn, hasApplied, isInvited, invitationStatus, invitationId);
                 }
             }
 
-            // ========== KIỂM TRA TRẠNG THÁI ỨNG TUYỂN - GIỐNG HOMEAPP ==========
+            // ========== KIỂM TRA TRẠNG THÁI ỨNG TUYỂN + LỜI MỜI ==========
             function checkApplicationStatus(jobId) {
-                if (!checkAuth()) return;
+                if (!checkAuth()) {
+                    console.log('❌ User not authenticated');
+                    return;
+                }
+
+                console.log(`🔍 checkApplicationStatus for jobId:`, jobId);
 
                 fetch(`/api/jobs/${jobId}/check-application`, {
                         headers: {
@@ -1041,33 +1219,21 @@
                     })
                     .then(response => response.json())
                     .then(data => {
+                        console.log(`📦 checkApplicationStatus response:`, data);
                         if (data.success) {
-                            syncApplyButtons(jobId, data.applied);
+                            // ✅ Truyền ĐẦY ĐỦ parameters cho syncApplyButtons
+                            syncApplyButtons(
+                                jobId,
+                                data.applied || false,
+                                data.invited || false,
+                                data.invitation_status || null,
+                                data.invitation_id || null
+                            );
                         }
                     })
-                    .catch(error => console.error('Error checking application status:', error));
-            }
-
-            // ========== LOAD DANH SÁCH ĐÃ ỨNG TUYỂN - GIỐNG HOMEAPP ==========
-            function loadAppliedJobs() {
-                if (!checkAuth()) return;
-
-                fetch('/api/applied-jobs', {
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success && data.appliedJobIds && data.appliedJobIds.length > 0) {
-                            data.appliedJobIds.forEach(jobId => {
-                                syncApplyButtons(jobId, true);
-                            });
-                        }
-                    })
-                    .catch(error => console.error('Error loading applied jobs:', error));
+                    .catch(error => {
+                        console.error('❌ Error checking application status:', error);
+                    });
             }
 
             // ========== XỬ LÝ USER DROPDOWN ==========
@@ -1087,7 +1253,7 @@
                 });
             }
 
-            // ========== XỬ LÝ NÚT APPLY - GIỐNG HOMEAPP ==========
+            // ========== XỬ LÝ NÚT APPLY ==========
             const openApplyModal = document.getElementById('openApplyModal');
 
             if (openApplyModal) {
@@ -1107,6 +1273,150 @@
                         modalJobIdInput.value = jobId;
                     }
                 });
+            }
+
+            // ✅ XỬ LÝ CHẤP NHẬN LỜI MỜI
+            window.handleAcceptInvitationButton = function(button, event) {
+                event.stopPropagation();
+                event.preventDefault();
+
+                if (!checkAuth()) {
+                    showToast('Vui lòng đăng nhập!', 'error');
+                    setTimeout(() => window.location.href = '/login', 1500);
+                    return;
+                }
+
+                const invitationId = button.dataset.invitationId;
+                const jobId = button.dataset.jobId;
+
+                if (!invitationId || !jobId) {
+                    console.error('Missing invitationId or jobId', {
+                        invitationId,
+                        jobId
+                    });
+                    showToast('Không xác định được công việc!', 'error');
+                    return;
+                }
+
+                console.log(`✅ Accepting invitation:`, {
+                    invitationId,
+                    jobId
+                });
+
+                // ✅ LƯU invitationId VÀO MODAL (CHƯA GỬI API)
+                document.getElementById('modalInvitationId').value = invitationId;
+                document.getElementById('modalAcceptInvitation').value = '1';
+                document.getElementById('modalJobId').value = jobId;
+
+                // ✅ HIỂN THỊ MODAL ỨNG TUYỂN
+                showToast('📋 Vui lòng hoàn tất thông tin ứng tuyển để gửi hồ sơ', 'info');
+                const modal = new bootstrap.Modal(document.getElementById('applyJobModal'));
+                modal.show();
+            };
+
+            // ✅ XỬ LÝ TỪ CHỐI LỜI MỜI
+            window.handleRejectInvitationButton = function(button, event) {
+                event.stopPropagation();
+                event.preventDefault();
+
+                if (!checkAuth()) {
+                    showToast('Vui lòng đăng nhập!', 'error');
+                    setTimeout(() => window.location.href = '/login', 1500);
+                    return;
+                }
+
+                const invitationId = button.dataset.invitationId;
+                const jobId = button.dataset.jobId;
+
+                if (!invitationId || !jobId) {
+                    console.error('Missing invitationId or jobId', {
+                        invitationId,
+                        jobId
+                    });
+                    showToast('Không xác định được công việc!', 'error');
+                    return;
+                }
+
+                // Hiển thị xác nhận trước khi từ chối
+                if (!confirm('Bạn có chắc muốn từ chối lời mời này?')) {
+                    return;
+                }
+
+                console.log(`❌ Rejecting invitation:`, {
+                    invitationId,
+                    jobId
+                });
+
+                // ✅ GỌI API TỪ CHỐI LỜI MỜI
+                respondToInvitation(invitationId, 'rejected', jobId, null);
+            };
+
+            // ✅ HÀM LÝ API TỪ CHỐI/CHẤP NHẬN LỜI MỜI
+            function respondToInvitation(invitationId, response, jobId, modal = null) {
+                const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+                if (!csrfToken) {
+                    console.error('❌ CSRF token not found!');
+                    showToast('Có lỗi bảo mật. Vui lòng tải lại trang!', 'error');
+                    return;
+                }
+
+                console.log(`📤 Sending request to /api/job-invitations/${invitationId}/respond with:`, {
+                    invitationId,
+                    response,
+                    jobId,
+                    csrfToken: csrfToken.substring(0, 20) + '...'
+                });
+
+                fetch(`/api/job-invitations/${invitationId}/respond`, {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            response: response
+                        })
+                    })
+                    .then(res => {
+                        console.log(`📥 Response status:`, res.status);
+                        return res.json().then(data => ({
+                            status: res.status,
+                            data
+                        }));
+                    })
+                    .then(({
+                        status,
+                        data
+                    }) => {
+                        console.log(`📊 Response data:`, data);
+
+                        if (status === 401) {
+                            showToast('Vui lòng đăng nhập!', 'error');
+                            setTimeout(() => window.location.href = '/login', 1500);
+                            return;
+                        }
+
+                        if (data.success) {
+                            const message = response === 'accepted' ?
+                                '✅ Bạn đã chấp nhận lời mời!' :
+                                '❌ Bạn đã từ chối lời mời!';
+                            showToast(message, 'success');
+
+                            // ✅ Cập nhật nút ngay lập tức (thay vì reload)
+                            if (jobId) {
+                                checkApplicationStatus(jobId);
+                            }
+                        } else {
+                            showToast(data.message || 'Có lỗi xảy ra!', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('❌ Fetch error:', error);
+                        showToast('Có lỗi xảy ra: ' + error.message, 'error');
+                    });
             }
 
             // ========== XỬ LÝ CV TYPE SELECTION ==========
@@ -1209,7 +1519,7 @@
                 charCount.textContent = letterTextarea.value.length;
             }
 
-            // ========== FORM SUBMIT - GIỐNG HOMEAPP ==========
+            // ========== FORM SUBMIT ==========
             const applyJobForm = document.getElementById('applyJobForm');
 
             if (applyJobForm) {
@@ -1243,9 +1553,25 @@
                             if (data.success) {
                                 showToast(data.message, 'success');
 
-                                // ✅ CẬP NHẬT NÚT NGAY - GIỐNG HOMEAPP
+                                // ✅ KIỂM TRA XEM CÓ CHẤP NHẬN LỜI MỜI KHÔNG
+                                const invitationId = document.getElementById('modalInvitationId').value;
+                                const acceptInvitation = document.getElementById('modalAcceptInvitation').value;
                                 const jobId = document.getElementById('modalJobId').value;
-                                syncApplyButtons(jobId, true);
+
+                                console.log(`📋 Form submitted with:`, {
+                                    invitationId,
+                                    acceptInvitation,
+                                    jobId
+                                });
+
+                                // Nếu có invitationId và đánh dấu accept, gửi API chấp nhận lời mời
+                                if (invitationId && acceptInvitation === '1') {
+                                    console.log(`✅ Accepting invitation after application submitted...`);
+                                    respondToInvitation(invitationId, 'accepted', jobId, null);
+                                }
+
+                                // ✅ CẬP NHẬT NÚT NGAY - Gọi checkApplicationStatus để lấy data đầy đủ
+                                checkApplicationStatus(jobId);
 
                                 // Đóng modal
                                 const modal = bootstrap.Modal.getInstance(document.getElementById('applyJobModal'));
@@ -1253,6 +1579,8 @@
 
                                 // Reset form
                                 applyJobForm.reset();
+                                document.getElementById('modalInvitationId').value = '';
+                                document.getElementById('modalAcceptInvitation').value = '0';
 
                                 // Reset file
                                 if (fileNameDisplay) fileNameDisplay.style.display = 'none';
@@ -1296,14 +1624,17 @@
                 });
             }
 
-            // ========== KHỞI TẠO - GIỐNG HOMEAPP ==========
+            // ========== KHỞI TẠO - CHECK APPLICATION STATUS ==========
             const jobButton = document.querySelector('[data-job-id]');
             if (jobButton) {
                 const jobId = jobButton.getAttribute('data-job-id');
-                checkApplicationStatus(jobId);
-            }
+                console.log(`🎯 Initializing with jobId:`, jobId);
 
-            loadAppliedJobs();
+                // ✅ Check application status (bao gồm cả invitation)
+                checkApplicationStatus(jobId);
+            } else {
+                console.log('❌ No job button found on page');
+            }
 
             console.log('✅ Job Detail Script Initialized');
         });

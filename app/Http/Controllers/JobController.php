@@ -6,6 +6,8 @@ use App\Models\Application;
 use App\Models\JobDetail;
 use App\Models\JobPost;
 use App\Models\JobHashtag;
+use App\Models\JobInvitation;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -295,14 +297,40 @@ class JobController extends Controller
     {
         $job = JobPost::with(['company', 'hashtags', 'detail'])
             ->where('job_id', $id)
-            ->where('status', 'active')                      // 🎯 THÊM DÒNG NÀY
-            ->where('deadline', '>=', now()->toDateString()) // 🎯 THÊM DÒNG NÀY
+            ->where('status', 'active')
+            ->where('deadline', '>=', now()->toDateString())
             ->first();
 
         if (!$job) {
             return response()->json([
-                'error' => 'Công việc không tồn tại hoặc đã hết hạn' // 🎯 SỬA MESSAGE
+                'error' => 'Công việc không tồn tại hoặc đã hết hạn'
             ], 404);
+        }
+
+        // ✅ LẤY THÔNG TIN LỜI MỜI (nếu user đã đăng nhập)
+        $invitationStatus = null;
+        $invitationId = null;
+        $invitationData = null;
+
+        if (Auth::check()) {
+            $applicant = Auth::user()->applicant;
+            if ($applicant) {
+                $invitation = JobInvitation::where('job_id', $job->job_id)
+                    ->where('applicant_id', $applicant->id)
+                    ->first();
+
+                if ($invitation) {
+                    $invitationStatus = $invitation->status; // pending, accepted, rejected
+                    $invitationId = $invitation->id;
+                    $invitationData = [
+                        'id' => $invitation->id,
+                        'status' => $invitation->status,
+                        'message' => $invitation->message,
+                        'invited_at' => $invitation->invited_at,
+                        'responded_at' => $invitation->responded_at
+                    ];
+                }
+            }
         }
 
         return response()->json([
@@ -341,7 +369,12 @@ class JobController extends Controller
 
             'hashtags' => $job->hashtags->map(function ($tag) {
                 return ['tag_name' => $tag->tag_name];
-            })
+            }),
+
+            // ✅ THÊM THÔNG TIN LỜI MỜI
+            'invitation_status' => $invitationStatus,
+            'invitation_id' => $invitationId,
+            'invitation' => $invitationData
         ]);
     }
 
@@ -350,7 +383,7 @@ class JobController extends Controller
      */ public function edit($id)
     {
         try {
-            $job = JobPost::with(['detail', 'hashtags'])->findOrFail($id);
+            $job = JobPost::with(['detail', 'hashtags'])->where('job_id', $id)->firstOrFail();
 
             $user = Auth::user();
 
@@ -398,7 +431,7 @@ class JobController extends Controller
      */ public function update(Request $request, $id)
     {
         try {
-            $job = JobPost::with('detail')->findOrFail($id);
+            $job = JobPost::with('detail')->where('job_id', $id)->firstOrFail();
 
             $user = Auth::user();
 
@@ -629,7 +662,8 @@ class JobController extends Controller
             if (!Auth::check()) {
                 return response()->json([
                     'success' => true,
-                    'applied' => false
+                    'applied' => false,
+                    'invited' => false
                 ]);
             }
 
@@ -638,18 +672,35 @@ class JobController extends Controller
             if (!$applicant) {
                 return response()->json([
                     'success' => true,
-                    'applied' => false
+                    'applied' => false,
+                    'invited' => false
                 ]);
             }
 
+            // ✅ Kiểm tra application
             $application = Application::where('job_id', $id)
+                ->where('applicant_id', $applicant->id_uv)
+                ->first();
+
+            // ✅ Kiểm tra invitation
+            $invitation = JobInvitation::where('job_id', $id)
                 ->where('applicant_id', $applicant->id_uv)
                 ->first();
 
             return response()->json([
                 'success' => true,
                 'applied' => $application ? true : false,
-                'application_status' => $application ? $application->trang_thai : null
+                'application_status' => $application ? $application->trang_thai : null,
+                'invited' => $invitation ? true : false,
+                'invitation_status' => $invitation ? $invitation->status : null,
+                'invitation_id' => $invitation ? $invitation->id : null,
+                'invitation_data' => $invitation ? [
+                    'id' => $invitation->id,
+                    'status' => $invitation->status,
+                    'message' => $invitation->message,
+                    'invited_at' => $invitation->invited_at,
+                    'responded_at' => $invitation->responded_at
+                ] : null
             ]);
         } catch (\Exception $e) {
             Log::error('Error checking application status', [
@@ -705,6 +756,48 @@ class JobController extends Controller
             ], 500);
         }
     }
+
+    // ✅ LẤY CÁC LỜI MỜI CỦA ỨNG VIÊN
+    public function getUserInvitations()
+    {
+        try {
+            if (!Auth::check()) {
+                return response()->json([
+                    'success' => true,
+                    'invitations' => []
+                ]);
+            }
+
+            $applicant = Auth::user()->applicant;
+
+            if (!$applicant) {
+                return response()->json([
+                    'success' => true,
+                    'invitations' => []
+                ]);
+            }
+
+            // Lấy tất cả invitations của applicant
+            $invitations = JobInvitation::where('applicant_id', $applicant->id_uv)
+                ->select('id', 'job_id', 'status', 'invited_at', 'responded_at')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'invitations' => $invitations
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error getting user invitations', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra'
+            ], 500);
+        }
+    }
+
     public function getJobsPaginated(Request $request)
     {
         try {
@@ -1272,6 +1365,123 @@ class JobController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Có lỗi xảy ra khi tìm kiếm: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * ✅ XỬ LÝ CHẤP NHẬN/TỪ CHỐI LỜI MỜI
+     */
+    public function respondToInvitation(Request $request, $invitationId)
+    {
+        try {
+            $user = Auth::user();
+
+            Log::info('🔐 respondToInvitation called', [
+                'invitationId' => $invitationId,
+                'auth_check' => Auth::check(),
+                'auth_user' => $user?->id,
+                'session_id' => session()->getId()
+            ]);
+
+            // Tìm invitation
+            $invitation = JobInvitation::with(['job', 'applicant'])
+                ->find($invitationId);
+
+            if (!$invitation) {
+                Log::error('❌ Invitation not found', ['invitationId' => $invitationId]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Lời mời không tồn tại'
+                ], 404);
+            }
+
+            Log::info('✅ Invitation found', [
+                'invitation_id' => $invitation->id,
+                'applicant_id' => $invitation->applicant_id,
+                'applicant_user_id' => $invitation->applicant->user_id,
+                'auth_user_id' => $user?->id
+            ]);
+
+            // Kiểm tra quyền: nếu đã đăng nhập, phải là applicant của invitation này
+            if ($user && $invitation->applicant->user_id !== $user->id) {
+                Log::warning('⚠️ User tried to update someone else\'s invitation', [
+                    'user_id' => $user->id,
+                    'invitation_applicant_user_id' => $invitation->applicant->user_id
+                ]);
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Bạn không có quyền thực hiện hành động này'
+                ], 403);
+            }
+
+            $response = $request->input('response'); // 'accepted' or 'rejected'
+
+            if (!in_array($response, ['accepted', 'rejected'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Phản hồi không hợp lệ'
+                ], 400);
+            }
+
+            // Cập nhật invitation status
+            $updated = $invitation->update([
+                'status' => $response,
+                'responded_at' => now(),
+                'response_message' => $request->input('message', '')
+            ]);
+
+            Log::info('✅ Invitation updated', [
+                'invitation_id' => $invitation->id,
+                'new_status' => $response,
+                'updated' => $updated,
+                'user_id' => $user?->id
+            ]);
+
+            // ✅ TẠO THÔNG BÁO CHO NTD (EMPLOYER)
+            if ($invitation->job && $invitation->job->company) {
+                $company = $invitation->job->company;
+                $employer = $company->employer; // Lấy employer từ company
+
+                if ($employer && $employer->user_id) {
+                    if ($response === 'accepted') {
+                        Notification::createInvitationAcceptedNotification(
+                            $employer->user_id,
+                            $invitation
+                        );
+                    } else {
+                        Notification::createInvitationRejectedNotification(
+                            $employer->user_id,
+                            $invitation
+                        );
+                    }
+                }
+            }
+
+            Log::info('✅ Job invitation updated', [
+                'invitation_id' => $invitationId,
+                'status' => $response
+            ]);
+
+            $message = $response === 'accepted'
+                ? 'Bạn đã chấp nhận lời mời'
+                : 'Bạn đã từ chối lời mời';
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'invitation_id' => $invitationId,
+                'status' => $response
+            ]);
+        } catch (\Exception $e) {
+            Log::error('❌ Error responding to invitation', [
+                'error' => $e->getMessage(),
+                'invitation_id' => $invitationId
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
             ], 500);
         }
     }
