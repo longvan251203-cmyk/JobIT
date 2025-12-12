@@ -36,6 +36,10 @@ class JobPost extends Model
         'working_environment',
         'contact_method'
     ];
+
+    // ✅ Tự động append các accessor vào JSON
+    protected $appends = ['selected_count', 'remaining_count'];
+
     /**
      * Scope: Chỉ lấy jobs còn hạn và đang active
      */
@@ -94,5 +98,32 @@ class JobPost extends Model
     public function applications()
     {
         return $this->hasMany(\App\Models\Application::class, 'job_id', 'job_id');
+    }
+
+    /**
+     * ✅ Lấy số lượng ứng viên đã được chọn (status = duoc_chon)
+     */
+    public function getSelectedCountAttribute()
+    {
+        return \App\Models\Application::where('job_id', $this->job_id)
+            ->where('trang_thai', 'duoc_chon')
+            ->count();
+    }
+
+    /**
+     * ✅ Kiểm tra xem job đã đủ số lượng tuyển dụng không
+     */
+    public function isRecruitmentComplete()
+    {
+        return $this->selected_count >= $this->recruitment_count;
+    }
+
+    /**
+     * ✅ Lấy số lượng còn lại cần tuyển
+     */
+    public function getRemainingCountAttribute()
+    {
+        $remaining = $this->recruitment_count - $this->selected_count;
+        return $remaining > 0 ? $remaining : 0;
     }
 }

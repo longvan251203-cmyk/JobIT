@@ -1940,77 +1940,77 @@
         </div>
     </div>
 
-    <div class="modal fade" id="viewCVModalEmployer" tabindex="-1" aria-labelledby="viewCVLabelEmployer" aria-hidden="true">
-        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-            <div class="modal-content cv-modal-content">
-
-                <!-- ✅ HEADER CV -->
-                <div class="modal-header cv-modal-header">
-                    <div class="d-flex align-items-center gap-3 flex-grow-1">
-                        <img id="cvAvatarImg"
-                            src=""
-                            alt="Avatar"
-                            class="cv-avatar rounded-circle">
-                        <div class="text-white">
-                            <h5 class="modal-title fw-bold mb-0" id="viewCVLabelEmployer"></h5>
-                            <p class="mb-0 opacity-85">
-                                <i class="bi bi-briefcase-fill me-1"></i><span id="cvPosition"></span>
-                            </p>
-                        </div>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-
-                <!-- ✅ BODY CV -->
-                <div class="modal-body cv-modal-body p-0" style="max-height: 80vh; overflow-y: auto;">
-                    <div class="row g-0">
-
-                        <!-- ===== CỘT TRÁI: SIDEBAR ===== -->
-                        <div class="col-md-3 cv-sidebar p-4 border-end">
-
-                            <!-- Avatar -->
-                            <div class="text-center mb-4">
-                                <img id="cvSidebarAvatar"
-                                    src=""
-                                    alt="Avatar"
-                                    class="cv-avatar rounded-circle">
-                                <h5 class="fw-bold mt-3 mb-1" id="cvNameSidebar"></h5>
-                                <p class="text-muted small mb-0" id="cvPositionSidebar"></p>
-                            </div>
-
-                            <hr class="my-3">
-
-                            <!-- ===== THÔNG TIN LIÊN HỆ ===== -->
-                            <h6 class="cv-section-title">Thông tin</h6>
-                            <div id="cvContactInfo"></div>
-
-                            <!-- ===== NGOẠI NGỮ ===== -->
-                            <div id="cvLanguagesSection"></div>
-
-                        </div>
-
-                        <!-- ===== CỘT PHẢI: NỘI DUNG CV ===== -->
-                        <div class="col-md-9 p-4">
-                            <div id="cvContent"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ✅ FOOTER CV -->
-                <div class="modal-footer cv-modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        <i class="bi bi-x-lg me-1"></i>Đóng
-                    </button>
-                    <button type="button" class="btn btn-outline-primary" onclick="window.print()">
-                        <i class="bi bi-printer me-1"></i>In CV
-                    </button>
-                    <button type="button" class="btn btn-primary" id="downloadCVBtn">
-                        <i class="bi bi-download me-1"></i>Tải PDF
-                    </button>
-                </div>
-
+    <!-- Modal: CV -->
+    <div id="viewCVModalEmployer" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 24px; display: flex; align-items: center; justify-content: space-between; color: white; border-radius: 16px 16px 0 0;">
+                <h3 class="modal-title" style="font-size: 20px; font-weight: 700; margin: 0;">
+                    <i class="bi bi-file-earmark-person"></i>
+                    Hồ sơ ứng viên
+                </h3>
+                <button class="modal-close" onclick="closeViewCVModal()" style="width: 36px; height: 36px; border-radius: 8px; border: none; background: rgba(255, 255, 255, 0.2); cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; transition: all 0.2s;">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="cvContent" style="padding: 24px; max-height: 80vh; overflow-y: auto;">
+                <!-- CV content will be loaded here -->
             </div>
         </div>
+    </div>
+
+    <!-- Modal Overlay Style -->
+    <style>
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
     </div>
     <!-- MODAL GỬI THÔNG TIN TUYỂN DỤNG -->
     <div id="inviteModal" class="modal-overlay hidden" onclick="closeInviteModal(event)">
@@ -2046,6 +2046,20 @@
             initializeFilterDropdowns();
             initializeRecommendedCards();
             restoreFilterStates();
+
+            // ✅ Add close modal handler for CV Modal
+            document.getElementById('viewCVModalEmployer')?.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeViewCVModal();
+                }
+            });
+
+            // ✅ Close modal on Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && document.getElementById('viewCVModalEmployer')?.classList.contains('active')) {
+                    closeViewCVModal();
+                }
+            });
 
             // ✅ Thêm event listener cho pagination buttons
             document.querySelectorAll('.pagination-btn[data-page]').forEach(btn => {
@@ -2389,15 +2403,6 @@
         // ============ VIEW CV EMPLOYER - MAIN FUNCTION ============
         function viewCVEmployer(candidateId) {
             currentCandidateId = candidateId;
-            const modal = document.getElementById('viewCVModalEmployer');
-
-            if (!modal) {
-                console.error('❌ Modal not found: viewCVModalEmployer');
-                return;
-            }
-
-            // Show modal immediately
-            modal.classList.remove('hidden');
 
             // Load data
             fetch(`/employer/candidates/${candidateId}`)
@@ -2407,13 +2412,9 @@
                 })
                 .then(data => {
                     generateEmployerCVHTML(data);
-                    // Initialize Bootstrap modal only after content is loaded
-                    const bootstrapModal = new bootstrap.Modal(modal);
-                    bootstrapModal.show();
                 })
                 .catch(error => {
                     console.error('❌ Error loading CV:', error);
-                    modal.classList.add('hidden');
                     alert('❌ Có lỗi xảy ra khi tải CV: ' + error.message);
                 });
         }
@@ -2774,221 +2775,189 @@
         // ✅ GENERATE CV HTML CHO EMPLOYER
         // Thay thế hàm generateEmployerCVHTML hiện tại
 
+        // ============ CLOSE CV MODAL ============
+        function closeViewCVModal() {
+            document.getElementById('viewCVModalEmployer').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // ✅ GENERATE CV HTML CHO EMPLOYER - MATCH JOB-APPLICANTS-NEW STYLE
         function generateEmployerCVHTML(candidate) {
-            // Header & Sidebar Info
-            document.getElementById('viewCVLabelEmployer').textContent = candidate.hoten_uv || 'N/A';
-            document.getElementById('cvPosition').textContent = candidate.vitriungtuyen || 'N/A';
-
-            const avatarUrl = candidate.avatar ?
-                `/assets/img/avt/${candidate.avatar}` :
-                `/assets/img/avt/default-avatar.png`;
-
-            document.getElementById('cvAvatarImg').src = avatarUrl;
-            document.getElementById('cvSidebarAvatar').src = avatarUrl;
-            document.getElementById('cvNameSidebar').textContent = candidate.hoten_uv || 'N/A';
-            document.getElementById('cvPositionSidebar').textContent = candidate.vitriungtuyen || 'N/A';
-
-            // Contact Info
-            let contactHTML = '';
-            if (candidate.user && candidate.user.email) {
-                contactHTML += `
-            <div class="cv-info-item">
-                <i class="bi bi-envelope"></i>
-                <div>
-                    <small class="cv-info-label">Email</small>
-                    <small class="cv-info-value">${candidate.user.email}</small>
-                </div>
-            </div>
-        `;
-            }
-            if (candidate.sdt_uv) {
-                contactHTML += `
-            <div class="cv-info-item">
-                <i class="bi bi-telephone"></i>
-                <div>
-                    <small class="cv-info-label">Điện thoại</small>
-                    <small class="cv-info-value">${candidate.sdt_uv}</small>
-                </div>
-            </div>
-        `;
-            }
-            if (candidate.diachi_uv) {
-                contactHTML += `
-            <div class="cv-info-item">
-                <i class="bi bi-geo-alt"></i>
-                <div>
-                    <small class="cv-info-label">Địa chỉ</small>
-                    <small class="cv-info-value">${candidate.diachi_uv}</small>
-                </div>
-            </div>
-        `;
-            }
-            document.getElementById('cvContactInfo').innerHTML = contactHTML;
-
-            // Languages Section
-            let languagesHTML = '';
-            if (candidate.ngoai_ngu && candidate.ngoai_ngu.length > 0) {
-                languagesHTML = `
-            <hr class="my-3">
-            <h6 class="cv-section-title">Ngoại ngữ</h6>
-        `;
-                candidate.ngoai_ngu.forEach(lang => {
-                    languagesHTML += `
-                <div class="cv-info-item">
-                    <i class="bi bi-translate"></i>
-                    <div>
-                        <small class="cv-info-label">${lang.ten_ngoai_ngu}</small>
-                        <small class="cv-info-value">${lang.trinh_do}</small>
+            let cvHTML = `<div style="display: flex; gap: 24px;">
+                <!-- Left Column -->
+                <div style="width: 280px; background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%); padding: 24px; border-radius: 12px; border-left: 3px solid #667eea; display: flex; flex-direction: column; align-items: center;">
+                    <div style="text-align: center; margin-bottom: 24px; width: 100%;">
+                        <img src="${candidate.avatar ? '/assets/img/avt/' + candidate.avatar : '/assets/img/avt/default-avatar.png'}" 
+                             alt="Avatar" style="width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 16px; display: block; border: 4px solid #667eea; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">
+                        <h4 style="font-size: 18px; font-weight: 700; color: #1f2937; margin-bottom: 4px;">${candidate.hoten_uv || 'N/A'}</h4>
+                        <p style="font-size: 14px; color: #6b7280;">${candidate.vitriungtuyen || 'Chức danh'}</p>
                     </div>
-                </div>
-            `;
-                });
-            }
-            document.getElementById('cvLanguagesSection').innerHTML = languagesHTML;
-
-            // Main Content
-            let contentHTML = '';
-
-            // Giới thiệu
-            if (candidate.gioithieu) {
-                contentHTML += `
-            <div class="cv-content-section">
-                <h5 class="cv-section-title">
-                    <i class="bi bi-person me-2"></i>Giới thiệu bản thân
-                </h5>
-                <p class="cv-description">${candidate.gioithieu.replace(/\n/g, '<br>')}</p>
-            </div>
-        `;
-            }
-
-            // Kinh nghiệm
-            if (candidate.kinhnghiem && candidate.kinhnghiem.length > 0) {
-                contentHTML += `<div class="cv-content-section">
-            <h5 class="cv-section-title">
-                <i class="bi bi-briefcase me-2"></i>Kinh nghiệm làm việc
-            </h5>`;
-                candidate.kinhnghiem.forEach(exp => {
-                    contentHTML += `
-                <div class="cv-timeline-item">
-                    <div class="cv-job-title">${exp.chucdanh || 'N/A'}</div>
-                    <div class="cv-company">${exp.congty || 'N/A'}</div>
-                    <div class="cv-date">
-                        <i class="bi bi-calendar-event me-1"></i>
-                        ${new Date(exp.tu_ngay).toLocaleDateString('vi-VN', {year: 'numeric', month: '2-digit'})} -
-                        ${exp.dang_lam_viec ? '<span class="badge bg-success text-white">Hiện tại</span>' : new Date(exp.den_ngay).toLocaleDateString('vi-VN', {year: 'numeric', month: '2-digit'})}
+                    
+                    <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px; width: 100%;">
+                        ${candidate.user && candidate.user.email ? `
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="bi bi-envelope" style="color: #667eea;"></i>
+                            <span style="color: #374151; word-break: break-word;">${candidate.user.email}</span>
+                        </div>` : ''}
+                        ${candidate.sdt_uv ? `
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="bi bi-telephone" style="color: #667eea;"></i>
+                            <span style="color: #374151;">${candidate.sdt_uv}</span>
+                        </div>` : ''}
+                        ${candidate.diachi_uv ? `
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="bi bi-geo-alt" style="color: #667eea;"></i>
+                            <span style="color: #374151;">${candidate.diachi_uv}</span>
+                        </div>` : ''}
+                        ${candidate.ngaysinh ? `
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="bi bi-calendar" style="color: #667eea;"></i>
+                            <span style="color: #374151;">${new Date(candidate.ngaysinh).toLocaleDateString('vi-VN')}</span>
+                        </div>` : ''}
                     </div>
-                    ${exp.mota ? `<div class="cv-description"><strong>Mô tả:</strong><br>${exp.mota.replace(/\n/g, '<br>')}</div>` : ''}
-                    ${exp.duan ? `<div class="cv-description"><strong>Dự án:</strong><br>${exp.duan.replace(/\n/g, '<br>')}</div>` : ''}
-                </div>
-            `;
-                });
-                contentHTML += `</div>`;
-            }
 
-            // Học vấn
-            if (candidate.hocvan && candidate.hocvan.length > 0) {
-                contentHTML += `<div class="cv-content-section">
-            <h5 class="cv-section-title">
-                <i class="bi bi-mortarboard me-2"></i>Học vấn
-            </h5>`;
-                candidate.hocvan.forEach(edu => {
-                    contentHTML += `
-                <div class="cv-timeline-item">
-                    <div class="cv-job-title">${edu.truong || 'N/A'}</div>
-                    <div class="cv-date">
-                        ${edu.nganh || 'N/A'} - 
-                        <span class="cv-badge" style="background: #e3f2fd; color: #1976d2;">
-                            ${edu.trinhdo || edu.trinh_do || 'N/A'}
-                        </span>
+                    ${candidate.ngoai_ngu && candidate.ngoai_ngu.length > 0 ? `
+                    <hr style="margin: 16px 0; border: none; border-top: 1px solid #e5e7eb;">
+                    <h6 style="font-size: 14px; font-weight: 700; color: #1f2937; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                        <i class="bi bi-translate" style="color: #f59e0b;"></i>
+                        Ngoại ngữ
+                    </h6>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        ${candidate.ngoai_ngu.map(item => `
+                            <div style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
+                                <p style="font-size: 12px; color: #6b7280; margin: 0 0 2px 0; text-transform: uppercase; font-weight: 600;">${item.ten_ngoai_ngu}</p>
+                                <p style="font-size: 13px; color: #374151; margin: 0;">${item.trinh_do}</p>
+                            </div>
+                        `).join('')}
                     </div>
+                    ` : ''}
                 </div>
-            `;
-                });
-                contentHTML += `</div>`;
-            }
-
-            // Kỹ năng
-            if (candidate.kynang && candidate.kynang.length > 0) {
-                contentHTML += `<div class="cv-content-section">
-            <h5 class="cv-section-title">
-                <i class="bi bi-lightbulb me-2"></i>Kỹ năng
-            </h5>
-            <div class="d-flex flex-wrap gap-2">`;
-                candidate.kynang.forEach(skill => {
-                    contentHTML += `<span class="cv-badge">${skill.ten_ky_nang} (${skill.nam_kinh_nghiem == 0 ? '< 1 năm' : skill.nam_kinh_nghiem + ' năm'})</span>`;
-                });
-                contentHTML += `</div></div>`;
-            }
-
-            // ✅ Dự án nổi bật
-            if (candidate.duan && candidate.duan.length > 0) {
-                contentHTML += `<div class="cv-content-section">
-            <h5 class="cv-section-title">
-                <i class="bi bi-kanban me-2"></i>Dự án nổi bật
-            </h5>`;
-                candidate.duan.forEach(da => {
-                    contentHTML += `
-                <div class="cv-timeline-item">
-                    <div class="cv-job-title">${da.ten_duan || 'N/A'}</div>
-                    <div class="cv-date">
-                        <i class="bi bi-calendar-event me-1"></i>
-                        ${new Date(da.ngay_bat_dau).toLocaleDateString('vi-VN', {year: 'numeric', month: '2-digit'})} -
-                        ${da.dang_lam ? '<span class="badge bg-success text-white">Hiện tại</span>' : new Date(da.ngay_ket_thuc).toLocaleDateString('vi-VN', {year: 'numeric', month: '2-digit'})}
-                    </div>
-                    ${da.mota_duan ? `<div class="cv-description mb-2">${da.mota_duan.replace(/\n/g, '<br>')}</div>` : ''}
-                    ${da.duongdan_website ? `<p class="mb-0"><a href="${da.duongdan_website}" target="_blank" class="btn btn-sm btn-outline-primary"><i class="bi bi-box-arrow-up-right me-1"></i>Xem dự án</a></p>` : ''}
+                
+                <!-- Right Column -->
+                <div style="flex: 1;">
+                    ${candidate.gioithieu ? `
+                    <div style="margin-bottom: 24px;">
+                        <h5 style="font-size: 16px; font-weight: 700; color: #1f2937; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #667eea; padding-bottom: 8px;">
+                            <i class="bi bi-person-lines-fill" style="color: #667eea;"></i>
+                            Giới thiệu bản thân
+                        </h5>
+                        <p style="color: #374151; line-height: 1.6; white-space: pre-line;">${candidate.gioithieu}</p>
+                    </div>` : ''}
+                    
+                    ${candidate.kinhnghiem && candidate.kinhnghiem.length > 0 ? `
+                    <div style="margin-bottom: 24px;">
+                        <h5 style="font-size: 16px; font-weight: 700; color: #1f2937; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #667eea; padding-bottom: 8px;">
+                            <i class="bi bi-briefcase" style="color: #667eea;"></i>
+                            Kinh nghiệm làm việc
+                        </h5>
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            ${candidate.kinhnghiem.map(item => `
+                                <div style="border-left: 3px solid #667eea; padding-left: 16px;">
+                                    <h6 style="font-weight: 700; color: #1f2937; margin-bottom: 4px;">${item.chucdanh}</h6>
+                                    <p style="font-size: 14px; color: #6b7280; margin-bottom: 2px;">${item.congty}</p>
+                                    <p style="font-size: 12px; color: #9ca3af;">${new Date(item.tu_ngay).toLocaleDateString('vi-VN')} - ${item.den_ngay ? new Date(item.den_ngay).toLocaleDateString('vi-VN') : 'Hiện tại'}</p>
+                                    ${item.mota ? `<p style="font-size: 14px; color: #374151; margin-top: 8px;">${item.mota}</p>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>` : ''}
+                    
+                    ${candidate.hocvan && candidate.hocvan.length > 0 ? `
+                    <div style="margin-bottom: 24px;">
+                        <h5 style="font-size: 16px; font-weight: 700; color: #1f2937; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #48bb78; padding-bottom: 8px;">
+                            <i class="bi bi-mortarboard" style="color: #48bb78;"></i>
+                            Học vấn
+                        </h5>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            ${candidate.hocvan.map(item => `
+                                <div style="border-left: 3px solid #48bb78; padding-left: 16px;">
+                                    <h6 style="font-weight: 700; color: #1f2937; margin-bottom: 4px;">${item.truong}</h6>
+                                    <p style="font-size: 14px; color: #6b7280; margin-bottom: 2px;">${item.nganh} - ${item.trinhdo || item.trinh_do}</p>
+                                    <p style="font-size: 12px; color: #9ca3af;">${new Date(item.tu_ngay).getFullYear()} - ${item.den_ngay ? new Date(item.den_ngay).getFullYear() : 'Hiện tại'}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>` : ''}
+                    
+                    ${candidate.kynang && candidate.kynang.length > 0 ? `
+                    <div style="margin-bottom: 24px;">
+                        <h5 style="font-size: 16px; font-weight: 700; color: #1f2937; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #667eea; padding-bottom: 8px;">
+                            <i class="bi bi-star" style="color: #667eea;"></i>
+                            Kỹ năng
+                        </h5>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                            ${candidate.kynang.map(item => `
+                                <span style="padding: 8px 14px; background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #1e40af; border-radius: 16px; font-size: 13px; font-weight: 700;">
+                                    ${item.ten_ky_nang}${item.nam_kinh_nghiem ? ` - ${item.nam_kinh_nghiem} năm` : ''}
+                                </span>
+                            `).join('')}
+                        </div>
+                    </div>` : ''}
+                    
+                    ${candidate.duan && candidate.duan.length > 0 ? `
+                    <div style="margin-bottom: 24px;">
+                        <h5 style="font-size: 16px; font-weight: 700; color: #1f2937; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #06b6d4; padding-bottom: 8px;">
+                            <i class="bi bi-kanban" style="color: #06b6d4;"></i>
+                            Dự án nổi bật
+                        </h5>
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            ${candidate.duan.map(item => `
+                                <div style="border-left: 3px solid #06b6d4; padding-left: 16px;">
+                                    <h6 style="font-weight: 700; color: #1f2937; margin-bottom: 4px;">${item.ten_duan}</h6>
+                                    <p style="font-size: 12px; color: #9ca3af; margin-bottom: 8px;">
+                                        <i class="bi bi-calendar"></i>
+                                        ${new Date(item.ngay_bat_dau).toLocaleDateString('vi-VN')} - 
+                                        ${item.dang_lam ? 'Hiện tại' : new Date(item.ngay_ket_thuc).toLocaleDateString('vi-VN')}
+                                    </p>
+                                    ${item.mota_duan ? `<p style="font-size: 13px; color: #374151; margin-bottom: 8px; white-space: pre-line;">${item.mota_duan}</p>` : ''}
+                                    ${item.duongdan_website ? `<p style="font-size: 12px;"><i class="bi bi-link-45deg" style="color: #06b6d4;"></i> <a href="${item.duongdan_website}" target="_blank" style="color: #06b6d4; text-decoration: none;">Xem dự án</a></p>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>` : ''}
+                    
+                    ${candidate.chungchi && candidate.chungchi.length > 0 ? `
+                    <div style="margin-bottom: 24px;">
+                        <h5 style="font-size: 16px; font-weight: 700; color: #1f2937; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #10b981; padding-bottom: 8px;">
+                            <i class="bi bi-award" style="color: #10b981;"></i>
+                            Chứng chỉ
+                        </h5>
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            ${candidate.chungchi.map(item => `
+                                <div style="border-left: 3px solid #10b981; padding-left: 16px;">
+                                    <h6 style="font-weight: 700; color: #1f2937; margin-bottom: 4px;">${item.ten_chungchi}</h6>
+                                    <p style="font-size: 13px; color: #6b7280; margin-bottom: 2px;"><i class="bi bi-building"></i> ${item.to_chuc}</p>
+                                    <p style="font-size: 12px; color: #9ca3af; margin-bottom: 8px;"><i class="bi bi-calendar"></i> ${new Date(item.thoigian).toLocaleDateString('vi-VN')}</p>
+                                    ${item.mo_ta ? `<p style="font-size: 13px; color: #374151; margin-bottom: 8px;">${item.mo_ta}</p>` : ''}
+                                    ${item.link_chungchi ? `<p style="font-size: 12px;"><i class="bi bi-link-45deg" style="color: #10b981;"></i> <a href="${item.link_chungchi}" target="_blank" style="color: #10b981; text-decoration: none;">Xem chứng chỉ</a></p>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>` : ''}
+                    
+                    ${candidate.giaithuong && candidate.giaithuong.length > 0 ? `
+                    <div style="margin-bottom: 24px;">
+                        <h5 style="font-size: 16px; font-weight: 700; color: #1f2937; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; border-bottom: 2px solid #f59e0b; padding-bottom: 8px;">
+                            <i class="bi bi-trophy" style="color: #f59e0b;"></i>
+                            Giải thưởng
+                        </h5>
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            ${candidate.giaithuong.map(item => `
+                                <div style="border-left: 3px solid #f59e0b; padding-left: 16px;">
+                                    <h6 style="font-weight: 700; color: #1f2937; margin-bottom: 4px;"><i class="bi bi-trophy-fill" style="color: #f59e0b;"></i> ${item.ten_giaithuong}</h6>
+                                    <p style="font-size: 13px; color: #6b7280; margin-bottom: 2px;"><i class="bi bi-building"></i> ${item.to_chuc}</p>
+                                    <p style="font-size: 12px; color: #9ca3af; margin-bottom: 8px;"><i class="bi bi-calendar-event"></i> ${new Date(item.thoigian).toLocaleDateString('vi-VN')}</p>
+                                    ${item.mo_ta ? `<p style="font-size: 13px; color: #374151;">${item.mo_ta}</p>` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>` : ''}
                 </div>
-            `;
-                });
-                contentHTML += `</div>`;
-            }
+            </div>`;
 
-            // ✅ Chứng chỉ
-            if (candidate.chungchi && candidate.chungchi.length > 0) {
-                contentHTML += `<div class="cv-content-section">
-            <h5 class="cv-section-title">
-                <i class="bi bi-award me-2"></i>Chứng chỉ
-            </h5>`;
-                candidate.chungchi.forEach(cc => {
-                    contentHTML += `
-                <div class="cv-timeline-item">
-                    <div class="cv-job-title">${cc.ten_chungchi || 'N/A'}</div>
-                    <div class="cv-company">${cc.to_chuc || 'N/A'}</div>
-                    <div class="cv-date">
-                        <i class="bi bi-calendar me-1"></i>${new Date(cc.thoigian).toLocaleDateString('vi-VN', {year: 'numeric', month: '2-digit'})}
-                    </div>
-                    ${cc.mo_ta ? `<div class="cv-description mb-2">${cc.mo_ta.replace(/\n/g, '<br>')}</div>` : ''}
-                    ${cc.link_chungchi ? `<p class="mb-0"><a href="${cc.link_chungchi}" target="_blank" class="btn btn-sm btn-outline-warning"><i class="bi bi-box-arrow-up-right me-1"></i>Xem chứng chỉ</a></p>` : ''}
-                </div>
-            `;
-                });
-                contentHTML += `</div>`;
-            }
-
-            // ✅ Giải thưởng
-            if (candidate.giaithuong && candidate.giaithuong.length > 0) {
-                contentHTML += `<div class="cv-content-section">
-            <h5 class="cv-section-title">
-                <i class="bi bi-trophy me-2"></i>Giải thưởng
-            </h5>`;
-                candidate.giaithuong.forEach(gt => {
-                    contentHTML += `
-                <div class="cv-timeline-item">
-                    <div class="cv-job-title">
-                        <i class="bi bi-trophy-fill text-warning me-2"></i>${gt.ten_giaithuong || 'N/A'}
-                    </div>
-                    <div class="cv-company">${gt.to_chuc || 'N/A'}</div>
-                    <div class="cv-date">
-                        <i class="bi bi-calendar-event me-1"></i>${new Date(gt.thoigian).toLocaleDateString('vi-VN', {year: 'numeric', month: '2-digit'})}
-                    </div>
-                    ${gt.mo_ta ? `<div class="cv-description">${gt.mo_ta.replace(/\n/g, '<br>')}</div>` : ''}
-                </div>
-            `;
-                });
-                contentHTML += `</div>`;
-            }
-
-            document.getElementById('cvContent').innerHTML = contentHTML;
+            document.getElementById('cvContent').innerHTML = cvHTML;
+            document.getElementById('viewCVModalEmployer').classList.add('active');
+            document.body.style.overflow = 'hidden';
         }
     </script>
 </body>

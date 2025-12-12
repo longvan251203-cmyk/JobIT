@@ -5,9 +5,47 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\JobPost;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class JobApiController extends Controller
 {
+    /**
+     * Lấy tổng số jobs còn tuyển (loại bỏ đã đủ số lượng)
+     */
+    public function getTotalCount()
+    {
+        try {
+            $allActiveJobs = JobPost::where('status', 'active')->get();
+            Log::info('getTotalCount: Total active jobs: ' . $allActiveJobs->count());
+
+            $availableJobs = $allActiveJobs->filter(function ($job) {
+                $selectedCount = $job->selected_count ?? 0;
+                $recruitmentCount = $job->recruitment_count ?? 0;
+                $isAvailable = !($recruitmentCount > 0 && $selectedCount >= $recruitmentCount);
+
+                if (!$isAvailable) {
+                    Log::info('Job hidden: ' . $job->job_title . ' (selected: ' . $selectedCount . ', recruitment: ' . $recruitmentCount . ')');
+                }
+
+                return $isAvailable;
+            });
+
+            Log::info('getTotalCount: Available jobs after filter: ' . $availableJobs->count());
+
+            return response()->json([
+                'success' => true,
+                'total' => $availableJobs->count()
+            ]);
+        } catch (\Exception $e) {
+            Log::error('getTotalCount error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'total' => 0,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     /**
      * Lấy danh sách jobs với phân trang
      */
@@ -19,8 +57,16 @@ class JobApiController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->paginate(12);
 
+            // ✅ Lọc bỏ job đã đủ số lượng nhân sự
+            $filteredJobs = $jobs->filter(function ($job) {
+                $selectedCount = $job->selected_count ?? 0;
+                $recruitmentCount = $job->recruitment_count ?? 0;
+                // Chỉ giữ những job chưa đủ số lượng
+                return !($recruitmentCount > 0 && $selectedCount >= $recruitmentCount);
+            })->values();
+
             // Trả về HTML của jobs
-            $html = view('applicant.partials.job-cards', ['jobs' => $jobs])->render();
+            $html = view('applicant.partials.job-cards', ['jobs' => $filteredJobs])->render();
 
             return response()->json([
                 'success' => true,
@@ -28,7 +74,7 @@ class JobApiController extends Controller
                 'pagination' => [
                     'current_page' => $jobs->currentPage(),
                     'last_page' => $jobs->lastPage(),
-                    'total' => $jobs->total(),
+                    'total' => $filteredJobs->count(), // ✅ Trả về số lượng sau khi filter
                     'per_page' => $jobs->perPage(),
                 ]
             ]);

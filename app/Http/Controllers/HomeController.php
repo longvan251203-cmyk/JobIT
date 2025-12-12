@@ -34,10 +34,19 @@ class HomeController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(12);
 
+        // ✅ Tính tổng jobs còn tuyển (loại bỏ đã đủ số lượng)
+        $allActiveJobs = JobPost::active()->get();
+        $availableJobs = $allActiveJobs->filter(function ($job) {
+            $selectedCount = $job->selected_count ?? 0;
+            $recruitmentCount = $job->recruitment_count ?? 0;
+            // Chỉ tính những job chưa đủ số lượng
+            return !($recruitmentCount > 0 && $selectedCount >= $recruitmentCount);
+        });
+
         // ✅ CẬP NHẬT: Lấy dữ liệu thực từ database
         $stats = [
-            // Tổng công việc đang hoạt động
-            'total_jobs' => JobPost::active()->count(),
+            // Tổng công việc đang hoạt động (loại bỏ đã đủ số lượng)
+            'total_jobs' => $availableJobs->count(),
 
             // Tổng công ty có công việc
             'total_companies' => JobPost::active()

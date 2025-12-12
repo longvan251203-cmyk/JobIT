@@ -12,6 +12,7 @@ use App\Http\Controllers\ApplicantController;
 
 // ✅ SEARCH & FILTER - PHẢI ĐẶT TRƯỚC các route có tham số
 Route::get('/jobs/search', [JobController::class, 'searchJobs']);
+Route::get('/jobs/count/total', [\App\Http\Controllers\Api\JobApiController::class, 'getTotalCount']);
 
 // ✅ Route lấy danh sách jobs với phân trang
 Route::get('/jobs', [JobController::class, 'getJobsPaginated']);

@@ -7,6 +7,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Employer Dashboard - JobIT</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- ✅ Toast Notification Styles -->
+    <link rel="stylesheet" href="{{ asset('css/toast.css') }}">
     <style>
         /* ============================================
    NOTIFICATION STYLES
@@ -899,7 +901,7 @@
                     // ✅ PHÂN LOẠI JOBS
                     $activeJobs = $jobPosts->filter(function($job) {
                     return strtotime($job->deadline) >= time()
-                    && (is_null($job->recruitment_count) || $job->applications_count < $job->recruitment_count);
+                    && (is_null($job->recruitment_count) || $job->selected_count < $job->recruitment_count);
                         });
 
                         $expiredJobs = $jobPosts->filter(function($job) {
@@ -908,18 +910,18 @@
 
                             $fulfilledJobs=$jobPosts->filter(function($job) {
                             return strtotime($job->deadline) >= time()
-                            && $job->applications_count >= $job->recruitment_count;
+                            && $job->selected_count >= $job->recruitment_count;
                             });
 
                             @endphp
 
                             <!-- STATS SECTION -->
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                                <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border-l-4 border-green-500">
+                                <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border-l-4 border-green-500" id="stat-active-jobs" data-api="/api/dashboard/stats/all">
                                     <div class="flex items-center justify-between">
                                         <div>
                                             <p class="text-sm text-gray-600 font-medium">Đang tuyển</p>
-                                            <p class="text-3xl font-bold text-green-600">{{ $activeJobs->count() }}</p>
+                                            <p class="text-3xl font-bold text-green-600 stat-value">{{ $activeJobs->count() }}</p>
                                         </div>
                                         <svg class="w-10 h-10 text-green-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -928,11 +930,11 @@
                                     </div>
                                 </div>
 
-                                <div class="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-lg p-4 border-l-4 border-orange-500">
+                                <div class="bg-gradient-to-br from-orange-50 to-yellow-50 rounded-lg p-4 border-l-4 border-orange-500" id="stat-fulfilled-jobs" data-api="/api/dashboard/stats/all">
                                     <div class="flex items-center justify-between">
                                         <div>
                                             <p class="text-sm text-gray-600 font-medium">Đã đủ số lượng</p>
-                                            <p class="text-3xl font-bold text-orange-600">{{ $fulfilledJobs->count() }}</p>
+                                            <p class="text-3xl font-bold text-orange-600 stat-value">{{ $fulfilledJobs->count() }}</p>
                                         </div>
                                         <svg class="w-10 h-10 text-orange-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -941,11 +943,11 @@
                                     </div>
                                 </div>
 
-                                <div class="bg-gradient-to-br from-red-50 to-pink-50 rounded-lg p-4 border-l-4 border-red-500">
+                                <div class="bg-gradient-to-br from-red-50 to-pink-50 rounded-lg p-4 border-l-4 border-red-500" id="stat-expired-jobs" data-api="/api/dashboard/stats/all">
                                     <div class="flex items-center justify-between">
                                         <div>
                                             <p class="text-sm text-gray-600 font-medium">Hết hạn</p>
-                                            <p class="text-3xl font-bold text-red-600">{{ $expiredJobs->count() }}</p>
+                                            <p class="text-3xl font-bold text-red-600 stat-value">{{ $expiredJobs->count() }}</p>
                                         </div>
                                         <svg class="w-10 h-10 text-red-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -954,11 +956,11 @@
                                     </div>
                                 </div>
 
-                                <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-4 border-l-4 border-blue-500">
+                                <div class="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-4 border-l-4 border-blue-500" id="stat-total-jobs" data-api="/api/dashboard/stats/all">
                                     <div class="flex items-center justify-between">
                                         <div>
                                             <p class="text-sm text-gray-600 font-medium">Tổng cộng</p>
-                                            <p class="text-3xl font-bold text-blue-600">{{ $jobPosts->count() }}</p>
+                                            <p class="text-3xl font-bold text-blue-600 stat-value">{{ $jobPosts->count() }}</p>
                                         </div>
                                         <svg class="w-10 h-10 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1020,7 +1022,7 @@
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857m0 0a5.002 5.002 0 00-9.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                                                     </svg>
-                                                    {{ $job->applications_count }} ứng viên
+                                                    {{ $job->selected_count }} ứng viên
                                                 </span>
 
                                                 <!-- ✅ THÊM: Số người đã mời -->
@@ -1047,7 +1049,7 @@
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                                     </svg>
-                                                    Còn {{ $job->recruitment_count - $job->applications_count }} vị trí
+                                                    Còn {{ $job->remaining_count }} vị trí
                                                 </span>
                                             </div>
                                             <div class="flex gap-2 flex-wrap">
@@ -1115,7 +1117,7 @@
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857m0 0a5.002 5.002 0 00-9.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                                                     </svg>
-                                                    {{ $job->applications_count }}/{{ $job->recruitment_count }} ứng viên
+                                                    {{ $job->selected_count }}/{{ $job->recruitment_count }} ứng viên
                                                 </span>
                                                 <span class="flex items-center gap-1">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1168,7 +1170,7 @@
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857m0 0a5.002 5.002 0 00-9.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                                                     </svg>
-                                                    {{ $job->applications_count }} ứng viên
+                                                    {{ $job->selected_count }} ứng viên
                                                 </span>
                                                 <span class="flex items-center gap-1 text-red-600">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -4309,10 +4311,59 @@
                 });
             });
         });
+
+        // ✅ REAL-TIME AUTO-REFRESH SYSTEM
+        // Initialize realtime updater
+        const updater = new RealtimeUpdater({
+            interval: 5000
+        }); // 5 seconds
+
+        // Watch API endpoint and update stat values
+        updater.watch('/api/dashboard/stats/all', '#stat-active-jobs', (data) => {
+            if (data.success && data.stats) {
+                const activeCount = data.stats.active_jobs || 0;
+                document.querySelector('#stat-active-jobs .stat-value').textContent = activeCount;
+            }
+        });
+
+        updater.watch('/api/dashboard/stats/all', '#stat-fulfilled-jobs', (data) => {
+            if (data.success && data.stats) {
+                const fulfilledCount = data.stats.selected || 0;
+                document.querySelector('#stat-fulfilled-jobs .stat-value').textContent = fulfilledCount;
+            }
+        });
+
+        updater.watch('/api/dashboard/stats/all', '#stat-expired-jobs', (data) => {
+            if (data.success && data.stats) {
+                const rejectedCount = data.stats.rejected || 0;
+                document.querySelector('#stat-expired-jobs .stat-value').textContent = rejectedCount;
+            }
+        });
+
+        updater.watch('/api/dashboard/stats/all', '#stat-total-jobs', (data) => {
+            if (data.success && data.stats) {
+                const totalCount = (data.stats.active_jobs || 0) +
+                    (data.stats.selected || 0) +
+                    (data.stats.rejected || 0);
+                document.querySelector('#stat-total-jobs .stat-value').textContent = totalCount;
+            }
+        });
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            updater.destroy();
+        });
     </script>
+
+    <!-- ✅ Real-time Auto-Refresh System -->
+    <script src="{{ asset('js/realtime-updates.js') }}"></script>
+
+    <!-- ✅ Toast Notification System -->
+    <script src="{{ asset('js/toast.js') }}"></script>
 </body>
 
 
 </body>
+
 
 </html>

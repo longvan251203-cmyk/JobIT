@@ -417,15 +417,16 @@ class CandidatesController extends Controller
             $jobs = JobPost::where('companies_id', $companiesId)
                 ->where('status', 'active')
                 ->where('deadline', '>=', now()->toDateString())
-                ->with(['applications' => function ($query) {
-                    $query->select('job_id');
-                }])
-
                 ->get()
                 ->map(function ($job) use ($companiesId) {
                     $location = [];
                     if ($job->province) $location[] = $job->province;
                     if ($job->district) $location[] = $job->district;
+
+                    // ✅ FIX: Đếm chỉ những ứng viên được chọn (duoc_chon)
+                    $selectedCount = \App\Models\Application::where('job_id', $job->job_id)
+                        ->where('trang_thai', 'duoc_chon')
+                        ->count();
 
                     return [
                         'id' => $job->job_id,
@@ -435,7 +436,7 @@ class CandidatesController extends Controller
                         'salary_max' => $job->salary_max ? number_format($job->salary_max, 0, ',', '.') : null,
                         'quantity' => $job->recruitment_count ?? 0,
                         'deadline' => $job->deadline,
-                        'received_count' => $job->applications->count(),
+                        'received_count' => $selectedCount,  // ✅ SỬA: Chỉ đếm những được chọn
                         'required_skills' => $job->requirements ? array_filter(array_map('trim', explode(',', $job->requirements))) : []
                     ];
                 });

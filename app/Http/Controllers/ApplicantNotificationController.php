@@ -225,7 +225,7 @@ class ApplicantNotificationController extends Controller
                         'location' => $invitation->job->province . ($invitation->job->district ? ', ' . $invitation->job->district : ''),
                         'deadline' => $invitation->job->deadline,
                         'recruitment_count' => $invitation->job->recruitment_count,
-                        'applications_count' => $invitation->job->applications->count()
+                        'applications_count' => $invitation->job->selected_count
                     ],
                     'company' => [
                         'id' => $invitation->job->company->companies_id,

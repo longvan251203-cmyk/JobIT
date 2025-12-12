@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ApplicantController;
+use App\Http\Controllers\ApplicationController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\NotificationController;
@@ -49,9 +50,20 @@ Route::get('/employer-dashboard', [CompanyController::class, 'edit'])
     ->name('employer.dashboard')
     ->middleware('auth');
 
+// ✅ API ENDPOINTS FOR REAL-TIME DASHBOARD UPDATES
+Route::middleware(['auth', 'employer'])->prefix('api')->group(function () {
+    Route::get('/dashboard/stats/pending', [ApplicationController::class, 'countPending'])
+        ->name('api.dashboard.pending');
+    Route::get('/dashboard/stats/interview', [ApplicationController::class, 'countInterview'])
+        ->name('api.dashboard.interview');
+    Route::get('/dashboard/stats/all', [ApplicationController::class, 'getDashboardStats'])
+        ->name('api.dashboard.stats');
+});
+
 // ==================== JOB (CÔNG VIỆC) ====================
 // Chi tiết công việc
 Route::get('/job/{id}', [JobController::class, 'show'])->name('job.detail');
+Route::get('/job-detail/{id}', [JobController::class, 'show'])->name('job.detail.alt');
 
 // ==================== APPLICANT (ỨNG VIÊN) ====================
 Route::prefix('applicant')->middleware(['auth'])->group(function () {
@@ -173,9 +185,6 @@ Route::middleware(['auth'])->group(function () {
 });
 // Routes cho Application (Thêm vào file routes/web.php)
 
-use App\Http\Controllers\ApplicationController;
-
-
 Route::middleware(['auth'])->group(function () {
     // Route ứng tuyển công việc
     Route::post('/apply-job', [ApplicationController::class, 'store'])->name('application.store');
@@ -218,6 +227,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/job/{job_id}/applicants', [ApplicationController::class, 'jobApplicants'])->name('job.applicants');
     Route::post('/application/{id}/update-status', [ApplicationController::class, 'updateStatus'])->name('application.updateStatus');
     Route::get('/application/{id}/view-cv', [ApplicationController::class, 'viewCV'])->name('application.viewCV');
+    Route::get('/job-invitation/{id}/view-cv', [ApplicationController::class, 'viewCVInvitation'])->name('jobInvitation.viewCV');
     Route::post('/application/{id}/add-note', [ApplicationController::class, 'addNote'])->name('application.addNote');
     Route::get('/application/{id}/download-cv', [ApplicationController::class, 'downloadCV'])->name('application.downloadCV');
 });
@@ -262,9 +272,21 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/applicant/ky-nang/store', [ApplicantController::class, 'storeKyNang'])
         ->name('applicant.storeKyNang');
 
+    // ✅ THÊM: Edit kỹ năng
+    Route::get('/applicant/ky-nang/{id}/edit', [ApplicantController::class, 'editKyNang'])
+        ->name('applicant.editKyNang');
+    Route::post('/applicant/ky-nang/{id}/update', [ApplicantController::class, 'updateKyNang'])
+        ->name('applicant.updateKyNang');
+
     // Xóa kỹ năng - RETURN JSON
     Route::post('/applicant/ky-nang/{id}/delete', [ApplicantController::class, 'deleteKyNang'])
         ->name('applicant.deleteKyNang');
+
+    // ✅ THÊM: Edit ngoại ngữ
+    Route::get('/ngoai-ngu/{id}/edit', [ApplicantController::class, 'editNgoaiNgu'])
+        ->name('applicant.editNgoaiNgu');
+    Route::post('/ngoai-ngu/{id}/update', [ApplicantController::class, 'updateNgoaiNgu'])
+        ->name('applicant.updateNgoaiNgu');
 });
 // Thêm vào phần Applicant routes trong web.php
 Route::middleware(['auth'])->group(function () {
@@ -308,10 +330,7 @@ Route::middleware(['auth'])->group(function () {
     // ✅ ROUTE MỚI - GỬI EMAIL KẾT QUẢ PHỎNG VẤN
     Route::post('/application/{id}/send-result-email', [ApplicationController::class, 'sendResultEmail']);
 });
-// Route Dashboard
-Route::get('/applicant-dashboard', [HomeController::class, 'applicantDashboard'])
-    ->name('applicant.dashboard')
-    ->middleware('auth');
+
 // Kiểm tra trạng thái ứng tuyển
 Route::get('/api/jobs/{id}/check-application', [JobController::class, 'checkApplicationStatus']);
 
@@ -350,9 +369,7 @@ Route::prefix('applicant')->middleware(['auth'])->group(function () {
         ->name('applicant.downloadCV');
 });
 // ==================== CHI TIẾT CÔNG VIỆC ====================
-// Sử dụng JobController@show và truyền vào ID của Job
-Route::get('/job-detail/{id}', [JobController::class, 'show'])->name('job.detail');
-// Thêm vào trong group middleware ['auth']
+// Sử dụng JobController@show với route tại line 54
 // Trang quản lý ứng viên cho nhà tuyển dụng
 Route::middleware(['auth', 'employer'])->group(function () {
     // ✅ THÊM ROUTE CHO TRANG APPLICANTS

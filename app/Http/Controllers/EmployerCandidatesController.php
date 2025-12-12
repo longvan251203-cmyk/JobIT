@@ -125,6 +125,9 @@ class EmployerCandidatesController extends Controller
                 'hocvan',
                 'kinhnghiem',
                 'ngoaiNgu',
+                'duan',
+                'chungchi',
+                'giaithuong',
                 'user'
             ])->findOrFail($id);
 

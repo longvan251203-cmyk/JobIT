@@ -8,6 +8,8 @@
     <title>Gợi ý việc làm phù hợp</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <!-- ✅ Toast Notification Styles -->
+    <link rel="stylesheet" href="{{ asset('css/toast.css') }}">
     <style>
         * {
             margin: 0;
@@ -35,6 +37,7 @@
             font-size: 1.8rem;
             font-weight: 800;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -506,24 +509,6 @@
                 grid-template-columns: 1fr;
             }
         }
-
-        :root {
-            --location-score: {
-                    {
-                    $details['location']['score']
-                }
-            }
-
-            %;
-
-            --salary-score: {
-                    {
-                    $details['salary']['score']
-                }
-            }
-
-            %;
-        }
     </style>
 </head>
 
@@ -641,6 +626,13 @@
             if ($score >= 60) return 'medium';
             return 'low';
             };
+
+            // ✅ Ẩn job đã đủ số lượng nhận
+            $selectedCount = $job->selected_count ?? 0;
+            $recruitmentCount = $job->recruitment_count ?? 0;
+            if ($recruitmentCount > 0 && $selectedCount >= $recruitmentCount) {
+            continue; // Bỏ qua job này
+            }
             @endphp
 
             <div class="job-card {{ $matchClass }}">
@@ -717,7 +709,7 @@
                             </div>
                             <div class="progress-bar-wrapper">
                                 <div class="progress-fill {{ $getScoreLevel($details['location']['score']) }}"
-                                    style="width: {{ $details['location']['score'] }}% !important;"></div>
+                                    data-width="{{ $details['location']['score'] }}"></div>
                             </div>
                             <div class="criteria-reason">
                                 {{ $details['location']['reason'] }}
@@ -739,7 +731,7 @@
                             </div>
                             <div class="progress-bar-wrapper">
                                 <div class="progress-fill {{ $getScoreLevel($details['skills']['score']) }}"
-                                    style="width: {{ $details['skills']['score'] }}% !important;"></div>
+                                    data-width="{{ $details['skills']['score'] }}"></div>
                             </div>
                             <div class="criteria-reason">
                                 {{ $details['skills']['reason'] }}
@@ -787,7 +779,7 @@
                             </div>
                             <div class="progress-bar-wrapper">
                                 <div class="progress-fill {{ $getScoreLevel($details['position']['score']) }}"
-                                    style="width: {{ $details['position']['score'] }}% !important;"></div>
+                                    data-width="{{ $details['position']['score'] }}"></div>
                             </div>
                             <div class="criteria-reason">
                                 {{ $details['position']['reason'] }}
@@ -809,7 +801,7 @@
                             </div>
                             <div class="progress-bar-wrapper">
                                 <div class="progress-fill {{ $getScoreLevel($details['experience']['score']) }}"
-                                    style="width: {{ $details['experience']['score'] }}% !important;"></div>
+                                    data-width="{{ $details['experience']['score'] }}"></div>
                             </div>
                             <div class="criteria-reason">
                                 {{ $details['experience']['reason'] }}
@@ -831,7 +823,7 @@
                             </div>
                             <div class="progress-bar-wrapper">
                                 <div class="progress-fill {{ $getScoreLevel($details['salary']['score']) }}"
-                                    style="width: {{ $details['salary']['score'] }}% !important;"></div>
+                                    data-width="{{ $details['salary']['score'] }}"></div>
                             </div>
                             <div class="criteria-reason">
                                 {{ $details['salary']['reason'] }}
@@ -853,7 +845,7 @@
                             </div>
                             <div class="progress-bar-wrapper">
                                 <div class="progress-fill {{ $getScoreLevel($details['language']['score']) }}"
-                                    style="width: {{ $details['language']['score'] }}% !important;"></div>
+                                    data-width="{{ $details['language']['score'] }}"></div>
                             </div>
                             <div class="criteria-reason">
                                 {{ $details['language']['reason'] }}
@@ -865,7 +857,7 @@
 
                 <!-- Action Buttons -->
                 <div class="job-actions">
-                    <a href="{{ route('job.detail', $job->job_id) }}" class="btn-action btn-primary" onclick="markAsViewed({{ $rec->id }}); return false;">
+                    <a href="{{ route('job.detail', $job->job_id) }}" class="btn-action btn-primary" onclick="markAsViewed('{{ $rec->id }}'); return false;">
                         <i class="bi bi-eye-fill"></i>
                         <span>Xem chi tiết</span>
                     </a>
@@ -886,10 +878,15 @@
                     <i class="bi bi-inbox"></i>
                 </div>
                 <h3 class="mt-3">Chưa có việc làm phù hợp</h3>
-                <p class="text-muted">Vui lòng cập nhật đầy đủ hồ sơ để nhận được gợi ý tốt nhất</p>
-                <a href="{{ route('profile') }}" class="btn btn-primary mt-3">
-                    Cập nhật hồ sơ
-                </a>
+                <p class="text-muted">Hầu hết các vị trí đã đủ số lượng nhân viên cần tuyển hoặc không có việc làm nào phù hợp với hồ sơ của bạn</p>
+                <div class="mt-4">
+                    <a href="{{ route('home') }}" class="btn btn-primary">
+                        <i class="bi bi-house-door"></i> Về trang chủ
+                    </a>
+                    <a href="{{ route('profile') }}" class="btn btn-outline-primary ms-2">
+                        <i class="bi bi-pencil"></i> Cập nhật hồ sơ
+                    </a>
+                </div>
             </div>
             @endforelse
         </div>
@@ -967,7 +964,8 @@
         // Mark as viewed
         async function markAsViewed(recommendationId) {
             try {
-                await fetch(`/recommendations/${recommendationId}/viewed`, {
+                const id = String(recommendationId).trim();
+                await fetch(`/recommendations/${id}/viewed`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -980,28 +978,89 @@
         }
 
         // Toggle save job
-        function toggleSave(btn, jobId) {
+        async function toggleSave(btn, jobId) {
             const icon = btn.querySelector('i');
+            const isSaved = icon.classList.contains('bi-heart-fill');
 
-            if (icon.classList.contains('bi-heart')) {
-                icon.classList.remove('bi-heart');
-                icon.classList.add('bi-heart-fill');
-                btn.classList.add('saved');
+            // Determine endpoint and method
+            const endpoint = isSaved ? `/job/unsave/${jobId}` : `/job/save/${jobId}`;
+            const method = isSaved ? 'DELETE' : 'POST';
 
-                // Animation
-                btn.style.transform = 'scale(1.2)';
-                setTimeout(() => {
-                    btn.style.transform = 'scale(1)';
-                }, 200);
+            try {
+                // Disable button while processing
+                btn.disabled = true;
 
-                // TODO: Call API to save job
-            } else {
-                icon.classList.remove('bi-heart-fill');
-                icon.classList.add('bi-heart');
-                btn.classList.remove('saved');
+                const response = await fetch(endpoint, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken
+                    }
+                });
 
-                // TODO: Call API to unsave job
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    // Update UI based on save/unsave
+                    if (isSaved) {
+                        // Unsave: Change to heart outline
+                        icon.classList.remove('bi-heart-fill');
+                        icon.classList.add('bi-heart');
+                        btn.classList.remove('saved');
+
+                        // Show notification
+                        showToast('Đã bỏ lưu công việc', 'info');
+                    } else {
+                        // Save: Change to filled heart
+                        icon.classList.remove('bi-heart');
+                        icon.classList.add('bi-heart-fill');
+                        btn.classList.add('saved');
+
+                        // Animation
+                        btn.style.transform = 'scale(1.2)';
+                        setTimeout(() => {
+                            btn.style.transform = 'scale(1)';
+                        }, 200);
+
+                        // Show notification
+                        showToast('Đã lưu công việc', 'success');
+                    }
+                } else {
+                    showToast(data.message || 'Có lỗi xảy ra', 'error');
+                }
+            } catch (error) {
+                console.error('Error toggling save:', error);
+                showToast('Có lỗi xảy ra. Vui lòng thử lại', 'error');
+            } finally {
+                btn.disabled = false;
             }
+        }
+
+        // Helper function to show toast notification
+        function showToast(message, type = 'info') {
+            const toastHTML = `
+                <div class="toast-notification ${type}">
+                    <span>${message}</span>
+                </div>
+            `;
+
+            // Create temporary container if doesn't exist
+            let container = document.getElementById('toast-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toast-container';
+                container.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; pointer-events: none;';
+                document.body.appendChild(container);
+            }
+
+            const toast = document.createElement('div');
+            toast.innerHTML = toastHTML;
+            container.appendChild(toast.firstElementChild);
+
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                toast.firstElementChild.remove();
+            }, 3000);
         }
 
         // Animate progress bars on scroll
@@ -1026,6 +1085,12 @@
         }, observerOptions);
 
         document.addEventListener('DOMContentLoaded', () => {
+            // Apply progress bar widths from data attributes
+            document.querySelectorAll('.progress-fill[data-width]').forEach(bar => {
+                const width = bar.getAttribute('data-width');
+                bar.style.width = `${width}% !important`;
+            });
+
             document.querySelectorAll('.match-analysis').forEach(analysis => {
                 observer.observe(analysis);
             });
@@ -1068,6 +1133,9 @@
             recalculateRecommendations();
         });
     </script>
+
+    <!-- ✅ Toast Notification System -->
+    <script src="{{ asset('js/toast.js') }}"></script>
 </body>
 
 </html>

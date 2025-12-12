@@ -1,4 +1,13 @@
 @forelse($jobs as $job)
+@php
+// ✅ Ẩn job đã đủ số lượng nhận
+$selectedCount = $job->selected_count ?? 0;
+$recruitmentCount = $job->recruitment_count ?? 0;
+if ($recruitmentCount > 0 && $selectedCount >= $recruitmentCount) {
+continue; // Bỏ qua job này
+}
+@endphp
+
 <article class="job-card-grid" data-job-id="{{ $job->job_id }}">
 
     {{-- 🎯 BADGE SẮP HẾT HẠN - LOGIC MỚI --}}
@@ -98,6 +107,6 @@
 @empty
 <div class="col-12 text-center py-5">
     <i class="bi bi-inbox" style="font-size: 4rem; color: #cbd5e0;"></i>
-    <p class="text-muted mt-3">Không có công việc nào</p>
+    <p class="text-muted mt-3">Hầu hết các vị trí đã đủ số lượng nhân viên cần tuyển hoặc không có công việc nào phù hợp</p>
 </div>
 @endforelse

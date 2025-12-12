@@ -2668,7 +2668,7 @@
         <div class="featured-section">
             <div class="section-title-highlight">
                 <div class="section-subtitle">TẤT CẢ CÔNG VIỆC</div>
-                <h2>{{ $stats['total_jobs'] }} cơ hội việc làm IT</h2>
+                <h2 id="totalJobsTitle">{{ $stats['total_jobs'] }} cơ hội việc làm IT</h2>
             </div>
 
             <!-- ✅ Loading Overlay -->
@@ -2693,6 +2693,15 @@
                     <!-- Left Column - Job List -->
                     <div class="job-list-column" id="jobListColumn">
                         @foreach($jobs as $job)
+                        @php
+                        // ✅ Ẩn job đã đủ số lượng nhận
+                        $selectedCount = $job->selected_count ?? 0;
+                        $recruitmentCount = $job->recruitment_count ?? 0;
+                        if ($recruitmentCount > 0 && $selectedCount >= $recruitmentCount) {
+                        continue; // Bỏ qua job này
+                        }
+                        @endphp
+
                         <article class="job-card" data-job-id="{{ $job->job_id }}">
                             <div class="job-card-header">
                                 <div class="company-logo-small">
@@ -4613,7 +4622,7 @@
 
 
             function updateResultCount(total, locationMessage = '') {
-                const titleElement = document.querySelector('.section-title-highlight h2');
+                const titleElement = document.getElementById('totalJobsTitle') || document.querySelector('.section-title-highlight h2');
                 if (titleElement) {
                     if (locationMessage) {
                         const match = locationMessage.match(/tại (.+)$/);
@@ -5212,6 +5221,36 @@
 
             // Call attach function when document ready
             document.addEventListener('DOMContentLoaded', function() {
+                // ✅ Cập nhật tổng số jobs - Chờ 500ms để chắc DOM đã load xong
+                setTimeout(() => {
+                    console.log('📊 Fetching total jobs count from API...');
+
+                    fetch('/api/jobs/count/total')
+                        .then(response => {
+                            console.log('✅ API Response Status:', response.status);
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('📥 API Response Data:', data);
+                            const titleElement = document.getElementById('totalJobsTitle');
+                            console.log('🎯 Found title element:', titleElement);
+
+                            if (data.success && titleElement) {
+                                console.log('✏️ Updating total from', titleElement.textContent, 'to', data.total, 'cơ hội việc làm IT');
+                                titleElement.textContent = data.total + ' cơ hội việc làm IT';
+                                console.log('✅ Updated! New text:', titleElement.textContent);
+                            } else {
+                                console.warn('⚠️ Cannot update: success=' + data.success + ', element=' + !!titleElement);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('❌ Error fetching job count:', error);
+                        });
+                }, 500);
+
                 setTimeout(() => {
                     attachRecommendedDetailButtons();
                 }, 300);

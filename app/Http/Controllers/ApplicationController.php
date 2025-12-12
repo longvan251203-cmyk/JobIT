@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Application;
 use App\Models\Applicant;
 use App\Models\JobPost;
+use App\Models\JobInvitation;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -111,6 +112,8 @@ class ApplicationController extends Controller
                 'sdt' => 'required|string|max:20',
                 'diachi' => 'nullable|string|max:500',
                 'thugioithieu' => 'nullable|string|max:2500',
+                'accept_invitation' => 'nullable|in:0,1',
+                'invitation_id' => 'nullable|exists:job_invitations,id'
             ], [
                 'job_id.required' => 'Vui lòng chọn công việc để ứng tuyển',
                 'job_id.exists' => 'Công việc không tồn tại',
@@ -169,13 +172,30 @@ class ApplicationController extends Controller
                 'trang_thai' => Application::STATUS_CHO_XU_LY,  // ✅ SỬA: dùng giá trị cũ
                 'ngay_ung_tuyen' => now(),
             ]);
-            // ✅ TẠO THÔNG BÁO CHO EMPLOYER
-            $employer = $job->company->employer;
-            if ($employer && $employer->user_id) {
-                Notification::createNewApplicationNotification(
-                    $employer->user_id,
-                    $application->load('job')
-                );
+
+            // ✅ KIỂM TRA: Nếu đến từ chấp nhận lời mời (accept_invitation=1)
+            // Không gửi "new_application" để tránh trùng thông báo
+            // Vì invitation status sẽ được update thành "accepted" từ respondToInvitation()
+            $acceptInvitation = $request->input('accept_invitation', '0');
+            $invitationId = $request->input('invitation_id');
+
+            // Chỉ gửi thông báo "new_application" nếu là ứng tuyển bình thường
+            // (không phải từ chấp nhận lời mời)
+            if ($acceptInvitation !== '1') {
+                // ✅ TẠO THÔNG BÁO CHO EMPLOYER - ứng tuyển thông thường
+                $employer = $job->company->employer;
+                if ($employer && $employer->user_id) {
+                    Notification::createNewApplicationNotification(
+                        $employer->user_id,
+                        $application->load('job')
+                    );
+                }
+            } else {
+                Log::info('✅ Skipped new_application notification (accepted invitation + applied)', [
+                    'application_id' => $application->application_id,
+                    'job_id' => $request->job_id,
+                    'invitation_id' => $invitationId
+                ]);
             }
 
             return response()->json([
@@ -326,6 +346,12 @@ class ApplicationController extends Controller
                 ->orderBy('ngay_ung_tuyen', 'desc')
                 ->get();
 
+            // Lấy danh sách ứng viên được mời
+            $invitations = JobInvitation::with('applicant')
+                ->where('job_id', $jobId)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
             $statistics = [
                 'total' => $applications->count(),
                 'cho_xu_ly' => $applications->where('trang_thai', Application::STATUS_CHO_XU_LY)->count(),
@@ -334,7 +360,7 @@ class ApplicationController extends Controller
                 'khong_phu_hop' => $applications->where('trang_thai', Application::STATUS_KHONG_PHU_HOP)->count(),
             ];
 
-            return view('employer.job-applicants', compact('job', 'applications', 'statistics'));
+            return view('employer.job-applicants-new', compact('job', 'applications', 'invitations', 'statistics'));
         } catch (\Exception $e) {
             Log::error('Lỗi xem ứng viên: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Có lỗi xảy ra');
@@ -361,6 +387,14 @@ class ApplicationController extends Controller
                 ], 403);
             }
 
+            // ✅ KIỂM ĐỊNH CHUYỂN ĐỔI TRẠNG THÁI HỢP LỆ
+            if (!$application->canTransitionTo($validated['status'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $application->getTransitionErrorMessage($validated['status'])
+                ], 422);
+            }
+
             $application->update([
                 'trang_thai' => $validated['status'],
                 'ghi_chu' => ($application->ghi_chu ?? '') .
@@ -375,9 +409,10 @@ class ApplicationController extends Controller
                 ]
             ]);
         } catch (\Exception $e) {
+            Log::error('Error updating status: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Có lỗi xảy ra'
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -389,11 +424,19 @@ class ApplicationController extends Controller
     public function viewCV($id)
     {
         try {
+            // Load applicant với tất cả relationships - sử dụng camelCase method names
             $application = Application::with([
-                'applicant.hocvan',
-                'applicant.kinhnghiem',
-                'applicant.kynang',
-                'applicant.ngoaingu',
+                'applicant' => function ($query) {
+                    $query->with([
+                        'hocvan',
+                        'kinhnghiem',
+                        'kynang',
+                        'ngoaiNgu',
+                        'duan',
+                        'chungchi',
+                        'giaithuong'
+                    ]);
+                },
                 'job',
                 'company'
             ])->findOrFail($id);
@@ -413,7 +456,50 @@ class ApplicationController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Có lỗi xảy ra'
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * ✅ XEM CV - ỨNG VIÊN ĐƯỢC MỜI
+     */
+    public function viewCVInvitation($id)
+    {
+        try {
+            // Load job invitation với applicant và tất cả relationships
+            $invitation = JobInvitation::with([
+                'applicant' => function ($query) {
+                    $query->with([
+                        'hocvan',
+                        'kinhnghiem',
+                        'kynang',
+                        'ngoaiNgu',
+                        'duan',
+                        'chungchi',
+                        'giaithuong'
+                    ]);
+                },
+                'job',
+                'job.company'
+            ])->findOrFail($id);
+
+            if (Auth::user()->user_id != $invitation->job->company->user_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không có quyền'
+                ], 403);
+            }
+
+            return response()->json([
+                'success' => true,
+                'applicant' => $invitation->applicant,
+                'invitation' => $invitation
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -605,6 +691,23 @@ class ApplicationController extends Controller
                     $validated['date'] . ' ' . $validated['time']
             ]);
 
+            // ✅ TẠO NOTIFICATION CHO APPLICANT
+            if ($application->applicant && $application->applicant->user) {
+                Notification::create([
+                    'user_id' => $application->applicant->user->id,
+                    'type' => 'interview_invitation',
+                    'title' => 'Lời mời phỏng vấn',
+                    'message' => 'Bạn đã nhận được lời mời phỏng vấn cho vị trí ' . $application->job->title,
+                    'data' => json_encode([
+                        'application_id' => $application->application_id,
+                        'job_id' => $application->job->job_id,
+                        'interview_date' => $validated['date'],
+                        'interview_time' => $validated['time']
+                    ]),
+                    'is_read' => false
+                ]);
+            }
+
             Log::info('✅ Đã gửi email phỏng vấn', [
                 'application_id' => $id,
                 'email' => $validated['email']
@@ -714,6 +817,107 @@ class ApplicationController extends Controller
             });
         } catch (\Exception $e) {
             Log::error('Send rejection email failed: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * ✅ API: LẤY SỐ ỨNG TUYỂN CHỜ XỬ LÝ (Real-time)
+     */
+    public function countPending()
+    {
+        try {
+            $employer = Auth::user()->employer;
+            if (!$employer) {
+                return response()->json(['count' => 0], 200);
+            }
+
+            $jobIds = JobPost::where('companies_id', $employer->company->companies_id)
+                ->pluck('job_id');
+
+            $count = Application::whereIn('job_id', $jobIds)
+                ->where('trang_thai', Application::STATUS_CHO_XU_LY)
+                ->count();
+
+            return response()->json([
+                'success' => true,
+                'count' => $count,
+                'timestamp' => now()->toIso8601String()
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('❌ countPending error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'count' => 0], 500);
+        }
+    }
+
+    /**
+     * ✅ API: LẤY SỐ LỊCH PHỎNG VẤN (Real-time)
+     */
+    public function countInterview()
+    {
+        try {
+            $employer = Auth::user()->employer;
+            if (!$employer) {
+                return response()->json(['count' => 0], 200);
+            }
+
+            $jobIds = JobPost::where('companies_id', $employer->company->companies_id)
+                ->pluck('job_id');
+
+            $count = Application::whereIn('job_id', $jobIds)
+                ->where('trang_thai', Application::STATUS_DANG_PHONG_VAN)
+                ->count();
+
+            return response()->json([
+                'success' => true,
+                'count' => $count,
+                'timestamp' => now()->toIso8601String()
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('❌ countInterview error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'count' => 0], 500);
+        }
+    }
+
+    /**
+     * ✅ API: LẤY THỐNG KÊ DASHBOARD (Real-time)
+     */
+    public function getDashboardStats()
+    {
+        try {
+            $employer = Auth::user()->employer;
+            if (!$employer || !$employer->company) {
+                return response()->json(['success' => false, 'stats' => []], 400);
+            }
+
+            $company = $employer->company;
+            $jobIds = JobPost::where('companies_id', $company->companies_id)
+                ->pluck('job_id');
+
+            $stats = [
+                'total_applicants' => Application::whereIn('job_id', $jobIds)->count(),
+                'pending_applications' => Application::whereIn('job_id', $jobIds)
+                    ->where('trang_thai', Application::STATUS_CHO_XU_LY)->count(),
+                'interview_scheduled' => Application::whereIn('job_id', $jobIds)
+                    ->where('trang_thai', Application::STATUS_DANG_PHONG_VAN)->count(),
+                'selected' => Application::whereIn('job_id', $jobIds)
+                    ->where('trang_thai', Application::STATUS_DUOC_CHON)->count(),
+                'rejected' => Application::whereIn('job_id', $jobIds)
+                    ->where('trang_thai', Application::STATUS_KHONG_PHU_HOP)->count(),
+                'active_jobs' => JobPost::where('companies_id', $company->companies_id)
+                    ->where('deadline', '>=', now())->count(),
+                'new_applicants_week' => Application::whereIn('job_id', $jobIds)
+                    ->where('ngay_ung_tuyen', '>=', Carbon::now()->startOfWeek())
+                    ->count(),
+                'timestamp' => now()->toIso8601String()
+            ];
+
+            return response()->json([
+                'success' => true,
+                'stats' => $stats
+            ], 200);
+        } catch (\Exception $e) {
+            Log::error('❌ getDashboardStats error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'stats' => []], 500);
         }
     }
 }

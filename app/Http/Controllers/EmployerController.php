@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\JobPost;
 use App\Models\Application;
 use App\Models\Applicant;
+use App\Models\JobInvitation;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -65,7 +66,13 @@ class EmployerController extends Controller
             ->with(['applicant', 'job', 'job.company'])
             ->paginate(12);
 
-        return view('employer.job-applicants', compact('job', 'applications'));
+        // Lấy danh sách ứng viên được mời
+        $invitations = JobInvitation::with('applicant')
+            ->where('job_id', $job_id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('employer.job-applicants', compact('job', 'applications', 'invitations'));
     }
 
     /**
@@ -81,6 +88,12 @@ class EmployerController extends Controller
             ->orderBy('ngay_ung_tuyen', 'desc')
             ->get();
 
+        // Lấy danh sách ứng viên được mời
+        $invitations = JobInvitation::with('applicant')
+            ->where('job_id', $jobId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
         // Tính toán thống kê
         $statistics = [
             'total' => $applications->count(),
@@ -91,7 +104,7 @@ class EmployerController extends Controller
             'tu_choi' => $applications->where('trang_thai', 'tu_choi')->count(),
         ];
 
-        return view('employer.job-applicants', compact('job', 'applications', 'statistics'));
+        return view('employer.job-applicants', compact('job', 'applications', 'invitations', 'statistics'));
     }
 
     /**
@@ -209,6 +222,40 @@ class EmployerController extends Controller
             }
 
             $application->update($updateData);
+
+            // ✅ LOGIC: Khi update status thành "duoc_chon" (được chọn/đậu)
+            if ($validated['status'] === 'duoc_chon') {
+                try {
+                    $job = JobPost::findOrFail($application->job_id);
+
+                    // ✅ Kiểm tra số lượng đã chọn có vượt quá recruitment_count không
+                    $selectedCount = Application::where('job_id', $job->job_id)
+                        ->where('trang_thai', 'duoc_chon')
+                        ->count();
+
+                    Log::info('✅ Applicant selected', [
+                        'application_id' => $applicationId,
+                        'job_id' => $job->job_id,
+                        'recruitment_count' => $job->recruitment_count,
+                        'selected_count' => $selectedCount
+                    ]);
+
+                    // Thông báo cho employer nếu đã đủ số lượng
+                    if ($selectedCount >= $job->recruitment_count) {
+                        Log::info('✅ Job recruitment complete', [
+                            'job_id' => $job->job_id,
+                            'job_title' => $job->title,
+                            'selected_count' => $selectedCount,
+                            'recruitment_count' => $job->recruitment_count
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    Log::error('❌ Error checking selected count', [
+                        'error' => $e->getMessage(),
+                        'job_id' => $application->job_id
+                    ]);
+                }
+            }
 
             return response()->json([
                 'success' => true,

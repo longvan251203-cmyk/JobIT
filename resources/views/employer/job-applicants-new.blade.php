@@ -54,18 +54,6 @@
             gap: 8px;
         }
 
-        .page-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: #1a1a1a;
-            margin-bottom: 8px;
-        }
-
-        .page-subtitle {
-            font-size: 14px;
-            color: #6b7280;
-        }
-
         /* Statistics */
         .stats-grid {
             display: grid;
@@ -474,6 +462,34 @@
             animation: spin 0.6s linear infinite;
         }
 
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         /* Tab content visibility */
         .tab-content {
             display: none;
@@ -501,45 +517,6 @@
             background: rgba(255, 255, 255, 0.3);
             transform: translateX(-4px);
             color: white;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(20px);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-
-        /* Loading */
-        .loading {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-top-color: white;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
         }
     </style>
 </head>
@@ -764,13 +741,14 @@
             </div>
         </div>
     </div>
-    <!-- 2️⃣ THÊM MODAL PHẢN HỒI PHỎNG VẤN -->
+
+    <!-- Modal: Result -->
     <div id="resultModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
                 <h3 class="modal-title">
                     <i class="bi bi-check-circle"></i>
-                    Xác nhận kết quả phỏng vấn
+                    Kết quả phỏng vấn
                 </h3>
                 <button class="modal-close" onclick="closeModal('resultModal')">
                     <i class="bi bi-x-lg"></i>
@@ -783,7 +761,7 @@
 
                 <div class="form-group">
                     <label class="form-label">Ứng viên</label>
-                    <div id="resultCandidateName" style="padding: 12px; background: #f9fafb; border-radius: 8px; font-weight: 600;"></div>
+                    <div id="resultCandidateName" style="padding: 12px; background: #f9fafb; border-radius: 8px; font-weight: 600; border-left: 3px solid #667eea;"></div>
                 </div>
 
                 <div class="form-group">
@@ -792,9 +770,9 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">
-                        <input type="checkbox" id="sendEmailResult" checked>
-                        <span style="margin-left: 8px;">Gửi email thông báo kết quả cho ứng viên</span>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" id="sendEmailResult" checked style="width: 18px; height: 18px; accent-color: #667eea;">
+                        <span style="font-size: 14px; color: #374151;">Gửi email thông báo kết quả cho ứng viên</span>
                     </label>
                 </div>
             </div>
@@ -810,7 +788,7 @@
         </div>
     </div>
 
-    <!-- Modal: View CV -->
+    <!-- Modal: CV -->
     <div id="cvModal" class="modal">
         <div class="modal-content" style="max-width: 900px;">
             <div class="modal-header">
@@ -828,7 +806,7 @@
         </div>
     </div>
 
-    <!-- Modal: Interview Invitation -->
+    <!-- Modal: Interview -->
     <div id="interviewModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -846,50 +824,35 @@
 
                 <div class="form-group">
                     <label class="form-label">Ứng viên</label>
-                    <div id="interviewCandidateName" style="padding: 12px; background: #f9fafb; border-radius: 8px; font-weight: 600;"></div>
+                    <div id="interviewCandidateName" style="padding: 12px; background: #f9fafb; border-radius: 8px; font-weight: 600; border-left: 3px solid #667eea;"></div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Hình thức phỏng vấn</label>
                     <div class="form-radio-group">
-                        <label class="form-radio-label" style="flex: 1; border-color: #3b82f6;">
+                        <label class="form-radio-label" style="border-color: #667eea;">
                             <input type="radio" name="interviewType" value="online" checked>
-                            <span>
-                                <i class="bi bi-camera-video"></i>
-                                Online
-                            </span>
+                            <span><i class="bi bi-camera-video"></i> Online</span>
                         </label>
-                        <label class="form-radio-label" style="flex: 1;">
+                        <label class="form-radio-label">
                             <input type="radio" name="interviewType" value="offline">
-                            <span>
-                                <i class="bi bi-building"></i>
-                                Offline
-                            </span>
+                            <span><i class="bi bi-building"></i> Offline</span>
                         </label>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">
-                        <i class="bi bi-calendar"></i>
-                        Ngày phỏng vấn
-                    </label>
+                    <label class="form-label"><i class="bi bi-calendar"></i> Ngày phỏng vấn</label>
                     <input type="date" id="interviewDate" class="form-input" min="{{ date('Y-m-d') }}" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">
-                        <i class="bi bi-clock"></i>
-                        Giờ phỏng vấn
-                    </label>
+                    <label class="form-label"><i class="bi bi-clock"></i> Giờ phỏng vấn</label>
                     <input type="time" id="interviewTime" class="form-input" value="09:00" required>
                 </div>
 
                 <div class="form-group" id="locationGroup">
-                    <label class="form-label">
-                        <i class="bi bi-camera-video"></i>
-                        Link meeting
-                    </label>
+                    <label class="form-label"><i class="bi bi-camera-video"></i> Link meeting</label>
                     <input type="text" id="interviewLocation" class="form-input" placeholder="https://meet.google.com/xxx hoặc để trống để tự tạo">
                     <small style="color: #6b7280; font-size: 12px; display: block; margin-top: 4px;">
                         💡 Có thể để trống, hệ thống sẽ tự tạo link Google Meet
@@ -952,6 +915,8 @@
             });
         });
 
+        // =====================================
+        // VIEW CV
         // =====================================
         // VIEW CV
         // =====================================

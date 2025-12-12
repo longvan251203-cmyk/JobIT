@@ -1629,14 +1629,14 @@
 
                     const cvType = document.querySelector('input[name="cv_type"]:checked').value;
                     if (cvType === 'upload' && !cvFileInput.files.length) {
-                        alert('Vui lòng tải lên CV của bạn');
+                        showToast('Vui lòng tải lên CV của bạn', 'warning');
                         return;
                     }
 
                     const jobId = window.currentJobId;
 
                     if (!jobId) {
-                        alert('Không xác định được công việc. Vui lòng thử lại!');
+                        showToast('Không xác định được công việc. Vui lòng thử lại!', 'error');
                         return;
                     }
 
@@ -1659,7 +1659,7 @@
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                alert('✅ ' + data.message);
+                                showToast(data.message, 'success');
 
                                 const modal = bootstrap.Modal.getInstance(document.getElementById('applyJobModal'));
                                 if (modal) modal.hide();
@@ -1699,10 +1699,10 @@
                                 if (uploadArea) uploadArea.style.display = 'block';
                             } else {
                                 if (data.errors) {
-                                    const errorMessages = Object.values(data.errors).flat().join('\n');
-                                    alert('❌ ' + errorMessages);
+                                    const errorMessages = Object.values(data.errors).flat().join(', ');
+                                    showToast(errorMessages, 'error');
                                 } else {
-                                    alert('❌ ' + (data.message || 'Có lỗi xảy ra. Vui lòng thử lại!'));
+                                    showToast(data.message || 'Có lỗi xảy ra. Vui lòng thử lại!', 'error');
                                 }
                             }
                         })
@@ -2010,14 +2010,14 @@
                     `;
                                 }
                             } else {
-                                alert(data.message || 'Có lỗi xảy ra!');
+                                showToast(data.message || 'Có lỗi xảy ra!', 'error');
                                 this.disabled = false;
                                 this.innerHTML = originalHtml;
                             }
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            alert('Có lỗi xảy ra khi bỏ lưu công việc!');
+                            showToast('Có lỗi xảy ra khi bỏ lưu công việc!', 'error');
                             this.disabled = false;
                             this.innerHTML = originalHtml;
                         });
@@ -2026,6 +2026,9 @@
 
         });
     </script>
+
+    <!-- ✅ Toast Notification System -->
+    <script src="{{ asset('js/toast.js') }}"></script>
 </body>
 
 </html>

@@ -156,4 +156,55 @@ class Application extends Model
     {
         return $this->getDisplayStatus()['text'];
     }
+
+    /**
+     * ✅ KIỂM ĐỊNH CHUYỂN TRẠNG THÁI HỢP LỆ
+     * Định nghĩa các chuyển đổi trạng thái hợp lệ
+     */
+    const VALID_TRANSITIONS = [
+        self::STATUS_CHO_XU_LY => [self::STATUS_DANG_PHONG_VAN, self::STATUS_KHONG_PHU_HOP],
+        self::STATUS_DANG_PHONG_VAN => [self::STATUS_DUOC_CHON, self::STATUS_KHONG_PHU_HOP],
+        self::STATUS_DUOC_CHON => [], // Trạng thái cuối - không có chuyển đổi nữa
+        self::STATUS_KHONG_PHU_HOP => [], // Trạng thái cuối - không có chuyển đổi nữa
+    ];
+
+    /**
+     * ✅ Kiểm tra xem có thể chuyển sang trạng thái mới không
+     */
+    public function canTransitionTo($newStatus)
+    {
+        $currentStatus = $this->trang_thai;
+
+        // Không cho phép chuyển thành trạng thái giống hiện tại
+        if ($currentStatus === $newStatus) {
+            return false;
+        }
+
+        // Kiểm tra xem chuyển đổi này có hợp lệ không
+        $allowedTransitions = self::VALID_TRANSITIONS[$currentStatus] ?? [];
+        return in_array($newStatus, $allowedTransitions);
+    }
+
+    /**
+     * ✅ Lấy message lỗi khi chuyển trạng thái không hợp lệ
+     */
+    public function getTransitionErrorMessage($newStatus)
+    {
+        $currentStatus = $this->trang_thai;
+        $statusNames = [
+            self::STATUS_CHO_XU_LY => 'Chờ xử lý',
+            self::STATUS_DANG_PHONG_VAN => 'Đang phỏng vấn',
+            self::STATUS_DUOC_CHON => 'Được chọn',
+            self::STATUS_KHONG_PHU_HOP => 'Không phù hợp',
+        ];
+
+        $current = $statusNames[$currentStatus] ?? 'Không xác định';
+        $new = $statusNames[$newStatus] ?? 'Không xác định';
+
+        if ($currentStatus === $newStatus) {
+            return "Ứng viên đã ở trạng thái '{$current}', không cần cập nhật";
+        }
+
+        return "Không thể chuyển từ '{$current}' sang '{$new}'";
+    }
 }
