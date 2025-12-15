@@ -4162,6 +4162,21 @@
             'use strict';
 
             // ========================================
+            // CHECK PENDING ACTION ON PAGE LOAD
+            // ========================================
+
+            // Kiểm tra nếu user vừa login và có pending action
+            setTimeout(() => {
+                if (checkAuth()) {
+                    const pendingAction = sessionStorage.getItem('pendingAction');
+                    if (pendingAction) {
+                        console.log('🔄 Found pending action on page load, executing...');
+                        executePendingAction();
+                    }
+                }
+            }, 500);
+
+            // ========================================
             // HELPER FUNCTIONS
             // ========================================
 
@@ -4242,6 +4257,113 @@
                 }
             `;
                 document.head.appendChild(style);
+            }
+
+            // ========================================
+            // SHOW LOGIN MODAL
+            // ========================================
+
+            function showLoginModal(pendingAction = null) {
+                // Lưu hành động đang chờ vào sessionStorage
+                if (pendingAction) {
+                    sessionStorage.setItem('pendingAction', JSON.stringify(pendingAction));
+                    console.log('💾 Saved pending action:', pendingAction);
+                }
+
+                const loginModal = document.getElementById('loginModal');
+                if (loginModal) {
+                    const bsModal = new bootstrap.Modal(loginModal);
+
+                    // Lắng nghe sự kiện modal đóng
+                    loginModal.addEventListener('hidden.bs.modal', function onModalHidden() {
+                        console.log('🔍 Modal closed, checking auth status...');
+
+                        // Đợi một chút để đảm bảo auth state đã update
+                        setTimeout(() => {
+                            if (checkAuth()) {
+                                console.log('✅ User is now authenticated!');
+                                executePendingAction();
+                            } else {
+                                console.log('❌ User still not authenticated');
+                            }
+                        }, 300);
+
+                        // Remove listener để tránh duplicate
+                        loginModal.removeEventListener('hidden.bs.modal', onModalHidden);
+                    });
+
+                    bsModal.show();
+                } else {
+                    console.warn('Login modal not found, redirecting to login page');
+                    window.location.href = '/login';
+                }
+            }
+
+            // ========================================
+            // EXECUTE PENDING ACTION AFTER LOGIN
+            // ========================================
+
+            function executePendingAction() {
+                const storedAction = sessionStorage.getItem('pendingAction');
+
+                if (!storedAction) {
+                    console.log('ℹ️ No pending action found');
+                    return;
+                }
+
+                try {
+                    const action = JSON.parse(storedAction);
+                    console.log('🎯 Executing pending action:', action);
+
+                    // Xóa pending action
+                    sessionStorage.removeItem('pendingAction');
+
+                    // Thực hiện action tương ứng
+                    if (action.type === 'apply' && action.jobId) {
+                        // Mở modal ứng tuyển
+                        console.log('📝 Opening apply modal for job:', action.jobId);
+                        window.currentJobId = action.jobId;
+
+                        const applyModal = document.getElementById('applyJobModal');
+                        if (applyModal) {
+                            const modalJobIdInput = document.getElementById('modalJobId');
+                            if (modalJobIdInput) {
+                                modalJobIdInput.value = action.jobId;
+                            }
+
+                            const applyBsModal = new bootstrap.Modal(applyModal);
+                            applyBsModal.show();
+                            showToast('✅ Đã đăng nhập! Vui lòng hoàn tất hồ sơ ứng tuyển', 'success');
+                        }
+                    } else if (action.type === 'save' && action.jobId) {
+                        // Tự động lưu công việc
+                        console.log('💾 Auto-saving job:', action.jobId);
+
+                        // Tìm button để trigger save
+                        const buttons = document.querySelectorAll(`[data-job-id="${action.jobId}"] .save-btn-grid, [data-job-id="${action.jobId}"] .save-btn-large, .save-btn-small[data-job-id="${action.jobId}"]`);
+                        if (buttons.length > 0) {
+                            handleSaveJob(action.jobId, false, buttons[0]);
+                        }
+                    } else if (action.type === 'accept-invitation' && action.invitationId && action.jobId) {
+                        // Mở modal ứng tuyển với invitation data
+                        console.log('📨 Opening apply modal for invitation:', action.invitationId);
+
+                        document.getElementById('modalInvitationId').value = action.invitationId;
+                        document.getElementById('modalAcceptInvitation').value = '1';
+                        document.getElementById('modalJobId').value = action.jobId;
+                        window.currentJobId = action.jobId;
+
+                        const applyModal = document.getElementById('applyJobModal');
+                        if (applyModal) {
+                            const applyBsModal = new bootstrap.Modal(applyModal);
+                            applyBsModal.show();
+                            showToast('📋 Vui lòng hoàn tất thông tin ứng tuyển để gửi hồ sơ', 'info');
+                        }
+                    }
+                } catch (error) {
+                    console.error('❌ Error executing pending action:', error);
+                    sessionStorage.removeItem('pendingAction');
+                }
             }
 
             // ========================================
@@ -4648,7 +4770,10 @@
             function handleSaveJob(jobId, isSaved, button) {
                 if (!checkAuth()) {
                     showToast('Vui lòng đăng nhập để lưu công việc!', 'error');
-                    setTimeout(() => window.location.href = '/login', 1500);
+                    showLoginModal({
+                        type: 'save',
+                        jobId: jobId
+                    });
                     return;
                 }
 
@@ -4771,7 +4896,10 @@
                     })
                     .then(job => {
                         renderJobDetail(job);
-                        checkApplicationStatus(jobId);
+                        // ✅ Chỉ check application status nếu đã đăng nhập
+                        if (checkAuth()) {
+                            checkApplicationStatus(jobId);
+                        }
                     })
                     .catch(error => {
                         console.error('Error:', error);
@@ -4932,8 +5060,12 @@
                         }
 
                         if (!checkAuth()) {
+                            const jobId = this.getAttribute('data-job-id');
                             showToast('Vui lòng đăng nhập để ứng tuyển!', 'error');
-                            setTimeout(() => window.location.href = '/login', 1500);
+                            showLoginModal({
+                                type: 'apply',
+                                jobId: jobId
+                            });
                             return;
                         }
 
@@ -4958,24 +5090,36 @@
                     const applyBtn = card.querySelector('.btn-apply-now');
                     const saveBtn = card.querySelector('.save-btn-grid');
 
-                    card.addEventListener('click', function(e) {
+                    // Remove old event listeners by cloning
+                    const newCard = card.cloneNode(true);
+                    card.parentNode.replaceChild(newCard, card);
+
+                    // Re-query after replacement
+                    const updatedCard = newCard;
+                    const updatedApplyBtn = updatedCard.querySelector('.btn-apply-now');
+                    const updatedSaveBtn = updatedCard.querySelector('.save-btn-grid');
+
+                    updatedCard.addEventListener('click', function(e) {
                         if (!e.target.closest('.save-btn-grid, .btn-apply-now')) {
                             const jobId = this.getAttribute('data-job-id');
-                            if (jobId) showDetailView(jobId);
+                            if (jobId) {
+                                console.log('📋 Opening detail view for job:', jobId);
+                                showDetailView(jobId);
+                            }
                         }
                     });
 
-                    if (applyBtn) {
-                        applyBtn.addEventListener('click', function(e) {
+                    if (updatedApplyBtn) {
+                        updatedApplyBtn.addEventListener('click', function(e) {
                             e.stopPropagation();
                             handleApplyClick.call(this);
                         });
                     }
 
-                    if (saveBtn) {
-                        saveBtn.addEventListener('click', function(e) {
+                    if (updatedSaveBtn) {
+                        updatedSaveBtn.addEventListener('click', function(e) {
                             e.stopPropagation();
-                            const jobId = card.getAttribute('data-job-id');
+                            const jobId = updatedCard.getAttribute('data-job-id');
                             const isSaved = this.classList.contains('saved');
                             handleSaveJob(jobId, isSaved, this);
                         });
@@ -5099,7 +5243,7 @@
 
                         if (status === 401) {
                             showToast('Vui lòng đăng nhập!', 'error');
-                            setTimeout(() => window.location.href = '/login', 1500);
+                            showLoginModal();
                             return;
                         }
 
@@ -5147,8 +5291,12 @@
                 }
 
                 if (!checkAuth()) {
+                    const jobId = this.getAttribute('data-job-id') || this.closest('[data-job-id]')?.getAttribute('data-job-id');
                     showToast('Vui lòng đăng nhập để ứng tuyển!', 'error');
-                    setTimeout(() => window.location.href = '/login', 1500);
+                    showLoginModal({
+                        type: 'apply',
+                        jobId: jobId
+                    });
                     return;
                 }
 
@@ -5167,14 +5315,18 @@
                 event.stopPropagation();
                 event.preventDefault();
 
-                if (!checkAuth()) {
-                    showToast('Vui lòng đăng nhập!', 'error');
-                    setTimeout(() => window.location.href = '/login', 1500);
-                    return;
-                }
-
                 const invitationId = button.dataset.invitationId;
                 const jobId = button.dataset.jobId;
+
+                if (!checkAuth()) {
+                    showToast('Vui lòng đăng nhập!', 'error');
+                    showLoginModal({
+                        type: 'accept-invitation',
+                        invitationId: invitationId,
+                        jobId: jobId
+                    });
+                    return;
+                }
 
                 if (!invitationId || !jobId) {
                     console.error('Missing invitationId or jobId', {
@@ -5211,7 +5363,7 @@
 
                 if (!checkAuth()) {
                     showToast('Vui lòng đăng nhập!', 'error');
-                    setTimeout(() => window.location.href = '/login', 1500);
+                    showLoginModal();
                     return;
                 }
 
@@ -5629,8 +5781,31 @@
                 }
             }
 
+            // ========================================
+            // SHOW/HIDE ABOUT SECTION
+            // ========================================
+
+            function hideAboutSection() {
+                const aboutSection = document.querySelector('.hero-about-section');
+                if (aboutSection) {
+                    aboutSection.style.display = 'none';
+                    console.log('🙈 About section hidden');
+                }
+            }
+
+            function showAboutSection() {
+                const aboutSection = document.querySelector('.hero-about-section');
+                if (aboutSection) {
+                    aboutSection.style.display = 'block';
+                    console.log('👀 About section visible');
+                }
+            }
+
             function loadAllJobs(page = 1) {
                 if (loadingOverlay) loadingOverlay.style.display = 'flex';
+
+                // ✅ Hiện lại section about khi load all jobs
+                showAboutSection();
 
                 fetch(`/api/jobs?page=${page}`, {
                         method: 'GET',
@@ -5677,6 +5852,9 @@
                     loadAllJobs(page);
                     return;
                 }
+
+                // ✅ Ẩn section about khi có filters
+                hideAboutSection();
 
                 const params = new URLSearchParams();
                 params.append('page', page);
@@ -5890,14 +6068,17 @@
                 e.preventDefault();
                 e.stopPropagation();
 
-                if (!checkAuth()) {
-                    showToast('Vui lòng đăng nhập để ứng tuyển!', 'error');
-                    setTimeout(() => window.location.href = '/login', 1500);
-                    return;
-                }
-
                 const card = this.closest('.recommended-job-card');
                 const jobId = card?.getAttribute('data-job-id');
+
+                if (!checkAuth()) {
+                    showToast('Vui lòng đăng nhập để ứng tuyển!', 'error');
+                    showLoginModal({
+                        type: 'apply',
+                        jobId: jobId
+                    });
+                    return;
+                }
 
                 if (!jobId) {
                     showToast('Không xác định được công việc!', 'error');
@@ -5922,14 +6103,17 @@
                 e.preventDefault();
                 e.stopPropagation();
 
-                if (!checkAuth()) {
-                    showToast('Vui lòng đăng nhập để lưu công việc!', 'error');
-                    setTimeout(() => window.location.href = '/login', 1500);
-                    return;
-                }
-
                 const card = this.closest('.recommended-job-card');
                 const jobId = card?.getAttribute('data-job-id');
+
+                if (!checkAuth()) {
+                    showToast('Vui lòng đăng nhập để lưu công việc!', 'error');
+                    showLoginModal({
+                        type: 'save',
+                        jobId: jobId
+                    });
+                    return;
+                }
 
                 if (!jobId) {
                     showToast('Không xác định được công việc!', 'error');
@@ -6139,7 +6323,10 @@
                         applyBtn.addEventListener('click', function() {
                             if (!checkAuth()) {
                                 showToast('Vui lòng đăng nhập để ứng tuyển!', 'error');
-                                setTimeout(() => window.location.href = '/login', 1500);
+                                showLoginModal({
+                                    type: 'apply',
+                                    jobId: job.job_id
+                                });
                                 return;
                             }
 

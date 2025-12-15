@@ -295,17 +295,20 @@ class JobController extends Controller
     // Controller API
     public function getJobDetail($id)
     {
+        // ✅ Không lọc deadline để có thể xem recommended jobs đã hết hạn
         $job = JobPost::with(['company', 'hashtags', 'detail'])
             ->where('job_id', $id)
             ->where('status', 'active')
-            ->where('deadline', '>=', now()->toDateString())
             ->first();
 
         if (!$job) {
             return response()->json([
-                'error' => 'Công việc không tồn tại hoặc đã hết hạn'
+                'error' => 'Công việc không tồn tại hoặc đã bị xóa'
             ], 404);
         }
+
+        // ✅ Kiểm tra deadline nhưng vẫn trả về data, chỉ đánh dấu
+        $isExpired = $job->deadline < now()->toDateString();
 
         // ✅ LẤY THÔNG TIN LỜI MỜI (nếu user đã đăng nhập)
         $invitationStatus = null;
@@ -348,6 +351,7 @@ class JobController extends Controller
             'address_detail' => $job->address_detail,
             'deadline' => $job->deadline,
             'gender_requirement' => $job->gender_requirement,
+            'is_expired' => $isExpired, // ✅ THÊM FLAG HẾT HẠN
 
             // Lấy từ detail relation
             'description' => $job->detail->description ?? null,
@@ -1490,4 +1494,36 @@ class JobController extends Controller
             ], 500);
         }
     }
-}
+
+    // ========== GET PENDING INVITATION COUNT ==========
+    public function getPendingInvitationCount()
+    {
+        try {
+            // Check nếu user chưa login
+            if (!Auth::check()) {
+                return response()->json(['count' => 0]);
+            }
+
+            $user = Auth::user();
+
+            // Lấy số lời mời ứng tuyển đang pending (chờ phản hồi)
+            $pendingCount = JobInvitation::where('applicant_id', $user->id)
+                ->where('status', 'pending')
+                ->count();
+
+            return response()->json([
+                'count' => $pendingCount,
+                'success' => true
+            ]);
+        } catch (\Exception $e) {
+            Log::error('❌ Error getting pending invitation count', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'count' => 0,
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }

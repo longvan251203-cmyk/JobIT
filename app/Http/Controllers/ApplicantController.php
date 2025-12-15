@@ -20,6 +20,7 @@ use App\Models\SavedJob;
 use App\Models\Application;
 use Illuminate\Support\Facades\Log;
 use App\Models\Notification;
+use App\Models\JobInvitation;
 
 class ApplicantController extends Controller
 {
@@ -627,12 +628,15 @@ class ApplicantController extends Controller
      */
     public function storeKyNang(Request $request)
     {
-        // Validate
+        // Debug log
+        Log::info('storeKyNang request data:', $request->all());
+
+        // Validate - chấp nhận cả ten_ky_nang và ten_ky_nang[]
         $request->validate([
             'ten_ky_nang' => 'required|array|min:1',
             'ten_ky_nang.*' => 'required|string|max:100',
             'nam_kinh_nghiem' => 'required|array|min:1',
-            'nam_kinh_nghiem.*' => 'required|integer|min:0'
+            'nam_kinh_nghiem.*' => 'required'
         ], [
             'ten_ky_nang.required' => 'Vui lòng nhập ít nhất một kỹ năng',
             'ten_ky_nang.*.required' => 'Tên kỹ năng không được để trống',
@@ -648,8 +652,13 @@ class ApplicantController extends Controller
                 return redirect()->back()->with('error', 'Không tìm thấy thông tin ứng viên!');
             }
 
-            $tenKyNang = $request->ten_ky_nang;
-            $namKinhNghiem = $request->nam_kinh_nghiem;
+            $tenKyNang = $request->input('ten_ky_nang', []);
+            $namKinhNghiem = $request->input('nam_kinh_nghiem', []);
+
+            Log::info('Kỹ năng data:', [
+                'ten_ky_nang' => $tenKyNang,
+                'nam_kinh_nghiem' => $namKinhNghiem
+            ]);
 
             $added = 0;
             $skipped = 0;
@@ -663,13 +672,20 @@ class ApplicantController extends Controller
 
                 if (!$exists) {
                     try {
+                        // Convert năm kinh nghiệm
+                        $nam = $namKinhNghiem[$i] ?? 0;
+                        if ($nam === '10+') {
+                            $nam = 10;
+                        }
+
                         KyNang::create([
                             'applicant_id' => $applicant->id_uv,
                             'ten_ky_nang' => $tenKyNang[$i],
-                            'nam_kinh_nghiem' => $namKinhNghiem[$i] ?? 0,
-                            'mo_ta' => null
+                            'nam_kinh_nghiem' => $nam,
+                            // 'mo_ta' => null  // Bỏ vì DB không có cột này
                         ]);
                         $added++;
+                        Log::info('Đã thêm kỹ năng:', ['skill' => $tenKyNang[$i], 'years' => $nam]);
                     } catch (\Exception $e) {
                         Log::error('Lỗi khi thêm kỹ năng: ' . $e->getMessage());
                         continue;
@@ -680,19 +696,38 @@ class ApplicantController extends Controller
             }
 
             // Thông báo kết quả
+            $message = '';
             if ($added > 0 && $skipped > 0) {
-                return redirect()->route('applicant.hoso')
-                    ->with('success', "Đã thêm {$added} kỹ năng thành công! ({$skipped} kỹ năng bị trùng)");
+                $message = "Đã thêm {$added} kỹ năng thành công! ({$skipped} kỹ năng bị trùng)";
             } elseif ($added > 0) {
-                return redirect()->route('applicant.hoso')
-                    ->with('success', "Đã thêm {$added} kỹ năng thành công!");
+                $message = "Đã thêm {$added} kỹ năng thành công!";
             } else {
-                return redirect()->route('applicant.hoso')
-                    ->with('info', 'Tất cả kỹ năng đã tồn tại trong hồ sơ của bạn!');
+                $message = 'Tất cả kỹ năng đã tồn tại trong hồ sơ của bạn!';
             }
+
+            // Check if AJAX request
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => $added > 0,
+                    'message' => $message,
+                    'added' => $added,
+                    'skipped' => $skipped
+                ]);
+            }
+
+            // Traditional redirect for non-AJAX
+            return redirect()->route('applicant.hoso')->with('success', $message);
         } catch (\Exception $e) {
             Log::error('Lỗi khi lưu kỹ năng: ' . $e->getMessage());
             Log::error('Stack trace: ' . $e->getTraceAsString());
+
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+                ], 500);
+            }
+
             return redirect()->back()->with('error', 'Có lỗi xảy ra: ' . $e->getMessage());
         }
     }
@@ -721,29 +756,45 @@ class ApplicantController extends Controller
     public function uploadCv(Request $request)
     {
         $request->validate([
-            'cv' => 'required|mimes:pdf,doc,docx|max:5120',
+            'hosodinhkem' => 'required|mimes:pdf,doc,docx|max:5120',
+        ], [], [
+            'hosodinhkem' => 'CV'
         ]);
+
+        $file = $request->file('hosodinhkem') ?? $request->file('cv');
+        if (!$file) {
+            return back()->with('error', 'Vui lòng chọn file CV.');
+        }
 
         $user = Auth::user();
         $applicant = DB::table('applicants')->where('user_id', $user->id)->first();
 
-        if ($applicant && $applicant->cv) {
-            $oldPath = public_path('assets/cv/' . $applicant->cv);
+        $uploadDir = public_path('assets/cv');
+        if (!File::exists($uploadDir)) {
+            File::makeDirectory($uploadDir, 0755, true);
+        }
+
+        if ($applicant && $applicant->hosodinhkem) {
+            $oldPath = public_path($applicant->hosodinhkem);
             if (File::exists($oldPath)) {
                 File::delete($oldPath);
             }
         }
 
-        $file = $request->file('cv');
         $fileName = time() . '_' . $file->getClientOriginalName();
-        $file->move(public_path('assets/cv'), $fileName);
+        $file->move($uploadDir, $fileName);
+
+        $relativePath = 'assets/cv/' . $fileName;
 
         DB::table('applicants')->where('user_id', $user->id)->update([
-            'cv' => $fileName,
+            'hosodinhkem' => $relativePath,
             'updated_at' => now(),
         ]);
 
-        return back()->with('success', 'Tải CV lên thành công.');
+        return redirect()
+            ->route('applicant.hoso')
+            ->withFragment('tab-attachments')
+            ->with('success', 'Tải CV lên thành công.');
     }
 
     public function viewCv()
@@ -751,23 +802,29 @@ class ApplicantController extends Controller
         $user = Auth::user();
         $applicant = DB::table('applicants')->where('user_id', $user->id)->first();
 
-        if (!$applicant || !$applicant->cv) {
-            return back()->with('error', 'Bạn chưa upload CV.');
+        if (!$applicant || !$applicant->hosodinhkem) {
+            return redirect()
+                ->route('applicant.hoso')
+                ->withFragment('tab-attachments')
+                ->with('error', 'Bạn chưa upload CV.');
         }
 
-        $filePath = public_path('assets/cv/' . $applicant->cv);
+        $filePath = public_path($applicant->hosodinhkem);
 
         if (!File::exists($filePath)) {
-            return back()->with('error', 'CV không tồn tại.');
+            return redirect()
+                ->route('applicant.hoso')
+                ->withFragment('tab-attachments')
+                ->with('error', 'CV không tồn tại.');
         }
 
-        $extension = pathinfo($filePath, PATHINFO_EXTENSION);
+        $extension = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
 
         if ($extension === 'pdf') {
             return response()->file($filePath);
-        } else {
-            return response()->download($filePath);
         }
+
+        return response()->download($filePath, basename($filePath));
     }
 
     public function deleteCv()
@@ -775,19 +832,22 @@ class ApplicantController extends Controller
         $user = Auth::user();
         $applicant = DB::table('applicants')->where('user_id', $user->id)->first();
 
-        if ($applicant && $applicant->cv) {
-            $filePath = public_path('assets/cv/' . $applicant->cv);
+        if ($applicant && $applicant->hosodinhkem) {
+            $filePath = public_path($applicant->hosodinhkem);
             if (File::exists($filePath)) {
                 File::delete($filePath);
             }
 
             DB::table('applicants')->where('user_id', $user->id)->update([
-                'cv' => null,
+                'hosodinhkem' => null,
                 'updated_at' => now(),
             ]);
         }
 
-        return back()->with('success', 'Đã xoá CV thành công.');
+        return redirect()
+            ->route('applicant.hoso')
+            ->withFragment('tab-attachments')
+            ->with('success', 'Đã xoá CV thành công.');
     }
 
 
@@ -867,6 +927,26 @@ class ApplicantController extends Controller
             ->get();
 
         return view('applicant.my-jobs', compact('applications', 'savedJobs', 'applicant'));
+    }
+
+    /**
+     * ✅ Hiển thị trang lời mời ứng tuyển
+     */
+    public function jobInvitations()
+    {
+        $applicant = Auth::user()->applicant;
+
+        if (!$applicant) {
+            return redirect()->route('applicant.profile')->with('error', 'Vui lòng cập nhật thông tin cá nhân trước!');
+        }
+
+        // Lấy danh sách lời mời từ NTD
+        $invitations = JobInvitation::where('applicant_id', $applicant->id_uv)
+            ->with(['job.company', 'job.hashtags'])
+            ->orderBy('invited_at', 'desc')
+            ->get();
+
+        return view('applicant.job-invitations', compact('invitations', 'applicant'));
     }
 
     public function saveJob($jobId)

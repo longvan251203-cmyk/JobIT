@@ -849,6 +849,10 @@
 
     <main class="main">
         <div class="container-fluid">
+
+            <!-- ✅ TOAST NOTIFICATION CONTAINER -->
+            <div id="toastContainer" style="position: fixed; top: 100px; right: 20px; z-index: 9999; min-width: 300px;"></div>
+
             <div class="row">
 
                 <!-- Sidebar -->
@@ -873,18 +877,18 @@
                                     </a>
                                 </li>
                                 <li class="nav-item mb-2">
-                                    <a href="{{ route('applicant.hoso') }}" class="nav-link active fw-bold text-primary">
+                                    <a href="#" class="nav-link active fw-bold text-primary tab-link-personal" data-tab="personal">
                                         <i class="bi bi-person-badge"></i> Thông tin cá nhân
                                     </a>
                                 </li>
                                 <li class="nav-item mb-2">
-                                    <a href="#" class="nav-link text-dark"><i class="bi bi-file-earmark-text"></i> Hồ sơ đính kèm</a>
+                                    <a href="#" class="nav-link text-dark tab-link-attachments" data-tab="attachments"><i class="bi bi-file-earmark-text"></i> Hồ sơ đính kèm</a>
                                 </li>
                                 <li class="nav-item mb-2">
                                     <a href="{{ route('applicant.myJobs') }}" class="nav-link text-dark"><i class="bi bi-briefcase"></i> Việc làm của tôi</a>
                                 </li>
                                 <li class="nav-item mb-2">
-                                    <a href="#" class="nav-link text-dark"><i class="bi bi-envelope"></i> Lời mời công việc</a>
+                                    <a href="{{ route('applicant.jobInvitations') }}" class="nav-link text-dark"><i class="bi bi-envelope"></i> Lời mời công việc</a>
                                 </li>
                                 <li class="nav-item mb-2">
                                     <a href="#" class="nav-link text-dark"><i class="bi bi-bell"></i> Thông báo</a>
@@ -906,7 +910,7 @@
                         </button>
                     </div>
 
-                    <!-- Thông tin cá nhân -->
+                    <!-- Thông tin cá nhân - SHARED ACROSS ALL TABS -->
                     <div class="card header-card-gradient shadow-sm border-0 rounded-3 mb-4">
                         <div class="card-body row align-items-center">
 
@@ -957,540 +961,603 @@
 
                         </div>
                     </div>
-                    <!-- Giới thiệu bản thân -->
-                    <div class="card shadow-sm border-0 rounded-3 mb-3">
-                        <div class="card-body d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <div class="section-header-modern">
-                                    <div class="section-icon-modern">
-                                        <i class="bi bi-person"></i>
-                                    </div>
-                                    <h5 class="fw-bold mb-0">Giới thiệu bản thân</h5>
-                                </div>
-                                <p class="text-muted mb-0">
-                                    {!! $applicant->gioithieu ?? 'Chưa có nội dung.' !!}
-                                </p>
-                            </div>
-                            <a href="#" class="btn btn-light rounded-circle shadow-sm ms-3" data-bs-toggle="modal" data-bs-target="#editGioiThieuModal">
-                                <i class="bi bi-pencil-square"></i>
-                            </a>
-                        </div>
-                    </div>
-                    <!-- Học vấn Section -->
-                    <div class="card shadow-sm border-0 rounded-3 mb-3">
-                        <div class="card-body d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <div class="section-header-modern">
-                                    <div class="section-icon-modern">
-                                        <i class="bi bi-mortarboard"></i>
-                                    </div>
-                                    <h5 class="fw-bold mb-0">Học vấn</h5>
-                                </div>
 
-                                @if(isset($hocvan) && count($hocvan) > 0)
-                                @foreach($hocvan as $hv)
-                                <div class="timeline-item-modern">
-                                    <div class="timeline-dot-modern"></div>
-                                    <div class="timeline-content-modern">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div class="flex-grow-1">
-                                                <p class="mb-1">
-                                                    <strong>{{ $hv->truong }}</strong><br>
-                                                    {{ $hv->nganh }} - {{ $hv->trinhdo }}<br>
-                                                    {{ date('m/Y', strtotime($hv->tu_ngay)) }} -
-                                                    {{ $hv->dang_hoc ? 'Hiện tại' : date('m/Y', strtotime($hv->den_ngay)) }}
-                                                    @if(!empty($hv->thongtin_khac))
-                                                    <br><span class="text-muted fst-italic">{{ $hv->thongtin_khac }}</span>
-                                                    @endif
-                                                </p>
+                    <div class="tab-content">
+                        <div class="tab-pane fade show active" id="tab-personal" role="tabpanel" aria-labelledby="tab-personal-pill">
+
+                            <!-- Giới thiệu bản thân -->
+                            <div class="card shadow-sm border-0 rounded-3 mb-3">
+                                <div class="card-body d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="section-header-modern">
+                                            <div class="section-icon-modern">
+                                                <i class="bi bi-person"></i>
                                             </div>
-                                            <div class="ms-3">
-                                                <!-- Nút Sửa -->
-                                                <button class="btn btn-sm btn-outline-primary editHocVanBtn me-1"
-                                                    data-id="{{ $hv->id_hocvan }}"
-                                                    title="Chỉnh sửa">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
-
-                                                <!-- Nút Xóa -->
-                                                <form action="{{ route('hocvan.delete', $hv->id_hocvan) }}"
-                                                    method="POST"
-                                                    class="d-inline"
-                                                    onsubmit="return confirm('Bạn có chắc muốn xóa học vấn này?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </form>
+                                            <h5 class="fw-bold mb-0">Giới thiệu bản thân</h5>
+                                        </div>
+                                        <p class="text-muted mb-0">
+                                            {!! $applicant->gioithieu ?? 'Chưa có nội dung.' !!}
+                                        </p>
+                                    </div>
+                                    <a href="#" class="btn btn-light rounded-circle shadow-sm ms-3" data-bs-toggle="modal" data-bs-target="#editGioiThieuModal">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- Học vấn Section -->
+                            <div class="card shadow-sm border-0 rounded-3 mb-3">
+                                <div class="card-body d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="section-header-modern">
+                                            <div class="section-icon-modern">
+                                                <i class="bi bi-mortarboard"></i>
                                             </div>
+                                            <h5 class="fw-bold mb-0">Học vấn</h5>
                                         </div>
-                                    </div>
-                                </div>
-                                @endforeach
-                                @else
-                                <p class="text-muted mb-0">Chưa có nội dung.</p>
-                                @endif
-                            </div>
 
-                            <!-- Nút thêm -->
-                            <a href="#" class="btn btn-light rounded-circle shadow-sm ms-3"
-                                data-bs-toggle="modal"
-                                data-bs-target="#addHocVanModal">
-                                <i class="bi bi-plus-lg"></i>
-                            </a>
-                        </div>
-                    </div>
-                    <!-- Kinh nghiệm làm việc -->
-                    <div class="card shadow-sm border-0 rounded-3 mb-3">
-                        <div class="card-body d-flex justify-content-between align-items-start">
-                            <div class="w-100">
-                                <div class="section-header-modern">
-                                    <div class="section-icon-modern">
-                                        <i class="bi bi-briefcase"></i>
-                                    </div>
-                                    <h5 class="fw-bold mb-0">Kinh nghiệm làm việc</h5>
-                                </div>
+                                        @if(isset($hocvan) && count($hocvan) > 0)
+                                        @foreach($hocvan as $hv)
+                                        <div class="timeline-item-modern">
+                                            <div class="timeline-dot-modern"></div>
+                                            <div class="timeline-content-modern">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div class="flex-grow-1">
+                                                        <p class="mb-1">
+                                                            <strong>{{ $hv->truong }}</strong><br>
+                                                            {{ $hv->nganh }} - {{ $hv->trinhdo }}<br>
+                                                            {{ date('m/Y', strtotime($hv->tu_ngay)) }} -
+                                                            {{ $hv->dang_hoc ? 'Hiện tại' : date('m/Y', strtotime($hv->den_ngay)) }}
+                                                            @if(!empty($hv->thongtin_khac))
+                                                            <br><span class="text-muted fst-italic">{{ $hv->thongtin_khac }}</span>
+                                                            @endif
+                                                        </p>
+                                                    </div>
+                                                    <div class="ms-3">
+                                                        <!-- Nút Sửa -->
+                                                        <button class="btn btn-sm btn-outline-primary editHocVanBtn me-1"
+                                                            data-id="{{ $hv->id_hocvan }}"
+                                                            title="Chỉnh sửa">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </button>
 
-                                @if(isset($kinhnghiem) && count($kinhnghiem) > 0)
-                                @foreach($kinhnghiem as $kn)
-                                <div class="timeline-item-modern">
-                                    <div class="timeline-dot-modern"></div>
-                                    <div class="timeline-content-modern">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div class="flex-grow-1">
-                                                <!-- Chức danh + Công ty -->
-                                                <p class="mb-1">
-                                                    <strong class="text-dark fs-6">{{ $kn->chucdanh }}</strong>
-                                                    <span class="text-muted"> - {{ $kn->congty }}</span>
-                                                </p>
-
-                                                <!-- Thời gian -->
-                                                <p class="text-muted small mb-2">
-                                                    <i class="bi bi-calendar me-1"></i>
-                                                    {{ date('m/Y', strtotime($kn->tu_ngay)) }} -
-                                                    {{ $kn->dang_lam_viec ? 'Hiện tại' : date('m/Y', strtotime($kn->den_ngay)) }}
-                                                </p>
-
-                                                <!-- Mô tả -->
-                                                @if(!empty($kn->mota))
-                                                <p class="mb-2">
-                                                    <span class="fw-semibold">Mô tả:</span><br>
-                                                    {!! nl2br(e($kn->mota)) !!}
-                                                </p>
-                                                @endif
-
-                                                <!-- Dự án -->
-                                                @if(!empty($kn->duan))
-                                                <p class="mb-0">
-                                                    <span class="fw-semibold">Dự án đã tham gia:</span><br>
-                                                    {!! nl2br(e($kn->duan)) !!}
-                                                </p>
-                                                @endif
-                                            </div>
-
-                                            <!-- Nút Sửa & Xóa -->
-                                            <div class="ms-3">
-                                                <!-- Nút Sửa -->
-                                                <button class="btn btn-sm btn-outline-primary editKinhNghiemBtn me-1"
-                                                    data-id="{{ $kn->id_kn }}"
-                                                    title="Chỉnh sửa">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
-
-                                                <!-- Nút Xóa -->
-                                                <form action="{{ route('kinhnghiem.delete', $kn->id_kn) }}"
-                                                    method="POST"
-                                                    class="d-inline"
-                                                    onsubmit="return confirm('Bạn có chắc muốn xóa kinh nghiệm này?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                @endforeach
-                                @else
-                                <p class="text-muted mb-0">Chưa có nội dung.</p>
-                                @endif
-                            </div>
-
-                            <!-- Nút mở modal thêm -->
-                            <a href="#" class="btn btn-light rounded-circle shadow-sm ms-3"
-                                data-bs-toggle="modal" data-bs-target="#addKinhNghiemModal">
-                                <i class="bi bi-plus-lg"></i>
-                            </a>
-                        </div>
-                    </div>
-                    <!-- Section mức lương mong muốn -->
-                    <!-- ✅ SECTION MỨC LƯƠNG MONG MUỐN -->
-                    <div class="card shadow-sm border-0 rounded-3 mb-3">
-                        <div class="card-body d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <div class="section-header-modern">
-                                    <div class="section-icon-modern">
-                                        <i class="bi bi-cash-coin"></i>
-                                    </div>
-                                    <h5 class="fw-bold mb-0">Mức lương mong muốn</h5>
-                                </div>
-
-                                @if($applicant->mucluong_mongmuon)
-                                <div class="mt-3">
-                                    <div class="alert alert-info py-3 mb-0">
-                                        <i class="bi bi-info-circle me-2"></i>
-                                        <strong>{{ $applicant->mucluong_mongmuon }}</strong>
-                                    </div>
-                                </div>
-                                @else
-                                <p class="text-muted mb-0 mt-3">Chưa cập nhật mức lương mong muốn.</p>
-                                @endif
-                            </div>
-
-                            <!-- Nút chỉnh sửa -->
-                            <a href="#" class="btn btn-light rounded-circle shadow-sm ms-3" data-bs-toggle="modal" data-bs-target="#editMucLuongModal">
-                                <i class="bi bi-pencil-square"></i>
-                            </a>
-                        </div>
-                    </div>
-                    <!-- Section Kỹ năng -->
-                    <!-- Section Kỹ năng -->
-                    <div class="card shadow-sm border-0 rounded-3 mb-3">
-                        <div class="card-body d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <div class="section-header-modern">
-                                    <div class="section-icon-modern">
-                                        <i class="bi bi-lightbulb"></i>
-                                    </div>
-                                    <h5 class="fw-bold mb-0">Kỹ năng</h5>
-                                </div>
-                                @if(isset($kynang) && count($kynang) > 0)
-                                <div class="mt-3">
-                                    @foreach($kynang as $kn)
-                                    <div class="d-inline-flex align-items-center badge bg-primary text-white me-2 mb-2 p-2 fs-6">
-                                        <div class="me-2">
-                                            <strong>{{ $kn->ten_ky_nang }}</strong>
-                                            <span class="opacity-75">
-                                                ({{ $kn->nam_kinh_nghiem == 0 ? '<1 năm' : $kn->nam_kinh_nghiem . ' năm' }})
-                                            </span>
-                                        </div>
-                                        <button type="button"
-                                            class="btn btn-sm btn-link text-white p-0 deleteKyNangBtn"
-                                            data-id="{{ $kn->id }}"
-                                            title="Xóa">
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
-                                    </div>
-                                    @endforeach
-                                </div>
-                                @else
-                                <p class="text-muted mb-0">Chưa có kỹ năng nào.</p>
-                                @endif
-                            </div>
-
-                            <!-- Nút mở modal -->
-                            <a href="#" class="btn btn-light rounded-circle shadow-sm ms-3" data-bs-toggle="modal" data-bs-target="#addKyNangModal">
-                                <i class="bi bi-plus-lg"></i>
-                            </a>
-                        </div>
-                    </div>
-                    <!-- Section Ngoại Ngữ - PHIÊN BẢN SỬA LỖI HIỂN THỊ -->
-                    <div class="card shadow-sm border-0 rounded-3 mb-3">
-                        <div class="card-body d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <div class="section-header-modern">
-                                    <div class="section-icon-modern">
-                                        <i class="bi bi-translate"></i>
-                                    </div>
-                                    <h5 class="fw-bold mb-0">Ngoại ngữ</h5>
-                                </div>
-
-                                @if(isset($ngoaiNgu) && $ngoaiNgu->count() > 0)
-                                <div class="mt-3">
-                                    @foreach($ngoaiNgu as $nn)
-                                    <div class="d-inline-flex align-items-center badge bg-primary text-white me-2 mb-2 p-2 fs-6">
-                                        <div class="me-2">
-                                            <strong>{{ $nn->ten_ngoai_ngu }}</strong>
-                                            <span class="opacity-75"> - {{ $nn->trinh_do }}</span>
-                                        </div>
-                                        <button type="button"
-                                            class="btn btn-sm btn-link text-white p-0 deleteNgoaiNguBtn"
-                                            data-id="{{ $nn->ngoai_ngu_id }}"
-                                            title="Xóa">
-                                            <i class="bi bi-x-circle"></i>
-                                        </button>
-                                    </div>
-                                    @endforeach
-                                </div>
-                                @else
-                                <p class="text-muted mb-0">Chưa có ngoại ngữ nào.</p>
-                                @endif
-                            </div>
-
-                            <!-- Nút mở modal -->
-                            <a href="#" class="btn btn-light rounded-circle shadow-sm ms-3"
-                                data-bs-toggle="modal" data-bs-target="#addNgoaiNguModal">
-                                <i class="bi bi-plus-lg"></i>
-                            </a>
-                        </div>
-                    </div>
-                    <!-- Section Dự Án Nổi Bật -->
-                    <div class="card shadow-sm border-0 rounded-3 mb-3">
-                        <div class="card-body d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <div class="section-header-modern">
-                                    <div class="section-icon-modern">
-                                        <i class="bi bi-kanban"></i>
-                                    </div>
-                                    <h5 class="fw-bold mb-0">Dự án nổi bật</h5>
-                                </div>
-
-                                @if(isset($duAn) && count($duAn) > 0)
-                                @foreach($duAn as $da)
-                                <div class="timeline-item-modern">
-                                    <div class="timeline-dot-modern"></div>
-                                    <div class="timeline-content-modern">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div class="flex-grow-1">
-                                                <!-- Tên dự án -->
-                                                <p class="mb-1">
-                                                    <strong class="text-dark fs-6">{{ $da->ten_duan }}</strong>
-                                                </p>
-
-                                                <!-- Thời gian -->
-                                                <p class="text-muted small mb-2">
-                                                    <i class="bi bi-calendar me-1"></i>
-                                                    {{ date('m/Y', strtotime($da->ngay_bat_dau)) }} -
-                                                    {{ $da->dang_lam ? 'Hiện tại' : date('m/Y', strtotime($da->ngay_ket_thuc)) }}
-                                                </p>
-
-                                                <!-- Mô tả -->
-                                                @if(!empty($da->mota_duan))
-                                                <div class="mb-2">
-                                                    {!! nl2br(e($da->mota_duan)) !!}
+                                                        <!-- Nút Xóa -->
+                                                        <form action="{{ route('hocvan.delete', $hv->id_hocvan) }}"
+                                                            method="POST"
+                                                            class="d-inline"
+                                                            onsubmit="return confirm('Bạn có chắc muốn xóa học vấn này?');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
                                                 </div>
-                                                @endif
-
-                                                <!-- Link website -->
-                                                @if(!empty($da->duongdan_website))
-                                                <p class="mb-0">
-                                                    <i class="bi bi-link-45deg text-primary"></i>
-                                                    <a href="{{ $da->duongdan_website }}" target="_blank" class="text-decoration-none">
-                                                        {{ $da->duongdan_website }}
-                                                    </a>
-                                                </p>
-                                                @endif
-                                            </div>
-
-                                            <!-- Nút Sửa & Xóa -->
-                                            <div class="ms-3">
-                                                <!-- Nút Sửa -->
-                                                <button class="btn btn-sm btn-outline-primary editDuAnBtn me-1"
-                                                    data-id="{{ $da->id_duan }}"
-                                                    title="Chỉnh sửa">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
-
-                                                <!-- Nút Xóa -->
-                                                <form action="{{ route('duan.delete', $da->id_duan) }}"
-                                                    method="POST"
-                                                    class="d-inline"
-                                                    onsubmit="return confirm('Bạn có chắc muốn xóa dự án này?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </form>
                                             </div>
                                         </div>
+                                        @endforeach
+                                        @else
+                                        <p class="text-muted mb-0">Chưa có nội dung.</p>
+                                        @endif
                                     </div>
+
+                                    <!-- Nút thêm -->
+                                    <a href="#" class="btn btn-light rounded-circle shadow-sm ms-3"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#addHocVanModal">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </a>
                                 </div>
-                                @endforeach
-                                @else
-                                <p class="text-muted mb-0">Chưa có nội dung.</p>
-                                @endif
                             </div>
+                            <!-- Kinh nghiệm làm việc -->
+                            <div class="card shadow-sm border-0 rounded-3 mb-3">
+                                <div class="card-body d-flex justify-content-between align-items-start">
+                                    <div class="w-100">
+                                        <div class="section-header-modern">
+                                            <div class="section-icon-modern">
+                                                <i class="bi bi-briefcase"></i>
+                                            </div>
+                                            <h5 class="fw-bold mb-0">Kinh nghiệm làm việc</h5>
+                                        </div>
 
-                            <!-- Nút mở modal thêm -->
-                            <a href="#" class="btn btn-light rounded-circle shadow-sm ms-3"
-                                data-bs-toggle="modal" data-bs-target="#addDuAnModal">
-                                <i class="bi bi-plus-lg"></i>
-                            </a>
-                        </div>
-                    </div>
-                    <!-- SECTION HIỂN THỊ CHỨNG CHỈ -->
-                    <div class="card shadow-sm border-0 rounded-3 mb-3">
-                        <div class="card-body d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <div class="section-header-modern">
-                                    <div class="section-icon-modern">
-                                        <i class="bi bi-award"></i>
-                                    </div>
-                                    <h5 class="fw-bold mb-0">Chứng chỉ</h5>
-                                </div>
+                                        @if(isset($kinhnghiem) && count($kinhnghiem) > 0)
+                                        @foreach($kinhnghiem as $kn)
+                                        <div class="timeline-item-modern">
+                                            <div class="timeline-dot-modern"></div>
+                                            <div class="timeline-content-modern">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div class="flex-grow-1">
+                                                        <!-- Chức danh + Công ty -->
+                                                        <p class="mb-1">
+                                                            <strong class="text-dark fs-6">{{ $kn->chucdanh }}</strong>
+                                                            <span class="text-muted"> - {{ $kn->congty }}</span>
+                                                        </p>
 
-                                @if(isset($chungChi) && count($chungChi) > 0)
-                                @foreach($chungChi as $cc)
-                                <div class="timeline-item-modern">
-                                    <div class="timeline-dot-modern"></div>
-                                    <div class="timeline-content-modern">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div class="flex-grow-1">
-                                                <!-- Tên chứng chỉ -->
-                                                <p class="mb-1">
-                                                    <strong class="text-dark fs-6">{{ $cc->ten_chungchi }}</strong>
-                                                </p>
+                                                        <!-- Thời gian -->
+                                                        <p class="text-muted small mb-2">
+                                                            <i class="bi bi-calendar me-1"></i>
+                                                            {{ date('m/Y', strtotime($kn->tu_ngay)) }} -
+                                                            {{ $kn->dang_lam_viec ? 'Hiện tại' : date('m/Y', strtotime($kn->den_ngay)) }}
+                                                        </p>
 
-                                                <!-- Tổ chức cấp -->
-                                                <p class="text-muted small mb-2">
-                                                    <i class="bi bi-building me-1"></i>
-                                                    {{ $cc->to_chuc }}
-                                                </p>
+                                                        <!-- Mô tả -->
+                                                        @if(!empty($kn->mota))
+                                                        <p class="mb-2">
+                                                            <span class="fw-semibold">Mô tả:</span><br>
+                                                            {!! nl2br(e($kn->mota)) !!}
+                                                        </p>
+                                                        @endif
 
-                                                <!-- Thời gian -->
-                                                <p class="text-muted small mb-2">
-                                                    <i class="bi bi-calendar me-1"></i>
-                                                    {{ date('m/Y', strtotime($cc->thoigian)) }}
-                                                </p>
+                                                        <!-- Dự án -->
+                                                        @if(!empty($kn->duan))
+                                                        <p class="mb-0">
+                                                            <span class="fw-semibold">Dự án đã tham gia:</span><br>
+                                                            {!! nl2br(e($kn->duan)) !!}
+                                                        </p>
+                                                        @endif
+                                                    </div>
 
-                                                <!-- Mô tả -->
-                                                @if(!empty($cc->mo_ta))
-                                                <div class="mb-2">
-                                                    {!! nl2br(e($cc->mo_ta)) !!}
+                                                    <!-- Nút Sửa & Xóa -->
+                                                    <div class="ms-3">
+                                                        <!-- Nút Sửa -->
+                                                        <button class="btn btn-sm btn-outline-primary editKinhNghiemBtn me-1"
+                                                            data-id="{{ $kn->id_kn }}"
+                                                            title="Chỉnh sửa">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </button>
+
+                                                        <!-- Nút Xóa -->
+                                                        <form action="{{ route('kinhnghiem.delete', $kn->id_kn) }}"
+                                                            method="POST"
+                                                            class="d-inline"
+                                                            onsubmit="return confirm('Bạn có chắc muốn xóa kinh nghiệm này?');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
                                                 </div>
-                                                @endif
-
-                                                <!-- Link chứng chỉ -->
-                                                @if(!empty($cc->link_chungchi))
-                                                <p class="mb-0">
-                                                    <i class="bi bi-link-45deg text-primary"></i>
-                                                    <a href="{{ $cc->link_chungchi }}" target="_blank" class="text-decoration-none">
-                                                        Xem chứng chỉ
-                                                    </a>
-                                                </p>
-                                                @endif
-                                            </div>
-
-                                            <!-- Nút Sửa & Xóa -->
-                                            <div class="ms-3">
-                                                <button class="btn btn-sm btn-outline-primary editChungChiBtn me-1"
-                                                    data-id="{{ $cc->id_chungchi }}"
-                                                    title="Chỉnh sửa">
-                                                    <i class="bi bi-pencil"></i>
-                                                </button>
-
-                                                <form action="{{ route('chungchi.delete', $cc->id_chungchi) }}"
-                                                    method="POST"
-                                                    class="d-inline"
-                                                    onsubmit="return confirm('Bạn có chắc muốn xóa chứng chỉ này?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </form>
                                             </div>
                                         </div>
+                                        @endforeach
+                                        @else
+                                        <p class="text-muted mb-0">Chưa có nội dung.</p>
+                                        @endif
                                     </div>
+
+                                    <!-- Nút mở modal thêm -->
+                                    <a href="#" class="btn btn-light rounded-circle shadow-sm ms-3"
+                                        data-bs-toggle="modal" data-bs-target="#addKinhNghiemModal">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </a>
                                 </div>
-                                @endforeach
-                                @else
-                                <p class="text-muted mb-0">Chưa có nội dung.</p>
-                                @endif
                             </div>
+                            <!-- Section mức lương mong muốn -->
+                            <!-- ✅ SECTION MỨC LƯƠNG MONG MUỐN -->
+                            <div class="card shadow-sm border-0 rounded-3 mb-3">
+                                <div class="card-body d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="section-header-modern">
+                                            <div class="section-icon-modern">
+                                                <i class="bi bi-cash-coin"></i>
+                                            </div>
+                                            <h5 class="fw-bold mb-0">Mức lương mong muốn</h5>
+                                        </div>
 
-                            <!-- Nút mở modal thêm -->
-                            <a href="#" class="btn btn-light rounded-circle shadow-sm ms-3"
-                                data-bs-toggle="modal" data-bs-target="#addChungChiModal">
-                                <i class="bi bi-plus-lg"></i>
-                            </a>
-                        </div>
-                    </div>
-                    <!-- SECTION HIỂN THỊ GIẢI THƯỞNG -->
-                    <div class="card shadow-sm border-0 rounded-3 mb-3">
-                        <div class="card-body d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <div class="section-header-modern">
-                                    <div class="section-icon-modern">
-                                        <i class="bi bi-trophy"></i>
+                                        @if($applicant->mucluong_mongmuon)
+                                        <div class="mt-3">
+                                            <div class="alert alert-info py-3 mb-0">
+                                                <i class="bi bi-info-circle me-2"></i>
+                                                <strong>{{ $applicant->mucluong_mongmuon }}</strong>
+                                            </div>
+                                        </div>
+                                        @else
+                                        <p class="text-muted mb-0 mt-3">Chưa cập nhật mức lương mong muốn.</p>
+                                        @endif
                                     </div>
-                                    <h5 class="fw-bold mb-0">Giải thưởng</h5>
+
+                                    <!-- Nút chỉnh sửa -->
+                                    <a href="#" class="btn btn-light rounded-circle shadow-sm ms-3" data-bs-toggle="modal" data-bs-target="#editMucLuongModal">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
                                 </div>
-
-                                @if(isset($giaiThuong) && count($giaiThuong) > 0)
-                                @foreach($giaiThuong as $gt)
-                                <div class="timeline-item-modern">
-                                    <div class="timeline-dot-modern"></div>
-                                    <div class="timeline-content-modern">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div class="flex-grow-1">
-                                                <!-- Tên giải thưởng -->
-                                                <p class="mb-1">
-                                                    <strong class="text-dark fs-6">
-                                                        <i class="bi bi-trophy-fill text-warning me-1"></i>
-                                                        {{ $gt->ten_giaithuong }}
-                                                    </strong>
-                                                </p>
-
-                                                <!-- Tổ chức trao -->
-                                                <p class="text-muted small mb-2">
-                                                    <i class="bi bi-building me-1"></i>
-                                                    {{ $gt->to_chuc }}
-                                                </p>
-
-                                                <!-- Thời gian -->
-                                                <p class="text-muted small mb-2">
-                                                    <i class="bi bi-calendar-event me-1"></i>
-                                                    {{ date('m/Y', strtotime($gt->thoigian)) }}
-                                                </p>
-
-                                                <!-- Mô tả -->
-                                                @if(!empty($gt->mo_ta))
-                                                <div class="mb-0">
-                                                    {!! nl2br(e($gt->mo_ta)) !!}
+                            </div>
+                            <!-- Section Kỹ năng -->
+                            <!-- Section Kỹ năng -->
+                            <div class="card shadow-sm border-0 rounded-3 mb-3">
+                                <div class="card-body d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="section-header-modern">
+                                            <div class="section-icon-modern">
+                                                <i class="bi bi-lightbulb"></i>
+                                            </div>
+                                            <h5 class="fw-bold mb-0">Kỹ năng</h5>
+                                        </div>
+                                        @if(isset($kynang) && count($kynang) > 0)
+                                        <div class="mt-3">
+                                            @foreach($kynang as $kn)
+                                            <div class="d-inline-flex align-items-center badge bg-primary text-white me-2 mb-2 p-2 fs-6">
+                                                <div class="me-2">
+                                                    <strong>{{ $kn->ten_ky_nang }}</strong>
+                                                    <span class="opacity-75">
+                                                        ({{ $kn->nam_kinh_nghiem == 0 ? '<1 năm' : $kn->nam_kinh_nghiem . ' năm' }})
+                                                    </span>
                                                 </div>
-                                                @endif
-                                            </div>
-
-                                            <!-- Nút Sửa & Xóa -->
-                                            <div class="ms-3">
-                                                <button class="btn btn-sm btn-outline-primary editGiaiThuongBtn me-1"
-                                                    data-id="{{ $gt->id_giaithuong }}"
-                                                    title="Chỉnh sửa">
-                                                    <i class="bi bi-pencil"></i>
+                                                <button type="button"
+                                                    class="btn btn-sm btn-link text-white p-0 deleteKyNangBtn"
+                                                    data-id="{{ $kn->id }}"
+                                                    title="Xóa">
+                                                    <i class="bi bi-x-circle"></i>
                                                 </button>
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                        @else
+                                        <p class="text-muted mb-0">Chưa có kỹ năng nào.</p>
+                                        @endif
+                                    </div>
 
-                                                <form action="{{ route('giaithuong.delete', $gt->id_giaithuong) }}"
-                                                    method="POST"
-                                                    class="d-inline"
-                                                    onsubmit="return confirm('Bạn có chắc muốn xóa giải thưởng này?');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </form>
+                                    <!-- Nút mở modal -->
+                                    <a href="#" class="btn btn-light rounded-circle shadow-sm ms-3" data-bs-toggle="modal" data-bs-target="#addKyNangModal">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- Section Ngoại Ngữ - PHIÊN BẢN SỬA LỖI HIỂN THỊ -->
+                            <div class="card shadow-sm border-0 rounded-3 mb-3">
+                                <div class="card-body d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="section-header-modern">
+                                            <div class="section-icon-modern">
+                                                <i class="bi bi-translate"></i>
+                                            </div>
+                                            <h5 class="fw-bold mb-0">Ngoại ngữ</h5>
+                                        </div>
+
+                                        @if(isset($ngoaiNgu) && $ngoaiNgu->count() > 0)
+                                        <div class="mt-3">
+                                            @foreach($ngoaiNgu as $nn)
+                                            <div class="d-inline-flex align-items-center badge bg-primary text-white me-2 mb-2 p-2 fs-6">
+                                                <div class="me-2">
+                                                    <strong>{{ $nn->ten_ngoai_ngu }}</strong>
+                                                    <span class="opacity-75"> - {{ $nn->trinh_do }}</span>
+                                                </div>
+                                                <button type="button"
+                                                    class="btn btn-sm btn-link text-white p-0 deleteNgoaiNguBtn"
+                                                    data-id="{{ $nn->ngoai_ngu_id }}"
+                                                    title="Xóa">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            </div>
+                                            @endforeach
+                                        </div>
+                                        @else
+                                        <p class="text-muted mb-0">Chưa có ngoại ngữ nào.</p>
+                                        @endif
+                                    </div>
+
+                                    <!-- Nút mở modal -->
+                                    <a href="#" class="btn btn-light rounded-circle shadow-sm ms-3"
+                                        data-bs-toggle="modal" data-bs-target="#addNgoaiNguModal">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- Section Dự Án Nổi Bật -->
+                            <div class="card shadow-sm border-0 rounded-3 mb-3">
+                                <div class="card-body d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="section-header-modern">
+                                            <div class="section-icon-modern">
+                                                <i class="bi bi-kanban"></i>
+                                            </div>
+                                            <h5 class="fw-bold mb-0">Dự án nổi bật</h5>
+                                        </div>
+
+                                        @if(isset($duAn) && count($duAn) > 0)
+                                        @foreach($duAn as $da)
+                                        <div class="timeline-item-modern">
+                                            <div class="timeline-dot-modern"></div>
+                                            <div class="timeline-content-modern">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div class="flex-grow-1">
+                                                        <!-- Tên dự án -->
+                                                        <p class="mb-1">
+                                                            <strong class="text-dark fs-6">{{ $da->ten_duan }}</strong>
+                                                        </p>
+
+                                                        <!-- Thời gian -->
+                                                        <p class="text-muted small mb-2">
+                                                            <i class="bi bi-calendar me-1"></i>
+                                                            {{ date('m/Y', strtotime($da->ngay_bat_dau)) }} -
+                                                            {{ $da->dang_lam ? 'Hiện tại' : date('m/Y', strtotime($da->ngay_ket_thuc)) }}
+                                                        </p>
+
+                                                        <!-- Mô tả -->
+                                                        @if(!empty($da->mota_duan))
+                                                        <div class="mb-2">
+                                                            {!! nl2br(e($da->mota_duan)) !!}
+                                                        </div>
+                                                        @endif
+
+                                                        <!-- Link website -->
+                                                        @if(!empty($da->duongdan_website))
+                                                        <p class="mb-0">
+                                                            <i class="bi bi-link-45deg text-primary"></i>
+                                                            <a href="{{ $da->duongdan_website }}" target="_blank" class="text-decoration-none">
+                                                                {{ $da->duongdan_website }}
+                                                            </a>
+                                                        </p>
+                                                        @endif
+                                                    </div>
+
+                                                    <!-- Nút Sửa & Xóa -->
+                                                    <div class="ms-3">
+                                                        <!-- Nút Sửa -->
+                                                        <button class="btn btn-sm btn-outline-primary editDuAnBtn me-1"
+                                                            data-id="{{ $da->id_duan }}"
+                                                            title="Chỉnh sửa">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </button>
+
+                                                        <!-- Nút Xóa -->
+                                                        <form action="{{ route('duan.delete', $da->id_duan) }}"
+                                                            method="POST"
+                                                            class="d-inline"
+                                                            onsubmit="return confirm('Bạn có chắc muốn xóa dự án này?');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                        @else
+                                        <p class="text-muted mb-0">Chưa có nội dung.</p>
+                                        @endif
+                                    </div>
+
+                                    <!-- Nút mở modal thêm -->
+                                    <a href="#" class="btn btn-light rounded-circle shadow-sm ms-3"
+                                        data-bs-toggle="modal" data-bs-target="#addDuAnModal">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- SECTION HIỂN THỊ CHỨNG CHỈ -->
+                            <div class="card shadow-sm border-0 rounded-3 mb-3">
+                                <div class="card-body d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="section-header-modern">
+                                            <div class="section-icon-modern">
+                                                <i class="bi bi-award"></i>
+                                            </div>
+                                            <h5 class="fw-bold mb-0">Chứng chỉ</h5>
+                                        </div>
+
+                                        @if(isset($chungChi) && count($chungChi) > 0)
+                                        @foreach($chungChi as $cc)
+                                        <div class="timeline-item-modern">
+                                            <div class="timeline-dot-modern"></div>
+                                            <div class="timeline-content-modern">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div class="flex-grow-1">
+                                                        <!-- Tên chứng chỉ -->
+                                                        <p class="mb-1">
+                                                            <strong class="text-dark fs-6">{{ $cc->ten_chungchi }}</strong>
+                                                        </p>
+
+                                                        <!-- Tổ chức cấp -->
+                                                        <p class="text-muted small mb-2">
+                                                            <i class="bi bi-building me-1"></i>
+                                                            {{ $cc->to_chuc }}
+                                                        </p>
+
+                                                        <!-- Thời gian -->
+                                                        <p class="text-muted small mb-2">
+                                                            <i class="bi bi-calendar me-1"></i>
+                                                            {{ date('m/Y', strtotime($cc->thoigian)) }}
+                                                        </p>
+
+                                                        <!-- Mô tả -->
+                                                        @if(!empty($cc->mo_ta))
+                                                        <div class="mb-2">
+                                                            {!! nl2br(e($cc->mo_ta)) !!}
+                                                        </div>
+                                                        @endif
+
+                                                        <!-- Link chứng chỉ -->
+                                                        @if(!empty($cc->link_chungchi))
+                                                        <p class="mb-0">
+                                                            <i class="bi bi-link-45deg text-primary"></i>
+                                                            <a href="{{ $cc->link_chungchi }}" target="_blank" class="text-decoration-none">
+                                                                Xem chứng chỉ
+                                                            </a>
+                                                        </p>
+                                                        @endif
+                                                    </div>
+
+                                                    <!-- Nút Sửa & Xóa -->
+                                                    <div class="ms-3">
+                                                        <button class="btn btn-sm btn-outline-primary editChungChiBtn me-1"
+                                                            data-id="{{ $cc->id_chungchi }}"
+                                                            title="Chỉnh sửa">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </button>
+
+                                                        <form action="{{ route('chungchi.delete', $cc->id_chungchi) }}"
+                                                            method="POST"
+                                                            class="d-inline"
+                                                            onsubmit="return confirm('Bạn có chắc muốn xóa chứng chỉ này?');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                        @else
+                                        <p class="text-muted mb-0">Chưa có nội dung.</p>
+                                        @endif
+                                    </div>
+
+                                    <!-- Nút mở modal thêm -->
+                                    <a href="#" class="btn btn-light rounded-circle shadow-sm ms-3"
+                                        data-bs-toggle="modal" data-bs-target="#addChungChiModal">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </a>
+                                </div>
+                            </div>
+                            <!-- SECTION HIỂN THỊ GIẢI THƯỞNG -->
+                            <div class="card shadow-sm border-0 rounded-3 mb-3">
+                                <div class="card-body d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="section-header-modern">
+                                            <div class="section-icon-modern">
+                                                <i class="bi bi-trophy"></i>
+                                            </div>
+                                            <h5 class="fw-bold mb-0">Giải thưởng</h5>
+                                        </div>
+
+                                        @if(isset($giaiThuong) && count($giaiThuong) > 0)
+                                        @foreach($giaiThuong as $gt)
+                                        <div class="timeline-item-modern">
+                                            <div class="timeline-dot-modern"></div>
+                                            <div class="timeline-content-modern">
+                                                <div class="d-flex justify-content-between align-items-start">
+                                                    <div class="flex-grow-1">
+                                                        <!-- Tên giải thưởng -->
+                                                        <p class="mb-1">
+                                                            <strong class="text-dark fs-6">
+                                                                <i class="bi bi-trophy-fill text-warning me-1"></i>
+                                                                {{ $gt->ten_giaithuong }}
+                                                            </strong>
+                                                        </p>
+
+                                                        <!-- Tổ chức trao -->
+                                                        <p class="text-muted small mb-2">
+                                                            <i class="bi bi-building me-1"></i>
+                                                            {{ $gt->to_chuc }}
+                                                        </p>
+
+                                                        <!-- Thời gian -->
+                                                        <p class="text-muted small mb-2">
+                                                            <i class="bi bi-calendar-event me-1"></i>
+                                                            {{ date('m/Y', strtotime($gt->thoigian)) }}
+                                                        </p>
+
+                                                        <!-- Mô tả -->
+                                                        @if(!empty($gt->mo_ta))
+                                                        <div class="mb-0">
+                                                            {!! nl2br(e($gt->mo_ta)) !!}
+                                                        </div>
+                                                        @endif
+                                                    </div>
+
+                                                    <!-- Nút Sửa & Xóa -->
+                                                    <div class="ms-3">
+                                                        <button class="btn btn-sm btn-outline-primary editGiaiThuongBtn me-1"
+                                                            data-id="{{ $gt->id_giaithuong }}"
+                                                            title="Chỉnh sửa">
+                                                            <i class="bi bi-pencil"></i>
+                                                        </button>
+
+                                                        <form action="{{ route('giaithuong.delete', $gt->id_giaithuong) }}"
+                                                            method="POST"
+                                                            class="d-inline"
+                                                            onsubmit="return confirm('Bạn có chắc muốn xóa giải thưởng này?');">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
+                                                                <i class="bi bi-trash"></i>
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        @endforeach
+                                        @else
+                                        <p class="text-muted mb-0">Chưa có nội dung.</p>
+                                        @endif
+                                    </div>
+
+                                    <!-- Nút mở modal thêm -->
+                                    <a href="#" class="btn btn-light rounded-circle shadow-sm ms-3"
+                                        data-bs-toggle="modal" data-bs-target="#addGiaiThuongModal">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div> <!-- end tab-personal -->
+
+                        <div class="tab-pane fade" id="tab-attachments" role="tabpanel" aria-labelledby="tab-attachments-pill">
+                            <div class="card shadow-sm border-0 rounded-3 mb-3">
+                                <div class="card-body">
+                                    <div class="section-header-modern mb-3">
+                                        <div class="section-icon-modern">
+                                            <i class="bi bi-file-earmark-arrow-up"></i>
+                                        </div>
+                                        <div>
+                                            <h5 class="fw-bold mb-1">Hồ sơ đính kèm</h5>
+                                            <p class="text-muted mb-0">Tải CV/đính kèm hồ sơ để gửi cho nhà tuyển dụng. Hỗ trợ .pdf, .doc, .docx (tối đa 5MB).</p>
+                                        </div>
+                                    </div>
+
+                                    <form action="{{ route('applicant.uploadCv') }}" method="POST" enctype="multipart/form-data" class="mb-3">
+                                        @csrf
+                                        <div class="input-group">
+                                            <input type="file" name="hosodinhkem" class="form-control" accept=".pdf,.doc,.docx" required>
+                                            <button class="btn btn-primary" type="submit">
+                                                <i class="bi bi-cloud-upload"></i> Tải lên
+                                            </button>
+                                        </div>
+                                        <small class="text-muted">Lưu ý: Nếu tải mới, CV cũ sẽ được thay thế.</small>
+                                    </form>
+
+                                    @if(!empty($applicant->hosodinhkem))
+                                    <div class="d-flex align-items-center justify-content-between p-3 border rounded-3 bg-light">
+                                        <div>
+                                            <div class="fw-semibold text-dark">{{ basename($applicant->hosodinhkem) }}</div>
+                                            <div class="text-muted small">Đã lưu vào hồ sơ</div>
+                                        </div>
+                                        <div class="d-flex gap-2">
+                                            <a href="{{ route('applicant.viewCv') }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-eye"></i> Xem
+                                            </a>
+                                            <a href="{{ route('applicant.viewCv') }}" class="btn btn-outline-secondary btn-sm">
+                                                <i class="bi bi-download"></i> Tải xuống
+                                            </a>
+                                            <a href="{{ route('applicant.deleteCv') }}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Xóa CV hiện tại?');">
+                                                <i class="bi bi-trash"></i> Xóa
+                                            </a>
+                                        </div>
+                                    </div>
+                                    @else
+                                    <div class="p-3 border rounded-3 bg-light d-flex align-items-center justify-content-between">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-file-earmark text-primary fs-4"></i>
+                                            <div>
+                                                <div class="fw-semibold">Chưa có CV đính kèm</div>
+                                                <div class="text-muted small">Hãy tải lên để tăng tỷ lệ ứng tuyển thành công.</div>
                                             </div>
                                         </div>
                                     </div>
+                                    @endif
                                 </div>
-                                @endforeach
-                                @else
-                                <p class="text-muted mb-0">Chưa có nội dung.</p>
-                                @endif
                             </div>
-
-                            <!-- Nút mở modal thêm -->
-                            <a href="#" class="btn btn-light rounded-circle shadow-sm ms-3"
-                                data-bs-toggle="modal" data-bs-target="#addGiaiThuongModal">
-                                <i class="bi bi-plus-lg"></i>
-                            </a>
                         </div>
-                    </div>
+                    </div> <!-- end tab-content -->
                     <!-- MODAL -->
                     <!-- MODAL THÊM KỸ NĂNG -->
                     <div class="modal fade" id="addKyNangModal" tabindex="-1" aria-labelledby="addKyNangModalLabel" aria-hidden="true">
@@ -2620,6 +2687,101 @@
                     <!-- ...existing code... -->
                 </div>
     </main>
+
+    <!-- ✅ TOAST NOTIFICATION HELPER -->
+    <script>
+        // Toast Notification Function
+        function showToast(message, type = 'success') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toastId = 'toast-' + Date.now();
+
+            const iconMap = {
+                success: 'bi-check-circle-fill',
+                error: 'bi-x-circle-fill',
+                warning: 'bi-exclamation-triangle-fill',
+                info: 'bi-info-circle-fill'
+            };
+
+            const bgMap = {
+                success: 'linear-gradient(135deg, #10b981, #059669)',
+                error: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                warning: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                info: 'linear-gradient(135deg, #3b82f6, #2563eb)'
+            };
+
+            const toast = document.createElement('div');
+            toast.id = toastId;
+            toast.style.cssText = `
+                background: ${bgMap[type]};
+                color: white;
+                padding: 16px 20px;
+                border-radius: 12px;
+                margin-bottom: 10px;
+                box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                animation: slideInRight 0.3s ease-out;
+                max-width: 400px;
+            `;
+
+            toast.innerHTML = `
+                <i class="bi ${iconMap[type]}" style="font-size: 1.5rem;"></i>
+                <div style="flex: 1; font-weight: 500;">${message}</div>
+                <button onclick="this.parentElement.remove()" style="background: rgba(255,255,255,0.2); border: none; color: white; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                    <i class="bi bi-x"></i>
+                </button>
+            `;
+
+            toastContainer.appendChild(toast);
+
+            // Auto remove after 4 seconds
+            setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.3s ease-out';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Animation CSS
+        if (!document.getElementById('toast-animations')) {
+            const style = document.createElement('style');
+            style.id = 'toast-animations';
+            style.textContent = `
+                @keyframes slideInRight {
+                    from { transform: translateX(400px); opacity: 0; }
+                    to { transform: translateX(0); opacity: 1; }
+                }
+                @keyframes slideOutRight {
+                    from { transform: translateX(0); opacity: 1; }
+                    to { transform: translateX(400px); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    </script>
+
+    @if(session('success'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.location.hash !== '#tab-attachments') {
+                window.location.hash = '#tab-attachments';
+            }
+            showToast("{{ session('success') }}", 'success');
+        });
+    </script>
+    @endif
+
+    @if(session('error'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.location.hash !== '#tab-attachments') {
+                window.location.hash = '#tab-attachments';
+            }
+            showToast("{{ session('error') }}", 'error');
+        });
+    </script>
+    @endif
+
     <!-- xử lý chứng chỉ -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -3335,13 +3497,29 @@
             const hiddenSkillInputs = document.getElementById('hiddenSkillInputs');
             const submitBtn = document.getElementById('submitKyNangBtn');
 
+            console.log('🔧 Kỹ năng elements:', {
+                skillInput,
+                experienceSelect,
+                addSkillBtn,
+                selectedSkills,
+                hiddenSkillInputs,
+                submitBtn
+            });
+
             let skills = [];
 
             // ========== THÊM KỸ NĂNG VÀO DANH SÁCH TẠM THỜI ==========
             if (addSkillBtn) {
                 addSkillBtn.addEventListener('click', function() {
+                    console.log('🔵 Click nút thêm kỹ năng');
+
                     const skill = skillInput.value.trim();
                     const experience = experienceSelect.value;
+
+                    console.log('📝 Input values:', {
+                        skill,
+                        experience
+                    });
 
                     // Validate input
                     if (!skill || !experience) {
@@ -3362,6 +3540,8 @@
                         experience
                     });
 
+                    console.log('✅ Đã thêm kỹ năng:', skills);
+
                     // Render lại danh sách
                     renderSkills();
 
@@ -3373,17 +3553,25 @@
                     // Enable nút submit
                     if (submitBtn) submitBtn.disabled = false;
                 });
+            } else {
+                console.error('❌ Không tìm thấy nút addSkillBtn');
             }
 
             // ========== RENDER DANH SÁCH KỸ NĂNG ĐÃ CHỌN ==========
             function renderSkills() {
+                console.log('🎨 Rendering skills:', skills);
+                console.log('📍 selectedSkills element:', selectedSkills);
+
                 // Nếu không có kỹ năng nào
                 if (skills.length === 0) {
+                    console.log('⚠️ Không có kỹ năng nào để hiển thị');
                     if (selectedSkills) selectedSkills.innerHTML = '';
                     if (hiddenSkillInputs) hiddenSkillInputs.innerHTML = '';
                     if (submitBtn) submitBtn.disabled = true;
                     return;
                 }
+
+                console.log('✅ Bắt đầu render', skills.length, 'kỹ năng');
 
                 // Render phần hiển thị
                 if (selectedSkills) {
@@ -3394,6 +3582,7 @@
             `;
 
                     skills.forEach((item, index) => {
+                        console.log('  → Render item:', item);
                         const expText = item.experience == 0 ? '<1 năm' :
                             item.experience == '10+' ? '10+ năm' :
                             `${item.experience} năm`;
@@ -3411,6 +3600,22 @@
                     </div>
                 `;
                     });
+
+                    console.log('✨ HTML sau khi render:', selectedSkills.innerHTML);
+                    console.log('📏 Children count:', selectedSkills.children.length);
+
+                    // Force scroll to view
+                    selectedSkills.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center'
+                    });
+
+                    // Force repaint
+                    selectedSkills.style.display = 'none';
+                    selectedSkills.offsetHeight; // trigger reflow
+                    selectedSkills.style.display = 'block';
+                } else {
+                    console.error('❌ selectedSkills element không tồn tại!');
                 }
 
                 // Render hidden inputs cho form submit
@@ -3422,6 +3627,10 @@
                     <input type="hidden" name="nam_kinh_nghiem[]" value="${item.experience}">
                 `;
                     });
+                    console.log('📨 Hidden inputs HTML:', hiddenSkillInputs.innerHTML);
+                    console.log('📦 Total hidden inputs:', hiddenSkillInputs.querySelectorAll('input').length);
+                } else {
+                    console.error('❌ hiddenSkillInputs element không tồn tại!');
                 }
 
                 // Gắn event cho nút xóa trong danh sách tạm
@@ -3443,6 +3652,79 @@
                     if (skillInput) skillInput.value = '';
                     if (experienceSelect) experienceSelect.value = '';
                 });
+            }
+
+            // ========== FORM SUBMIT HANDLER ==========
+            const kyNangForm = document.getElementById('kyNangForm');
+            if (kyNangForm) {
+                kyNangForm.addEventListener('submit', function(e) {
+                    e.preventDefault(); // Chặn submit mặc định
+
+                    console.log('📤 Form submit triggered');
+                    console.log('📊 Skills array:', skills);
+
+                    // Kiểm tra có kỹ năng không
+                    if (skills.length === 0) {
+                        showToast('Vui lòng thêm ít nhất 1 kỹ năng!', 'warning');
+                        return false;
+                    }
+
+                    const formData = new FormData(this);
+                    const hasSkillData = formData.getAll('ten_ky_nang[]').length > 0;
+
+                    if (!hasSkillData) {
+                        console.error('❌ KHÔNG CÓ DỮ LIỆU KỸ NĂNG TRONG FORM!');
+                        showToast('Lỗi: Không có dữ liệu kỹ năng. Vui lòng thử lại!', 'error');
+                        return false;
+                    }
+
+                    // Disable submit button
+                    const submitBtn = document.getElementById('submitKyNangBtn');
+                    const originalText = submitBtn.innerHTML;
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="bi bi-hourglass-split"></i> Đang lưu...';
+
+                    // AJAX Submit
+                    fetch('{{ route("applicant.storeKyNang") }}', {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                showToast(data.message || 'Đã thêm kỹ năng thành công!', 'success');
+
+                                // Đóng modal
+                                const modal = bootstrap.Modal.getInstance(document.getElementById('addKyNangModal'));
+                                modal.hide();
+
+                                // Reset form
+                                skills = [];
+                                renderSkills();
+                                kyNangForm.reset();
+
+                                // Reload section kỹ năng
+                                setTimeout(() => {
+                                    location.reload();
+                                }, 1000);
+                            } else {
+                                showToast(data.message || 'Có lỗi xảy ra!', 'error');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            showToast('Có lỗi xảy ra khi lưu kỹ năng!', 'error');
+                        })
+                        .finally(() => {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalText;
+                        });
+                });
+            } else {
+                console.error('❌ Không tìm thấy form kyNangForm');
             }
 
             // ========== HỖ TRỢ PHÍM ENTER ĐỂ THÊM NHANH ==========
@@ -3878,6 +4160,64 @@
                             });
                     }
                 });
+            }
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const personalLink = document.querySelector('.tab-link-personal');
+            const attachmentsLink = document.querySelector('.tab-link-attachments');
+            const personalPane = document.getElementById('tab-personal');
+            const attachmentsPane = document.getElementById('tab-attachments');
+
+            function showPersonal() {
+                if (personalPane) {
+                    personalPane.classList.add('show', 'active');
+                    personalPane.classList.remove('fade');
+                }
+                if (attachmentsPane) {
+                    attachmentsPane.classList.remove('show', 'active');
+                    attachmentsPane.classList.add('fade');
+                }
+                // Update sidebar active state
+                personalLink?.classList.add('active', 'fw-bold', 'text-primary');
+                personalLink?.classList.remove('text-dark');
+                attachmentsLink?.classList.remove('active', 'fw-bold', 'text-primary');
+                attachmentsLink?.classList.add('text-dark');
+            }
+
+            function showAttachments() {
+                if (attachmentsPane) {
+                    attachmentsPane.classList.add('show', 'active');
+                    attachmentsPane.classList.remove('fade');
+                }
+                if (personalPane) {
+                    personalPane.classList.remove('show', 'active');
+                    personalPane.classList.add('fade');
+                }
+                // Update sidebar active state
+                attachmentsLink?.classList.add('active', 'fw-bold', 'text-primary');
+                attachmentsLink?.classList.remove('text-dark');
+                personalLink?.classList.remove('active', 'fw-bold', 'text-primary');
+                personalLink?.classList.add('text-dark');
+            }
+
+            // Click handlers for sidebar
+            personalLink?.addEventListener('click', function(e) {
+                e.preventDefault();
+                showPersonal();
+            });
+
+            attachmentsLink?.addEventListener('click', function(e) {
+                e.preventDefault();
+                showAttachments();
+            });
+
+            // Auto-activate based on hash
+            if (window.location.hash === '#tab-attachments') {
+                showAttachments();
+            } else {
+                showPersonal();
             }
         });
     </script>

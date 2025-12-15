@@ -119,6 +119,9 @@ Route::prefix('applicant')->middleware(['auth'])->group(function () {
     Route::get('/applied-jobs', function () {
         return view('applicant.applied_jobs');
     })->name('applicant.applied.jobs');
+
+    // Lời mời ứng tuyển
+    Route::get('/job-invitations', [ApplicantController::class, 'jobInvitations'])->name('applicant.jobInvitations');
 });
 // nhà tuyển dụng
 // Đăng ký nhà tuyển dụng

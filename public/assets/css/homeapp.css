@@ -1545,17 +1545,20 @@ body {
 .job-card-info {
     flex: 1;
     min-width: 0;
+    display: flex;
+    flex-direction: column;
 }
 
 .job-card-title {
     font-size: 0.95rem;
     font-weight: 600;
-    color: #2D3748;
+    color: #2D3748 !important;
     margin-bottom: 0.25rem;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    line-height: 1.4;
 }
 
 .job-card:hover .job-card-title {
@@ -1564,14 +1567,15 @@ body {
 
 .company-name-small {
     font-size: 0.85rem;
-    color: #718096;
+    color: #718096 !important;
     margin-bottom: 0.5rem;
+    display: block;
 }
 
 .job-card-salary {
     display: inline-block;
     background: #10B981;
-    color: #FFFFFF;
+    color: #FFFFFF !important;
     padding: 0.2rem 0.6rem;
     border-radius: 0.25rem;
     font-size: 0.8rem;
@@ -1588,13 +1592,18 @@ body {
     flex-wrap: wrap;
     margin-top: 0.5rem;
     font-size: 0.8rem;
-    color: #718096;
+    color: #718096 !important;
 }
 
 .job-card-meta-item {
     display: flex;
     align-items: center;
     gap: 0.25rem;
+    color: #718096 !important;
+}
+
+.job-card-meta-item i {
+    color: #3B82F6 !important;
 }
 
 .job-card-tags {
@@ -1606,7 +1615,7 @@ body {
 
 .job-card-tag {
     background: #EFF6FF;
-    color: #3B82F6;
+    color: #3B82F6 !important;
     padding: 0.25rem 0.6rem;
     border-radius: 0.3rem;
     font-size: 0.75rem;
@@ -1624,10 +1633,14 @@ body {
 
 .job-card-deadline {
     font-size: 0.75rem;
-    color: #EF4444;
+    color: #EF4444 !important;
     display: flex;
     align-items: center;
     gap: 0.25rem;
+}
+
+.job-card-deadline i {
+    color: #EF4444 !important;
 }
 
 .save-btn-small {

@@ -60,4 +60,61 @@ class Company extends Model
             'user_id'       // Local key on employers table
         );
     }
+
+    // ✅ HELPER METHODS để lấy thông tin công ty
+    /**
+     * Get company name (tên công ty)
+     */
+    public function getTenCty()
+    {
+        return $this->tencty;
+    }
+
+    /**
+     * Get company scale (quy mô)
+     */
+    public function getQuyMo()
+    {
+        return $this->quymo;
+    }
+
+    /**
+     * Get company address (địa chỉ)
+     */
+    public function getDiaChi()
+    {
+        return $this->dia_chi_cu_the;
+    }
+
+    /**
+     * Get company phone (điện thoại)
+     */
+    public function getPhone()
+    {
+        return $this->sdt_cty;
+    }
+
+    /**
+     * Get company email
+     */
+    public function getCompanyEmail()
+    {
+        return $this->email_cty;
+    }
+
+    /**
+     * Get company website
+     */
+    public function getWebsite()
+    {
+        return $this->website_cty;
+    }
+
+    /**
+     * Get company logo URL
+     */
+    public function getLogoUrl()
+    {
+        return $this->logo ? asset('assets/img/' . $this->logo) : null;
+    }
 }

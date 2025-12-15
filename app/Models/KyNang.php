@@ -23,7 +23,7 @@ class KyNang extends Model
         'applicant_id',
         'ten_ky_nang',        // Tên kỹ năng
         'nam_kinh_nghiem',    // Số năm kinh nghiệm
-        'mo_ta',              // Mô tả chi tiết
+        // 'mo_ta',           // Bỏ comment nếu có cột này trong DB
     ];
 
     // Casting

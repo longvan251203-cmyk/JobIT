@@ -23,7 +23,7 @@ class Applicant extends Model
         'gioitinh_uv',
         'diachi_uv',
         'avatar',
-        'cv',          // thêm nếu bạn lưu CV
+        'hosodinhkem',
         'gioithieu',
         'mucluong_mongmuon',
     ];
@@ -113,6 +113,27 @@ class Applicant extends Model
             return asset('assets/img/avt/' . $this->avatar);
         }
         return asset('assets/img/avt/default-avatar.png');
+    }
+
+    /**
+     * Backward compatibility accessor: allow existing code using `cv` to read/write the new column.
+     */
+    public function getCvAttribute()
+    {
+        return $this->hosodinhkem;
+    }
+
+    public function setCvAttribute($value): void
+    {
+        $this->attributes['hosodinhkem'] = $value;
+    }
+
+    /**
+     * Public URL for the attached CV if present.
+     */
+    public function getHosodinhkemUrlAttribute()
+    {
+        return $this->hosodinhkem ? asset($this->hosodinhkem) : null;
     }
 
     /**

@@ -2,6 +2,58 @@
 <html lang="vi">
 @include('applicant.partials.head')
 <style>
+    /* Reset default page spacing so header sits at the very top */
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Make header fixed at the top but minimal for consistent experience.
+       - Hide the main nav links (Việc làm, Công ty, Blog) and "Việc Làm Của Tôi" button.
+       - Use a subtle background and small height so it doesn't overpower the page.
+       - Adjust `body` padding to match header height. */
+    header#header.header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1050;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 6px 18px rgba(16, 24, 40, 0.06);
+        backdrop-filter: blur(4px);
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    /* Reduce header internal spacing for a compact look */
+    .header-container {
+        padding: 10px 16px;
+        max-width: 1200px;
+        margin: 0 auto;
+        align-items: center;
+    }
+
+    /* Hide entire nav on this page (logo already links home) */
+    #navmenu ul li {
+        display: none !important;
+    }
+
+    /* Hide "Việc Làm Của Tôi" action button in header */
+    .btn-my-jobs {
+        display: none !important;
+    }
+
+    /* Optionally hide recommendations button to keep header minimal */
+    .btn-recommendations {
+        opacity: 0.9;
+        font-size: 0.95rem;
+        padding: 6px 10px;
+    }
+
+    /* Body padding to prevent content being hidden under fixed header (adjust if needed) */
+
     /* Thêm vào phần <style> của my-jobs.blade.php */
     /* Job Title Hover Effect */
     .job-title a {
@@ -392,6 +444,7 @@
         --info-color: #3b82f6;
         --light-bg: #f8fafc;
         --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        --hover-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
     }
 
     * {
@@ -405,6 +458,7 @@
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         min-height: 100vh;
         overflow-x: hidden;
+        padding-top: 84px;
     }
 
     .main {
@@ -421,16 +475,63 @@
     /* Sidebar Card */
     .sidebar-card {
         background: white;
-        border-radius: 24px;
-        box-shadow: var(--card-shadow);
-        border: none;
+        border-radius: 24px !important;
+        box-shadow: var(--card-shadow) !important;
+        border: none !important;
+        transition: all 0.3s ease;
         position: sticky;
-        top: 20px;
+        top: 100px;
         overflow: hidden;
+    }
+
+    .sidebar-card:hover {
+        box-shadow: var(--hover-shadow) !important;
+        transform: translateY(-4px);
     }
 
     .sidebar-card .card-body {
         padding: 2rem;
+    }
+
+    /* Avatar Wrapper */
+    .avatar-wrapper-modern {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 1rem;
+    }
+
+    .avatar-wrapper-modern img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 5px solid var(--primary-color);
+        box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+    }
+
+    .status-badge-modern {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        width: 24px;
+        height: 24px;
+        background: #10b981;
+        border: 3px solid white;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.1);
+        }
     }
 
     .sidebar-card h6 {
@@ -820,6 +921,13 @@
             padding: 1.5rem;
         }
 
+        /* Make avatar smaller on mobile */
+        .avatar-wrapper-modern,
+        .avatar-wrapper-modern img {
+            width: 84px !important;
+            height: 84px !important;
+        }
+
         .nav-tabs-modern {
             padding: 0.5rem;
             flex-direction: column;
@@ -959,6 +1067,10 @@
                             <h5 class="fw-bold">{{ $applicant->hoten_uv ?? 'Ứng viên' }}</h5>
                             <p class="text-secondary small mb-1">{{ Auth::user()->email }}</p>
                             <hr>
+                            <a href="{{ route('applicant.hoso') }}" class="btn btn-primary btn-sm w-100 mb-3">
+                                <i class="bi bi-pencil-square me-2"></i>Cập nhật hồ sơ
+                            </a>
+                            <hr>
                             <ul class="nav flex-column">
                                 <li class="nav-item mb-2">
                                     <a href="{{ route('applicant.profile') }}" class="nav-link text-dark">
@@ -971,9 +1083,8 @@
                                     </a>
                                 </li>
                                 <li class="nav-item mb-2">
-                                    <a href="#" class="nav-link text-dark">
-                                        <i class="bi bi-file-earmark-text"></i> Hồ sơ đính kèm
-                                    </a>
+                                    <a href="#" class="nav-link text-dark tab-link-attachments" data-tab="attachments"><i class="bi bi-file-earmark-text"></i> Hồ sơ đính kèm</a>
+
                                 </li>
                                 <li class="nav-item mb-2">
                                     <a href="{{ route('applicant.myJobs') }}" class="nav-link active text-primary fw-bold">
@@ -981,7 +1092,7 @@
                                     </a>
                                 </li>
                                 <li class="nav-item mb-2">
-                                    <a href="#" class="nav-link text-dark">
+                                    <a href="{{ route('applicant.jobInvitations') }}" class="nav-link text-dark">
                                         <i class="bi bi-envelope"></i> Lời mời công việc
                                     </a>
                                 </li>
@@ -1003,9 +1114,14 @@
                 <!-- Main Content -->
                 <div class="col-md-9 col-lg-9">
 
-                    <h3 class="text-white fw-bold mb-4">
-                        <i class="bi bi-briefcase-fill me-2"></i>Việc làm của tôi
-                    </h3>
+                    <div class="d-flex align-items-center justify-content-between mb-4">
+                        <h3 class="text-white fw-bold mb-0">
+                            <i class="bi bi-briefcase-fill me-2"></i>Việc làm của tôi
+                        </h3>
+                        <a href="{{ route('applicant.hoso') }}#tab-attachments" class="btn btn-outline-light btn-sm">
+                            <i class="bi bi-file-earmark-arrow-up me-2"></i>Cập nhật CV
+                        </a>
+                    </div>
 
                     <!-- Tab Navigation -->
                     <ul class="nav nav-tabs nav-tabs-modern" id="myJobsTabs" role="tablist">
@@ -1503,6 +1619,16 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // ========== XỬ LÝ LINK HỒ SƠ ĐÍNH KÈM ==========
+            const attachmentsLink = document.querySelector('.tab-link-attachments');
+            if (attachmentsLink) {
+                attachmentsLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    // Chuyển đến trang hoso với tab attachments được kích hoạt
+                    window.location.href = "{{ route('applicant.hoso') }}#tab-attachments";
+                });
+            }
+
             // ========== XỬ LÝ NÚT ỨNG TUYỂN NGAY ==========
             // ========== XỬ LÝ NÚT ỨNG TUYỂN NGAY ==========
             const applyNowButtons = document.querySelectorAll('.btn-apply-now');

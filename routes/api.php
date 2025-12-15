@@ -29,6 +29,9 @@ Route::get('/applied-jobs', [JobController::class, 'getAppliedJobIds']);
 // ✅ Get user invitations
 Route::get('/job-invitations', [JobController::class, 'getUserInvitations']);
 
+// ✅ Get pending invitations count
+Route::get('/invitations/pending-count', [JobController::class, 'getPendingInvitationCount']);
+
 // ✅ Get saved jobs (yêu cầu auth hoặc trả về empty nếu guest)
 Route::get('/saved-jobs', [ApplicantController::class, 'getSavedJobIds']);
 
