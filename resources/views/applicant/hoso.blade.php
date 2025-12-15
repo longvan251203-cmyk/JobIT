@@ -3,7 +3,62 @@
 
 @include('applicant.partials.head')
 <style>
+    /* Reset default page spacing so header sits at the very top */
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
     /* ... existing styles ... */
+
+    /* Make header fixed at the top but minimal for the profile edit page.
+       - Hide the main nav links (Việc làm, Công ty, Blog) and "Việc Làm Của Tôi" button.
+       - Use a subtle background and small height so it doesn't overpower the page.
+       - Adjust `body` padding to match header height. */
+    header#header.header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1050;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 6px 18px rgba(16, 24, 40, 0.06);
+        backdrop-filter: blur(4px);
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    /* Reduce header internal spacing for a compact look */
+    .header-container {
+        padding: 10px 16px;
+        max-width: 1200px;
+        margin: 0 auto;
+        align-items: center;
+    }
+
+    /* Hide entire nav on this page (logo already links home) */
+    #navmenu ul li {
+        display: none !important;
+    }
+
+    /* Hide "Việc Làm Của Tôi" action button in header */
+    .btn-my-jobs {
+        display: none !important;
+    }
+
+    /* Optionally hide recommendations button to keep header minimal */
+    .btn-recommendations {
+        opacity: 0.9;
+        font-size: 0.95rem;
+        padding: 6px 10px;
+    }
+
+    /* Body padding to prevent content being hidden under fixed header (adjust if needed) */
+    body {
+        padding-top: 84px;
+    }
 
     /* ✅ FIX AVATAR BỊCO DÃNCO DÃN */
     #avatarPreview {
@@ -558,6 +613,13 @@
         }
     }
 
+    /* Larger textarea helper for desktop; mobile override exists below */
+    .textarea-large {
+        min-height: 350px;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
         .main {
@@ -567,18 +629,230 @@
         .card {
             margin-bottom: 1rem !important;
         }
+
+        /* Make avatar and profile images smaller on mobile */
+        .avatar-wrapper-modern,
+        .avatar-wrapper-modern img,
+        .profile-avatar-modern {
+            width: 84px !important;
+            height: 84px !important;
+        }
+
+        /* Slightly reduce padding in header card */
+        .header-card-gradient .card-body {
+            padding: 0.75rem !important;
+        }
+
+        /* Sidebar card spacing for stacked layout */
+        #profileSidebar {
+            margin-bottom: 1rem;
+        }
+
+        /* Ensure modals use full width comfortably on small devices */
+        .modal-dialog {
+            max-width: 95% !important;
+            margin: 0.5rem auto;
+        }
+
+        /* Reduce tall textareas on mobile to avoid huge scroll gaps */
+        textarea.form-control {
+            min-height: 160px !important;
+            font-size: 13px !important;
+        }
     }
 </style>
 
 <body>
     @include('applicant.partials.header')
 
+    <!-- Notifications: use header's global notification UI when available (kept generic here) -->
+
+    <!-- Page-scoped notification script and header tweaks (kept inside hoso.blade.php) -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Prefer header's global notification UI; fall back to page-scoped if present
+            const btn = document.getElementById('btnNotifications') || document.getElementById('btnNotificationsPage');
+            const dropdown = document.getElementById('notificationDropdown') || document.getElementById('notificationDropdownPage');
+            const listEl = document.getElementById('notificationList') || document.getElementById('notificationListPage');
+            const badge = document.getElementById('notificationBadge') || document.getElementById('notificationBadgePage');
+            const markAllBtn = document.getElementById('btnMarkAllRead') || document.getElementById('btnMarkAllReadPage');
+
+            // Default routes (explicit paths so JS works even if route() names are missing)
+            const defaultNotificationsApi = '/applicant/api/notifications';
+            const defaultNotificationsReadAll = '/applicant/notifications/read-all';
+            const defaultNotificationsUnread = '/applicant/notifications/unread-count';
+
+            // Read notification route URLs from the button's data-attributes or fall back to defaults
+            let notificationsApi = btn?.dataset.notificationsApi || defaultNotificationsApi || null;
+            let notificationsReadAll = btn?.dataset.notificationsReadall || defaultNotificationsReadAll || null;
+            let notificationsUnread = btn?.dataset.notificationsUnread || defaultNotificationsUnread || null;
+
+            if (!btn) return; // nothing to bind to on this page
+
+            async function fetchNotifications() {
+                try {
+                    if (!notificationsApi) return null;
+                    console.debug('[notifications] fetching from', notificationsApi);
+                    const res = await fetch(notificationsApi, {
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    });
+                    if (!res.ok) throw new Error('Network');
+                    const data = await res.json();
+                    console.debug('[notifications] response', data);
+                    // Controller returns { success: true, notifications: [...] }
+                    if (data && Array.isArray(data.notifications)) return data.notifications;
+                    if (Array.isArray(data)) return data;
+                    return [];
+                } catch (e) {
+                    console.error('[notifications] fetch error', e);
+                    return null;
+                }
+            }
+
+            function renderEmpty() {
+                listEl.innerHTML = '<div style="padding:2.5rem 1.5rem;text-align:center;color:#9ca3af;">' +
+                    '<i class="bi bi-inbox" style="font-size:2.5rem;display:block;margin-bottom:.75rem;color:#d1d5db;"></i>' +
+                    '<p style="margin:0;">Chưa có thông báo nào</p></div>';
+                badge && badge.classList.add('d-none');
+            }
+
+            function escapeHtml(str) {
+                if (!str) return '';
+                return String(str).replace(/[&<>"']/g, function(s) {
+                    return ({
+                        '&': '&amp;',
+                        '<': '&lt;',
+                        '>': '&gt;',
+                        '"': '&quot;',
+                        "'": "&#39;"
+                    })[s];
+                });
+            }
+
+            async function loadAndRender() {
+                const items = await fetchNotifications();
+                if (!items || items.length === 0) {
+                    renderEmpty();
+                    return;
+                }
+
+                badge && badge.classList.remove('d-none');
+                listEl.innerHTML = '';
+                items.forEach(n => {
+                    const row = document.createElement('div');
+                    row.style.padding = '0.85rem 1rem';
+                    row.style.borderBottom = '1px solid #eef2f6';
+                    row.innerHTML = `
+                        <div style="display:flex;gap:.75rem;align-items:flex-start;">
+                            <div style="flex:1">
+                                <div style="font-weight:600;color:#1f2937">${escapeHtml(n.message || '')} ${!n.is_read ? '<span class="badge bg-danger ms-2" style="font-size:.6rem;">Mới</span>' : ''}</div>
+                                <div style="color:#9ca3af;font-size:.8rem;margin-top:6px">${n.created_at || ''}</div>
+                            </div>
+                            <div style="flex-shrink:0;margin-left:8px">
+                                <button data-id="${n.id}" class="mark-read-btn" style="background:none;border:1px solid #e6eefc;border-radius:6px;padding:.35rem .5rem;cursor:pointer">Đã đọc</button>
+                            </div>
+                        </div>
+                    `;
+                    listEl.appendChild(row);
+                });
+
+                listEl.querySelectorAll('.mark-read-btn').forEach(b => {
+                    b.addEventListener('click', async function(ev) {
+                        ev.preventDefault();
+                        const id = this.dataset.id;
+                        await markAsRead(id);
+                        this.closest('div').remove();
+                    });
+                });
+            }
+
+            async function markAsRead(id) {
+                try {
+                    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                    await fetch(`/applicant/notifications/${id}/read`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': token
+                        }
+                    });
+                    updateUnreadCount();
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            async function markAll() {
+                try {
+                    const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                    if (!notificationsReadAll) return;
+                    const res = await fetch(notificationsReadAll, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': token
+                        }
+                    });
+                    if (res.ok) {
+                        renderEmpty();
+                    }
+                    updateUnreadCount();
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            async function updateUnreadCount() {
+                try {
+                    if (!notificationsUnread) return;
+                    const res = await fetch(notificationsUnread, {
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        }
+                    });
+                    if (!res.ok) return;
+                    const data = await res.json();
+                    console.debug('[notifications] unread count response', data);
+                    const count = data.count ?? data;
+                    if (badge) {
+                        if (count > 0) {
+                            badge.textContent = count > 99 ? '99+' : count;
+                            badge.classList.remove('d-none');
+                        } else badge.classList.add('d-none');
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            btn.addEventListener('click', function(e) {
+                const expanded = btn.getAttribute('aria-expanded') === 'true';
+                if (!expanded) {
+                    btn.setAttribute('aria-expanded', 'true');
+                    if (dropdown) dropdown.style.display = 'block';
+                    loadAndRender();
+                } else {
+                    btn.setAttribute('aria-expanded', 'false');
+                    if (dropdown) dropdown.style.display = 'none';
+                }
+            });
+
+            if (markAllBtn) markAllBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                markAll();
+            });
+
+            // initial count
+            updateUnreadCount();
+        });
+    </script>
+
     <main class="main">
         <div class="container-fluid">
             <div class="row">
 
                 <!-- Sidebar -->
-                <div class="col-md-3 col-lg-3 mb-4">
+                <div id="profileSidebar" class="col-md-3 col-lg-3 mb-4 order-2 order-md-1 d-none d-md-block">
                     <div class="card sidebar-card-modern shadow-sm border-0 rounded-3">
                         <div class="card-body">
                             <div class="text-center">
@@ -623,7 +897,14 @@
                     </div>
                 </div>
                 <!-- Nội dung chính -->
-                <div class="col-md-9 col-lg-9">
+                <div class="col-md-9 col-lg-9 order-1 order-md-2">
+
+                    <!-- Mobile: button to toggle profile sidebar -->
+                    <div class="d-md-none mb-3">
+                        <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#profileSidebar" aria-expanded="false" aria-controls="profileSidebar">
+                            <i class="bi bi-list"></i> Menu hồ sơ
+                        </button>
+                    </div>
 
                     <!-- Thông tin cá nhân -->
                     <div class="card header-card-gradient shadow-sm border-0 rounded-3 mb-4">
@@ -1392,7 +1673,7 @@
                                                     <i class="bi bi-file-earmark-text"></i> Chèn mẫu
                                                 </button>
                                             </div>
-                                            <textarea class="form-control"
+                                            <textarea class="form-control textarea-large"
                                                 name="mota_duan"
                                                 id="mota_duan"
                                                 rows="12"
@@ -1630,7 +1911,7 @@
                                                 id="gt_mota"
                                                 rows="15"
                                                 maxlength="1000"
-                                                style="min-height: 350px; font-size: 14px;"
+
                                                 placeholder="VD:
 - Đạt doanh số cao nhất quý 4/2023
 - Hoàn thành vượt 150% KPI
@@ -2231,12 +2512,12 @@
                                                 <i class="bi bi-lightbulb text-warning me-1"></i>
                                                 <strong>Tips:</strong> Mô tả nội dung, phạm vi, kỹ năng đạt được từ chứng chỉ này
                                             </div>
-                                            <textarea class="form-control"
+                                            <textarea class="form-control textarea-large"
                                                 name="mo_ta"
                                                 id="cc_mota"
                                                 rows="15"
                                                 maxlength="1000"
-                                                style="min-height: 350px; font-size: 14px;"
+
                                                 placeholder="VD:
 - Chứng chỉ chứng nhận kiến thức về AWS Cloud
 - Nội dung: Architecture Design, Security, Cost Optimization

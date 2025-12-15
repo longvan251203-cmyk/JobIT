@@ -1927,9 +1927,14 @@
                                     </div>
                                 </div>
 
-                                <button data-candidate-id="{{ $rec['applicant']->id_uv }}" class="btn-view-profile btn-view-cv-rec">
-                                    <i class="bi bi-eye mr-1"></i> Xem hồ sơ
-                                </button>
+                                <div class="btn-container" style="display: flex; gap: 0.5rem; flex-direction: column; margin-top: auto;">
+                                    <button data-candidate-id="{{ $rec['applicant']->id_uv }}" class="btn-view-profile btn-view-cv-rec">
+                                        <i class="bi bi-eye mr-1"></i> Xem hồ sơ
+                                    </button>
+                                    <button data-candidate-id="{{ $rec['applicant']->id_uv }}" class="btn-invite btn-invite-rec">
+                                        <i class="bi bi-person-plus-fill"></i> Mời ứng viên
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         @endforeach
@@ -2077,6 +2082,16 @@
                     const candidateId = this.getAttribute('data-candidate-id');
                     if (candidateId) {
                         viewCV(candidateId);
+                    }
+                });
+            });
+
+            // ✅ Thêm event listener cho recommended invite buttons
+            document.querySelectorAll('.btn-invite-rec').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const candidateId = this.getAttribute('data-candidate-id');
+                    if (candidateId) {
+                        inviteCandidate(candidateId);
                     }
                 });
             });
@@ -2783,12 +2798,12 @@
 
         // ✅ GENERATE CV HTML CHO EMPLOYER - MATCH JOB-APPLICANTS-NEW STYLE
         function generateEmployerCVHTML(candidate) {
-            let cvHTML = `<div style="display: flex; gap: 24px;">
+            let cvHTML = `<div class="cv-flex">
                 <!-- Left Column -->
-                <div style="width: 280px; background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%); padding: 24px; border-radius: 12px; border-left: 3px solid #667eea; display: flex; flex-direction: column; align-items: center;">
+                <div class="cv-left">
                     <div style="text-align: center; margin-bottom: 24px; width: 100%;">
                         <img src="${candidate.avatar ? '/assets/img/avt/' + candidate.avatar : '/assets/img/avt/default-avatar.png'}" 
-                             alt="Avatar" style="width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 16px; display: block; border: 4px solid #667eea; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">
+                             alt="Avatar" class="cv-avatar">
                         <h4 style="font-size: 18px; font-weight: 700; color: #1f2937; margin-bottom: 4px;">${candidate.hoten_uv || 'N/A'}</h4>
                         <p style="font-size: 14px; color: #6b7280;">${candidate.vitriungtuyen || 'Chức danh'}</p>
                     </div>

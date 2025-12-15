@@ -802,10 +802,15 @@ class JobController extends Controller
     {
         try {
             $page = $request->input('page', 1);
-            $perPage = 12; // Số job mỗi trang
+            $perPage = 8; // Số job mỗi trang
             $jobs = JobPost::with(['company', 'hashtags'])
-                ->where('status', 'active')                      // 🎯 THÊM DÒNG NÀY
-                ->where('deadline', '>=', now()->toDateString()) // 🎯 THÊM DÒNG NÀY
+                ->where('status', 'active')
+                ->where('deadline', '>=', now()->toDateString())
+                ->whereRaw('(recruitment_count = 0 OR recruitment_count > (
+                    SELECT COUNT(*) FROM applications 
+                    WHERE applications.job_id = job_post.job_id 
+                    AND applications.trang_thai = "duoc_chon"
+                ))')
                 ->orderBy('created_at', 'desc')
                 ->paginate($perPage, ['*'], 'page', $page);
             // Render HTML cho job cards

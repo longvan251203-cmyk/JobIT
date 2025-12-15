@@ -17,10 +17,36 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        $jobs = JobPost::with(['company', 'hashtags', 'detail'])->get();
+        $jobs = JobPost::with(['company', 'hashtags', 'detail'])
+            ->where('status', 'active')
+            ->where('deadline', '>=', now()->toDateString())
+            ->whereRaw('(recruitment_count = 0 OR recruitment_count > (
+                SELECT COUNT(*) FROM applications 
+                WHERE applications.job_id = job_post.job_id 
+                AND applications.trang_thai = "duoc_chon"
+            ))')
+            ->orderBy('created_at', 'desc')
+            ->paginate(8);
+
+        // Lấy top công ty có nhiều việc làm nhất
+        $topCompanies = JobPost::with('company')
+            ->select('companies_id', DB::raw('COUNT(*) as job_count'))
+            ->where('status', 'active')
+            ->where('deadline', '>=', now()->toDateString())
+            ->groupBy('companies_id')
+            ->orderBy('job_count', 'desc')
+            ->limit(6)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'company' => $item->company,
+                    'job_count' => $item->job_count,
+                ];
+            });
 
         return view('home', [
             'jobs' => $jobs,
+            'topCompanies' => $topCompanies,
             'showLogin' => $request->get('showLogin', false),
         ]);
     }

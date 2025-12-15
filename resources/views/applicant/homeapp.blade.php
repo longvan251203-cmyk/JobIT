@@ -25,6 +25,18 @@
     <link href="{{ asset('assets/css/homeapp.css') }}" rel="stylesheet">
 </head>
 <style>
+    /* Smooth scroll behavior */
+    html {
+        scroll-behavior: smooth;
+    }
+
+    /* Scroll margin for fixed header */
+    #jobs-section,
+    #companies-section,
+    #blog-section {
+        scroll-margin-top: 120px;
+    }
+
     /* Thêm vào phần style của file */
 
     .btn-notifications {
@@ -2322,31 +2334,9 @@
             <nav id="navmenu" class="navmenu">
                 <ul>
                     <li><a href="#" class="active">Trang chủ</a></li>
-                    <li class="dropdown">
-                        <a href="#"><span>Việc làm</span> <i class="bi bi-chevron-down"></i></a>
-                        <ul>
-                            <li><a href="#">Theo khu vực</a></li>
-                            <li><a href="#">Theo lĩnh vực</a></li>
-                            <li><a href="#">Theo kỹ năng</a></li>
-                            <li><a href="#">Theo từ khóa</a></li>
-                        </ul>
-                    </li>
-                    <li class="dropdown">
-                        <a href="#"><span>Công ty</span> <i class="bi bi-chevron-down"></i></a>
-                        <ul>
-                            <li><a href="#">Theo khu vực</a></li>
-                            <li><a href="#">Theo lĩnh vực</a></li>
-                        </ul>
-                    </li>
-                    <li class="dropdown">
-                        <a href="#"><span>Blog</span> <i class="bi bi-chevron-down"></i></a>
-                        <ul>
-                            <li><a href="#">Cẩm nang tìm việc</a></li>
-                            <li><a href="#">Kỹ năng văn phòng</a></li>
-                            <li><a href="#">Kiến thức chuyên ngành</a></li>
-                            <li><a href="#">Tin tức tổng hợp</a></li>
-                        </ul>
-                    </li>
+                    <li><a href="#jobs-section">Việc làm</a></li>
+                    <li><a href="#companies-section">Công ty</a></li>
+                    <li><a href="#blog-section">Blog</a></li>
                 </ul>
             </nav>
 
@@ -2664,7 +2654,7 @@
     </section>
 
     <!-- ========== ALL JOBS SECTION ========== -->
-    <div class="main-container">
+    <div class="main-container" id="jobs-section">
         <div class="featured-section">
             <div class="section-title-highlight">
                 <div class="section-subtitle">TẤT CẢ CÔNG VIỆC</div>
@@ -2832,7 +2822,7 @@
         </div>
     </div>
     <!-- ========== TOP COMPANIES SECTION ========== -->
-    <div class="main-container">
+    <div class="main-container" id="companies-section">
         <div class="featured-section">
             <div class="section-title-highlight">
                 <div class="section-subtitle">TOP CÔNG TY</div>
@@ -2922,7 +2912,7 @@
     <!-- ========== BLOG SECTION ========== -->
     <!-- ...existing code... -->
     <!-- ========== BLOG SECTION ========== -->
-    <div class="main-container">
+    <div class="main-container" id="blog-section">
         <div class="featured-section">
             <div class="section-title-highlight">
                 <div class="section-subtitle">BLOG</div>

@@ -997,17 +997,17 @@
         // GENERATE EMPLOYER CV HTML
         // =====================================
         function generateEmployerCVHTML(candidate, application) {
-            let cvHTML = `<div style="display: flex; gap: 24px;">
-                <!-- Left Column -->
-                <div style="width: 280px; background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%); padding: 24px; border-radius: 12px; border-left: 3px solid #667eea; display: flex; flex-direction: column; align-items: center;">
-                    <div style="text-align: center; margin-bottom: 24px; width: 100%;">
-                        <img src="${candidate.avatar ? '/assets/img/avt/' + candidate.avatar : '/assets/img/avt/default-avatar.png'}" 
-                             alt="Avatar" style="width: 120px; height: 120px; border-radius: 50%; margin: 0 auto 16px; display: block; border: 4px solid #667eea; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">
-                        <h4 style="font-size: 18px; font-weight: 700; color: #1f2937; margin-bottom: 4px;">${application ? application.hoten : candidate.hoten_uv}</h4>
-                        <p style="font-size: 14px; color: #6b7280;">${candidate.vitriungtuyen || 'Chức danh'}</p>
-                    </div>
+            let cvHTML = `<div class="cv-flex">
+                    <!-- Left Column -->
+                    <div class="cv-left">
+                        <div style="text-align: center; margin-bottom: 24px; width: 100%;">
+                            <img src="${candidate.avatar ? '/assets/img/avt/' + candidate.avatar : '/assets/img/avt/default-avatar.png'}" 
+                                 alt="Avatar" class="cv-avatar">
+                            <h4 style="font-size: 18px; font-weight: 700; color: #1f2937; margin-bottom: 4px;">${application ? application.hoten : candidate.hoten_uv}</h4>
+                            <p style="font-size: 14px; color: #6b7280;">${candidate.vitriungtuyen || 'Chức danh'}</p>
+                        </div>
                     
-                    <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px; width: 100%;">
+                        <div style="display: flex; flex-direction: column; gap: 12px; font-size: 13px; width: 100%;">
                         <div style="display: flex; align-items: center; gap: 8px;">
                             <i class="bi bi-envelope" style="color: #667eea;"></i>
                             <span style="color: #374151; word-break: break-word;">${application ? application.email : candidate.email_uv}</span>

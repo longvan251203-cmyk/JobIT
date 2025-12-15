@@ -1,0 +1,576 @@
+/* ============================================================
+   HOME PAGE RESPONSIVE ENHANCEMENTS
+   Mobile-First Approach
+   ============================================================ */
+
+/* ============================================================
+   1. HERO & ABOUT SECTION - MOBILE FIRST
+   ============================================================ */
+
+.hero-about-section {
+    position: relative;
+    background: linear-gradient(135deg, #f8f9ff 0%, #f0f3ff 100%);
+    overflow: visible;
+    padding: 0;
+}
+
+.hero-about-section>.about-wrapper {
+    padding: 40px 1rem 0 1rem;
+    max-width: 100%;
+}
+
+.hero-about-section>.stats-wrapper {
+    padding: 0 1rem 40px 1rem;
+    max-width: 100%;
+}
+
+.hero-about-section>.stats-divider {
+    margin: 40px 0;
+    position: relative;
+    z-index: 1;
+}
+
+.about-wrapper,
+.stats-wrapper {
+    max-width: 100%;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+/* Mobile: Stack layout (1 column) */
+.about-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    align-items: center;
+    margin-bottom: 3rem;
+}
+
+.about-text h2 {
+    font-size: 1.5rem;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+}
+
+.about-text p {
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    color: #6b7280;
+}
+
+.about-image {
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.about-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+}
+
+/* ============================================================
+   2. BADGES & BUTTONS - MOBILE RESPONSIVE
+   ============================================================ */
+
+.about-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.cta-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.cta-btn {
+    flex: 1;
+    min-width: 140px;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: none;
+    font-size: 0.9rem;
+}
+
+.cta-btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.cta-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.cta-btn-secondary {
+    background: white;
+    border: 2px solid #667eea;
+    color: #667eea;
+}
+
+.cta-btn-secondary:hover {
+    background: #f0f4ff;
+}
+
+/* ============================================================
+   3. STATS SECTION - RESPONSIVE GRID
+   ============================================================ */
+
+.stats-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    max-width: 100%;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #667eea;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.95rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* ============================================================
+   4. JOBS SECTION - RESPONSIVE GRID
+   ============================================================ */
+
+.jobs-section {
+    padding: 3rem 1rem;
+}
+
+.jobs-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.jobs-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.job-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.job-card:hover {
+    border-color: #667eea;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+    transform: translateY(-2px);
+}
+
+.job-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.job-logo {
+    width: 48px;
+    height: 48px;
+    border-radius: 8px;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.job-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: #1f2937;
+}
+
+.job-company {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+}
+
+.job-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.job-tag {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background-color: #f3f4f6;
+    color: #4b5563;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+/* ============================================================
+   5. COMPANIES SECTION - RESPONSIVE GRID
+   ============================================================ */
+
+.companies-section {
+    padding: 3rem 1rem;
+    background-color: #f9fafb;
+}
+
+.companies-section h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.companies-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.company-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.company-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    transform: translateY(-4px);
+}
+
+.company-logo {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 1rem;
+    border-radius: 8px;
+    object-fit: contain;
+}
+
+.company-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #1f2937;
+}
+
+.company-jobs {
+    font-size: 0.9rem;
+    color: #667eea;
+    font-weight: 600;
+}
+
+/* ============================================================
+   6. RESPONSIVE TABLES
+   ============================================================ */
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.95rem;
+}
+
+th,
+td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+th {
+    background-color: #f9fafb;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+/* ============================================================
+   7. TABLET BREAKPOINT (576px+)
+   ============================================================ */
+
+@media (min-width: 576px) {
+    .hero-about-section>.about-wrapper {
+        padding: 50px 1.5rem 0 1.5rem;
+    }
+
+    .hero-about-section>.stats-wrapper {
+        padding: 0 1.5rem 50px 1.5rem;
+    }
+
+    .about-text h2 {
+        font-size: 1.7rem;
+    }
+
+    .stats-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+    }
+
+    .jobs-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .companies-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .cta-btn {
+        flex: none;
+        min-width: auto;
+    }
+}
+
+/* ============================================================
+   8. MEDIUM TABLET (768px+)
+   ============================================================ */
+
+@media (min-width: 768px) {
+    .hero-about-section>.about-wrapper {
+        padding: 60px 2rem 0 2rem;
+    }
+
+    .hero-about-section>.stats-wrapper {
+        padding: 0 2rem 60px 2rem;
+    }
+
+    .hero-about-section>.stats-divider {
+        margin: 80px 0;
+    }
+
+    .about-content {
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+    }
+
+    .about-text h2 {
+        font-size: 2rem;
+    }
+
+    .stats-container {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .jobs-section {
+        padding: 4rem 2rem;
+    }
+
+    .jobs-section h2 {
+        font-size: 1.8rem;
+    }
+
+    .jobs-container {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+    }
+
+    .companies-section {
+        padding: 4rem 2rem;
+    }
+
+    .companies-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+    }
+}
+
+/* ============================================================
+   9. DESKTOP (992px+)
+   ============================================================ */
+
+@media (min-width: 992px) {
+    .hero-about-section>.about-wrapper {
+        padding: 100px 3rem 0 3rem;
+    }
+
+    .hero-about-section>.stats-wrapper {
+        padding: 0 3rem 100px 3rem;
+    }
+
+    .about-wrapper,
+    .stats-wrapper {
+        max-width: 1200px;
+    }
+
+    .about-text h2 {
+        font-size: 2.5rem;
+    }
+
+    .stats-container {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 3rem;
+    }
+
+    .jobs-container {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    .companies-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ============================================================
+   10. LARGE DESKTOP (1200px+)
+   ============================================================ */
+
+@media (min-width: 1200px) {
+
+    .about-wrapper,
+    .stats-wrapper {
+        max-width: 1320px;
+    }
+
+    .about-wrapper {
+        padding: 120px 2rem 0 2rem;
+    }
+
+    .stats-wrapper {
+        padding: 0 2rem 120px 2rem;
+    }
+}
+
+/* ============================================================
+   11. LANDSCAPE MODE
+   ============================================================ */
+
+@media (orientation: landscape) and (max-height: 600px) {
+    .hero-about-section>.about-wrapper {
+        padding: 30px 1rem 0 1rem;
+    }
+
+    .hero-about-section>.stats-wrapper {
+        padding: 0 1rem 30px 1rem;
+    }
+
+    .about-text h2 {
+        font-size: 1.3rem;
+    }
+
+    .about-text p {
+        font-size: 0.85rem;
+    }
+
+    .stat-number {
+        font-size: 1.5rem;
+    }
+}
+
+/* ============================================================
+   12. DARK MODE
+   ============================================================ */
+
+@media (prefers-color-scheme: dark) {
+    .hero-about-section {
+        background: linear-gradient(135deg, #1a1f35 0%, #232d4a 100%);
+    }
+
+    .stat-card,
+    .job-card,
+    .company-card {
+        background: #1f2937;
+        border-color: #374151;
+    }
+
+    .about-text h2,
+    .job-title,
+    .company-name {
+        color: #f3f4f6;
+    }
+
+    .about-text p,
+    .job-company,
+    .stat-label {
+        color: #d1d5db;
+    }
+
+    .job-tag {
+        background-color: #374151;
+        color: #e5e7eb;
+    }
+
+    .companies-section {
+        background-color: #111827;
+    }
+
+    th {
+        background-color: #1f2937;
+        color: #f3f4f6;
+    }
+
+    table {
+        color: #f3f4f6;
+    }
+}
+
+/* ============================================================
+   13. SAFE AREA INSETS (Notched devices)
+   ============================================================ */
+
+@supports (padding: calc(1px)) {
+    .hero-about-section>.about-wrapper {
+        padding-left: max(1rem, env(safe-area-inset-left));
+        padding-right: max(1rem, env(safe-area-inset-right));
+    }
+
+    .hero-about-section>.stats-wrapper {
+        padding-left: max(1rem, env(safe-area-inset-left));
+        padding-right: max(1rem, env(safe-area-inset-right));
+    }
+
+    .jobs-section,
+    .companies-section {
+        padding-left: max(1rem, env(safe-area-inset-left));
+        padding-right: max(1rem, env(safe-area-inset-right));
+    }
+}

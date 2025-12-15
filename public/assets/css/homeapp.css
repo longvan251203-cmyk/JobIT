@@ -994,6 +994,48 @@ body {
     width: 20px;
 }
 
+/* Header Buttons */
+.btn-header {
+    padding: 0.6rem 1.5rem;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    border: none;
+}
+
+.btn-outline-header {
+    border: 2px solid #4F46E5;
+    color: #4F46E5;
+    background: transparent;
+}
+
+.btn-outline-header:hover {
+    background: #4F46E5;
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+}
+
+.btn-primary-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3);
+}
+
+.btn-primary-header:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(79, 70, 229, 0.4);
+    color: white;
+    text-decoration: none;
+}
+
 /* Search Section */
 .search-section {
     background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);

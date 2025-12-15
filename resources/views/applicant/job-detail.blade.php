@@ -640,8 +640,10 @@
                         </div>
                         <button id="openApplyModal"
                             class="bg-indigo-600 text-white font-semibold py-3 px-8 rounded-lg hover:bg-indigo-700 transition duration-300 transform hover:scale-105 shadow-lg apply-button"
+                            @if(Auth::check())
                             data-bs-toggle="modal"
                             data-bs-target="#applyJobModal"
+                            @endif
                             data-job-id="{{ $job->job_id }}">
                             <i class="fas fa-paper-plane mr-2"></i> Ứng Tuyển Ngay
                         </button>

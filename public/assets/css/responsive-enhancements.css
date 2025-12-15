@@ -1,0 +1,541 @@
+/* ============================================================
+   RESPONSIVE LAYOUT IMPROVEMENTS
+   Mobile-first approach with Bootstrap Grid optimization
+   ============================================================ */
+
+/* ============================================================
+   OVERRIDE BOOTSTRAP DEFAULTS - MOBILE FIRST
+   ============================================================ */
+
+/* Remove default Bootstrap padding on containers for mobile */
+.container-fluid {
+    padding-right: var(--spacing-sm);
+    padding-left: var(--spacing-sm);
+}
+
+/* Optimize Bootstrap grid for mobile */
+.row {
+    --bs-gutter-x: 0.5rem;
+    --bs-gutter-y: 0.5rem;
+}
+
+.col-12,
+[class*='col-'] {
+    padding-right: calc(var(--bs-gutter-x) * 0.5);
+    padding-left: calc(var(--bs-gutter-x) * 0.5);
+}
+
+/* Tablet breakpoint (576px+) */
+@media (min-width: 576px) {
+    .container-fluid {
+        padding-right: var(--spacing-md);
+        padding-left: var(--spacing-md);
+    }
+
+    .row {
+        --bs-gutter-x: 1rem;
+        --bs-gutter-y: 1rem;
+    }
+}
+
+/* Medium/iPad (768px+) */
+@media (min-width: 768px) {
+    .container-fluid {
+        padding-right: var(--spacing-lg);
+        padding-left: var(--spacing-lg);
+    }
+
+    .row {
+        --bs-gutter-x: 1.5rem;
+    }
+}
+
+/* Desktop (992px+) */
+@media (min-width: 992px) {
+    .container-fluid {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-right: var(--spacing-lg);
+        padding-left: var(--spacing-lg);
+    }
+
+    .row {
+        --bs-gutter-x: 1.5rem;
+    }
+}
+
+/* ============================================================
+   FLEXIBLE GRID LAYOUT - MOBILE STACKING
+   ============================================================ */
+
+/* Mobile: Full width stacking */
+.col-md-3,
+.col-md-9,
+.col-lg-3,
+.col-lg-9 {
+    flex: 0 0 100%;
+    max-width: 100%;
+}
+
+/* Tablet: 2 column layout */
+@media (min-width: 576px) and (max-width: 767px) {
+    .col-md-3 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .col-md-9 {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+/* Medium/iPad: Original 25/75 layout */
+@media (min-width: 768px) {
+    .col-md-3 {
+        flex: 0 0 25%;
+        max-width: 25%;
+    }
+
+    .col-md-9 {
+        flex: 0 0 75%;
+        max-width: 75%;
+    }
+
+    .col-lg-3 {
+        flex: 0 0 25%;
+        max-width: 25%;
+    }
+
+    .col-lg-9 {
+        flex: 0 0 75%;
+        max-width: 75%;
+    }
+}
+
+/* ============================================================
+   RESPONSIVE TYPOGRAPHY
+   ============================================================ */
+
+/* Mobile typography */
+h1 {
+    font-size: 1.5rem;
+    line-height: 1.3;
+}
+
+h2 {
+    font-size: 1.3rem;
+}
+
+h3 {
+    font-size: 1.1rem;
+}
+
+h4,
+h5 {
+    font-size: 1rem;
+}
+
+p {
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+small,
+.small {
+    font-size: 0.8rem;
+}
+
+/* Tablet typography */
+@media (min-width: 576px) {
+    h1 {
+        font-size: 1.7rem;
+    }
+
+    h2 {
+        font-size: 1.4rem;
+    }
+
+    h3 {
+        font-size: 1.2rem;
+    }
+
+    p {
+        font-size: 0.95rem;
+    }
+}
+
+/* Desktop typography */
+@media (min-width: 992px) {
+    h1 {
+        font-size: 2rem;
+    }
+
+    h2 {
+        font-size: 1.6rem;
+    }
+
+    h3 {
+        font-size: 1.3rem;
+    }
+
+    p {
+        font-size: 1rem;
+    }
+
+    small,
+    .small {
+        font-size: 0.85rem;
+    }
+}
+
+/* ============================================================
+   RESPONSIVE IMAGES & MEDIA
+   ============================================================ */
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Responsive image containers */
+.img-container {
+    width: 100%;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+/* Aspect ratio containers */
+.aspect-ratio {
+    position: relative;
+    width: 100%;
+}
+
+.aspect-ratio-1-1 {
+    padding-bottom: 100%;
+}
+
+.aspect-ratio-16-9 {
+    padding-bottom: 56.25%;
+}
+
+.aspect-ratio-4-3 {
+    padding-bottom: 75%;
+}
+
+.aspect-ratio>* {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* ============================================================
+   RESPONSIVE FORMS
+   ============================================================ */
+
+.form-group {
+    margin-bottom: var(--spacing-md);
+}
+
+.form-control,
+.form-select,
+textarea {
+    width: 100%;
+    font-size: 16px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    transition: all 0.2s ease;
+}
+
+.form-control:focus,
+.form-select:focus,
+textarea:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+}
+
+textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+@media (min-width: 768px) {
+    textarea {
+        min-height: 140px;
+    }
+}
+
+/* Responsive form grid */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--spacing-sm);
+}
+
+@media (min-width: 576px) {
+    .form-row-2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 768px) {
+    .form-row-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .form-row-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (min-width: 992px) {
+    .form-row-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .form-row-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ============================================================
+   RESPONSIVE TABLES
+   ============================================================ */
+
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table {
+    width: 100%;
+    font-size: 0.9rem;
+}
+
+.table th,
+.table td {
+    padding: 10px 8px;
+    text-align: left;
+}
+
+@media (min-width: 576px) {
+
+    .table th,
+    .table td {
+        padding: 12px 10px;
+        font-size: 0.95rem;
+    }
+}
+
+@media (min-width: 768px) {
+
+    .table th,
+    .table td {
+        padding: 14px 12px;
+        font-size: 1rem;
+    }
+}
+
+/* ============================================================
+   RESPONSIVE MODALS & DIALOGS
+   ============================================================ */
+
+.modal-dialog {
+    margin: var(--spacing-sm);
+    width: calc(100% - 2 * var(--spacing-sm));
+}
+
+@media (min-width: 576px) {
+    .modal-dialog {
+        max-width: 500px;
+        margin: auto;
+    }
+
+    .modal-lg {
+        max-width: 700px;
+    }
+
+    .modal-xl {
+        max-width: 900px;
+    }
+}
+
+@media (min-width: 768px) {
+    .modal-dialog {
+        max-width: 600px;
+    }
+
+    .modal-lg {
+        max-width: 800px;
+    }
+
+    .modal-xl {
+        max-width: 1000px;
+    }
+}
+
+.modal-content {
+    border-radius: 16px;
+}
+
+.modal-header {
+    padding: var(--spacing-md);
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.modal-body {
+    padding: var(--spacing-md);
+}
+
+.modal-footer {
+    padding: var(--spacing-md);
+    border-top: 1px solid #e5e7eb;
+}
+
+@media (min-width: 768px) {
+
+    .modal-header,
+    .modal-body,
+    .modal-footer {
+        padding: var(--spacing-lg);
+    }
+}
+
+/* ============================================================
+   RESPONSIVE UTILITIES
+   ============================================================ */
+
+/* Spacing responsive */
+.p-responsive {
+    padding: var(--spacing-sm);
+}
+
+.px-responsive {
+    padding-left: var(--spacing-sm);
+    padding-right: var(--spacing-sm);
+}
+
+.py-responsive {
+    padding-top: var(--spacing-sm);
+    padding-bottom: var(--spacing-sm);
+}
+
+@media (min-width: 576px) {
+    .p-responsive {
+        padding: var(--spacing-md);
+    }
+
+    .px-responsive {
+        padding-left: var(--spacing-md);
+        padding-right: var(--spacing-md);
+    }
+
+    .py-responsive {
+        padding-top: var(--spacing-md);
+        padding-bottom: var(--spacing-md);
+    }
+}
+
+@media (min-width: 768px) {
+    .p-responsive {
+        padding: var(--spacing-lg);
+    }
+
+    .px-responsive {
+        padding-left: var(--spacing-lg);
+        padding-right: var(--spacing-lg);
+    }
+
+    .py-responsive {
+        padding-top: var(--spacing-lg);
+        padding-bottom: var(--spacing-lg);
+    }
+}
+
+/* Display utilities */
+.d-flex-responsive {
+    display: flex;
+    flex-direction: column;
+}
+
+@media (min-width: 768px) {
+    .d-flex-responsive {
+        flex-direction: row;
+    }
+}
+
+.gap-responsive {
+    gap: var(--spacing-sm);
+}
+
+@media (min-width: 576px) {
+    .gap-responsive {
+        gap: var(--spacing-md);
+    }
+}
+
+@media (min-width: 768px) {
+    .gap-responsive {
+        gap: var(--spacing-lg);
+    }
+}
+
+/* Touch targets - minimum 44px for mobile */
+@media (max-width: 767px) {
+
+    .btn,
+    button,
+    .nav-link,
+    a.card {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 10px 12px;
+    }
+}
+
+/* ============================================================
+   LANDSCAPE MODE - OPTIMIZATIONS
+   ============================================================ */
+
+@media (orientation: landscape) and (max-height: 600px) {
+    .header {
+        padding: 4px 0;
+    }
+
+    body {
+        padding-top: 56px;
+    }
+
+    .main {
+        padding: 0.5rem 0;
+    }
+
+    .card {
+        margin-bottom: 0.5rem !important;
+    }
+
+    .card-body {
+        padding: 0.75rem !important;
+    }
+}
+
+/* ============================================================
+   SAFE AREA INSETS (for notched devices)
+   ============================================================ */
+
+@supports (padding: calc(1px)) {
+    body {
+        padding-left: max(0px, env(safe-area-inset-left));
+        padding-right: max(0px, env(safe-area-inset-right));
+    }
+
+    .header-container {
+        padding-left: max(var(--spacing-sm), env(safe-area-inset-left));
+        padding-right: max(var(--spacing-sm), env(safe-area-inset-right));
+    }
+}

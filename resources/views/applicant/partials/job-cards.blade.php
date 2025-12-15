@@ -1,13 +1,4 @@
 @forelse($jobs as $job)
-@php
-// ✅ Ẩn job đã đủ số lượng nhận
-$selectedCount = $job->selected_count ?? 0;
-$recruitmentCount = $job->recruitment_count ?? 0;
-if ($recruitmentCount > 0 && $selectedCount >= $recruitmentCount) {
-continue; // Bỏ qua job này
-}
-@endphp
-
 <article class="job-card-grid" data-job-id="{{ $job->job_id }}">
 
     {{-- 🎯 BADGE SẮP HẾT HẠN - LOGIC MỚI --}}
