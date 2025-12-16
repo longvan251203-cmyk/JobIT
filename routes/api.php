@@ -35,6 +35,11 @@ Route::get('/invitations/pending-count', [JobController::class, 'getPendingInvit
 // ✅ Get saved jobs (yêu cầu auth hoặc trả về empty nếu guest)
 Route::get('/saved-jobs', [ApplicantController::class, 'getSavedJobIds']);
 
+// ✅ Get applicant's CV info (for apply modal) - with web middleware for session auth
+Route::middleware('web')->group(function () {
+    Route::get('/applicant-cv', [ApplicantController::class, 'getApplicantCV']);
+});
+
 // ✅ Hashtag search (cho autocomplete)
 Route::get('/hashtags/search', [JobController::class, 'searchHashtags']);
 // ✅ Job Invitation - Respond (accept/reject)

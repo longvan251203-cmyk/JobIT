@@ -1527,3 +1527,4 @@ class JobController extends Controller
             ], 500);
         }
     }
+}

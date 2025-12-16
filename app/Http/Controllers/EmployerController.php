@@ -62,12 +62,14 @@ class EmployerController extends Controller
             ->where('companies_id', $company->companies_id ?? null)
             ->firstOrFail();
 
+        // 🆕 FILTER: Chỉ lấy applications KHÔNG từ invitation (job_invitation_id IS NULL)
         $applications = Application::where('job_id', $job_id)
+            ->whereNull('job_invitation_id')
             ->with(['applicant', 'job', 'job.company'])
             ->paginate(12);
 
-        // Lấy danh sách ứng viên được mời
-        $invitations = JobInvitation::with('applicant')
+        // Lấy danh sách ứng viên được mời (có job_invitation_id)
+        $invitations = JobInvitation::with(['applicant', 'application'])
             ->where('job_id', $job_id)
             ->orderBy('created_at', 'desc')
             ->get();
@@ -82,26 +84,27 @@ class EmployerController extends Controller
     {
         $job = JobPost::where('job_id', $jobId)->firstOrFail();
 
-        // Lấy danh sách ứng viên với thông tin chi tiết
-        $applications = Application::with(['applicant', 'company'])
-            ->where('job_id', $jobId)
-            ->orderBy('ngay_ung_tuyen', 'desc')
-            ->get();
-
         // Lấy danh sách ứng viên được mời
-        $invitations = JobInvitation::with('applicant')
+        $invitations = JobInvitation::with(['applicant', 'application'])  // 🆕 Thêm 'application'
             ->where('job_id', $jobId)
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // Tính toán thống kê
+        // Lấy danh sách ứng viên ứng tuyển (loại bỏ những người được mời)
+        // Loại bỏ cả applications có job_invitation_id (từ invitation)
+        $applications = Application::with(['applicant', 'company'])
+            ->where('job_id', $jobId)
+            ->whereNull('job_invitation_id')
+            ->orderBy('ngay_ung_tuyen', 'desc')
+            ->get();
+
+        // Tính toán thống kê (chỉ ứng viên ứng tuyển thường)
         $statistics = [
             'total' => $applications->count(),
-            'chua_xem' => $applications->where('trang_thai', 'chua_xem')->count(),
-            'da_xem' => $applications->where('trang_thai', 'da_xem')->count(),
-            'phong_van' => $applications->where('trang_thai', 'phong_van')->count(),
+            'cho_xu_ly' => $applications->where('trang_thai', 'cho_xu_ly')->count(),
+            'dang_phong_van' => $applications->where('trang_thai', 'dang_phong_van')->count(),
             'duoc_chon' => $applications->where('trang_thai', 'duoc_chon')->count(),
-            'tu_choi' => $applications->where('trang_thai', 'tu_choi')->count(),
+            'khong_phu_hop' => $applications->where('trang_thai', 'khong_phu_hop')->count(),
         ];
 
         return view('employer.job-applicants', compact('job', 'applications', 'invitations', 'statistics'));

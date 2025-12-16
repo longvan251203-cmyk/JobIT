@@ -59,6 +59,14 @@ class JobInvitation extends Model
         return $this->belongsTo(Company::class, 'company_id', 'id');
     }
 
+    /**
+     * 🆕 Relationship: Application từ invitation này
+     */
+    public function application()
+    {
+        return $this->hasOne(Application::class, 'job_invitation_id', 'id');
+    }
+
     // ============ SCOPES ============
 
     /**

@@ -147,6 +147,9 @@
         box-shadow: var(--card-shadow) !important;
         border: none !important;
         transition: all 0.3s ease;
+        position: sticky;
+        top: 100px;
+        overflow: hidden;
     }
 
     .sidebar-card-modern:hover {
@@ -890,9 +893,7 @@
                                 <li class="nav-item mb-2">
                                     <a href="{{ route('applicant.jobInvitations') }}" class="nav-link text-dark"><i class="bi bi-envelope"></i> Lời mời công việc</a>
                                 </li>
-                                <li class="nav-item mb-2">
-                                    <a href="#" class="nav-link text-dark"><i class="bi bi-bell"></i> Thông báo</a>
-                                </li>
+
                                 <li class="nav-item">
                                     <a href="#" class="nav-link text-dark"><i class="bi bi-gear"></i> Cài đặt</a>
                                 </li>
@@ -2004,40 +2005,41 @@
                     </div>
                     <!-- Modal Xem CV -->
                     <!-- ✅ MODAL XEM CV - THIẾT KẾ CHUYÊN NGHIỆP -->
+                    <!-- Modal: CV - SYNC WITH CANDIDATES.BLADE.PHP STYLE -->
                     <div class="modal fade" id="viewCVModal" tabindex="-1" aria-labelledby="viewCVLabel" aria-hidden="true">
                         <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-                            <div class="modal-content cv-modal-content">
+                            <div class="modal-content cv-modal-content" style="border-radius: 24px; border: none; box-shadow: 0 25px 100px rgba(0, 0, 0, 0.3);">
 
                                 <!-- ✅ HEADER CV -->
-                                <div class="modal-header cv-modal-header">
-                                    <div class="d-flex align-items-center gap-3 flex-grow-1">
+                                <div class="modal-header cv-modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 28px; display: flex; align-items: center; justify-content: space-between; color: white; border-radius: 24px 24px 0 0;">
+                                    <div class="d-flex align-items: center gap-3 flex-grow-1">
                                         <img src="{{ $applicant->avatar ? asset('assets/img/avt/'.$applicant->avatar) : asset('assets/img/avt/default-avatar.png') }}"
                                             alt="Avatar"
-                                            class="cv-avatar rounded-circle">
+                                            style="width: 100px; height: 100px; border-radius: 50%; border: 4px solid white; object-fit: cover;">
                                         <div class="text-white">
-                                            <h5 class="modal-title fw-bold mb-0" id="viewCVLabel">
+                                            <h5 class="modal-title fw-bold mb-1" id="viewCVLabel" style="font-size: 24px;">
                                                 {{ $applicant->hoten_uv ?? 'Họ tên ứng viên' }}
                                             </h5>
-                                            <p class="mb-0 opacity-85">
+                                            <p class="mb-0 opacity-90" style="font-size: 16px;">
                                                 <i class="bi bi-briefcase-fill me-1"></i>{{ $applicant->vitriungtuyen ?? 'Chức danh' }}
                                             </p>
                                         </div>
                                     </div>
-                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" style="width: 40px; height: 40px;"></button>
                                 </div>
 
-                                <!-- ✅ BODY CV -->
-                                <div class="modal-body cv-modal-body p-0" style="max-height: 80vh; overflow-y: auto;">
-                                    <div class="row g-0">
+                                <!-- ✅ BODY CV - TWO COLUMN LAYOUT -->
+                                <div class="modal-body cv-modal-body p-0" style="max-height: 80vh; overflow-y: auto; background: #f8fafc;">
+                                    <div style="display: grid; grid-template-columns: 300px 1fr; gap: 0; padding: 28px;">
 
                                         <!-- ===== CỘT TRÁI: SIDEBAR ===== -->
-                                        <div class="col-md-3 cv-sidebar p-4 border-end">
+                                        <div class="cv-sidebar" style="padding-right: 24px; border-right: 1px solid #e5e7eb;">
 
                                             <!-- Avatar -->
-                                            <div class="text-center mb-4">
+                                            <div style="text-align: center; margin-bottom: 24px;">
                                                 <img src="{{ $applicant->avatar ? asset('assets/img/avt/'.$applicant->avatar) : asset('assets/img/avt/default-avatar.png') }}"
                                                     alt="Avatar"
-                                                    class="cv-avatar rounded-circle">
+                                                    style="width: 140px; height: 140px; border-radius: 50%; border: 5px solid #667eea; object-fit: cover; box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3); display: inline-block;">
                                                 <h5 class="fw-bold mt-3 mb-1">{{ $applicant->hoten_uv ?? 'N/A' }}</h5>
                                                 <p class="text-muted small mb-0">{{ $applicant->vitriungtuyen ?? 'N/A' }}</p>
                                             </div>
@@ -2045,47 +2047,61 @@
                                             <hr class="my-3">
 
                                             <!-- ===== THÔNG TIN LIÊN HỆ ===== -->
-                                            <h6 class="cv-section-title">Thông tin</h6>
+                                            <h6 class="cv-section-title" style="font-size: 13px; font-weight: 700; color: #1f2937; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #667eea; padding-bottom: 8px;">
+                                                <i class="bi bi-info-circle" style="color: #667eea;"></i> Thông tin
+                                            </h6>
 
                                             @if(Auth::user()->email)
-                                            <div class="cv-info-item">
-                                                <i class="bi bi-envelope"></i>
-                                                <div>
-                                                    <small class="cv-info-label">Email</small>
-                                                    <small class="cv-info-value">{{ Auth::user()->email }}</small>
+                                            <div class="cv-info-item" style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; display: flex; align-items: flex-start; gap: 8px;">
+                                                <i class="bi bi-envelope" style="color: #667eea; margin-top: 2px;"></i>
+                                                <div style="font-size: 12px;">
+                                                    <small class="cv-info-label" style="color: #6b7280; font-size: 11px; font-weight: 600; text-transform: uppercase; display: block; margin-bottom: 2px;">Email</small>
+                                                    <small class="cv-info-value" style="color: #1f2937; font-weight: 500; word-break: break-all;">{{ Auth::user()->email }}</small>
                                                 </div>
                                             </div>
                                             @endif
 
                                             @if($applicant->sdt_uv)
-                                            <div class="cv-info-item">
-                                                <i class="bi bi-telephone"></i>
-                                                <div>
-                                                    <small class="cv-info-label">Điện thoại</small>
-                                                    <small class="cv-info-value">{{ $applicant->sdt_uv }}</small>
+                                            <div class="cv-info-item" style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; display: flex; align-items: flex-start; gap: 8px;">
+                                                <i class="bi bi-telephone" style="color: #667eea; margin-top: 2px;"></i>
+                                                <div style="font-size: 12px;">
+                                                    <small class="cv-info-label" style="color: #6b7280; font-size: 11px; font-weight: 600; text-transform: uppercase; display: block; margin-bottom: 2px;">Điện thoại</small>
+                                                    <small class="cv-info-value" style="color: #1f2937; font-weight: 500;">{{ $applicant->sdt_uv }}</small>
                                                 </div>
                                             </div>
                                             @endif
 
                                             @if($applicant->diachi_uv)
-                                            <div class="cv-info-item">
-                                                <i class="bi bi-geo-alt"></i>
-                                                <div>
-                                                    <small class="cv-info-label">Địa chỉ</small>
-                                                    <small class="cv-info-value">{{ $applicant->diachi_uv }}</small>
+                                            <div class="cv-info-item" style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; display: flex; align-items: flex-start; gap: 8px;">
+                                                <i class="bi bi-geo-alt" style="color: #667eea; margin-top: 2px;"></i>
+                                                <div style="font-size: 12px;">
+                                                    <small class="cv-info-label" style="color: #6b7280; font-size: 11px; font-weight: 600; text-transform: uppercase; display: block; margin-bottom: 2px;">Địa chỉ</small>
+                                                    <small class="cv-info-value" style="color: #1f2937; font-weight: 500;">{{ $applicant->diachi_uv }}</small>
                                                 </div>
                                             </div>
                                             @endif
 
-                                            <!-- ✅ MỨC LƯONG MONG MUON -->
+                                            @if($applicant->ngaysinh)
+                                            <div class="cv-info-item" style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; display: flex; align-items: flex-start; gap: 8px;">
+                                                <i class="bi bi-calendar" style="color: #667eea; margin-top: 2px;"></i>
+                                                <div style="font-size: 12px;">
+                                                    <small class="cv-info-label" style="color: #6b7280; font-size: 11px; font-weight: 600; text-transform: uppercase; display: block; margin-bottom: 2px;">Ngày sinh</small>
+                                                    <small class="cv-info-value" style="color: #1f2937; font-weight: 500;">{{ date('d/m/Y', strtotime($applicant->ngaysinh)) }}</small>
+                                                </div>
+                                            </div>
+                                            @endif
+
+                                            <!-- ✅ MỨC LƯƠNG MONG MUỐN -->
                                             @if($applicant->mucluong_mongmuon)
                                             <hr class="my-3">
-                                            <h6 class="cv-section-title">Mức lương</h6>
-                                            <div class="cv-info-item">
-                                                <i class="bi bi-cash-coin"></i>
-                                                <div>
-                                                    <small class="cv-info-label">Mong muốn</small>
-                                                    <small class="cv-info-value text-success fw-bold">{{ $applicant->mucluong_mongmuon }}</small>
+                                            <h6 class="cv-section-title" style="font-size: 13px; font-weight: 700; color: #1f2937; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #10b981; padding-bottom: 8px;">
+                                                <i class="bi bi-cash-coin" style="color: #10b981;"></i> Mức lương
+                                            </h6>
+                                            <div class="cv-info-item" style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; display: flex; align-items: flex-start; gap: 8px;">
+                                                <i class="bi bi-cash-coin" style="color: #10b981; margin-top: 2px;"></i>
+                                                <div style="font-size: 12px;">
+                                                    <small class="cv-info-label" style="color: #6b7280; font-size: 11px; font-weight: 600; text-transform: uppercase; display: block; margin-bottom: 2px;">Mong muốn</small>
+                                                    <small class="cv-info-value" style="color: #059669; font-weight: 700;">{{ $applicant->mucluong_mongmuon }}</small>
                                                 </div>
                                             </div>
                                             @endif
@@ -2093,14 +2109,32 @@
                                             <!-- ===== NGOẠI NGỮ ===== -->
                                             @if(isset($ngoaiNgu) && $ngoaiNgu->count() > 0)
                                             <hr class="my-3">
-                                            <h6 class="cv-section-title">Ngoại ngữ</h6>
+                                            <h6 class="cv-section-title" style="font-size: 13px; font-weight: 700; color: #1f2937; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #f59e0b; padding-bottom: 8px;">
+                                                <i class="bi bi-translate" style="color: #f59e0b;"></i> Ngoại ngữ
+                                            </h6>
                                             @foreach($ngoaiNgu as $nn)
-                                            <div class="cv-info-item">
-                                                <i class="bi bi-translate"></i>
-                                                <div>
-                                                    <small class="cv-info-label">{{ $nn->ten_ngoai_ngu }}</small>
-                                                    <small class="cv-info-value">{{ $nn->trinh_do }}</small>
+                                            <div class="cv-info-item" style="padding: 10px 0; border-bottom: 1px solid #e5e7eb; display: flex; align-items: flex-start; gap: 8px;">
+                                                <i class="bi bi-translate" style="color: #f59e0b; margin-top: 2px;"></i>
+                                                <div style="font-size: 12px;">
+                                                    <small class="cv-info-label" style="color: #6b7280; font-size: 11px; font-weight: 600; text-transform: uppercase; display: block; margin-bottom: 2px;">{{ $nn->ten_ngoai_ngu }}</small>
+                                                    <small class="cv-info-value" style="color: #1f2937; font-weight: 500;">{{ $nn->trinh_do }}</small>
                                                 </div>
+                                            </div>
+                                            @endforeach
+                                            @endif
+
+                                            <!-- ===== KỸ NĂNG NỔI BẬT ===== -->
+                                            @if(isset($kynang) && $kynang->count() > 0)
+                                            <hr class="my-3">
+                                            <h6 class="cv-section-title" style="font-size: 13px; font-weight: 700; color: #1f2937; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 2px solid #667eea; padding-bottom: 8px;">
+                                                <i class="bi bi-star" style="color: #667eea;"></i> Kỹ năng
+                                            </h6>
+                                            @foreach($kynang->take(6) as $kn)
+                                            <div style="padding: 8px 12px; background: linear-gradient(135deg, #e0e7ff 0%, #f3e8ff 100%); border-radius: 8px; border-left: 3px solid #667eea; margin-bottom: 8px; font-size: 12px;">
+                                                <p style="margin: 0; color: #4f46e5; font-weight: 600;">{{ $kn->ten_ky_nang }}</p>
+                                                @if($kn->nam_kinh_nghiem)
+                                                <small style="color: #9333ea; display: block; margin-top: 2px;">⚡ {{ $kn->nam_kinh_nghiem }} năm</small>
+                                                @endif
                                             </div>
                                             @endforeach
                                             @endif
@@ -2108,15 +2142,16 @@
                                         </div>
 
                                         <!-- ===== CỘT PHẢI: NỘI DUNG CV ===== -->
-                                        <div class="col-md-9 p-4">
+                                        <div class="col-md-9 p-0" style="padding-left: 24px !important;">
 
                                             <!-- ===== GIỚI THIỆU BẢN THÂN ===== -->
                                             @if($applicant->gioithieu)
-                                            <div class="cv-content-section">
-                                                <h5 class="cv-section-title">
-                                                    <i class="bi bi-person me-2"></i>Giới thiệu bản thân
+                                            <div style="margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid #e5e7eb;">
+                                                <h5 style="font-size: 15px; font-weight: 700; color: #1f2937; margin: 0 0 12px 0; display: flex; align-items: center; gap: 8px; border-bottom: 3px solid #667eea; padding-bottom: 8px;">
+                                                    <i class="bi bi-person" style="color: #667eea;"></i>
+                                                    Giới thiệu bản thân
                                                 </h5>
-                                                <p class="cv-description">
+                                                <p style="color: #374151; line-height: 1.8; margin: 0; white-space: pre-line; font-size: 14px;">
                                                     {!! nl2br(e($applicant->gioithieu)) !!}
                                                 </p>
                                             </div>
@@ -2124,29 +2159,30 @@
 
                                             <!-- ===== KINH NGHIỆM LÀM VIỆC ===== -->
                                             @if(isset($kinhnghiem) && $kinhnghiem->count() > 0)
-                                            <div class="cv-content-section">
-                                                <h5 class="cv-section-title">
-                                                    <i class="bi bi-briefcase me-2"></i>Kinh nghiệm làm việc
+                                            <div style="margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid #e5e7eb;">
+                                                <h5 style="font-size: 15px; font-weight: 700; color: #1f2937; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px; border-bottom: 3px solid #667eea; padding-bottom: 8px;">
+                                                    <i class="bi bi-briefcase" style="color: #667eea;"></i>
+                                                    Kinh nghiệm làm việc
                                                 </h5>
                                                 @foreach($kinhnghiem as $item)
-                                                <div class="cv-timeline-item">
-                                                    <div class="cv-job-title">{{ $item->chucdanh ?? 'N/A' }}</div>
-                                                    <div class="cv-company">{{ $item->congty ?? 'N/A' }}</div>
-                                                    <div class="cv-date">
-                                                        <i class="bi bi-calendar-event me-1"></i>
+                                                <div style="padding-left: 20px; border-left: 3px solid #667eea; position: relative; padding-bottom: 18px; margin-bottom: 18px;">
+                                                    <div style="position: absolute; left: -8px; top: 4px; width: 12px; height: 12px; background: #667eea; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 2px #667eea;"></div>
+
+                                                    <h6 style="font-size: 15px; font-weight: 700; color: #1f2937; margin: 0 0 6px 0;">{{ $item->chucdanh ?? 'N/A' }}</h6>
+                                                    <p style="font-size: 14px; color: #667eea; font-weight: 600; margin: 0 0 8px 0;">{{ $item->congty ?? 'N/A' }}</p>
+                                                    <p style="font-size: 12px; color: #6b7280; margin: 0 0 12px 0;">
+                                                        <i class="bi bi-calendar"></i>
                                                         {{ \Carbon\Carbon::parse($item->tu_ngay)->format('m/Y') }} -
                                                         {{ $item->dang_lam_viec ? '<span class="badge bg-success text-white">Hiện tại</span>' : \Carbon\Carbon::parse($item->den_ngay)->format('m/Y') }}
-                                                    </div>
+                                                    </p>
                                                     @if($item->mota)
-                                                    <div class="cv-description mb-2">
-                                                        <strong>Mô tả:</strong><br>
-                                                        {!! nl2br(e($item->mota)) !!}
+                                                    <div style="font-size: 13px; color: #374151; line-height: 1.6; margin: 0 0 8px 0; white-space: pre-line;">
+                                                        <strong>Mô tả:</strong> {!! nl2br(e($item->mota)) !!}
                                                     </div>
                                                     @endif
                                                     @if($item->duan)
-                                                    <div class="cv-description">
-                                                        <strong>Dự án tham gia:</strong><br>
-                                                        {!! nl2br(e($item->duan)) !!}
+                                                    <div style="font-size: 13px; color: #374151; line-height: 1.6;">
+                                                        <strong>Dự án tham gia:</strong> {!! nl2br(e($item->duan)) !!}
                                                     </div>
                                                     @endif
                                                 </div>
@@ -2156,73 +2192,55 @@
 
                                             <!-- ===== HỌC VẤN ===== -->
                                             @if(isset($hocvan) && $hocvan->count() > 0)
-                                            <div class="cv-content-section">
-                                                <h5 class="cv-section-title">
-                                                    <i class="bi bi-mortarboard me-2"></i>Học vấn
+                                            <div style="margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid #e5e7eb;">
+                                                <h5 style="font-size: 15px; font-weight: 700; color: #1f2937; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px; border-bottom: 3px solid #10b981; padding-bottom: 8px;">
+                                                    <i class="bi bi-mortarboard" style="color: #10b981;"></i>
+                                                    Học vấn
                                                 </h5>
                                                 @foreach($hocvan as $item)
-                                                <div class="cv-timeline-item">
-                                                    <div class="cv-job-title">{{ $item->truong ?? 'N/A' }}</div>
-                                                    <div class="cv-date">
-                                                        {{ $item->nganh ?? 'N/A' }} -
-                                                        <span class="cv-badge" style="background: #e3f2fd; color: #1976d2;">
-                                                            {{ $item->trinhdo ?? 'N/A' }}
-                                                        </span>
-                                                    </div>
-                                                    <div class="cv-date">
-                                                        <i class="bi bi-calendar-event me-1"></i>
+                                                <div style="padding-left: 20px; border-left: 3px solid #10b981; position: relative; padding-bottom: 16px; margin-bottom: 16px;">
+                                                    <div style="position: absolute; left: -8px; top: 4px; width: 12px; height: 12px; background: #10b981; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 2px #10b981;"></div>
+
+                                                    <h6 style="font-size: 15px; font-weight: 700; color: #1f2937; margin: 0 0 6px 0;">{{ $item->truong ?? 'N/A' }}</h6>
+                                                    <p style="font-size: 14px; color: #6b7280; margin: 0 0 6px 0;">{{ $item->nganh ?? 'N/A' }} - <span style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #1e40af; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; display: inline-block;">{{ $item->trinhdo ?? 'N/A' }}</span></p>
+                                                    <p style="font-size: 12px; color: #9ca3af; margin: 0;">
                                                         {{ \Carbon\Carbon::parse($item->tu_ngay)->format('Y') }} -
                                                         {{ $item->dang_hoc ? '<span class="badge bg-success text-white">Hiện tại</span>' : \Carbon\Carbon::parse($item->den_ngay)->format('Y') }}
-                                                    </div>
+                                                    </p>
                                                     @if($item->thongtin_khac)
-                                                    <p class="cv-description fst-italic mb-0">{{ $item->thongtin_khac }}</p>
+                                                    <p style="font-size: 12px; color: #374151; margin-top: 8px; margin-bottom: 0; font-style: italic;">{{ $item->thongtin_khac }}</p>
                                                     @endif
                                                 </div>
                                                 @endforeach
                                             </div>
                                             @endif
 
-                                            <!-- ===== KỸ NĂNG ===== -->
-                                            @if(isset($kynang) && $kynang->count() > 0)
-                                            <div class="cv-content-section">
-                                                <h5 class="cv-section-title">
-                                                    <i class="bi bi-lightbulb me-2"></i>Kỹ năng
-                                                </h5>
-                                                <div class="d-flex flex-wrap gap-2">
-                                                    @foreach($kynang as $item)
-                                                    <span class="cv-badge">
-                                                        {{ $item->ten_ky_nang }}
-                                                        <span style="opacity: 0.85;">({{ $item->nam_kinh_nghiem == 0 ? '< 1 năm' : $item->nam_kinh_nghiem . ' năm' }})</span>
-                                                    </span>
-                                                    @endforeach
-                                                </div>
-                                            </div>
-                                            @endif
-
                                             <!-- ===== DỰ ÁN NỔI BẬT ===== -->
                                             @if(isset($duAn) && $duAn->count() > 0)
-                                            <div class="cv-content-section">
-                                                <h5 class="cv-section-title">
-                                                    <i class="bi bi-kanban me-2"></i>Dự án nổi bật
+                                            <div style="margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid #e5e7eb;">
+                                                <h5 style="font-size: 15px; font-weight: 700; color: #1f2937; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px; border-bottom: 3px solid #06b6d4; padding-bottom: 8px;">
+                                                    <i class="bi bi-kanban" style="color: #06b6d4;"></i>
+                                                    Dự án nổi bật
                                                 </h5>
                                                 @foreach($duAn as $da)
-                                                <div class="cv-timeline-item">
-                                                    <div class="cv-job-title">{{ $da->ten_duan ?? 'N/A' }}</div>
-                                                    <div class="cv-date">
-                                                        <i class="bi bi-calendar-event me-1"></i>
+                                                <div style="padding-left: 20px; border-left: 3px solid #06b6d4; position: relative; padding-bottom: 18px; margin-bottom: 18px;">
+                                                    <div style="position: absolute; left: -8px; top: 4px; width: 12px; height: 12px; background: #06b6d4; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 2px #06b6d4;"></div>
+
+                                                    <h6 style="font-size: 15px; font-weight: 700; color: #1f2937; margin: 0 0 8px 0;">{{ $da->ten_duan ?? 'N/A' }}</h6>
+                                                    <p style="font-size: 12px; color: #9ca3af; margin: 0 0 10px 0;">
+                                                        <i class="bi bi-calendar"></i>
                                                         {{ date('m/Y', strtotime($da->ngay_bat_dau)) }} -
                                                         {{ $da->dang_lam ? '<span class="badge bg-success text-white">Hiện tại</span>' : date('m/Y', strtotime($da->ngay_ket_thuc)) }}
-                                                    </div>
+                                                    </p>
                                                     @if($da->mota_duan)
-                                                    <div class="cv-description mb-2">
+                                                    <p style="font-size: 13px; color: #374151; line-height: 1.6; margin: 0 0 8px 0; white-space: pre-line;">
                                                         {!! nl2br(e($da->mota_duan)) !!}
-                                                    </div>
+                                                    </p>
                                                     @endif
                                                     @if($da->duongdan_website)
-                                                    <p class="mb-0">
-                                                        <a href="{{ $da->duongdan_website }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                            <i class="bi bi-box-arrow-up-right me-1"></i>Xem dự án
-                                                        </a>
+                                                    <p style="margin: 0;">
+                                                        <i class="bi bi-link-45deg" style="color: #06b6d4;"></i>
+                                                        <a href="{{ $da->duongdan_website }}" target="_blank" style="color: #06b6d4; text-decoration: none; font-size: 12px;">Xem dự án →</a>
                                                     </p>
                                                     @endif
                                                 </div>
@@ -2232,27 +2250,25 @@
 
                                             <!-- ===== CHỨNG CHỈ ===== -->
                                             @if(isset($chungChi) && $chungChi->count() > 0)
-                                            <div class="cv-content-section">
-                                                <h5 class="cv-section-title">
-                                                    <i class="bi bi-award me-2"></i>Chứng chỉ
+                                            <div style="margin-bottom: 28px; padding-bottom: 24px; border-bottom: 1px solid #e5e7eb;">
+                                                <h5 style="font-size: 15px; font-weight: 700; color: #1f2937; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px; border-bottom: 3px solid #10b981; padding-bottom: 8px;">
+                                                    <i class="bi bi-award" style="color: #10b981;"></i>
+                                                    Chứng chỉ
                                                 </h5>
                                                 @foreach($chungChi as $cc)
-                                                <div class="cv-timeline-item">
-                                                    <div class="cv-job-title">{{ $cc->ten_chungchi ?? 'N/A' }}</div>
-                                                    <div class="cv-company">{{ $cc->to_chuc ?? 'N/A' }}</div>
-                                                    <div class="cv-date">
-                                                        <i class="bi bi-calendar me-1"></i>{{ date('m/Y', strtotime($cc->thoigian)) }}
-                                                    </div>
+                                                <div style="padding-left: 20px; border-left: 3px solid #10b981; position: relative; padding-bottom: 16px; margin-bottom: 16px;">
+                                                    <div style="position: absolute; left: -8px; top: 4px; width: 12px; height: 12px; background: #10b981; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 2px #10b981;"></div>
+
+                                                    <h6 style="font-size: 15px; font-weight: 700; color: #1f2937; margin: 0 0 6px 0;">{{ $cc->ten_chungchi ?? 'N/A' }}</h6>
+                                                    <p style="font-size: 13px; color: #6b7280; margin: 0 0 4px 0;"><i class="bi bi-building"></i> {{ $cc->to_chuc ?? 'N/A' }}</p>
+                                                    <p style="font-size: 12px; color: #9ca3af; margin: 0 0 6px 0;"><i class="bi bi-calendar"></i> {{ date('m/Y', strtotime($cc->thoigian)) }}</p>
                                                     @if($cc->mo_ta)
-                                                    <div class="cv-description mb-2">
-                                                        {!! nl2br(e($cc->mo_ta)) !!}
-                                                    </div>
+                                                    <p style="font-size: 13px; color: #374151; margin: 0 0 6px 0;">{{ $cc->mo_ta }}</p>
                                                     @endif
                                                     @if($cc->link_chungchi)
-                                                    <p class="mb-0">
-                                                        <a href="{{ $cc->link_chungchi }}" target="_blank" class="btn btn-sm btn-outline-warning">
-                                                            <i class="bi bi-box-arrow-up-right me-1"></i>Xem chứng chỉ
-                                                        </a>
+                                                    <p style="margin: 0;">
+                                                        <i class="bi bi-link-45deg" style="color: #10b981;"></i>
+                                                        <a href="{{ $cc->link_chungchi }}" target="_blank" style="color: #10b981; text-decoration: none; font-size: 12px;">Xem chứng chỉ →</a>
                                                     </p>
                                                     @endif
                                                 </div>
@@ -2262,23 +2278,22 @@
 
                                             <!-- ===== GIẢI THƯỞNG ===== -->
                                             @if(isset($giaiThuong) && $giaiThuong->count() > 0)
-                                            <div class="cv-content-section">
-                                                <h5 class="cv-section-title">
-                                                    <i class="bi bi-trophy me-2"></i>Giải thưởng
+                                            <div>
+                                                <h5 style="font-size: 15px; font-weight: 700; color: #1f2937; margin: 0 0 16px 0; display: flex; align-items: center; gap: 8px; border-bottom: 3px solid #f59e0b; padding-bottom: 8px;">
+                                                    <i class="bi bi-trophy" style="color: #f59e0b;"></i>
+                                                    Giải thưởng
                                                 </h5>
                                                 @foreach($giaiThuong as $gt)
-                                                <div class="cv-timeline-item">
-                                                    <div class="cv-job-title">
-                                                        <i class="bi bi-trophy-fill text-warning me-2"></i>{{ $gt->ten_giaithuong ?? 'N/A' }}
-                                                    </div>
-                                                    <div class="cv-company">{{ $gt->to_chuc ?? 'N/A' }}</div>
-                                                    <div class="cv-date">
-                                                        <i class="bi bi-calendar-event me-1"></i>{{ date('m/Y', strtotime($gt->thoigian ?? now())) }}
-                                                    </div>
+                                                <div style="padding-left: 20px; border-left: 3px solid #f59e0b; position: relative; padding-bottom: 16px; margin-bottom: 16px;">
+                                                    <div style="position: absolute; left: -8px; top: 4px; width: 12px; height: 12px; background: #f59e0b; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 0 2px #f59e0b;"></div>
+
+                                                    <h6 style="font-size: 15px; font-weight: 700; color: #1f2937; margin: 0 0 6px 0;">
+                                                        <i class="bi bi-trophy-fill" style="color: #f59e0b;"></i> {{ $gt->ten_giaithuong ?? 'N/A' }}
+                                                    </h6>
+                                                    <p style="font-size: 13px; color: #6b7280; margin: 0 0 4px 0;"><i class="bi bi-building"></i> {{ $gt->to_chuc ?? 'N/A' }}</p>
+                                                    <p style="font-size: 12px; color: #9ca3af; margin: 0 0 6px 0;"><i class="bi bi-calendar-event"></i> {{ date('m/Y', strtotime($gt->thoigian ?? now())) }}</p>
                                                     @if($gt->mo_ta)
-                                                    <div class="cv-description">
-                                                        {!! nl2br(e($gt->mo_ta)) !!}
-                                                    </div>
+                                                    <p style="font-size: 13px; color: #374151; margin: 0;">{{ $gt->mo_ta }}</p>
                                                     @endif
                                                 </div>
                                                 @endforeach
@@ -2290,15 +2305,12 @@
                                 </div>
 
                                 <!-- ✅ FOOTER CV -->
-                                <div class="modal-footer cv-modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                        <i class="bi bi-x-lg me-1"></i>Đóng
+                                <div class="modal-footer cv-modal-footer" style="background: white; border-top: 1px solid #e5e7eb; border-radius: 0 0 24px 24px; padding: 20px 28px; display: flex; gap: 12px; justify-content: flex-end;">
+                                    <button type="button" class="btn btn-light" data-bs-dismiss="modal" style="border-radius: 10px; font-weight: 600; padding: 10px 20px; border: 1px solid #e5e7eb; cursor: pointer; transition: all 0.3s;">
+                                        <i class="bi bi-x"></i> Đóng
                                     </button>
-                                    <button type="button" class="btn btn-outline-primary" onclick="window.print()">
-                                        <i class="bi bi-printer me-1"></i>In CV
-                                    </button>
-                                    <button type="button" class="btn btn-primary">
-                                        <i class="bi bi-download me-1"></i>Tải PDF
+                                    <button type="button" class="btn btn-light" onclick="window.print()" style="border-radius: 10px; font-weight: 600; padding: 10px 20px; border: 1px solid #e5e7eb; cursor: pointer; transition: all 0.3s;">
+                                        <i class="bi bi-printer"></i> In CV
                                     </button>
                                 </div>
 

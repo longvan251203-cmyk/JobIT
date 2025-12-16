@@ -599,6 +599,11 @@
 
         <!-- Tab Content: Applicants -->
         <div id="applicants" class="tab-content active">
+            <!-- 🆕 DEBUG: Show applications count -->
+            <div style="background: #f0f0f0; padding: 10px; margin-bottom: 10px; border-radius: 5px; font-size: 12px; color: #666;">
+                📊 Debug: Tổng ứng viên ứng tuyển (whereNull job_invitation_id): <strong>{{ $applications->count() }}</strong>
+                <br />Job ID: <strong>{{ $job->job_id }}</strong>
+            </div>
             <div class="table-container">
                 <table>
                     <thead>
@@ -717,25 +722,39 @@
                                 </div>
                             </td>
                             <td>
-                                <div style="font-size: 14px; color: #374151;">{{ $invitation->applicant->email_uv ?? 'N/A' }}</div>
+                                <div style="font-size: 14px; color: #374151;">
+                                    {{-- Nếu ứng viên đã chấp nhận + ứng tuyển, dùng email từ Application --}}
+                                    @if($invitation->application)
+                                    {{ $invitation->application->email }}
+                                    @else
+                                    {{ $invitation->applicant->email_uv ?? 'N/A' }}
+                                    @endif
+                                </div>
                             </td>
                             <td>
-                                <div style="font-size: 14px; color: #374151;">{{ $invitation->applicant->sdt_uv ?? 'N/A' }}</div>
+                                <div style="font-size: 14px; color: #374151;">
+                                    {{-- Nếu ứng viên đã chấp nhận + ứng tuyển, dùng sdt từ Application --}}
+                                    @if($invitation->application)
+                                    {{ $invitation->application->sdt }}
+                                    @else
+                                    {{ $invitation->applicant->sdt_uv ?? 'N/A' }}
+                                    @endif
+                                </div>
                             </td>
                             <td>
                                 @switch($invitation->status)
                                 @case('pending')
-                                <span class="status-badge status-cho_xu_ly">
+                                <span class="status-badge status-cho_xu_ly" id="invite-status-{{ $invitation->id }}">
                                     <i class="bi bi-clock-history"></i> Chờ phản hồi
                                 </span>
                                 @break
                                 @case('accepted')
-                                <span class="status-badge status-duoc_chon">
+                                <span class="status-badge status-duoc_chon" id="invite-status-{{ $invitation->id }}">
                                     <i class="bi bi-check-circle"></i> Đã chấp nhận
                                 </span>
                                 @break
                                 @case('rejected')
-                                <span class="status-badge status-khong_phu_hop">
+                                <span class="status-badge status-khong_phu_hop" id="invite-status-{{ $invitation->id }}">
                                     <i class="bi bi-x-circle"></i> Đã từ chối
                                 </span>
                                 @break
@@ -746,6 +765,24 @@
                                     <button class="btn btn-primary" onclick="viewCV('{{ $invitation->id }}', true)">
                                         <i class="bi bi-eye"></i> CV
                                     </button>
+
+                                    @if($invitation->status == 'accepted')
+                                    {{-- Nếu ứng viên đã chấp nhận + ứng tuyển, lấy email/sdt từ Application --}}
+                                    @php
+                                    $displayEmail = $invitation->application ? $invitation->application->email : $invitation->applicant->email_uv;
+                                    $displayName = $invitation->applicant->hoten ?? 'N/A';
+                                    @endphp
+
+                                    <button class="btn btn-success" onclick="openInterviewModalInvited('{{ $invitation->id }}', '{{ $displayName }}', '{{ $displayEmail }}', true)">
+                                        <i class="bi bi-calendar-check"></i> Mời PV
+                                    </button>
+                                    <button class="btn btn-success" onclick="approveApplicantInvited('{{ $invitation->id }}', '{{ $displayName }}', '{{ $displayEmail }}')">
+                                        <i class="bi bi-check-circle"></i> Chọn đậu
+                                    </button>
+                                    <button class="btn btn-danger" onclick="rejectApplicantInvited('{{ $invitation->id }}')">
+                                        <i class="bi bi-x-circle"></i> Từ chối
+                                    </button>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -1190,6 +1227,7 @@
             const time = document.getElementById('interviewTime').value;
             const location = document.getElementById('interviewLocation').value;
             const type = document.querySelector('input[name="interviewType"]:checked').value;
+            const isInvitation = document.getElementById('interviewModal').dataset.isInvitation === '1';
 
             if (!date || !time) {
                 alert('Vui lòng chọn ngày và giờ phỏng vấn');
@@ -1207,7 +1245,12 @@
             btn.innerHTML = '<span class="loading"></span> Đang gửi...';
 
             try {
-                const response = await fetch(`/application/${appId}/send-interview`, {
+                // Chọn endpoint theo loại (application hay invitation)
+                const endpoint = isInvitation ?
+                    `/job-invitation/${appId}/send-interview` :
+                    `/application/${appId}/send-interview`;
+
+                const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1329,6 +1372,7 @@
             const email = document.getElementById('resultEmail').value;
             const note = document.getElementById('resultNote').value;
             const sendEmail = document.getElementById('sendEmailResult').checked;
+            const isInvitation = document.getElementById('resultModal').dataset.isInvitation === '1';
 
             let newStatus = resultType === 'approved' ? 'duoc_chon' : 'khong_phu_hop';
 
@@ -1338,7 +1382,12 @@
             btn.innerHTML = '<span class="loading"></span> Đang xử lý...';
 
             try {
-                const updateResponse = await fetch(`/application/${appId}/update-status`, {
+                // Chọn endpoint theo loại
+                const updateEndpoint = isInvitation ?
+                    `/job-invitation/${appId}/update-result` :
+                    `/application/${appId}/update-status`;
+
+                const updateResponse = await fetch(updateEndpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -1346,7 +1395,8 @@
                         'Accept': 'application/json'
                     },
                     body: JSON.stringify({
-                        status: newStatus
+                        status: newStatus,
+                        result: resultType === 'approved' ? 'approved' : 'rejected'
                     })
                 });
 
@@ -1361,7 +1411,11 @@
                 }
 
                 if (note.trim()) {
-                    await fetch(`/application/${appId}/add-note`, {
+                    const noteEndpoint = isInvitation ?
+                        `/job-invitation/${appId}/add-note` :
+                        `/application/${appId}/add-note`;
+
+                    await fetch(noteEndpoint, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1375,7 +1429,11 @@
                 }
 
                 if (sendEmail) {
-                    await fetch(`/application/${appId}/send-result-email`, {
+                    const emailEndpoint = isInvitation ?
+                        `/job-invitation/${appId}/send-result-email` :
+                        `/application/${appId}/send-result-email`;
+
+                    await fetch(emailEndpoint, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1405,6 +1463,83 @@
                 alert('❌ ' + (error.message || 'Có lỗi xảy ra'));
                 btn.disabled = false;
                 btn.innerHTML = originalHTML;
+            }
+        }
+
+        // =====================================
+        // INVITED APPLICANT ACTIONS
+        // =====================================
+        let invitationIdForResult = null;
+
+        function openInterviewModalInvited(invitationId, candidateName, candidateEmail, isInvitation = true) {
+            document.getElementById('interviewAppId').value = invitationId;
+            document.getElementById('interviewEmail').value = candidateEmail;
+            document.getElementById('interviewCandidateName').textContent = candidateName;
+            document.getElementById('interviewDate').value = '';
+            document.getElementById('interviewTime').value = '09:00';
+            document.getElementById('interviewLocation').value = '';
+            // Đặt flag để biết có phải invitation không
+            document.getElementById('interviewModal').dataset.isInvitation = isInvitation ? '1' : '0';
+            openModal('interviewModal');
+        }
+
+        function approveApplicantInvited(invitationId, candidateName, candidateEmail) {
+            invitationIdForResult = invitationId;
+            openResultModalInvited(invitationId, candidateName, candidateEmail, 'approved');
+        }
+
+        function openResultModalInvited(invitationId, candidateName, candidateEmail, type) {
+            resultType = type;
+            document.getElementById('resultAppId').value = invitationId;
+            document.getElementById('resultEmail').value = candidateEmail;
+            document.getElementById('resultName').value = candidateName;
+            document.getElementById('resultCandidateName').textContent = candidateName;
+            document.getElementById('resultNote').value = '';
+            document.getElementById('sendEmailResult').checked = true;
+            // Đặt flag để biết có phải invitation không
+            document.getElementById('resultModal').dataset.isInvitation = '1';
+
+            const btn = document.getElementById('resultBtn');
+            const btnText = document.getElementById('resultBtnText');
+            if (type === 'approved') {
+                btn.className = 'btn btn-success';
+                btnText.textContent = 'Xác nhận chọn đậu';
+            } else {
+                btn.className = 'btn btn-danger';
+                btnText.textContent = 'Xác nhận từ chối';
+            }
+
+            openModal('resultModal');
+        }
+
+        async function rejectApplicantInvited(invitationId) {
+            if (!confirm('Bạn có chắc chắn muốn từ chối ứng viên này?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/job-invitation/${invitationId}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Có lỗi xảy ra');
+                }
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('✅ Đã từ chối ứng viên!');
+                    location.reload();
+                } else {
+                    alert('❌ ' + (data.message || 'Có lỗi xảy ra'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Có lỗi xảy ra khi từ chối ứng viên');
             }
         }
 

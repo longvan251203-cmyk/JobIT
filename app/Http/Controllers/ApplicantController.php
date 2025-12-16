@@ -850,6 +850,37 @@ class ApplicantController extends Controller
             ->with('success', 'Đã xoá CV thành công.');
     }
 
+    // ✅ API: Get applicant's CV info (for apply modal)
+    public function getApplicantCV()
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Vui lòng đăng nhập'
+            ], 401);
+        }
+
+        $applicant = DB::table('applicants')->where('user_id', $user->id)->first();
+
+        if (!$applicant || !$applicant->hosodinhkem) {
+            return response()->json([
+                'success' => true,
+                'data' => null
+            ]);
+        }
+
+        $fileName = basename($applicant->hosodinhkem);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'filename' => $fileName,
+                'path' => $applicant->hosodinhkem
+            ]
+        ]);
+    }
+
 
     // ============ XEM CV ============
 

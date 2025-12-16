@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Applicant;
 use App\Models\JobPost;
 use App\Models\JobInvitation;
+use App\Models\JobRecommendation;
 use App\Services\JobRecommendationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -136,6 +137,82 @@ class EmployerCandidatesController extends Controller
             return response()->json([
                 'error' => 'Không tìm thấy ứng viên'
             ], 404);
+        }
+    }
+
+    /**
+     * ✅ API: Lấy matched jobs từ DB (TAB GỢI Ý)
+     * Chỉ hiển thị job phù hợp từ tính toán trước
+     */
+    public function getMatchedJobsFromDB(Request $request, $applicantId)
+    {
+        try {
+            $user = Auth::user();
+            $employer = $user->employer;
+            $company = $employer?->company;
+
+            if (!$company) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy thông tin công ty'
+                ], 404);
+            }
+
+            // 💾 LẤY MATCHED JOBS TỪ DATABASE
+            $matchedJobs = JobRecommendation::where('applicant_id', $applicantId)
+                ->where('score', '>=', 60) // Chỉ job có score >= 60%
+                ->with(['jobPost' => function ($query) use ($company) {
+                    $query->where('companies_id', $company->companies_id); // Chỉ job của công ty này
+                }])
+                ->orderByDesc('score') // Sắp xếp điểm cao nhất
+                ->get();
+
+            // Filter ra job không thuộc công ty
+            $matchedJobs = $matchedJobs->filter(function ($rec) {
+                return $rec->jobPost !== null;
+            });
+
+            // Format data để hiển thị
+            $formattedJobs = $matchedJobs->map(function ($rec) {
+                $job = $rec->jobPost;
+                return [
+                    'id' => $job->job_id,
+                    'job_title' => $job->job_title,
+                    'location' => $job->province ?? $job->location ?? 'Không xác định',
+                    'salary_min' => $job->salary_min,
+                    'salary_max' => $job->salary_max,
+                    'salary_type' => $job->salary_type,
+                    'quantity' => $job->quantity,
+                    'deadline' => $job->deadline,
+                    'working_type' => $job->working_type,
+                    'level' => $job->level,
+                    'match_score' => round($rec->score), // 95%, 92%, 80%
+                    'match_details' => json_decode($rec->match_details, true), // Chi tiết {skills, location, position, ...}
+                    'received_count' => $job->applicant_count ?? 0,
+                    'is_full' => false,
+                    'required_skills' => $job->hashtags?->pluck('tag_name')->toArray() ?? [],
+                    'company_name' => $job->company->tencty ?? 'N/A',
+                    'company_logo' => $job->company->logo ?? null,
+                    'is_matched' => true // Flag để biết là từ matched
+                ];
+            })->values()->toArray();
+
+            return response()->json([
+                'success' => true,
+                'jobs' => $formattedJobs,
+                'total' => count($formattedJobs),
+                'is_matched' => true
+            ]);
+        } catch (\Exception $e) {
+            Log::error('❌ Error getting matched jobs from DB', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
         }
     }
 

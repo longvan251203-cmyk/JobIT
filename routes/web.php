@@ -407,6 +407,11 @@ Route::middleware(['auth'])->prefix('employer')->name('employer.')->group(functi
 
     // Download CV
     Route::get('/candidates/{id}/download-cv', [CandidatesController::class, 'downloadCV'])->name('candidates.download');
+
+    // ✅ LẤY MATCHED JOBS TỪ DB (TAB GỢI Ý)
+    Route::get('/candidates/{applicantId}/matched-jobs', [CandidatesController::class, 'getMatchedJobsFromDB'])
+        ->name('candidates.matched-jobs');
+
     // Check invitation status
     Route::get(
         '/candidates/{candidateId}/job/{jobId}/invitation-status',
@@ -417,6 +422,8 @@ Route::middleware(['auth'])->prefix('employer')->name('employer.')->group(functi
     // Job Invitations ✅ THÊM 2 ROUTE NÀY
     Route::get('/jobs/active-unfilled', [CandidatesController::class, 'getActiveUnfilled']);
     Route::post('/candidates/{candidateId}/invite', [CandidatesController::class, 'sendInvite']);
+    // ✅ API lấy lịch sử ứng viên
+    Route::get('/api/applicants-history', [CandidatesController::class, 'getApplicantsHistory']);
 });
 // Thêm vào routes/web.php
 

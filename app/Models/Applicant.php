@@ -88,6 +88,15 @@ class Applicant extends Model
         return $this->hasMany(NgoaiNgu::class, 'applicant_id', 'id_uv')
             ->orderBy('created_at', 'desc');
     }
+
+    /**
+     * Relationship với Job Invitations
+     */
+    public function jobInvitations()
+    {
+        return $this->hasMany(JobInvitation::class, 'applicant_id', 'id_uv');
+    }
+
     public function duan()
     {
         return $this->hasMany(DuAn::class, 'applicant_id', 'id_uv')

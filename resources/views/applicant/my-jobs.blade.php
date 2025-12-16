@@ -1096,11 +1096,7 @@
                                         <i class="bi bi-envelope"></i> Lời mời công việc
                                     </a>
                                 </li>
-                                <li class="nav-item mb-2">
-                                    <a href="#" class="nav-link text-dark">
-                                        <i class="bi bi-bell"></i> Thông báo
-                                    </a>
-                                </li>
+
                                 <li class="nav-item">
                                     <a href="#" class="nav-link text-dark">
                                         <i class="bi bi-gear"></i> Cài đặt

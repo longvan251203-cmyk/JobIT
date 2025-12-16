@@ -6,6 +6,7 @@ use App\Models\Applicant;
 use App\Models\JobPost;
 use App\Models\JobInvitation;
 use App\Models\Notification;
+use App\Models\JobRecommendation;
 use App\Services\JobRecommendationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -254,7 +255,8 @@ class CandidatesController extends Controller
                             ->getRecommendedApplicantsForCompany($companyId, 12);
 
                         Log::info('✅ Recommendations result:', [
-                            'count' => count($recommendedApplicants)
+                            'count' => count($recommendedApplicants),
+                            'data' => json_encode($recommendedApplicants, JSON_UNESCAPED_UNICODE)
                         ]);
                     } else {
                         Log::warning('⚠️ Company ID is NULL');
@@ -263,7 +265,8 @@ class CandidatesController extends Controller
                 } catch (\Exception $e) {
                     Log::error('❌ Error getting recommendations', [
                         'message' => $e->getMessage(),
-                        'line' => $e->getLine()
+                        'line' => $e->getLine(),
+                        'trace' => $e->getTraceAsString()
                     ]);
                     $recommendedApplicants = [];
                 }
@@ -620,5 +623,325 @@ class CandidatesController extends Controller
                 'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * ✅ API: Lấy matched jobs từ DB (TAB GỢI Ý)
+     * Chỉ hiển thị job phù hợp từ tính toán trước
+     * Route: GET /employer/candidates/{applicantId}/matched-jobs
+     */
+    public function getMatchedJobsFromDB($applicantId)
+    {
+        try {
+            $user = Auth::user();
+            $employer = $user->employer;
+
+            if (!$employer || !$employer->companies_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy thông tin công ty'
+                ], 404);
+            }
+
+            $companyId = $employer->companies_id;
+
+            // 💾 LẤY MATCHED JOBS TỪ DATABASE
+            $matchedJobs = JobRecommendation::where('applicant_id', $applicantId)
+                ->where('score', '>=', 60) // Chỉ job có score >= 60%
+                ->with(['job' => function ($query) use ($companyId) {
+                    $query->where('companies_id', $companyId) // Chỉ job của công ty này
+                        ->with(['company', 'hashtags']);
+                }])
+                ->orderByDesc('score') // Sắp xếp điểm cao nhất
+                ->get();
+
+            // Filter ra job không thuộc công ty
+            $matchedJobs = $matchedJobs->filter(function ($rec) {
+                return $rec->job !== null;
+            })->values();
+
+            // Format data để hiển thị
+            $formattedJobs = $matchedJobs->map(function ($rec) {
+                $job = $rec->job;
+                $matchDetails = is_string($rec->match_details)
+                    ? json_decode($rec->match_details, true)
+                    : $rec->match_details;
+
+                // Format mức lương
+                $salaryMin = (int)($job->salary_min ?? 0);
+                $salaryMax = (int)($job->salary_max ?? 0);
+                $salaryDisplay = '';
+                if ($salaryMin > 0 && $salaryMax > 0) {
+                    $salaryDisplay = number_format($salaryMin / 1000000, 0) . 'M - ' . number_format($salaryMax / 1000000, 0) . 'M';
+                } elseif ($job->salary_type === 'negotiable') {
+                    $salaryDisplay = 'Thỏa thuận';
+                }
+
+                return [
+                    'id' => $job->job_id,
+                    'job_title' => $job->title,  // ✅ FIX: title chứ không phải job_title
+                    'location' => $job->province ?? $job->location ?? 'Không xác định',
+                    'salary_min' => $salaryMin,
+                    'salary_max' => $salaryMax,
+                    'salary_display' => $salaryDisplay,  // ✅ Hiển thị "5M - 8M"
+                    'salary_type' => $job->salary_type ?? 'Tháng',
+                    'quantity' => $job->quantity ?? 0,
+                    'deadline' => $job->deadline,
+                    'working_type' => $job->working_type ?? 'Full-time',
+                    'level' => $job->level ?? 'Không xác định',
+                    'match_score' => round($rec->score), // 95%, 92%, 80%
+                    'match_details' => $matchDetails ?? [], // Chi tiết {skills, location, position, experience, salary, language}
+                    'received_count' => $job->applicant_count ?? 0,
+                    'is_full' => false,
+                    'required_skills' => $job->hashtags?->pluck('tag_name')->toArray() ?? [],
+                    'company_name' => $job->company->tencty ?? 'N/A',
+                    'company_logo' => $job->company->logo ?? null,
+                    'is_matched' => true // Flag để biết là từ matched
+                ];
+            })->values()->toArray();
+
+            Log::info('✅ Matched jobs retrieved from DB', [
+                'applicant_id' => $applicantId,
+                'total' => count($formattedJobs)
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'jobs' => $formattedJobs,
+                'total' => count($formattedJobs),
+                'is_matched' => true
+            ]);
+        } catch (\Exception $e) {
+            Log::error('❌ Error getting matched jobs from DB', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * 📋 Lấy danh sách ứng viên đã ứng tuyển/được mời của công ty
+     * Route: GET /api/employer/applicants-history
+     */
+    public function getApplicantsHistory(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            $employer = $user->employer;
+
+            if (!$employer || !$employer->companies_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Không tìm thấy thông tin công ty'
+                ], 404);
+            }
+
+            $companyId = $employer->companies_id;
+            $filter = $request->get('filter', 'all'); // all, applied, invited, interviewed, hired, rejected
+            $keyword = $request->get('keyword', '');
+            $sort = $request->get('sort', 'recent'); // recent, name, most_applied
+
+            // Lấy tất cả job của công ty
+            $jobIds = JobPost::where('companies_id', $companyId)
+                ->pluck('job_id')
+                ->toArray();
+
+            if (empty($jobIds)) {
+                return response()->json([
+                    'success' => true,
+                    'applicants' => [],
+                    'total' => 0
+                ]);
+            }
+
+            // Lấy ứng viên từ applications hoặc invitations
+            $applicantQuery = Applicant::query();
+
+            // Filter theo trạng thái
+            if ($filter === 'applied') {
+                $applicantQuery->whereHas('applications', function ($q) use ($jobIds) {
+                    $q->whereIn('job_id', $jobIds);
+                });
+            } elseif ($filter === 'invited') {
+                $applicantQuery->whereHas('jobInvitations', function ($q) use ($jobIds) {
+                    $q->whereIn('job_id', $jobIds);
+                });
+            } elseif ($filter === 'interviewed') {
+                $applicantQuery->whereHas('applications', function ($q) use ($jobIds) {
+                    $q->whereIn('job_id', $jobIds)
+                        ->where('trang_thai', 'dang_phong_van');
+                });
+            } elseif ($filter === 'hired') {
+                $applicantQuery->whereHas('applications', function ($q) use ($jobIds) {
+                    $q->whereIn('job_id', $jobIds)
+                        ->where('trang_thai', 'duoc_chon');
+                });
+            } elseif ($filter === 'rejected') {
+                $applicantQuery->whereHas('applications', function ($q) use ($jobIds) {
+                    $q->whereIn('job_id', $jobIds)
+                        ->where('trang_thai', 'tu_choi');
+                });
+            } else {
+                // all - những ứng viên từng ứng tuyển hoặc được mời
+                $applicantQuery->where(function ($q) use ($jobIds) {
+                    $q->whereHas('applications', function ($sub) use ($jobIds) {
+                        $sub->whereIn('job_id', $jobIds);
+                    })->orWhereHas('jobInvitations', function ($sub) use ($jobIds) {
+                        $sub->whereIn('job_id', $jobIds);
+                    });
+                });
+            }
+
+            // Tìm kiếm theo keyword
+            if (!empty($keyword)) {
+                $applicantQuery->where(function ($q) use ($keyword) {
+                    $q->where('hoten_uv', 'like', "%{$keyword}%")
+                        ->orWhere('vitriungtuyen', 'like', "%{$keyword}%")
+                        ->orWhereHas('kynang', function ($subQ) use ($keyword) {
+                            $subQ->where('ten_ky_nang', 'like', "%{$keyword}%");
+                        });
+                });
+            }
+
+            // Sắp xếp
+            if ($sort === 'name') {
+                $applicantQuery->orderBy('hoten_uv', 'asc');
+            } elseif ($sort === 'most_applied') {
+                // Sắp xếp theo số lần ứng tuyển
+                $applicantQuery->withCount(['applications' => function ($q) use ($jobIds) {
+                    $q->whereIn('job_id', $jobIds);
+                }])->orderByDesc('applications_count');
+            } else {
+                // recent - mới nhất
+                $applicantQuery->orderByDesc('created_at');
+            }
+
+            $applicants = $applicantQuery->with(['kynang', 'hocvan', 'kinhnghiem', 'ngoaiNgu'])
+                ->paginate(15);
+
+            // Format dữ liệu
+            $formatted = $applicants->map(function ($applicant) use ($jobIds, $companyId) {
+                // Đếm số lần ứng tuyển
+                $applicationCount = DB::table('applications')
+                    ->where('applicant_id', $applicant->id_uv)
+                    ->whereIn('job_id', $jobIds)
+                    ->count();
+
+                // Đếm số lần được mời
+                $invitationCount = DB::table('job_invitations')
+                    ->where('applicant_id', $applicant->id_uv)
+                    ->whereIn('job_id', $jobIds)
+                    ->count();
+
+                // Lấy trạng thái cuối cùng
+                $lastApplication = DB::table('applications')
+                    ->where('applicant_id', $applicant->id_uv)
+                    ->whereIn('job_id', $jobIds)
+                    ->orderByDesc('created_at')
+                    ->first();
+
+                // Lấy job cuối cùng ứng tuyển
+                $lastJob = null;
+                if ($lastApplication) {
+                    $lastJob = JobPost::find($lastApplication->job_id);
+                }
+
+                // Lấy tất cả job đã ứng tuyển
+                $appliedJobs = DB::table('applications')
+                    ->where('applicant_id', $applicant->id_uv)
+                    ->whereIn('job_id', $jobIds)
+                    ->select('job_id', 'trang_thai', 'created_at')
+                    ->orderByDesc('created_at')
+                    ->get()
+                    ->map(function ($app) {
+                        $job = JobPost::find($app->job_id);
+                        return [
+                            'job_id' => $app->job_id,
+                            'job_title' => $job?->title ?? 'N/A',
+                            'status' => $this->translateStatus($app->trang_thai),
+                            'status_code' => $app->trang_thai,
+                            'applied_at' => $app->created_at,
+                            'status_color' => $this->getStatusColor($app->trang_thai)
+                        ];
+                    })->toArray();
+
+                return [
+                    'id' => $applicant->id_uv,
+                    'name' => $applicant->hoten_uv,
+                    'avatar' => $applicant->avatar ? asset('assets/img/avatars/' . $applicant->avatar) : null,
+                    'position' => $applicant->vitriungtuyen,
+                    'location' => $applicant->diachi_uv,
+                    'email' => $applicant->user?->email ?? 'N/A',
+                    'phone' => $applicant->sdt_uv ?? 'N/A',
+                    'skills' => $applicant->kynang?->pluck('ten_ky_nang')->toArray() ?? [],
+                    'about' => $applicant->gioithieu,
+                    'experience_years' => $applicant->kinhnghiem?->count() ?? 0,
+                    'application_count' => $applicationCount,
+                    'invitation_count' => $invitationCount,
+                    'last_status' => $lastApplication ? $this->translateStatus($lastApplication->trang_thai) : 'Chưa ứng tuyển',
+                    'last_status_code' => $lastApplication?->trang_thai ?? null,
+                    'last_status_color' => $lastApplication ? $this->getStatusColor($lastApplication->trang_thai) : 'gray',
+                    'last_applied_at' => $lastApplication?->created_at,
+                    'last_job_title' => $lastJob?->title ?? 'N/A',
+                    'applied_jobs' => $appliedJobs
+                ];
+            })->toArray();
+
+            return response()->json([
+                'success' => true,
+                'applicants' => $formatted,
+                'pagination' => [
+                    'current_page' => $applicants->currentPage(),
+                    'last_page' => $applicants->lastPage(),
+                    'total' => $applicants->total(),
+                    'per_page' => $applicants->perPage()
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('❌ Error getting applicants history', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * 🔄 Dịch trạng thái ứng tuyển
+     */
+    private function translateStatus($status)
+    {
+        $map = [
+            'cho_xu_ly' => 'Chờ xử lý',
+            'dang_phong_van' => 'Đang phỏng vấn',
+            'duoc_chon' => 'Được chọn',
+            'tu_choi' => 'Từ chối',
+            'da_nhan' => 'Đã nhận việc'
+        ];
+        return $map[$status] ?? $status;
+    }
+
+    /**
+     * 🎨 Lấy màu cho trạng thái
+     */
+    private function getStatusColor($status)
+    {
+        $colors = [
+            'cho_xu_ly' => 'yellow',
+            'dang_phong_van' => 'blue',
+            'duoc_chon' => 'green',
+            'tu_choi' => 'red',
+            'da_nhan' => 'emerald'
+        ];
+        return $colors[$status] ?? 'gray';
     }
 }

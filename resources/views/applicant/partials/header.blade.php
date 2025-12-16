@@ -75,14 +75,14 @@
 
             <div class="user-dropdown">
                 <button class="user-btn" id="userDropdownBtn">
-                    <img src="{{ asset('assets/img/user.png') }}" alt="" class="user-avatar">
+                    <img src="{{ Auth::user()->applicant->avatar ? asset('assets/img/avt/'.Auth::user()->applicant->avatar) : asset('assets/img/avt/default-avatar.png') }}" alt="" class="user-avatar">
                     <span class="user-name">{{ Auth::user()->applicant->hoten_uv ?? Auth::user()->email }}</span>
                     <i class="bi bi-chevron-down"></i>
                 </button>
                 <ul class="user-dropdown-menu" id="userDropdownMenu">
                     <li><a href="{{ route('applicant.profile') }}"><i class="bi bi-person"></i> Hồ sơ</a></li>
-                    <li><a href="#"><i class="bi bi-info-circle"></i> Thông tin cá nhân</a></li>
-                    <li><a href="#"><i class="bi bi-file-earmark-text"></i> Hồ sơ Đính kèm</a></li>
+                    <li><a href="{{ route('applicant.hoso') }}"><i class="bi bi-info-circle"></i> Thông tin cá nhân</a></li>
+                    <li><a href="{{ route('applicant.hoso') }}"><i class="bi bi-file-earmark-text"></i> Hồ sơ đính kèm</a></li>
                     <li>
                         <a href="{{ route('applicant.recommendations') }}">
                             <i class="bi bi-stars"></i>
@@ -93,8 +93,7 @@
                         </a>
                     </li>
                     <li><a href="{{ route('applicant.myJobs') }}"><i class="bi bi-briefcase"></i> Việc làm của tôi</a></li>
-                    <li><a href="#"><i class="bi bi-envelope"></i> Lời mời công việc</a></li>
-                    <li><a href="#"><i class="bi bi-bell"></i> Thông báo</a></li>
+                    <li><a href="{{ route('applicant.jobInvitations') }}"><i class="bi bi-envelope"></i> Lời mời công việc</a></li>
                     <li class="divider"></li>
                     <li>
                         <form action="{{ route('logout') }}" method="POST">
@@ -626,11 +625,16 @@
             // Notification dropdown toggle
             const btnNotifications = document.getElementById('btnNotifications');
             const notificationDropdown = document.getElementById('notificationDropdown');
+            const notificationList = document.getElementById('notificationList');
 
             if (btnNotifications && notificationDropdown) {
                 btnNotifications.addEventListener('click', function(e) {
                     e.stopPropagation();
                     notificationDropdown.classList.toggle('show');
+                    // Load notifications when opening dropdown
+                    if (notificationDropdown.classList.contains('show')) {
+                        loadNotifications();
+                    }
                 });
 
                 document.addEventListener('click', function(e) {
@@ -639,6 +643,109 @@
                     }
                 });
             }
+
+            // Load notifications function
+            async function loadNotifications() {
+                try {
+                    const response = await fetch('/applicant/api/notifications', {
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
+                        }
+                    });
+
+                    if (!response.ok) throw new Error('Failed to load notifications');
+
+                    const data = await response.json();
+                    const notifications = data.data || [];
+
+                    // Update badge count
+                    const unreadCount = notifications.filter(n => !n.is_read).length;
+                    const badge = document.getElementById('notificationBadge');
+                    if (badge) {
+                        if (unreadCount > 0) {
+                            badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                            badge.classList.remove('d-none');
+                        } else {
+                            badge.classList.add('d-none');
+                        }
+                    }
+
+                    if (notifications.length === 0) {
+                        notificationList.innerHTML = '<div style="padding: 2.5rem 1.5rem; text-align: center; color: #9ca3af;"><i class="bi bi-inbox" style="font-size: 2.5rem; display: block; margin-bottom: 0.75rem; color: #d1d5db;"></i><p style="margin: 0;">Chưa có thông báo nào</p></div>';
+                        return;
+                    }
+
+                    let html = '';
+                    notifications.forEach(notif => {
+                        html += `
+                            <div style="padding: 1rem 1.25rem; border-bottom: 1px solid #e5e7eb; cursor: pointer; transition: all 0.2s ease; ${!notif.is_read ? 'background: #f0f9ff;' : ''}" data-notification-id="${notif.id}">
+                                <div style="display: flex; gap: 1rem; align-items: flex-start;">
+                                    <i class="bi bi-bell-fill" style="font-size: 1.2rem; color: #667eea; flex-shrink: 0; margin-top: 0.25rem;"></i>
+                                    <div style="flex: 1; min-width: 0;">
+                                        <p style="margin: 0; font-weight: 600; color: #1f2937; font-size: 0.95rem;">${notif.title || 'Thông báo'}</p>
+                                        <p style="margin: 0.5rem 0 0; color: #6b7280; font-size: 0.85rem; line-height: 1.4;">${notif.message || ''}</p>
+                                        <p style="margin: 0.5rem 0 0; color: #9ca3af; font-size: 0.75rem;">${new Date(notif.created_at).toLocaleDateString('vi-VN')}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    });
+
+                    notificationList.innerHTML = html;
+
+                    // Add click handlers to notification items
+                    document.querySelectorAll('[data-notification-id]').forEach(item => {
+                        item.addEventListener('click', async function() {
+                            const notificationId = this.getAttribute('data-notification-id');
+                            await markNotificationAsRead(notificationId);
+                        });
+                    });
+
+                } catch (error) {
+                    console.error('Error loading notifications:', error);
+                    notificationList.innerHTML = '<div style="padding: 2rem 1rem; text-align: center; color: #ef4444;"><p>Có lỗi xảy ra</p></div>';
+                }
+            }
+
+            // Mark notification as read
+            async function markNotificationAsRead(notificationId) {
+                try {
+                    await fetch(`/applicant/api/notifications/${notificationId}/read`, {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
+                        }
+                    });
+                    // Reload notifications after marking as read
+                    loadNotifications();
+                } catch (error) {
+                    console.error('Error marking notification as read:', error);
+                }
+            }
+
+            // Mark all as read button
+            const btnMarkAllRead = document.getElementById('btnMarkAllRead');
+            if (btnMarkAllRead) {
+                btnMarkAllRead.addEventListener('click', async function() {
+                    try {
+                        await fetch('/applicant/api/notifications/read-all', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content
+                            }
+                        });
+                        loadNotifications();
+                    } catch (error) {
+                        console.error('Error marking all notifications as read:', error);
+                    }
+                });
+            }
+
+            // Load notification count on page load
+            loadNotifications();
         });
     </script>
 </header>

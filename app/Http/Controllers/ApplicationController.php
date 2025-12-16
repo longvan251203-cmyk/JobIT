@@ -102,6 +102,14 @@ class ApplicationController extends Controller
     public function store(Request $request)
     {
         try {
+            // 🆕 DEBUG: Log request data
+            Log::info('📋 Application Store Request', [
+                'job_id' => $request->input('job_id'),
+                'invitation_id' => $request->input('invitation_id'),
+                'accept_invitation' => $request->input('accept_invitation'),
+                'applicant_id' => Auth::user()->applicant->id_uv ?? null
+            ]);
+
             // Validate dữ liệu
             $validator = Validator::make($request->all(), [
                 'job_id' => 'required|exists:job_post,job_id',  // ✅ SỬA: job_post (không có s)
@@ -161,6 +169,7 @@ class ApplicationController extends Controller
             $application = Application::create([
                 'job_id' => $request->job_id,
                 'applicant_id' => Auth::user()->applicant->id_uv,
+                'job_invitation_id' => $request->input('invitation_id'),  // 🆕 Thêm job_invitation_id
                 'company_id' => $job->companies_id,
                 'cv_type' => $request->cv_type,
                 'cv_file_path' => $cvFilePath,

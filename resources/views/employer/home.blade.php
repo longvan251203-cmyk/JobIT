@@ -894,6 +894,8 @@
                     ? \App\Models\JobPost::where('companies_id', $employer->company->companies_id)
                     ->with('detail')
                     ->withCount('applications')
+                    ->addSelect(\DB::raw('CAST(COALESCE((SELECT COUNT(*) FROM applications WHERE applications.job_id = job_post.job_id AND applications.trang_thai = "duoc_chon"), 0) AS UNSIGNED) as selected_count'))
+                    ->addSelect(\DB::raw('CAST(COALESCE((SELECT COUNT(*) FROM applications WHERE applications.job_id = job_post.job_id AND applications.trang_thai IN ("cho_xu_ly", "dang_phong_van")), 0) AS UNSIGNED) as pending_count'))
                     ->orderBy('job_id', 'desc')
                     ->get()
                     : collect();
@@ -1022,7 +1024,7 @@
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857m0 0a5.002 5.002 0 00-9.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                                                     </svg>
-                                                    {{ $job->selected_count }} ứng viên
+                                                    Tổng ứng viên: {{ $job->pending_count }}
                                                 </span>
 
                                                 <!-- ✅ THÊM: Số người đã mời -->
@@ -1049,7 +1051,7 @@
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                                     </svg>
-                                                    Còn {{ $job->remaining_count }} vị trí
+                                                    Còn {{ $job->recruitment_count - $job->selected_count }} vị trí
                                                 </span>
                                             </div>
                                             <div class="flex gap-2 flex-wrap">
@@ -1446,53 +1448,165 @@
             <!-- Applicants Tab -->
             <div id="applicants" class="tab-content hidden">
                 <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                    <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-6">Thông tin ứng viên</h2>
-                    <!-- <div class="space-y-4">
-                        <div class="p-6 border border-gray-200 rounded-xl hover:shadow-lg transition-all">
-                            <div class="flex items-start justify-between">
-                                <div class="flex gap-4 flex-1">
-                                    <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xl">AN</div>
-                                    <div class="flex-1">
-                                        <h3 class="text-lg font-semibold text-gray-800 mb-1">Anh Nguyễn</h3>
-                                        <p class="text-sm text-gray-600 mb-2">Senior Frontend Developer</p>
-                                        <div class="flex gap-2 mb-3">
-                                            <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs">React</span>
-                                            <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">TypeScript</span>
-                                        </div>
-                                        <p class="text-sm text-gray-500">Ứng tuyển: 2 giờ trước</p>
-                                    </div>
-                                </div>
-                                <div class="flex gap-2">
-                                    <button class="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg">Xem hồ sơ</button>
-                                    <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">Liên hệ</button>
-                                </div>
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">Thông tin ứng viên</h2>
+                            <p class="text-sm text-gray-600 mt-1">Quản lý tất cả ứng viên đã ứng tuyển hoặc được mời</p>
+                        </div>
+                    </div>
+
+                    <!-- FILTERS -->
+                    <div class="bg-gray-50 rounded-xl p-4 mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Bộ lọc</label>
+                                <select id="filterStatus" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                    <option value="all">Tất cả</option>
+                                    <option value="applied">Đã ứng tuyển</option>
+                                    <option value="invited">Được mời</option>
+                                    <option value="interviewed">Đang phỏng vấn</option>
+                                    <option value="hired">Được chọn</option>
+                                    <option value="rejected">Từ chối</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Sắp xếp</label>
+                                <select id="sortBy" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                                    <option value="recent">Mới nhất</option>
+                                    <option value="name">Tên (A-Z)</option>
+                                    <option value="most_applied">Ứng tuyển nhiều nhất</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Tìm kiếm</label>
+                                <input type="text" id="searchKeyword" placeholder="Tên, vị trí, kỹ năng..."
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500" />
+                            </div>
+                            <div class="flex items-end">
+                                <button id="btnLoadApplicants" class="w-full px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg font-semibold transition-all">
+                                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                    </svg>
+                                    Tìm kiếm
+                                </button>
                             </div>
                         </div>
-                    </div> -->
+                    </div>
+
+                    <!-- APPLICANTS LIST -->
+                    <div id="applicantsList" class="space-y-4">
+                        <div class="text-center py-12">
+                            <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857m0 0a5.002 5.002 0 00-9.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                            <p class="text-gray-500 text-lg">Nhấn "Tìm kiếm" để hiển thị danh sách ứng viên</p>
+                        </div>
+                    </div>
+
+                    <!-- PAGINATION -->
+                    <div id="paginationContainer" class="mt-6 flex items-center justify-between"></div>
                 </div>
             </div>
 
-            <!-- History Tab -->
-            <div id="history" class="tab-content hidden">
-                <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                    <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-6">Lịch sử</h2>
-                    <div class="space-y-3">
-                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
-                            <div class="flex items-center gap-3">
-                                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <div>
-                                    <p class="font-semibold text-gray-800">Đăng tin tuyển dụng</p>
-                                    <p class="text-sm text-gray-600">Senior Frontend Developer</p>
+            <!-- Modal Detail Applicant -->
+            <div id="applicantDetailModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+                <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                    <div class="sticky top-0 bg-white border-b p-6 flex items-center justify-between">
+                        <h2 class="text-2xl font-bold">Chi tiết ứng viên</h2>
+                        <button id="closeApplicantModal" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="p-6 space-y-6">
+                        <!-- Thông tin cơ bản -->
+                        <div class="flex gap-6">
+                            <div id="modalAvatar" class="w-24 h-24 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-3xl font-bold flex-shrink-0"></div>
+                            <div class="flex-1">
+                                <h3 id="modalName" class="text-2xl font-bold text-gray-800"></h3>
+                                <p id="modalPosition" class="text-gray-600 mb-2"></p>
+                                <p id="modalLocation" class="text-gray-600 text-sm mb-3"></p>
+                                <div id="modalSkills" class="flex gap-2 flex-wrap mb-3"></div>
+                                <div class="flex gap-4 text-sm">
+                                    <a id="modalEmail" href="#" class="text-blue-600 hover:underline">Email</a>
+                                    <a id="modalPhone" href="#" class="text-blue-600 hover:underline">Gọi</a>
+                                    <button id="modalViewCV" class="text-blue-600 hover:underline">Xem CV</button>
                                 </div>
                             </div>
-                            <span class="text-sm text-gray-500">15/10/2025 14:30</span>
+                            <div class="text-right">
+                                <div id="modalStats" class="space-y-2 text-sm">
+                                    <div class="bg-yellow-50 px-3 py-2 rounded-lg">
+                                        <span id="modalAppliedCount" class="font-bold">0</span> lần ứng tuyển
+                                    </div>
+                                    <div class="bg-blue-50 px-3 py-2 rounded-lg">
+                                        <span id="modalInvitedCount" class="font-bold">0</span> lần được mời
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Giới thiệu -->
+                        <div>
+                            <h4 class="font-semibold text-gray-800 mb-2">Giới thiệu</h4>
+                            <p id="modalAbout" class="text-gray-600 leading-relaxed"></p>
+                        </div>
+
+                        <!-- Lịch sử ứng tuyển -->
+                        <div>
+                            <h4 class="font-semibold text-gray-800 mb-4">Lịch sử ứng tuyển</h4>
+                            <div id="modalAppliedHistory" class="space-y-3 max-h-60 overflow-y-auto">
+                                <!-- Nạp động -->
+                            </div>
+                        </div>
+
+                        <!-- Kinh nghiệm -->
+                        <div id="modalExperienceSection" class="hidden">
+                            <h4 class="font-semibold text-gray-800 mb-4">Kinh nghiệm làm việc</h4>
+                            <div id="modalExperience" class="space-y-3">
+                                <!-- Nạp động -->
+                            </div>
+                        </div>
+
+                        <!-- Học vấn -->
+                        <div id="modalEducationSection" class="hidden">
+                            <h4 class="font-semibold text-gray-800 mb-4">Học vấn</h4>
+                            <div id="modalEducation" class="space-y-3">
+                                <!-- Nạp động -->
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
+
+    </div>
+    </div>
+    </div> -->
+    </div>
+    </div>
+
+    <!-- History Tab -->
+    <div id="history" class="tab-content hidden">
+        <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+            <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-6">Lịch sử</h2>
+            <div class="space-y-3">
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div>
+                            <p class="font-semibold text-gray-800">Đăng tin tuyển dụng</p>
+                            <p class="text-sm text-gray-600">Senior Frontend Developer</p>
+                        </div>
+                    </div>
+                    <span class="text-sm text-gray-500">15/10/2025 14:30</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    </main>
     </div>
     </div>
 
@@ -1615,7 +1729,7 @@
                     <h2 class="text-2xl font-bold">✏️ Chỉnh Sửa Tin Đăng</h2>
                     <p class="text-sm opacity-90 mt-1">Cập nhật thông tin tuyển dụng</p>
                 </div>
-                <button type="button" id="btnCloseEditModal" class="text-white hover:bg-white/20 rounded-lg p-2 transition-all">
+                <button type="button" id="btnCloseJobEditModal" class="text-white hover:bg-white/20 rounded-lg p-2 transition-all">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -1927,7 +2041,7 @@
         document.addEventListener('DOMContentLoaded', function() {
 
             const editJobModal = document.getElementById('editJobModal');
-            const btnCloseEditModal = document.getElementById('btnCloseEditModal');
+            const btnCloseEditModal = document.getElementById('btnCloseJobEditModal');
             const btnCancelEdit = document.getElementById('btnCancelEdit');
             const btnEditNext = document.getElementById('btnEditNext');
             const btnEditPrev = document.getElementById('btnEditPrev');
@@ -2304,7 +2418,8 @@
                         if (data.success) {
                             alert('✅ Cập nhật tin đăng thành công!');
                             closeEditModal();
-                            location.reload(); // Reload to show updated data
+                            // ✅ Giữ lại tab Quản lý tin đăng hiện tại, không reload trang
+                            // Modal sẽ tự đóng, người dùng sẽ vẫn ở tab hiện tại
                         } else {
                             alert('❌ Lỗi: ' + (data.error || 'Không thể cập nhật tin đăng'));
                             resetUpdateButton();
@@ -4355,11 +4470,253 @@
         });
     </script>
 
+    <!-- ✅ Applicants Tab Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnLoadApplicants = document.getElementById('btnLoadApplicants');
+            const filterStatus = document.getElementById('filterStatus');
+            const sortBy = document.getElementById('sortBy');
+            const searchKeyword = document.getElementById('searchKeyword');
+            const applicantsList = document.getElementById('applicantsList');
+            const applicantDetailModal = document.getElementById('applicantDetailModal');
+            const closeApplicantModal = document.getElementById('closeApplicantModal');
+            let currentApplicants = [];
+
+            // Load applicants
+            btnLoadApplicants.addEventListener('click', loadApplicants);
+            filterStatus.addEventListener('change', loadApplicants);
+            sortBy.addEventListener('change', loadApplicants);
+            searchKeyword.addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') loadApplicants();
+            });
+
+            // ✅ Tự động load khi tab "Ứng viên" được mở từ sidebar
+            const applicantsSidebarBtn = document.querySelector('[data-id="applicants"]');
+            if (applicantsSidebarBtn) {
+                // Original click handler
+                const originalOnClick = applicantsSidebarBtn.onclick;
+
+                applicantsSidebarBtn.addEventListener('click', function(e) {
+                    // Đợi tab được render thì load dữ liệu
+                    setTimeout(() => {
+                        const applicantsTab = document.getElementById('applicants');
+                        if (applicantsTab && !applicantsTab.classList.contains('hidden')) {
+                            loadApplicants();
+                        }
+                    }, 100);
+                });
+            }
+
+            // ✅ Tự động load ngay khi page load nếu tab "Ứng viên" là active
+            const applicantsTabContent = document.getElementById('applicants');
+            if (applicantsTabContent && !applicantsTabContent.classList.contains('hidden')) {
+                setTimeout(loadApplicants, 100);
+            }
+
+            closeApplicantModal.addEventListener('click', () => {
+                applicantDetailModal.classList.add('hidden');
+            });
+
+            async function loadApplicants() {
+                btnLoadApplicants.disabled = true;
+                btnLoadApplicants.innerHTML = '<svg class="w-4 h-4 inline mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> Đang tải...';
+
+                try {
+                    const params = new URLSearchParams({
+                        filter: filterStatus.value,
+                        sort: sortBy.value,
+                        keyword: searchKeyword.value
+                    });
+
+                    const response = await fetch(`/employer/api/applicants-history?${params}`);
+                    const data = await response.json();
+
+                    if (data.success) {
+                        currentApplicants = data.applicants;
+                        renderApplicants(data.applicants);
+                        renderPagination(data.pagination);
+                    } else {
+                        alert('Lỗi: ' + data.message);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi tải dữ liệu');
+                } finally {
+                    btnLoadApplicants.disabled = false;
+                    btnLoadApplicants.innerHTML = '<svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg> Tìm kiếm';
+                }
+            }
+
+            function renderApplicants(applicants) {
+                if (applicants.length === 0) {
+                    applicantsList.innerHTML = `
+                    <div class="text-center py-12">
+                        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="text-gray-500 text-lg">Không tìm thấy ứng viên nào</p>
+                    </div>
+                `;
+                    return;
+                }
+
+                applicantsList.innerHTML = applicants.map(app => `
+                <div class="p-6 border border-gray-200 rounded-xl hover:shadow-lg transition-all bg-gradient-to-r from-gray-50 to-transparent">
+                    <div class="flex items-start justify-between">
+                        <div class="flex gap-4 flex-1">
+                            <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                                ${app.name.substring(0, 2).toUpperCase()}
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-lg font-semibold text-gray-800 mb-1">${app.name}</h3>
+                                <p class="text-sm text-gray-600 mb-1">${app.position}</p>
+                                <p class="text-xs text-gray-500 mb-2">📍 ${app.location}</p>
+                                <div class="flex gap-2 flex-wrap mb-3">
+                                    ${app.skills.slice(0, 3).map(skill => `
+                                        <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">${skill}</span>
+                                    `).join('')}
+                                    ${app.skills.length > 3 ? `<span class="text-xs text-gray-600">+${app.skills.length - 3}</span>` : ''}
+                                </div>
+                                <div class="flex gap-4 text-sm">
+                                    <span class="flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <strong>${app.application_count}</strong> ứng tuyển
+                                    </span>
+                                    <span class="flex items-center gap-1">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                                        </svg>
+                                        <strong>${app.invitation_count}</strong> mời
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-2 items-end ml-4">
+                            <span class="px-3 py-1 bg-${getStatusBgColor(app.last_status_code)}-100 text-${getStatusColor(app.last_status_code)}-700 rounded-full text-xs font-semibold">
+                                ${app.last_status}
+                            </span>
+                            <p class="text-xs text-gray-500">${formatDate(app.last_applied_at)}</p>
+                            <button onclick="showApplicantDetail(${JSON.stringify(app).replace(/"/g, '&quot;')})" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:shadow-lg text-sm font-semibold transition-all mt-2">
+                                Xem chi tiết
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            }
+
+            function renderPagination(pagination) {
+                const container = document.getElementById('paginationContainer');
+                if (pagination.last_page === 1) {
+                    container.innerHTML = '';
+                    return;
+                }
+
+                let html = `<div>Trang ${pagination.current_page}/${pagination.last_page} (${pagination.total} ứng viên)</div>`;
+                html += '<div class="flex gap-2">';
+
+                if (pagination.current_page > 1) {
+                    html += `<button onclick="changePageApplicants(${pagination.current_page - 1})" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100">Trước</button>`;
+                }
+
+                for (let i = 1; i <= pagination.last_page; i++) {
+                    if (i === pagination.current_page) {
+                        html += `<button class="px-3 py-1 bg-purple-600 text-white rounded">${i}</button>`;
+                    } else if (i <= 3 || i > pagination.last_page - 2 || Math.abs(i - pagination.current_page) <= 1) {
+                        html += `<button onclick="changePageApplicants(${i})" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100">${i}</button>`;
+                    } else if (i === 4 || i === pagination.last_page - 2) {
+                        html += '<span>...</span>';
+                    }
+                }
+
+                if (pagination.current_page < pagination.last_page) {
+                    html += `<button onclick="changePageApplicants(${pagination.current_page + 1})" class="px-3 py-1 border border-gray-300 rounded hover:bg-gray-100">Tiếp</button>`;
+                }
+
+                html += '</div>';
+                container.innerHTML = html;
+            }
+
+            function getStatusColor(status) {
+                const colors = {
+                    'cho_xu_ly': 'yellow',
+                    'dang_phong_van': 'blue',
+                    'duoc_chon': 'green',
+                    'tu_choi': 'red',
+                    'da_nhan': 'emerald'
+                };
+                return colors[status] || 'gray';
+            }
+
+            function getStatusBgColor(status) {
+                return getStatusColor(status);
+            }
+
+            function formatDate(date) {
+                if (!date) return 'N/A';
+                const d = new Date(date);
+                const now = new Date();
+                const diff = Math.floor((now - d) / 1000); // seconds
+
+                if (diff < 60) return 'Vừa xong';
+                if (diff < 3600) return Math.floor(diff / 60) + ' phút trước';
+                if (diff < 86400) return Math.floor(diff / 3600) + ' giờ trước';
+                if (diff < 604800) return Math.floor(diff / 86400) + ' ngày trước';
+                return d.toLocaleDateString('vi-VN');
+            }
+
+            window.showApplicantDetail = function(applicant) {
+                document.getElementById('modalName').textContent = applicant.name;
+                document.getElementById('modalPosition').textContent = applicant.position;
+                document.getElementById('modalLocation').textContent = '📍 ' + applicant.location;
+                document.getElementById('modalEmail').href = 'mailto:' + applicant.email;
+                document.getElementById('modalEmail').textContent = '✉️ ' + applicant.email;
+                document.getElementById('modalPhone').href = 'tel:' + applicant.phone;
+                document.getElementById('modalPhone').textContent = '📞 ' + applicant.phone;
+                document.getElementById('modalAbout').textContent = applicant.about || 'Chưa có giới thiệu';
+                document.getElementById('modalAppliedCount').textContent = applicant.application_count;
+                document.getElementById('modalInvitedCount').textContent = applicant.invitation_count;
+
+                // Skills
+                const skillsHtml = applicant.skills.map(skill =>
+                    `<span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs">${skill}</span>`
+                ).join('');
+                document.getElementById('modalSkills').innerHTML = skillsHtml || '<span class="text-gray-500 text-sm">Chưa có kỹ năng</span>';
+
+                // Applied jobs history
+                const historyHtml = applicant.applied_jobs.map(job => `
+                <div class="p-3 border border-gray-200 rounded-lg">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="font-semibold text-gray-800">${job.job_title}</p>
+                            <p class="text-xs text-gray-500">${formatDate(job.applied_at)}</p>
+                        </div>
+                        <span class="px-2 py-1 bg-${getStatusBgColor(job.status_code)}-100 text-${getStatusColor(job.status_code)}-700 rounded text-xs font-semibold">
+                            ${job.status}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+                document.getElementById('modalAppliedHistory').innerHTML = historyHtml || '<p class="text-gray-500 text-sm">Chưa ứng tuyển job nào</p>';
+
+                applicantDetailModal.classList.remove('hidden');
+            };
+
+            window.changePageApplicants = function(page) {
+                // TODO: Implement pagination
+                console.log('Load page ' + page);
+            };
+        });
+    </script>
+
     <!-- ✅ Real-time Auto-Refresh System -->
     <script src="{{ asset('js/realtime-updates.js') }}"></script>
 
     <!-- ✅ Toast Notification System -->
     <script src="{{ asset('js/toast.js') }}"></script>
+
 </body>
 
 

@@ -75,6 +75,8 @@
         border: none !important;
         transition: all 0.3s ease;
         overflow: hidden;
+        position: sticky;
+        top: 100px;
     }
 
     .sidebar-card-modern:hover {
@@ -150,17 +152,26 @@
     /* Page Header */
     .page-header {
         margin-bottom: 2rem;
+        background: none !important;
+        padding: 0 !important;
     }
 
     .page-title {
         color: white;
-        font-size: 2rem;
-        font-weight: 800;
-        margin-bottom: 1rem;
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-bottom: 1.5rem;
         display: flex;
         align-items: center;
         gap: 1rem;
-        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.2));
+    }
+
+    .page-title i {
+        font-size: 2.5rem;
+        color: #fff;
+        text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
 
     /* Filter Tabs - Redesigned */
@@ -622,7 +633,12 @@
     /* Responsive Design */
     @media (max-width: 768px) {
         .page-title {
-            font-size: 1.5rem;
+            font-size: 1.8rem;
+            font-weight: 900;
+        }
+
+        .page-title i {
+            font-size: 1.8rem;
         }
 
         .filter-tabs {
@@ -1194,11 +1210,7 @@
                                         @endif
                                     </a>
                                 </li>
-                                <li class="nav-item mb-2">
-                                    <a href="#" class="nav-link text-dark">
-                                        <i class="bi bi-bell"></i> Thông báo
-                                    </a>
-                                </li>
+
                                 <li class="nav-item">
                                     <a href="#" class="nav-link text-dark">
                                         <i class="bi bi-gear"></i> Cài đặt
@@ -1211,35 +1223,28 @@
 
                 <!-- Main Content -->
                 <div class="col-md-9 col-lg-9 order-1 order-md-2">
-                    <div class="page-header">
-                        <h2 class="page-title">
-                            <i class="bi bi-envelope-check"></i>
-                            <span>Lời mời ứng tuyển</span>
-                        </h2>
-
-                        <!-- Filter Tabs -->
-                        <div class="filter-tabs">
-                            <button class="filter-btn active" onclick="filterInvitations('all')">
-                                <i class="bi bi-funnel"></i>
-                                <span>Tất cả</span>
-                                <span>(<span id="count-all">{{ $invitations->count() }}</span>)</span>
-                            </button>
-                            <button class="filter-btn" onclick="filterInvitations('pending')">
-                                <i class="bi bi-hourglass-split"></i>
-                                <span>Chờ phản hồi</span>
-                                <span>(<span id="count-pending">{{ $invitations->where('status', 'pending')->count() }}</span>)</span>
-                            </button>
-                            <button class="filter-btn" onclick="filterInvitations('accepted')">
-                                <i class="bi bi-check-circle"></i>
-                                <span>Đã chấp nhận</span>
-                                <span>(<span id="count-accepted">{{ $invitations->where('status', 'accepted')->count() }}</span>)</span>
-                            </button>
-                            <button class="filter-btn" onclick="filterInvitations('rejected')">
-                                <i class="bi bi-x-circle"></i>
-                                <span>Đã từ chối</span>
-                                <span>(<span id="count-rejected">{{ $invitations->where('status', 'rejected')->count() }}</span>)</span>
-                            </button>
-                        </div>
+                    <!-- Filter Tabs -->
+                    <div class="filter-tabs">
+                        <button class="filter-btn active" onclick="filterInvitations('all')">
+                            <i class="bi bi-funnel"></i>
+                            <span>Tất cả</span>
+                            <span>(<span id="count-all">{{ $invitations->count() }}</span>)</span>
+                        </button>
+                        <button class="filter-btn" onclick="filterInvitations('pending')">
+                            <i class="bi bi-hourglass-split"></i>
+                            <span>Chờ phản hồi</span>
+                            <span>(<span id="count-pending">{{ $invitations->where('status', 'pending')->count() }}</span>)</span>
+                        </button>
+                        <button class="filter-btn" onclick="filterInvitations('accepted')">
+                            <i class="bi bi-check-circle"></i>
+                            <span>Đã chấp nhận</span>
+                            <span>(<span id="count-accepted">{{ $invitations->where('status', 'accepted')->count() }}</span>)</span>
+                        </button>
+                        <button class="filter-btn" onclick="filterInvitations('rejected')">
+                            <i class="bi bi-x-circle"></i>
+                            <span>Đã từ chối</span>
+                            <span>(<span id="count-rejected">{{ $invitations->where('status', 'rejected')->count() }}</span>)</span>
+                        </button>
                     </div>
 
                     <!-- Invitations List -->
@@ -1422,63 +1427,13 @@
                     <input type="hidden" name="job_id" id="modalJobId" value="">
                     <input type="hidden" name="invitation_id" id="modalInvitationId" value="">
                     <input type="hidden" name="accept_invitation" id="modalAcceptInvitation" value="0">
+                    <input type="hidden" name="cv_type" id="modalCvType" value="profile">
                     <div class="modal-body p-4">
-                        <!-- Step 1: Chọn cách ứng tuyển -->
+                        <!-- Profile Preview Section (REQUIRED) -->
                         <div class="mb-4">
                             <h6 class="fw-bold mb-3">
-                                <i class="bi bi-file-earmark-person me-2 text-primary"></i>Chọn CV Để ứng tuyển <span class="required-mark">*</span>
+                                <i class="bi bi-person-badge me-2 text-primary"></i>Hồ sơ ứng tuyển <span class="required-mark">*</span>
                             </h6>
-                            <div class="row g-3">
-                                <!-- Option 1: Upload CV -->
-                                <div class="col-md-6">
-                                    <label class="cv-option-card active" id="uploadOption">
-                                        <input type="radio" name="cv_type" value="upload" checked>
-                                        <div class="cv-option-icon">
-                                            <i class="bi bi-cloud-upload"></i>
-                                        </div>
-                                        <div class="cv-option-title">Tải lên CV từ máy tính</div>
-                                        <div class="cv-option-desc">Hỗ trợ định dạng .doc, .docx, .pdf dưới 5MB</div>
-                                    </label>
-                                </div>
-
-                                <!-- Option 2: Use Profile -->
-                                <div class="col-md-6">
-                                    <label class="cv-option-card" id="profileOption">
-                                        <input type="radio" name="cv_type" value="profile">
-                                        <div class="cv-option-icon">
-                                            <i class="bi bi-person-badge"></i>
-                                        </div>
-                                        <div class="cv-option-title">Sử dụng hồ sơ có sẵn</div>
-                                        <div class="cv-option-desc">Dùng thông tin từ hồ sơ đã tạo trên hệ thống</div>
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Upload CV Section -->
-                        <div id="uploadSection" class="content-section mb-4">
-                            <div class="upload-area" id="uploadArea">
-                                <div class="upload-icon">
-                                    <i class="bi bi-cloud-arrow-up"></i>
-                                </div>
-                                <h6 class="fw-bold mb-2">Kéo thả CV vào đây hoặc chọn file</h6>
-                                <p class="text-muted small mb-3">Hỗ trợ .doc, .docx, .pdf (tối đa 5MB)</p>
-                                <input type="file" id="cvFileInput" name="cv_file" accept=".doc,.docx,.pdf" class="d-none">
-                                <button type="button" class="btn btn-outline-primary" id="selectFileBtn">
-                                    <i class="bi bi-folder2-open me-2"></i>Chọn file
-                                </button>
-                            </div>
-                            <div id="fileNameDisplay" class="mt-3 text-center" style="display: none;">
-                                <div class="alert alert-success d-inline-flex align-items-center">
-                                    <i class="bi bi-file-earmark-check me-2"></i>
-                                    <span id="fileName"></span>
-                                    <button type="button" class="btn-close ms-3" id="removeFile"></button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Profile Preview Section -->
-                        <div id="profileSection" class="content-section mb-4" style="display: none;">
                             <div class="profile-preview-card">
                                 <div class="d-flex align-items-start">
                                     @php
@@ -1509,6 +1464,33 @@
                                             <i class="bi bi-pencil me-1"></i>Chỉnh sửa
                                         </a>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Optional: Add Additional CV Section -->
+                        <div class="mb-4">
+                            <h6 class="fw-bold mb-3">
+                                <i class="bi bi-cloud-upload me-2 text-success"></i>CV Đính kèm thêm <span class="badge bg-secondary" style="font-size: 0.75rem; font-weight: 500;">Tùy chọn</span>
+                            </h6>
+                            <p class="text-muted small mb-3">Bạn có thể tải lên thêm CV để nâng cao cơ hội được chọn</p>
+
+                            <div class="upload-area" id="uploadArea">
+                                <div class="upload-icon">
+                                    <i class="bi bi-cloud-arrow-up"></i>
+                                </div>
+                                <h6 class="fw-bold mb-2">Kéo thả CV vào đây hoặc chọn file</h6>
+                                <p class="text-muted small mb-3">Hỗ trợ .doc, .docx, .pdf (tối đa 5MB)</p>
+                                <input type="file" id="cvFileInput" name="cv_file" accept=".doc,.docx,.pdf" class="d-none">
+                                <button type="button" class="btn btn-outline-primary" id="selectFileBtn">
+                                    <i class="bi bi-folder2-open me-2"></i>Chọn file
+                                </button>
+                            </div>
+                            <div id="fileNameDisplay" class="mt-3 text-start" style="display: none;">
+                                <div class="alert alert-success d-inline-flex align-items-center">
+                                    <i class="bi bi-file-earmark-check me-2"></i>
+                                    <span id="fileName"></span>
+                                    <button type="button" class="btn-close ms-3" id="removeFile"></button>
                                 </div>
                             </div>
                         </div>
@@ -1832,9 +1814,79 @@
 
         // ========== CV TYPE SELECTION ==========
         document.addEventListener('DOMContentLoaded', function() {
-            const cvTypeRadios = document.querySelectorAll('input[name="cv_type"]');
+            const uploadArea = document.getElementById('uploadArea');
+            const cvFileInput = document.getElementById('cvFileInput');
+            const selectFileBtn = document.getElementById('selectFileBtn');
+            const fileNameDisplay = document.getElementById('fileNameDisplay');
+            const fileName = document.getElementById('fileName');
+            const removeFile = document.getElementById('removeFile');
             const uploadSection = document.getElementById('uploadSection');
             const profileSection = document.getElementById('profileSection');
+            const applyModal = document.getElementById('applyJobModal');
+
+            // ========== LOAD CV FROM PROFILE ON MODAL SHOW ==========
+
+            async function loadApplicantCVForModal() {
+                try {
+                    console.log('📞 Calling /api/applicant-cv...');
+                    const response = await fetch('/api/applicant-cv', {
+                        method: 'GET',
+                        credentials: 'include', // ✅ THÊM: Include cookies for auth
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+                        }
+                    });
+
+                    console.log('📡 Response status:', response.status);
+                    const result = await response.json();
+
+                    console.log('📥 API Response:', result);
+
+                    if (result.success && result.data && result.data.filename) {
+                        const filename = result.data.filename;
+                        const filepath = result.data.path;
+
+                        console.log('✅ CV found - Filename:', filename, 'Path:', filepath);
+
+                        // Cập nhật hiển thị file name + link xem
+                        if (fileName) {
+                            fileName.innerHTML = `
+                                <span>${filename}</span>
+                                <a href="{{ route('applicant.viewCv') }}" target="_blank" class="btn btn-sm btn-outline-primary ms-2" style="font-size: 0.75rem;">
+                                    <i class="bi bi-eye"></i> Xem
+                                </a>
+                            `;
+                            console.log('✅ Updated fileName element:', filename);
+                        }
+                        if (fileNameDisplay) fileNameDisplay.style.display = 'block';
+                        if (uploadArea) uploadArea.style.display = 'none';
+
+                        // ✅ Ensure cv_type is set to 'profile'
+                        const cvTypeInput = document.getElementById('modalCvType');
+                        if (cvTypeInput) {
+                            cvTypeInput.value = 'profile';
+                            console.log('✅ Set cv_type to: profile');
+                        }
+                    } else {
+                        console.log('⚠️ No CV found in profile, showing upload form');
+                        if (fileNameDisplay) fileNameDisplay.style.display = 'none';
+                        if (uploadArea) uploadArea.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('❌ Error loading CV from profile:', error);
+                }
+            }
+
+            if (applyModal) {
+                applyModal.addEventListener('show.bs.modal', function() {
+                    console.log('✨ Modal is opening, loading CV...');
+                    loadApplicantCVForModal();
+                });
+            }
+
+            const cvTypeRadios = document.querySelectorAll('input[name="cv_type"]');
 
             cvTypeRadios.forEach(radio => {
                 radio.addEventListener('change', function() {
@@ -1854,12 +1906,6 @@
             });
 
             // ========== FILE UPLOAD HANDLING ==========
-            const uploadArea = document.getElementById('uploadArea');
-            const cvFileInput = document.getElementById('cvFileInput');
-            const selectFileBtn = document.getElementById('selectFileBtn');
-            const fileNameDisplay = document.getElementById('fileNameDisplay');
-            const fileName = document.getElementById('fileName');
-            const removeFile = document.getElementById('removeFile');
 
             if (selectFileBtn) {
                 selectFileBtn.addEventListener('click', () => cvFileInput.click());
@@ -1920,7 +1966,6 @@
 
             // ========== CHARACTER COUNT ==========
             const letterTextarea = document.querySelector('[name="thugioithieu"]');
-            const charCount = document.getElementById('charCount');
 
             if (letterTextarea) {
                 letterTextarea.addEventListener('input', function() {
@@ -2079,6 +2124,32 @@
                         showToast('Có lỗi xảy ra: ' + error.message, 'error');
                     });
             };
+
+            // Reset modal khi đóng
+            if (applyModal) {
+                applyModal.addEventListener('hidden.bs.modal', function() {
+                    const applyJobForm = document.getElementById('applyJobForm');
+                    const uploadSection = document.getElementById('uploadSection');
+                    const profileSection = document.getElementById('profileSection');
+                    const fileNameDisplay = document.getElementById('fileNameDisplay');
+                    const uploadArea = document.getElementById('uploadArea');
+                    const letterTextarea = document.querySelector('textarea[name="thugioithieu"]');
+
+                    if (applyJobForm) applyJobForm.reset();
+                    if (uploadSection) uploadSection.style.display = 'block';
+                    if (profileSection) profileSection.style.display = 'none';
+                    if (fileNameDisplay) fileNameDisplay.style.display = 'none';
+                    if (uploadArea) uploadArea.style.display = 'block';
+                    if (letterTextarea) letterTextarea.value = '';
+                    if (charCount) charCount.textContent = '0';
+
+                    document.querySelectorAll('.cv-option-card').forEach(card => {
+                        card.classList.remove('active');
+                    });
+                    const uploadOption = document.getElementById('uploadOption');
+                    if (uploadOption) uploadOption.classList.add('active');
+                });
+            }
         });
 
         function showJobDetail(jobId) {

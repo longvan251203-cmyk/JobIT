@@ -16,6 +16,7 @@ class Application extends Model
     protected $fillable = [
         'job_id',
         'applicant_id',
+        'job_invitation_id',
         'company_id',
         'cv_type',
         'cv_file_path',

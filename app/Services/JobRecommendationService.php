@@ -1108,6 +1108,20 @@ class JobRecommendationService
                         $bestScore = $score;
                         $bestJob = $job;
                     }
+
+                    // 💾 LƯU MATCHED JOB VÀO DATABASE
+                    JobRecommendation::updateOrCreate(
+                        [
+                            'applicant_id' => $applicant->id_uv,  // ✅ Applicant PK: id_uv
+                            'job_id' => $job->job_id,  // ✅ Job PK: job_id (không phải id)
+                        ],
+                        [
+                            'score' => $score,
+                            'match_details' => json_encode($matchData['breakdown']),
+                            'is_viewed' => false,
+                            'is_applied' => false
+                        ]
+                    );
                 }
             }
 
