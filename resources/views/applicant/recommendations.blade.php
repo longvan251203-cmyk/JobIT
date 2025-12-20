@@ -695,13 +695,13 @@
                     </div>
 
                     <div class="criteria-grid">
-                        <!-- 1. LOCATION - ƯU TIÊN NHẤT (35%) -->
+                        <!-- 1. LOCATION (30%) -->
                         @if(isset($details['location']) && is_array($details['location']))
                         <div class="criteria-item">
                             <div class="criteria-header">
                                 <div class="criteria-name">
                                     <i class="bi bi-geo-alt"></i>
-                                    🎯 Địa điểm (35%)
+                                    🎯 Địa điểm (30%)
                                 </div>
                                 <div class="criteria-score {{ $getScoreLevel($details['location']['score']) }}">
                                     {{ number_format($details['location']['score'], 0) }}%
@@ -717,13 +717,13 @@
                         </div>
                         @endif
 
-                        <!-- 2. SKILLS (30%) -->
+                        <!-- 2. SKILLS (25%) -->
                         @if(isset($details['skills']) && is_array($details['skills']))
                         <div class="criteria-item">
                             <div class="criteria-header">
                                 <div class="criteria-name">
                                     <i class="bi bi-code-square"></i>
-                                    Kỹ năng (30%)
+                                    Kỹ năng (25%)
                                 </div>
                                 <div class="criteria-score {{ $getScoreLevel($details['skills']['score']) }}">
                                     {{ number_format($details['skills']['score'], 0) }}%
@@ -765,13 +765,35 @@
                         </div>
                         @endif
 
-                        <!-- 3. POSITION (20%) -->
+                        <!-- 3. LANGUAGE (20%) -->
+                        @if(isset($details['language']) && is_array($details['language']))
+                        <div class="criteria-item">
+                            <div class="criteria-header">
+                                <div class="criteria-name">
+                                    <i class="bi bi-translate"></i>
+                                    🌐 Ngoại ngữ (20%)
+                                </div>
+                                <div class="criteria-score {{ $getScoreLevel($details['language']['score']) }}">
+                                    {{ number_format($details['language']['score'], 0) }}%
+                                </div>
+                            </div>
+                            <div class="progress-bar-wrapper">
+                                <div class="progress-fill {{ $getScoreLevel($details['language']['score']) }}"
+                                    data-width="{{ $details['language']['score'] }}"></div>
+                            </div>
+                            <div class="criteria-reason">
+                                {{ $details['language']['reason'] }}
+                            </div>
+                        </div>
+                        @endif
+
+                        <!-- 4. POSITION (15%) -->
                         @if(isset($details['position']) && is_array($details['position']))
                         <div class="criteria-item">
                             <div class="criteria-header">
                                 <div class="criteria-name">
                                     <i class="bi bi-person-badge"></i>
-                                    Vị trí (20%)
+                                    👔 Vị trí (15%)
                                 </div>
                                 <div class="criteria-score {{ $getScoreLevel($details['position']['score']) }}">
                                     {{ number_format($details['position']['score'], 0) }}%
@@ -787,35 +809,13 @@
                         </div>
                         @endif
 
-                        <!-- 4. Experience (8%) -->
+                        <!-- 5. Experience (5%) -->
                         @if(isset($details['experience']) && is_array($details['experience']))
                         <div class="criteria-item">
                             <div class="criteria-header">
                                 <div class="criteria-name">
                                     <i class="bi bi-clock-history"></i>
-                                    Kinh nghiệm (8%)
-                                </div>
-                                <div class="criteria-score {{ $getScoreLevel($details['experience']['score']) }}">
-                                    {{ number_format($details['experience']['score'], 0) }}%
-                                </div>
-                            </div>
-                            <div class="progress-bar-wrapper">
-                                <div class="progress-fill {{ $getScoreLevel($details['experience']['score']) }}"
-                                    data-width="{{ $details['experience']['score'] }}"></div>
-                            </div>
-                            <div class="criteria-reason">
-                                {{ $details['experience']['reason'] }}
-                            </div>
-                        </div>
-                        @endif
-
-                        <!-- 5. Salary (4%) -->
-                        @if(isset($details['salary']) && is_array($details['salary']))
-                        <div class="criteria-item">
-                            <div class="criteria-header">
-                                <div class="criteria-name">
-                                    <i class="bi bi-cash-coin"></i>
-                                    Mức lương (4%)
+                                    📅 Kinh nghiệm (5%)
                                 </div>
                                 <div class="criteria-score {{ $getScoreLevel($details['salary']['score']) }}">
                                     {{ number_format($details['salary']['score'], 0) }}%
@@ -831,13 +831,13 @@
                         </div>
                         @endif
 
-                        <!-- 6. Language (3%) -->
-                        @if(isset($details['language']) && is_array($details['language']))
+                        <!-- 6. Salary (5%) -->
+                        @if(isset($details['salary']) && is_array($details['salary']))
                         <div class="criteria-item">
                             <div class="criteria-header">
                                 <div class="criteria-name">
-                                    <i class="bi bi-translate"></i>
-                                    Ngoại ngữ (3%)
+                                    <i class="bi bi-cash-coin"></i>
+                                    💰 Mức lương (5%)
                                 </div>
                                 <div class="criteria-score {{ $getScoreLevel($details['language']['score']) }}">
                                     {{ number_format($details['language']['score'], 0) }}%
@@ -929,12 +929,12 @@
                     <i class="bi bi-check-circle-fill"></i>
                     Đã tạo <strong>${data.count}</strong> gợi ý mới với trọng số:
                     <ul class="mb-0 mt-2">
-                        <li>🎯 Địa điểm: 35%</li>
-                        <li>💻 Kỹ năng: 30%</li>
-                        <li>👔 Vị trí: 20%</li>
-                        <li>📅 Kinh nghiệm: 8%</li>
-                        <li>💰 Lương: 4%</li>
-                        <li>🌐 Ngoại ngữ: 3%</li>
+                        <li>🎯 Địa điểm: 30%</li>
+                        <li>💻 Kỹ năng: 25%</li>
+                        <li>🌐 Ngoại ngữ: 20%</li>
+                        <li>👔 Vị trí: 15%</li>
+                        <li>📅 Kinh nghiệm: 5%</li>
+                        <li>💰 Lương: 5%</li>
                     </ul>
                 `;
                         btn.parentElement.after(message);

@@ -454,6 +454,9 @@ Route::middleware(['auth'])->group(function () {
         ->name('applicant.recommendations.viewed');
     Route::post('/recommendations/recalculate', [JobRecommendationController::class, 'recalculate'])
         ->name('recommendations.recalculate');
+
+    Route::post('/job/{jobId}/recalculate-recommendations', [JobRecommendationController::class, 'recalculateForJob'])
+        ->name('job.recalculate-recommendations');
 });
 // ========== APPLICANT NOTIFICATION ROUTES ==========
 Route::prefix('applicant')->middleware(['auth'])->name('applicant.')->group(function () {

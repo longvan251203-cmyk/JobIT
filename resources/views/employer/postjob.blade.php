@@ -868,6 +868,38 @@
 
                     <div class="form-row">
                         <div class="form-group">
+                            <label for="foreign_language">Ngoại ngữ yêu cầu <span class="required">*</span></label>
+                            <select class="form-control" id="foreign_language" name="foreign_language" required>
+                                <option value="">-- Chọn ngoại ngữ --</option>
+                                <option value="no_requirement">Không yêu cầu</option>
+                                <option value="english">Tiếng Anh</option>
+                                <option value="japanese">Tiếng Nhật</option>
+                                <option value="korean">Tiếng Hàn</option>
+                                <option value="chinese">Tiếng Trung</option>
+                                <option value="french">Tiếng Pháp</option>
+                                <option value="german">Tiếng Đức</option>
+                                <option value="spanish">Tiếng Tây Ban Nha</option>
+                                <option value="russian">Tiếng Nga</option>
+                                <option value="thai">Tiếng Thái</option>
+                                <option value="indonesian">Tiếng Indonesia</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="language_level">Trình độ ngoại ngữ</label>
+                            <select class="form-control" id="language_level" name="language_level" disabled>
+                                <option value="">-- Chọn trình độ --</option>
+                                <option value="basic">Sơ cấp</option>
+                                <option value="intermediate">Trung cấp</option>
+                                <option value="advanced">Cao cấp</option>
+                                <option value="fluent">Thành thạo</option>
+                                <option value="native">Bản ngữ</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
                             <label for="deadline">Hạn nộp hồ sơ <span class="required">*</span></label>
                             <input type="date" class="form-control" id="deadline" name="deadline" required>
                         </div>
@@ -1267,6 +1299,33 @@
                     salaryMin.disabled = salaryMax.disabled = false;
                 }
             });
+        }
+
+        // ========== FOREIGN LANGUAGE HANDLER ==========
+
+        const foreignLanguageSelect = document.getElementById('foreign_language');
+        const languageLevelSelect = document.getElementById('language_level');
+
+        if (foreignLanguageSelect && languageLevelSelect) {
+            foreignLanguageSelect.addEventListener('change', function() {
+                if (this.value === 'no_requirement' || this.value === '') {
+                    languageLevelSelect.disabled = true;
+                    languageLevelSelect.value = '';
+                    languageLevelSelect.style.opacity = '0.5';
+                    languageLevelSelect.style.backgroundColor = '#f7fafc';
+                } else {
+                    languageLevelSelect.disabled = false;
+                    languageLevelSelect.style.opacity = '1';
+                    languageLevelSelect.style.backgroundColor = '#ffffff';
+                }
+            });
+
+            // Initialize on page load
+            if (foreignLanguageSelect.value === 'no_requirement' || foreignLanguageSelect.value === '') {
+                languageLevelSelect.disabled = true;
+                languageLevelSelect.style.opacity = '0.5';
+                languageLevelSelect.style.backgroundColor = '#f7fafc';
+            }
         }
 
         // ========== FORM SUBMISSION ==========

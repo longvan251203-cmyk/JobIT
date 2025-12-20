@@ -107,6 +107,8 @@ class JobApiController extends Controller
                 'recruitment_count' => $job->recruitment_count,
                 'province' => $job->province,
                 'deadline' => $job->deadline,
+                'foreign_language' => $job->foreign_language,
+                'language_level' => $job->language_level,
                 'gender_requirement' => $job->gender_requirement,
                 'description' => $job->description,
                 'responsibilities' => $job->responsibilities,

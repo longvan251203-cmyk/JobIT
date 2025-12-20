@@ -1924,6 +1924,25 @@
                                             </div>
                                         </div>
                                         @endif
+
+                                        {{-- Language Match --}}
+                                        @if(isset($rec['matched_jobs'][0]['match_details']['language']))
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-gray-600 flex items-center gap-1">
+                                                <i class="bi bi-translate text-orange-500"></i>
+                                                Ngoại ngữ
+                                            </span>
+                                            <div class="flex items-center gap-1">
+                                                <div class="w-16 bg-gray-200 rounded-full h-1.5">
+                                                    <div class="bg-gradient-to-r from-orange-400 to-pink-500 h-1.5 rounded-full"
+                                                        data-score="{{ round($rec['matched_jobs'][0]['match_details']['language']['score']) }}"></div>
+                                                </div>
+                                                <span class="font-bold text-orange-600 text-xs">
+                                                    {{ round($rec['matched_jobs'][0]['match_details']['language']['score']) }}%
+                                                </span>
+                                            </div>
+                                        </div>
+                                        @endif
                                     </div>
                                 </div>
 

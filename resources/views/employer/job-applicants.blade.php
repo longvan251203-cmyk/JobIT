@@ -463,6 +463,32 @@
             display: block;
         }
 
+        /* CV Modal Styles */
+        .cv-flex {
+            display: flex;
+            gap: 24px;
+        }
+
+        .cv-left {
+            width: 280px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f5f7ff 0%, #f0f0ff 100%);
+            border-radius: 12px;
+            flex-shrink: 0;
+        }
+
+        /* ✅ Avatar trong CV Modal */
+        .cv-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            margin: 0 auto;
+            display: block;
+        }
+
         /* Loading */
         .loading {
             display: inline-block;

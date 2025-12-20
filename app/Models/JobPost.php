@@ -27,6 +27,8 @@ class JobPost extends Model
         'province',
         'district',
         'address_detail',
+        'foreign_language',
+        'language_level',
         'deadline',
         'description',
         'responsibilities',
@@ -38,7 +40,7 @@ class JobPost extends Model
     ];
 
     // ✅ Tự động append các accessor vào JSON
-    protected $appends = ['selected_count', 'remaining_count'];
+    protected $appends = ['selected_count', 'remaining_count', 'experience_label', 'foreign_language_label', 'language_level_label'];
 
     /**
      * Scope: Chỉ lấy jobs còn hạn và đang active
@@ -79,6 +81,41 @@ class JobPost extends Model
 
         return $labels[$this->experience] ?? $this->experience;
     }
+
+    // ✅ THÊM ACCESSOR - Chuyển đổi foreign_language
+    public function getForeignLanguageLabelAttribute()
+    {
+        $labels = [
+            'no_requirement' => 'Không yêu cầu',
+            'english' => 'Tiếng Anh',
+            'japanese' => 'Tiếng Nhật',
+            'korean' => 'Tiếng Hàn',
+            'chinese' => 'Tiếng Trung',
+            'french' => 'Tiếng Pháp',
+            'german' => 'Tiếng Đức',
+            'spanish' => 'Tiếng Tây Ban Nha',
+            'russian' => 'Tiếng Nga',
+            'thai' => 'Tiếng Thái',
+            'indonesian' => 'Tiếng Indonesia',
+        ];
+
+        return $labels[$this->foreign_language] ?? $this->foreign_language;
+    }
+
+    // ✅ THÊM ACCESSOR - Chuyển đổi language_level
+    public function getLanguageLevelLabelAttribute()
+    {
+        $labels = [
+            'basic' => 'Sơ cấp',
+            'intermediate' => 'Trung cấp',
+            'advanced' => 'Cao cấp',
+            'fluent' => 'Thành thạo',
+            'native' => 'Bản ngữ',
+        ];
+
+        return $labels[$this->language_level] ?? $this->language_level;
+    }
+
     public function detail()
     {
         return $this->hasOne(JobDetail::class, 'job_id');

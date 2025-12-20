@@ -733,6 +733,18 @@
                                 class="fas fa-calendar-alt w-5 text-center text-indigo-500 mr-3"></i>
                             <span class="font-semibold">Hạn nộp:</span> <span class="ml-auto">{{ $job->deadline ?? '30/12/2025' }}</span>
                         </li>
+                        @if($job->foreign_language)
+                        <li class="flex items-center"><i
+                                class="fas fa-language w-5 text-center text-indigo-500 mr-3"></i>
+                            <span class="font-semibold">Ngoại ngữ:</span> <span class="ml-auto">{{ $job->foreign_language_label }}</span>
+                        </li>
+                        @endif
+                        @if($job->language_level)
+                        <li class="flex items-center"><i
+                                class="fas fa-graduation-cap w-5 text-center text-indigo-500 mr-3"></i>
+                            <span class="font-semibold">Trình độ ngoại ngữ:</span> <span class="ml-auto">{{ $job->language_level_label }}</span>
+                        </li>
+                        @endif
                     </ul>
                 </div>
 

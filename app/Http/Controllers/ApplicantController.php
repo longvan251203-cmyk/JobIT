@@ -11,6 +11,7 @@ use App\Models\NgoaiNgu;
 use App\Models\DuAn;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
@@ -108,6 +109,31 @@ class ApplicantController extends Controller
         }
 
         DB::table('applicants')->where('user_id', $user->id)->update($updateData);
+
+        // ✅ INVALIDATE CACHE
+        Cache::forget("recommended_applicants_v2_company_*");
+        Cache::flush(); // Clear all cache để safe
+
+        // ✅ TRIGGER: Re-generate recommendations sau khi profile update
+        try {
+            $applicant = Auth::user()->applicant;
+            if ($applicant) {
+                Log::info('🔄 Triggering recalculate after profile update', [
+                    'applicant_id' => $applicant->id_uv
+                ]);
+
+                // Inject service
+                $recommendationService = app(\App\Services\JobRecommendationService::class);
+                $recommendationService->generateRecommendationsForApplicant($applicant, 20);
+
+                Log::info('✅ Recommendations recalculated after profile update');
+            }
+        } catch (\Exception $e) {
+            Log::error('❌ Error recalculating recommendations', [
+                'error' => $e->getMessage()
+            ]);
+        }
+
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,

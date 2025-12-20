@@ -206,7 +206,7 @@ class JobRecommendationController extends Controller
     /**
      * Cập nhật lại recommendations sau khi thay đổi hồ sơ
      */
-    public function recalculateAfterProfileUpdate(Request $request)
+    public function recalculate(Request $request)
     {
         try {
             $applicant = Auth::user()->applicant;
@@ -310,6 +310,88 @@ class JobRecommendationController extends Controller
             ]);
         } catch (\Exception $e) {
             Log::error('❌ Error getting recommendations for home', [
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * ✅ Recalculate recommendations khi job được update
+     * Xóa recommendations cũ của job này từ tất cả ứng viên
+     */
+    public function recalculateForJob($jobId)
+    {
+        try {
+            // Kiểm tra job tồn tại
+            $job = \App\Models\JobPost::where('job_id', $jobId)->firstOrFail();
+
+            Log::info('🔄 Recalculating recommendations for job', [
+                'job_id' => $jobId,
+                'title' => $job->title
+            ]);
+
+            // Xóa tất cả recommendations cũ của job này
+            $deletedCount = \App\Models\JobRecommendation::where('job_id', $jobId)->delete();
+
+            Log::info('✅ Deleted old job recommendations', [
+                'job_id' => $jobId,
+                'count' => $deletedCount
+            ]);
+
+            // Lấy tất cả ứng viên có đủ thông tin
+            $applicants = \App\Models\Applicant::whereNotNull('vitriungtuyen')
+                ->whereNotNull('diachi_uv')
+                ->with(['kynang', 'hocvan', 'kinhnghiem', 'ngoaiNgu'])
+                ->get();
+
+            $newCount = 0;
+
+            // Tính toán lại recommendations cho mỗi ứng viên
+            foreach ($applicants as $applicant) {
+                try {
+                    $matchData = $this->recommendationService->calculateMatchScore($applicant, $job);
+                    $score = $matchData['score'];
+
+                    if ($score >= 40) {
+                        \App\Models\JobRecommendation::create([
+                            'applicant_id' => $applicant->id_uv,
+                            'job_id' => $job->job_id,
+                            'score' => $score,
+                            'match_details' => json_encode($matchData['breakdown']),
+                            'is_viewed' => false,
+                            'is_applied' => false
+                        ]);
+                        $newCount++;
+                    }
+                } catch (\Exception $e) {
+                    Log::error('❌ Error calculating match for applicant', [
+                        'applicant_id' => $applicant->id_uv,
+                        'job_id' => $jobId,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            }
+
+            Log::info('✅ Recalculated recommendations for job', [
+                'job_id' => $jobId,
+                'new_count' => $newCount,
+                'applicants_processed' => $applicants->count()
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "✅ Đã cập nhật gợi ý cho {$newCount} ứng viên",
+                'count' => $newCount,
+                'applicants_processed' => $applicants->count()
+            ]);
+        } catch (\Exception $e) {
+            Log::error('❌ Error recalculating for job', [
+                'job_id' => $jobId,
                 'error' => $e->getMessage()
             ]);
 

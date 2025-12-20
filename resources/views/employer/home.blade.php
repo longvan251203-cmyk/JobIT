@@ -600,12 +600,7 @@
                     <span class="flex-1 text-left font-medium">Thông tin liên hệ</span>
                 </button>
 
-                <button data-id="candidates" class="sidebar-item w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 text-gray-700 hover:bg-gray-50">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                    <span class="flex-1 text-left font-medium">Tìm kiếm ứng viên</span>
-                </button>
+
                 @php
                 $employer = auth()->user()->employer;
                 $jobPostsCount = $employer && $employer->company
@@ -1422,28 +1417,7 @@
             </form>
 
 
-            <!-- Candidates Tab -->
-            <div id="candidates" class="tab-content hidden">
-                <div class="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
-                    <h2 class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-6">Tìm kiếm ứng viên</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        <input type="text" placeholder="Tìm kiếm theo kỹ năng..." class="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" />
-                        <select class="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500">
-                            <option>Kinh nghiệm</option>
-                            <option>0-1 năm</option>
-                            <option>1-3 năm</option>
-                            <option>3-5 năm</option>
-                        </select>
-                        <button class="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:shadow-lg">Tìm kiếm</button>
-                    </div>
-                    <div class="text-center py-12">
-                        <svg class="w-24 h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                        <p class="text-gray-500 text-lg">Nhập từ khóa để tìm kiếm</p>
-                    </div>
-                </div>
-            </div>
+
 
             <!-- Applicants Tab -->
             <div id="applicants" class="tab-content hidden">
@@ -1911,6 +1885,44 @@
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Ngoại ngữ yêu cầu <span class="text-red-500">*</span>
+                                    </label>
+                                    <select id="edit_foreign_language" name="foreign_language" required
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500">
+                                        <option value="">-- Chọn ngoại ngữ --</option>
+                                        <option value="no_requirement">Không yêu cầu</option>
+                                        <option value="english">Tiếng Anh</option>
+                                        <option value="japanese">Tiếng Nhật</option>
+                                        <option value="korean">Tiếng Hàn</option>
+                                        <option value="chinese">Tiếng Trung</option>
+                                        <option value="french">Tiếng Pháp</option>
+                                        <option value="german">Tiếng Đức</option>
+                                        <option value="spanish">Tiếng Tây Ban Nha</option>
+                                        <option value="russian">Tiếng Nga</option>
+                                        <option value="thai">Tiếng Thái</option>
+                                        <option value="indonesian">Tiếng Indonesia</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                                        Trình độ ngoại ngữ
+                                    </label>
+                                    <select id="edit_language_level" name="language_level" disabled
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500">
+                                        <option value="">-- Chọn trình độ --</option>
+                                        <option value="basic">Sơ cấp</option>
+                                        <option value="intermediate">Trung cấp</option>
+                                        <option value="advanced">Cao cấp</option>
+                                        <option value="fluent">Thành thạo</option>
+                                        <option value="native">Bản ngữ</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">
                                         Hạn nộp hồ sơ <span class="text-red-500">*</span>
                                     </label>
                                     <input type="date" id="edit_deadline" name="deadline" required
@@ -2151,6 +2163,24 @@
                 document.getElementById('edit_deadline').value = job.deadline || '';
                 document.getElementById('edit_address_detail').value = job.address_detail || '';
 
+                // Language fields
+                const editForeignLanguage = document.getElementById('edit_foreign_language');
+                const editLanguageLevel = document.getElementById('edit_language_level');
+
+                editForeignLanguage.value = job.foreign_language || 'no_requirement';
+                editLanguageLevel.value = job.language_level || '';
+
+                // Handle language level disable/enable
+                if (editForeignLanguage.value === 'no_requirement' || editForeignLanguage.value === '') {
+                    editLanguageLevel.disabled = true;
+                    editLanguageLevel.style.opacity = '0.5';
+                    editLanguageLevel.style.backgroundColor = '#f7fafc';
+                } else {
+                    editLanguageLevel.disabled = false;
+                    editLanguageLevel.style.opacity = '1';
+                    editLanguageLevel.style.backgroundColor = '#ffffff';
+                }
+
                 // ⭐ FIX LOCATION: Lấy dữ liệu location từ database
                 const provinceName = job.province || ''; // ✅ Đây là TÊN tỉnh từ DB
                 const districtName = job.district || ''; // ✅ Đây là TÊN huyện từ DB
@@ -2282,6 +2312,7 @@
                     'edit_province',
                     'edit_district', // ✅ THÊM
                     'edit_address_detail', // ✅ THÊM
+                    'edit_foreign_language', // ✅ THÊM
                     'edit_deadline'
                 ];
 
@@ -2462,6 +2493,25 @@
 
             btnCloseEditModal.addEventListener('click', closeEditModal);
             btnCancelEdit.addEventListener('click', closeEditModal);
+
+            // Handle foreign language change in edit form
+            const editForeignLanguageSelect = document.getElementById('edit_foreign_language');
+            const editLanguageLevelSelect = document.getElementById('edit_language_level');
+
+            if (editForeignLanguageSelect && editLanguageLevelSelect) {
+                editForeignLanguageSelect.addEventListener('change', function() {
+                    if (this.value === 'no_requirement' || this.value === '') {
+                        editLanguageLevelSelect.disabled = true;
+                        editLanguageLevelSelect.value = '';
+                        editLanguageLevelSelect.style.opacity = '0.5';
+                        editLanguageLevelSelect.style.backgroundColor = '#f7fafc';
+                    } else {
+                        editLanguageLevelSelect.disabled = false;
+                        editLanguageLevelSelect.style.opacity = '1';
+                        editLanguageLevelSelect.style.backgroundColor = '#ffffff';
+                    }
+                });
+            }
 
             // Close on outside click
             editJobModal.addEventListener('click', function(e) {
@@ -4564,8 +4614,8 @@
                 <div class="p-6 border border-gray-200 rounded-xl hover:shadow-lg transition-all bg-gradient-to-r from-gray-50 to-transparent">
                     <div class="flex items-start justify-between">
                         <div class="flex gap-4 flex-1">
-                            <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-                                ${app.name.substring(0, 2).toUpperCase()}
+                            <div class="w-16 h-16 rounded-full flex-shrink-0 overflow-hidden">
+                                ${app.avatar ? `<img src="${app.avatar}" alt="${app.name}" class="w-16 h-16 object-cover">` : `<div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-lg">${app.name.substring(0, 2).toUpperCase()}</div>`}
                             </div>
                             <div class="flex-1">
                                 <h3 class="text-lg font-semibold text-gray-800 mb-1">${app.name}</h3>
@@ -4678,6 +4728,14 @@
                 document.getElementById('modalAbout').textContent = applicant.about || 'Chưa có giới thiệu';
                 document.getElementById('modalAppliedCount').textContent = applicant.application_count;
                 document.getElementById('modalInvitedCount').textContent = applicant.invitation_count;
+
+                // ✅ Display avatar image
+                const avatarElement = document.getElementById('modalAvatar');
+                if (applicant.avatar) {
+                    avatarElement.innerHTML = `<img src="${applicant.avatar}" alt="${applicant.name}" class="w-24 h-24 rounded-full object-cover">`;
+                } else {
+                    avatarElement.innerHTML = `<div class="w-24 h-24 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-3xl font-bold">${applicant.name.substring(0, 2).toUpperCase()}</div>`;
+                }
 
                 // Skills
                 const skillsHtml = applicant.skills.map(skill =>

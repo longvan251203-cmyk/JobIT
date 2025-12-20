@@ -10,6 +10,7 @@ use App\Models\JobInvitation;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -94,6 +95,8 @@ class JobController extends Controller
                 'province' => 'required|string',
                 'district' => 'required|string',
                 'address_detail' => 'required|string|max:500',
+                'foreign_language' => 'required|string|in:no_requirement,english,japanese,korean,chinese,french,german,spanish,russian,thai,indonesian',
+                'language_level' => 'nullable|string|in:basic,intermediate,advanced,fluent,native',
                 'deadline' => 'required|date|after_or_equal:today',
                 'description' => 'required|string|max:2000',
                 'responsibilities' => 'required|string|max:2000',
@@ -132,6 +135,8 @@ class JobController extends Controller
                     'province' => $validated['province'],
                     'district' => $validated['district'],
                     'address_detail' => $validated['address_detail'],
+                    'foreign_language' => $validated['foreign_language'] ?? null,
+                    'language_level' => $validated['language_level'] ?? null,
                     'deadline' => $validated['deadline'],
                 ]);
 
@@ -349,6 +354,8 @@ class JobController extends Controller
             'province' => $job->province,
             'district' => $job->district,
             'address_detail' => $job->address_detail,
+            'foreign_language' => $job->foreign_language,
+            'language_level' => $job->language_level,
             'deadline' => $job->deadline,
             'gender_requirement' => $job->gender_requirement,
             'is_expired' => $isExpired, // ✅ THÊM FLAG HẾT HẠN
@@ -469,6 +476,8 @@ class JobController extends Controller
                 'province' => 'required|string',
                 'district' => 'required|string',
                 'address_detail' => 'required|string|max:500',
+                'foreign_language' => 'required|string|in:no_requirement,english,japanese,korean,chinese,french,german,spanish,russian,thai,indonesian',
+                'language_level' => 'nullable|string|in:basic,intermediate,advanced,fluent,native',
                 'deadline' => 'required|date',
                 'description' => 'required|string|max:2000',
                 'responsibilities' => 'required|string|max:2000',
@@ -496,6 +505,8 @@ class JobController extends Controller
                     'province' => $validated['province'],
                     'district' => $validated['district'],
                     'address_detail' => $validated['address_detail'],
+                    'foreign_language' => $validated['foreign_language'] ?? null,
+                    'language_level' => $validated['language_level'] ?? null,
                     'deadline' => $validated['deadline'],
                 ]);
 
@@ -586,6 +597,64 @@ class JobController extends Controller
                 DB::commit();
 
                 Log::info('Job updated successfully', ['job_id' => $job->job_id]);
+
+                // ✅ INVALIDATE CACHE cho gợi ý ứng viên
+                Cache::forget("recommended_applicants_v2_company_*");
+                Cache::flush();
+
+                // ✅ TRIGGER: Recalculate recommendations cho tất cả ứng viên
+                try {
+                    Log::info('🔄 Triggering recalculate for job applicants', [
+                        'job_id' => $job->job_id
+                    ]);
+
+                    $recommendationService = app(\App\Services\JobRecommendationService::class);
+
+                    // Lấy tất cả ứng viên có đủ thông tin
+                    $applicants = \App\Models\Applicant::whereNotNull('vitriungtuyen')
+                        ->whereNotNull('diachi_uv')
+                        ->with(['kynang', 'hocvan', 'kinhnghiem', 'ngoaiNgu'])
+                        ->get();
+
+                    // Xóa recommendations cũ của job này
+                    \App\Models\JobRecommendation::where('job_id', $job->job_id)->delete();
+
+                    $newCount = 0;
+                    foreach ($applicants as $applicant) {
+                        try {
+                            $matchData = $recommendationService->calculateMatchScore($applicant, $job);
+                            $score = $matchData['score'];
+
+                            if ($score >= 40) {
+                                \App\Models\JobRecommendation::create([
+                                    'applicant_id' => $applicant->id_uv,
+                                    'job_id' => $job->job_id,
+                                    'score' => $score,
+                                    'match_details' => json_encode($matchData['breakdown']),
+                                    'is_viewed' => false,
+                                    'is_applied' => false
+                                ]);
+                                $newCount++;
+                            }
+                        } catch (\Exception $e) {
+                            Log::error('❌ Error recalculating for applicant', [
+                                'applicant_id' => $applicant->id_uv,
+                                'job_id' => $job->job_id,
+                                'error' => $e->getMessage()
+                            ]);
+                        }
+                    }
+
+                    Log::info('✅ Recalculated recommendations for job', [
+                        'job_id' => $job->job_id,
+                        'new_count' => $newCount
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('❌ Error triggering recalculate', [
+                        'job_id' => $job->job_id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
 
                 return response()->json([
                     'success' => true,

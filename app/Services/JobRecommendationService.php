@@ -9,15 +9,73 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 
+/**
+ * ✅ JOB RECOMMENDATION SERVICE - THUẬT TOÁN GỢI Ý CÔNG VIỆC
+ * 
+ * 🎯 THUẬT TOÁN GỢI Ý - 6 YẾU TỐ CHÍNH:
+ * ========================================
+ * 1. 📍 LOCATION (30%) - Địa điểm làm việc
+ *    - Cùng tỉnh: 100 điểm
+ *    - Tỉnh lân cận: 85 điểm
+ *    - Cùng miền: 60 điểm
+ *    - Khác miền: 30 điểm
+ *    - Remote: 100 điểm
+ * 
+ * 2. 💻 SKILLS (25%) - Kỹ năng yêu cầu
+ *    - Có tất cả kỹ năng + bonus: 100 điểm
+ *    - % kỹ năng phù hợp: 0-100 điểm
+ *    - Không có kỹ năng: 0 điểm
+ * 
+ * 3. 🌐 LANGUAGE (20%) - NGOẠI NGỮ & TRÌNH ĐỘ (XẾP HẠNG 3)
+ *    So sánh CHÍNH XÁC giữa ngoại ngữ yêu cầu và ngoại ngữ của ứng viên
+ *    
+ *    ✓ Không yêu cầu ngoại ngữ → 100 điểm
+ *    ✓ Khớp ngôn ngữ + trình độ = nhau → 100 điểm
+ *    ✓ Khớp ngôn ngữ + trình độ cao hơn 1 bậc → 95 điểm
+ *    ✓ Khớp ngôn ngữ + trình độ cao hơn 2 bậc → 90 điểm
+ *    ✓ Khớp ngôn ngữ + trình độ cao hơn 3+ bậc → 85 điểm
+ *    ⚠ Khớp ngôn ngữ + trình độ thấp hơn 1 bậc → 75 điểm
+ *    ⚠ Khớp ngôn ngữ + trình độ thấp hơn 2 bậc → 55 điểm
+ *    ⚠ Khớp ngôn ngữ + trình độ thấp hơn 3+ bậc → 30 điểm
+ *    ✗ Không có ngôn ngữ yêu cầu → 20 điểm
+ *    ✗ Chưa cập nhật ngoại ngữ → 10 điểm
+ * 
+ * 4. 💼 POSITION (15%) - Vị trí ứng tuyển
+ *    - Khớp chính xác: 100 điểm
+ *    - Khớp keyword: 90 điểm
+ *    - Level chênh lệch 1 bậc: 95 điểm
+ *    - Level chênh lệch 2 bậc: 85 điểm
+ *    - Level chênh lệch 3+ bậc: 70 điểm
+ * 
+ * 5. 📅 EXPERIENCE (5%) - Kinh nghiệm
+ *    - Bằng yêu cầu: 100 điểm
+ *    - Dưới yêu cầu: Giảm 25% mỗi năm
+ *    - Trên yêu cầu 1-2 năm: 100 điểm
+ *    - Trên yêu cầu 3+ năm: Giảm 5% mỗi năm
+ * 
+ * 6. 💰 SALARY (5%) - Mức lương
+ *    - Nằm trong range: 100 điểm
+ *    - Dưới range: Giảm tỉ lệ
+ *    - Trên range: Giảm tỉ lệ (mạnh hơn)
+ * 
+ * ========================================
+ * TRÌNH ĐỘ NGOẠI NGỮ (ranking):
+ * 5 - Native (Bản ngữ)
+ * 4 - Fluent (Thành thạo)
+ * 3 - Advanced (Cao cấp) / C1
+ * 2 - Intermediate (Trung cấp) / B1-B2
+ * 1 - Basic (Sơ cấp) / A1-A2
+ * ========================================
+ */
 class JobRecommendationService
 {
-    // ✅ TRỌNG SỐ MỚI - ƯU TIÊN LOCATION, KỸ NĂNG, VỊ TRÍ ỨNG TUYỂN
-    const WEIGHT_LOCATION = 0.35;       // ƯU TIÊN NHẤT - Địa điểm
-    const WEIGHT_SKILLS = 0.30;         // Quan trọng thứ 2 - Kỹ năng
-    const WEIGHT_POSITION = 0.20;       // Quan trọng thứ 3 - Vị trí ứng tuyển
-    const WEIGHT_EXPERIENCE = 0.08;     // Giảm xuống
-    const WEIGHT_SALARY = 0.04;         // Giảm xuống
-    const WEIGHT_LANGUAGE = 0.03;       // Ít quan trọng nhất
+    // ✅ TRỌNG SỐ MỚI - ƯU TIÊN LOCATION, KỸ NĂNG, VỊ TRÍ, NGOẠI NGỮ ỨNG TUYỂN
+    const WEIGHT_LOCATION = 0.30;           // ƯU TIÊN NHẤT - Địa điểm
+    const WEIGHT_SKILLS = 0.25;             // Quan trọng thứ 2 - Kỹ năng
+    const WEIGHT_LANGUAGE = 0.20;           // Quan trọng thứ 3 - Ngoại ngữ ứng tuyển
+    const WEIGHT_POSITION = 0.15;           // Quan trọng thứ 4 - Vị trí ứng tuyển
+    const WEIGHT_EXPERIENCE = 0.05;         // Giảm xuống
+    const WEIGHT_SALARY = 0.05;             // Giảm xuống
 
     /**
      * Tính điểm phù hợp giữa ứng viên và job
@@ -777,65 +835,348 @@ class JobRecommendationService
 
     /**
      * Tính độ phù hợp về NGOẠI NGỮ
+     * So sánh ngoại ngữ yêu cầu của job với ngoại ngữ của ứng viên
+     * Xếp hạng 3 sau kỹ năng
      */
     private function calculateLanguageMatch(Applicant $applicant, JobPost $job): array
     {
-        $languages = $applicant->ngoaiNgu()->pluck('ten_ngoai_ngu')->toArray();
+        // 📍 1. Kiểm tra job có yêu cầu ngoại ngữ không
+        $jobForeignLanguage = strtolower(trim($job->foreign_language ?? ''));
+        $jobLanguageLevel = strtolower(trim($job->language_level ?? ''));
 
-        if (empty($languages)) {
+        // Nếu job không yêu cầu ngoại ngữ → điểm cao nhưng thấp hơn job có yêu cầu + khớp
+        if (empty($jobForeignLanguage) || $jobForeignLanguage === 'no_requirement') {
             return [
-                'score' => 50,
-                'reason' => 'Bạn chưa cập nhật ngoại ngữ',
-                'details' => ['languages' => []]
+                'score' => 95,
+                'reason' => 'Công việc không yêu cầu ngoại ngữ',
+                'details' => [
+                    'job_requirement' => 'Không yêu cầu',
+                    'applicant_languages' => []
+                ]
             ];
         }
 
-        $languagesWithLevel = $applicant->ngoaiNgu()->get();
-        $priorityLanguages = ['Tiếng Anh', 'English'];
+        // 📍 2. Lấy ngoại ngữ của ứng viên
+        $applicantLanguages = $applicant->ngoaiNgu()->get();
 
-        $hasHighLevel = false;
-        $hasIntermediate = false;
-        $totalLanguages = count($languages);
+        if ($applicantLanguages->isEmpty()) {
+            return [
+                'score' => 10,
+                'reason' => "⚠ Job yêu cầu {$this->getLanguageLabelFromCode($jobForeignLanguage)}, nhưng bạn chưa cập nhật ngoại ngữ",
+                'details' => [
+                    'job_requirement' => $jobForeignLanguage,
+                    'applicant_languages' => [],
+                    'match_type' => 'no_language_found'
+                ]
+            ];
+        }
 
-        foreach ($languagesWithLevel as $lang) {
-            $proficiency = strtolower(trim($lang->trinh_do ?? ''));
+        // 📍 3. Chuẩn hóa mã ngoại ngữ job
+        $jobLanguageCode = $this->normalizeLanguageCode($jobForeignLanguage);
 
-            if (in_array($lang->ten_ngoai_ngu, $priorityLanguages)) {
-                if (in_array($proficiency, ['cao cap', 'cao cấp', 'advanced'])) {
-                    $hasHighLevel = true;
-                } elseif (in_array($proficiency, ['trung cap', 'trung cấp', 'intermediate'])) {
-                    $hasIntermediate = true;
-                }
+        // 📍 4. Tìm ngôn ngữ khớp trong danh sách ứng viên
+        $matchedLanguage = null;
+        foreach ($applicantLanguages as $appLang) {
+            $appLangCode = $this->normalizeLanguageCode($appLang->ten_ngoai_ngu);
+
+            if ($appLangCode === $jobLanguageCode) {
+                $matchedLanguage = $appLang;
+                break;
             }
         }
 
-        $score = 0;
-        $reason = '';
-
-        if ($hasHighLevel) {
-            $score = 100;
-            $reason = "✓ Bạn có trình độ cao cấp - lợi thế lớn";
-        } elseif ($hasIntermediate) {
-            $score = 80;
-            $reason = "✓ Bạn có trình độ trung cấp - khá tốt";
-        } elseif ($totalLanguages > 0) {
-            $score = 60;
-            $reason = "Bạn biết " . implode(', ', $languages) . " - cần nâng cao";
-        } else {
-            $score = 50;
-            $reason = "Chưa có thông tin ngoại ngữ";
+        // Nếu không có ngôn ngữ khớp → điểm thấp
+        if (!$matchedLanguage) {
+            $applicantLangList = $applicantLanguages->pluck('ten_ngoai_ngu')->implode(', ');
+            return [
+                'score' => 20,
+                'reason' => "⚠ Job yêu cầu {$this->getLanguageLabelFromCode($jobForeignLanguage)}, bạn có: {$applicantLangList}",
+                'details' => [
+                    'job_requirement' => $jobForeignLanguage,
+                    'applicant_languages' => $applicantLanguages->pluck('ten_ngoai_ngu')->toArray(),
+                    'match_type' => 'no_match'
+                ]
+            ];
         }
+
+        // 📍 5. Có ngôn ngữ khớp - So sánh trình độ
+        $applicantLevel = strtolower(trim($matchedLanguage->trinh_do ?? ''));
+
+        // Chuẩn hóa trình độ
+        $applicantLevelCode = $this->normalizeLanguageLevelCode($applicantLevel);
+        $jobLevelCode = $this->normalizeLanguageLevelCode($jobLanguageLevel);
+
+        // Tính điểm dựa trên level
+        $score = $this->calculateLanguageLevelScore($applicantLevelCode, $jobLevelCode);
+        $reason = $this->getLanguageLevelReason($applicantLevelCode, $jobLevelCode, $jobLanguageLevel);
 
         return [
             'score' => round($score, 2),
             'reason' => $reason,
             'details' => [
-                'languages' => $languages,
-                'total_languages' => $totalLanguages,
-                'has_high_level' => $hasHighLevel,
-                'has_intermediate' => $hasIntermediate
+                'job_language' => $jobForeignLanguage,
+                'job_level' => $jobLanguageLevel,
+                'applicant_language' => $matchedLanguage->ten_ngoai_ngu,
+                'applicant_level' => $matchedLanguage->trinh_do,
+                'applicant_level_code' => $applicantLevelCode,
+                'job_level_code' => $jobLevelCode,
+                'match_type' => 'language_match',
+                'all_applicant_languages' => $applicantLanguages->pluck('ten_ngoai_ngu')->toArray()
             ]
         ];
+    }
+
+    /**
+     * Chuẩn hóa mã ngoại ngữ
+     */
+    private function normalizeLanguageCode(string $language): string
+    {
+        $language = strtolower(trim($language));
+
+        // Loại bỏ dấu
+        $language = $this->removeDiacritics($language);
+
+        $languageMap = [
+            // Input => Code
+            'english' => 'english',
+            'tieng anh' => 'english',
+            'anh' => 'english',
+
+            'japanese' => 'japanese',
+            'tieng nhat' => 'japanese',
+            'nhat' => 'japanese',
+
+            'korean' => 'korean',
+            'tieng han' => 'korean',
+            'han' => 'korean',
+
+            'chinese' => 'chinese',
+            'tieng trung' => 'chinese',
+            'trung' => 'chinese',
+            'mandarin' => 'chinese',
+
+            'french' => 'french',
+            'tieng phap' => 'french',
+            'phap' => 'french',
+
+            'german' => 'german',
+            'tieng duc' => 'german',
+            'duc' => 'german',
+
+            'spanish' => 'spanish',
+            'tieng tay ban nha' => 'spanish',
+
+            'russian' => 'russian',
+            'tieng nga' => 'russian',
+            'nga' => 'russian',
+
+            'thai' => 'thai',
+            'tieng thai' => 'thai',
+
+            'indonesian' => 'indonesian',
+            'tieng indonesia' => 'indonesian',
+            'indonesia' => 'indonesian',
+        ];
+
+        foreach ($languageMap as $key => $code) {
+            if ($language === $key || strpos($language, $key) === 0) {
+                return $code;
+            }
+        }
+
+        return $language;
+    }
+
+    /**
+     * Chuẩn hóa trình độ ngoại ngữ
+     */
+    private function normalizeLanguageLevelCode(string $level): string
+    {
+        $level = strtolower(trim($level));
+        $level = $this->removeDiacritics($level);
+
+        // Map các biến thể của trình độ
+        $levelMap = [
+            // Basic / Sơ cấp
+            'basic' => 'basic',
+            'so cap' => 'basic',
+            'beginner' => 'basic',
+            'a1' => 'basic',
+            'a2' => 'basic',
+
+            // Intermediate / Trung cấp
+            'intermediate' => 'intermediate',
+            'trung cap' => 'intermediate',
+            'b1' => 'intermediate',
+            'b2' => 'intermediate',
+
+            // Advanced / Cao cấp
+            'advanced' => 'advanced',
+            'cao cap' => 'advanced',
+            'c1' => 'advanced',
+
+            // Fluent / Thành thạo
+            'fluent' => 'fluent',
+            'thanh thao' => 'fluent',
+            'c2' => 'fluent',
+            'proficient' => 'fluent',
+
+            // Native / Bản ngữ
+            'native' => 'native',
+            'ban ngu' => 'native',
+            'mother tongue' => 'native',
+        ];
+
+        foreach ($levelMap as $key => $code) {
+            if ($level === $key || strpos($level, $key) === 0) {
+                return $code;
+            }
+        }
+
+        return 'unknown';
+    }
+
+    /**
+     * Tính điểm dựa trên so sánh trình độ
+     * Levels: basic(1) < intermediate(2) < advanced(3) < fluent(4) < native(5)
+     */
+    private function calculateLanguageLevelScore(string $applicantLevel, string $jobLevel): float
+    {
+        $levelRanking = [
+            'unknown' => 0,
+            'basic' => 1,
+            'intermediate' => 2,
+            'advanced' => 3,
+            'fluent' => 4,
+            'native' => 5,
+        ];
+
+        $appRank = $levelRanking[$applicantLevel] ?? 0;
+        $jobRank = $levelRanking[$jobLevel] ?? 0;
+
+        // Nếu job không yêu cầu level cụ thể → điểm cao
+        if ($jobRank === 0) {
+            return $appRank > 0 ? 90 : 50; // Ứng viên có trình độ = 90, không có = 50
+        }
+
+        // Nếu ứng viên không có thông tin level
+        if ($appRank === 0) {
+            return 10;
+        }
+
+        // So sánh trình độ
+        if ($appRank === $jobRank) {
+            // 📈 Khớp chính xác → 100 điểm
+            return 100;
+        } elseif ($appRank > $jobRank) {
+            // 📈 Ứng viên có trình độ cao hơn yêu cầu
+            $excess = $appRank - $jobRank;
+
+            switch ($excess) {
+                case 1:
+                    return 95; // Cao hơn 1 bậc
+                case 2:
+                    return 90; // Cao hơn 2 bậc
+                default:
+                    return 85; // Cao hơn 3+ bậc
+            }
+        } else {
+            // 📉 Ứng viên có trình độ thấp hơn yêu cầu
+            $shortfall = $jobRank - $appRank;
+
+            switch ($shortfall) {
+                case 1:
+                    return 75; // Thấp hơn 1 bậc - vẫn chấp nhận được
+                case 2:
+                    return 55; // Thấp hơn 2 bậc - khó
+                default:
+                    return 30; // Thấp hơn 3+ bậc - rất khó
+            }
+        }
+    }
+
+    /**
+     * Lấy lý do so sánh trình độ ngoại ngữ
+     */
+    private function getLanguageLevelReason(string $applicantLevel, string $jobLevel, string $jobLevelDisplay): string
+    {
+        $jobLevelDisplay = $this->getLanguageLevelLabelFromCode($jobLevel);
+
+        if ($applicantLevel === 'unknown') {
+            return "⚠ Bạn chưa cập nhật trình độ ngoại ngữ, job yêu cầu {$jobLevelDisplay}";
+        }
+
+        $applicantLevelDisplay = $this->getLanguageLevelLabelFromCode($applicantLevel);
+
+        if ($applicantLevel === $jobLevel) {
+            return "✓ Trình độ khớp: {$applicantLevelDisplay}";
+        } elseif (
+            $this->compareLanguageLevels($applicantLevel, $jobLevel) > 0
+        ) {
+            return "✓ Bạn có trình độ {$applicantLevelDisplay} - cao hơn yêu cầu {$jobLevelDisplay}";
+        } else {
+            return "⚠ Bạn có trình độ {$applicantLevelDisplay}, job yêu cầu {$jobLevelDisplay}";
+        }
+    }
+
+    /**
+     * So sánh 2 trình độ
+     * Trả về: > 0 (app cao hơn), 0 (bằng), < 0 (app thấp hơn)
+     */
+    private function compareLanguageLevels(string $level1, string $level2): int
+    {
+        $ranking = [
+            'unknown' => 0,
+            'basic' => 1,
+            'intermediate' => 2,
+            'advanced' => 3,
+            'fluent' => 4,
+            'native' => 5,
+        ];
+
+        $rank1 = $ranking[$level1] ?? 0;
+        $rank2 = $ranking[$level2] ?? 0;
+
+        return $rank1 - $rank2;
+    }
+
+    /**
+     * Lấy label tiếng Việt cho mã ngoại ngữ
+     */
+    private function getLanguageLabelFromCode(string $code): string
+    {
+        $languageLabels = [
+            'english' => 'Tiếng Anh',
+            'japanese' => 'Tiếng Nhật',
+            'korean' => 'Tiếng Hàn',
+            'chinese' => 'Tiếng Trung',
+            'french' => 'Tiếng Pháp',
+            'german' => 'Tiếng Đức',
+            'spanish' => 'Tiếng Tây Ban Nha',
+            'russian' => 'Tiếng Nga',
+            'thai' => 'Tiếng Thái',
+            'indonesian' => 'Tiếng Indonesia',
+            'no_requirement' => 'Không yêu cầu',
+        ];
+
+        return $languageLabels[strtolower($code)] ?? $code;
+    }
+
+    /**
+     * Lấy label tiếng Việt cho mã trình độ
+     */
+    private function getLanguageLevelLabelFromCode(string $code): string
+    {
+        $levelLabels = [
+            'basic' => 'Sơ cấp',
+            'intermediate' => 'Trung cấp',
+            'advanced' => 'Cao cấp',
+            'fluent' => 'Thành thạo',
+            'native' => 'Bản ngữ',
+            'unknown' => 'Chưa xác định',
+        ];
+
+        return $levelLabels[strtolower($code)] ?? $code;
     }
 
     /**
