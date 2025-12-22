@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\Applicant;
 use App\Models\JobPost;
 use App\Models\JobRecommendation;
+use App\Models\ApplicantRecommendation;
+use App\Models\ApplicantJobMatch;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
@@ -1394,7 +1396,11 @@ class JobRecommendationService
      */
     private function calculateRecommendedApplicantsV2($companyId, $limit): array
     {
-        // ========== BƯỚC 1: LẤY JOBS ĐANG ACTIVE ==========
+        // XÓA DỮ LIỆU CŨ
+        ApplicantRecommendation::where('company_id', $companyId)->delete();
+        ApplicantJobMatch::where('company_id', $companyId)->delete();
+
+        // ========== BƯỚC 1: LẤY JOBS ĐANG ACTIVE ========== 
         $activeJobs = JobPost::where('companies_id', $companyId)
             ->where('status', 'active')
             ->where('deadline', '>=', now())
@@ -1408,7 +1414,7 @@ class JobRecommendationService
             return [];
         }
 
-        // ========== BƯỚC 2: LẤY ỨNG VIÊN PHÙ HỢP ==========
+        // ========== BƯỚC 2: LẤY ỨNG VIÊN PHÙ HỢP ========== 
         $applicants = Applicant::whereNotNull('vitriungtuyen')
             ->whereNotNull('diachi_uv')
             ->whereHas('kynang')
@@ -1423,61 +1429,76 @@ class JobRecommendationService
             return [];
         }
 
-        // ========== BƯỚC 3: TÍNH ĐIỂM CHO TỪNG ỨNG VIÊN VỚI TẤT CẢ JOB ==========
+        // ========== BƯỚC 3: TÍNH ĐIỂM CHO TỪNG ỨNG VIÊN VỚI TẤT CẢ JOB ========== 
         $recommendations = [];
 
         foreach ($applicants as $applicant) {
-            $applicantJobMatches = []; // Lưu tất cả job phù hợp với ứng viên này
+            $applicantJobMatches = [];
             $bestScore = 0;
             $bestJob = null;
 
-            // Tính điểm với TỪNG job
             foreach ($activeJobs as $job) {
                 $matchData = $this->calculateMatchScore($applicant, $job);
                 $score = $matchData['score'];
 
-                // ✅ CHỈ LƯU JOB CÓ ĐIỂM >= 60%
                 if ($score >= 60) {
+                    // Lưu vào applicant_job_matches
+                    ApplicantJobMatch::updateOrCreate(
+                        [
+                            'company_id' => $companyId,
+                            'applicant_id' => $applicant->id_uv,
+                            'job_id' => $job->job_id,
+                        ],
+                        [
+                            'match_score' => $score,
+                            'match_details' => json_encode($matchData['breakdown']),
+                        ]
+                    );
+
                     $applicantJobMatches[] = [
                         'job' => $job,
                         'score' => $score,
                         'match_details' => $matchData['breakdown']
                     ];
 
-                    // Cập nhật best match
                     if ($score > $bestScore) {
                         $bestScore = $score;
                         $bestJob = $job;
                     }
-
-                    // 💾 LƯU MATCHED JOB VÀO DATABASE
-                    JobRecommendation::updateOrCreate(
-                        [
-                            'applicant_id' => $applicant->id_uv,  // ✅ Applicant PK: id_uv
-                            'job_id' => $job->job_id,  // ✅ Job PK: job_id (không phải id)
-                        ],
-                        [
-                            'score' => $score,
-                            'match_details' => json_encode($matchData['breakdown']),
-                            'is_viewed' => false,
-                            'is_applied' => false
-                        ]
-                    );
                 }
             }
 
-            // ✅ CHỈ THÊM ỨNG VIÊN NẾU CÓ ÍT NHẤT 1 JOB PHÙ HỢP
             if (!empty($applicantJobMatches)) {
-                // Sắp xếp job theo điểm giảm dần
                 usort($applicantJobMatches, function ($a, $b) {
                     return $b['score'] <=> $a['score'];
                 });
 
+                // Lưu vào applicant_recommendations
+                ApplicantRecommendation::updateOrCreate(
+                    [
+                        'company_id' => $companyId,
+                        'applicant_id' => $applicant->id_uv,
+                    ],
+                    [
+                        'best_score' => $bestScore,
+                        'match_details' => json_encode([
+                            'best_job' => $bestJob ? $bestJob->job_id : null,
+                            'matched_jobs' => array_map(function ($mj) {
+                                return [
+                                    'job_id' => $mj['job']->job_id,
+                                    'score' => $mj['score'],
+                                    'match_details' => $mj['match_details'],
+                                ];
+                            }, $applicantJobMatches)
+                        ]),
+                    ]
+                );
+
                 $recommendations[] = [
                     'applicant' => $applicant,
-                    'best_score' => $bestScore, // Điểm cao nhất
-                    'best_job' => $bestJob, // Job phù hợp nhất
-                    'matched_jobs' => $applicantJobMatches, // TẤT CẢ các job phù hợp
+                    'best_score' => $bestScore,
+                    'best_job' => $bestJob,
+                    'matched_jobs' => $applicantJobMatches,
                     'total_matches' => count($applicantJobMatches)
                 ];
             }
@@ -1487,7 +1508,7 @@ class JobRecommendationService
             'total_recommendations' => count($recommendations)
         ]);
 
-        // ========== BƯỚC 4: SẮP XẾP VÀ LẤY TOP ==========
+        // ========== BƯỚC 4: SẮP XẾP VÀ LẤY TOP ========== 
         // Sắp xếp theo: 1) Số lượng job match, 2) Best score
         usort($recommendations, function ($a, $b) {
             if ($a['total_matches'] !== $b['total_matches']) {

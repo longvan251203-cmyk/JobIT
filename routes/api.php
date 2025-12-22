@@ -44,3 +44,47 @@ Route::middleware('web')->group(function () {
 Route::get('/hashtags/search', [JobController::class, 'searchHashtags']);
 // ✅ Job Invitation - Respond (accept/reject)
 Route::post('/job-invitations/{id}/respond', [JobController::class, 'respondToInvitation']);
+
+// =============================================================================
+// AI RECOMMENDATION API
+// =============================================================================
+Route::prefix('ai')->group(function () {
+
+    // ✅ Public: Test & Stats
+    Route::get('/test', [\App\Http\Controllers\Api\AIRecommendationController::class, 'testConnection']);
+    Route::get('/stats', [\App\Http\Controllers\Api\AIRecommendationController::class, 'getStatistics']);
+    Route::post('/demo/analyze', [\App\Http\Controllers\Api\AIRecommendationController::class, 'demoAnalyze']);
+
+    // ✅ Applicant: Cần đăng nhập
+    Route::middleware('web')->group(function () {
+        // Tạo recommendations cho ứng viên
+        Route::post('/recommendations/generate', [\App\Http\Controllers\Api\AIRecommendationController::class, 'generateForApplicant']);
+
+        // Lấy danh sách recommendations
+        Route::get('/recommendations', [\App\Http\Controllers\Api\AIRecommendationController::class, 'getApplicantRecommendations']);
+
+        // Phân tích 1 job cụ thể
+        Route::get('/analyze/{jobId}', [\App\Http\Controllers\Api\AIRecommendationController::class, 'analyzeJobMatch']);
+
+        // Refresh recommendations
+        Route::post('/recommendations/refresh', [\App\Http\Controllers\Api\AIRecommendationController::class, 'refreshApplicantRecommendations']);
+    });
+
+    // ✅ Employer: Cần đăng nhập nhà tuyển dụng
+    Route::prefix('employer')->middleware('web')->group(function () {
+        // Tạo AI recommendations cho công ty
+        Route::post('/recommendations/generate', [\App\Http\Controllers\Api\AIRecommendationController::class, 'generateForEmployer']);
+
+        // Refresh AI recommendations
+        Route::post('/recommendations/refresh', [\App\Http\Controllers\Api\AIRecommendationController::class, 'refreshEmployerRecommendations']);
+
+        // Tìm ứng viên cho job
+        Route::post('/find-candidates/{jobId}', [\App\Http\Controllers\Api\AIRecommendationController::class, 'findCandidatesForJob']);
+
+        // Lấy danh sách ứng viên đã recommend
+        Route::get('/candidates', [\App\Http\Controllers\Api\AIRecommendationController::class, 'getCompanyCandidates']);
+
+        // Phân tích ứng viên cụ thể
+        Route::get('/analyze/{applicantId}/{jobId}', [\App\Http\Controllers\Api\AIRecommendationController::class, 'analyzeCandidate']);
+    });
+});

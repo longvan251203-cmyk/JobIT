@@ -37,13 +37,28 @@ class EmployerCandidatesController extends Controller
                     ->with('error', 'Vui lòng cập nhật thông tin công ty trước');
             }
 
-            // ========== GỢI Ý ỨNG VIÊN CHO CÔNG TY ==========
-            $recommendedApplicants = $this->recommendationService
-                ->getRecommendedApplicantsForCompany($company->companies_id, 12);;
 
-            Log::info('📊 Recommended applicants loaded', [
+            // ========== XÓA CACHE & TÍNH TOÁN LẠI ========== 
+            $this->recommendationService->clearCompanyRecommendationsCache($company->companies_id);
+            $recommendedApplicants = $this->recommendationService->getRecommendedApplicantsForCompany($company->companies_id, 12);
+
+            // Lấy danh sách từ bảng applicant_recommendations
+            $applicantRecommendations = \App\Models\ApplicantRecommendation::where('company_id', $company->companies_id)
+                ->orderByDesc('best_score')
+                ->with('applicant')
+                ->limit(12)
+                ->get();
+
+            // Lấy tất cả job match cho các ứng viên này
+            $applicantIds = $applicantRecommendations->pluck('applicant_id')->toArray();
+            $jobMatches = \App\Models\ApplicantJobMatch::where('company_id', $company->companies_id)
+                ->whereIn('applicant_id', $applicantIds)
+                ->get()
+                ->groupBy('applicant_id');
+
+            Log::info('📊 Applicant recommendations loaded', [
                 'company_id' =>  $company->companies_id,
-                'count' => count($recommendedApplicants)
+                'count' => $applicantRecommendations->count()
             ]);
 
             // ========== DANH SÁCH ỨNG VIÊN THÔNG THƯỜNG ==========

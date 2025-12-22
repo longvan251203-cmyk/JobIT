@@ -254,10 +254,7 @@ class CandidatesController extends Controller
                         $recommendedApplicants = $this->recommendationService
                             ->getRecommendedApplicantsForCompany($companyId, 12);
 
-                        Log::info('✅ Recommendations result:', [
-                            'count' => count($recommendedApplicants),
-                            'data' => json_encode($recommendedApplicants, JSON_UNESCAPED_UNICODE)
-                        ]);
+                        Log::info('✅ Got legacy recommendations:', ['count' => count($recommendedApplicants)]);
                     } else {
                         Log::warning('⚠️ Company ID is NULL');
                         $recommendedApplicants = [];
@@ -272,7 +269,10 @@ class CandidatesController extends Controller
                 }
             }
 
-            return view('employer.candidates', compact('candidates', 'recommendedApplicants'));
+            return view('employer.candidates', [
+                'candidates' => $candidates,
+                'recommendedApplicants' => $recommendedApplicants
+            ]);
         } catch (\Exception $e) {
             Log::error('❌ Error in CandidatesController@index', [
                 'error' => $e->getMessage(),

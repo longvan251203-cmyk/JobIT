@@ -8,10 +8,13 @@ use App\Models\JobPost;
 use App\Models\HocVan;
 use App\Models\KinhNghiem;
 use App\Models\JobRecommendation;
+use App\Models\AIJobRecommendation;
 use App\Models\Applicant;
 use App\Models\Application;
 use App\Models\Company;
+use App\Services\AI\AIRecommendationService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class HomeController extends Controller
 {
@@ -103,12 +106,10 @@ class HomeController extends Controller
                 ];
             });
 
-        // ✅ Recommended Jobs
+        // ✅ AI Recommended Jobs (NEW)
         $recommendedJobs = null;
-
         if (Auth::check() && Auth::user()->applicant) {
             $applicantId = Auth::user()->applicant->id_uv;
-
             $recommendedJobs = JobRecommendation::where('applicant_id', $applicantId)
                 ->where('score', '>=', 60)
                 ->orderBy('score', 'desc')

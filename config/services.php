@@ -35,4 +35,18 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | OpenAI API Configuration
+    |--------------------------------------------------------------------------
+    |
+    | Cấu hình cho OpenAI API sử dụng trong AI Job Recommendation.
+    | Lấy API key tại: https://platform.openai.com/api-keys
+    |
+    */
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+        'model' => env('OPENAI_MODEL', 'gpt-4o-mini'),
+    ],
+
 ];

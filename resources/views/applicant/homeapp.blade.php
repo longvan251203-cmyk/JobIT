@@ -3045,46 +3045,66 @@
     </div>
 
 
-    <!-- ========== RECOMMENDED JOBS SECTION (FIXED) ========== -->
+    <!-- ========== RECOMMENDED JOBS SECTION ========== -->
     <div class="main-container">
         <div class="featured-section" style="position: relative;">
             <div class="section-title-highlight">
-                <div class="section-subtitle">DÀNH CHO BẠN</div>
-                <h2>Các công việc được gợi ý</h2>
-                <p style="color: #718096; margin-top: 0.5rem;">Được cá nhân hóa dựa trên kỹ năng và kinh nghiệm của bạn</p>
+                <div class="section-subtitle">
+                    GỢI Ý VIỆC LÀM DÀNH CHO BẠN
+                </div>
+                <h2>Việc làm phù hợp với bạn</h2>
+                <p style="color: #718096; margin-top: 0.5rem;">
+                    Các công việc được đề xuất dựa trên hồ sơ, kỹ năng và kinh nghiệm của bạn
+                </p>
             </div>
 
-            <!-- ✅ LOADING CONTAINER - ĐÃ SỬA -->
+            <!-- ✅ LOADING CONTAINER -->
             <div id="recLoadingOverlay" style="
-        display: none; 
-        position: absolute; 
-        top: 0; left: 0; right: 0; bottom: 0; 
-        background: rgba(255, 255, 255, 0.9); 
-        z-index: 100; 
-        border-radius: 20px;
-        align-items: center;
-        justify-content: center;
-    ">
+                display: none; 
+                position: absolute; 
+                top: 0; left: 0; right: 0; bottom: 0; 
+                background: rgba(255, 255, 255, 0.9); 
+                z-index: 100; 
+                border-radius: 20px;
+                align-items: center;
+                justify-content: center;
+            ">
                 <div style="text-align: center;">
                     <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;"></div>
-                    <p style="margin-top: 1rem; font-weight: 600; color: #667eea;">Đang tải gợi ý...</p>
+                    <p style="margin-top: 1rem; font-weight: 600; color: #667eea;">Đang phân tích hồ sơ...</p>
                 </div>
             </div>
 
             <!-- ✅ RECOMMENDED JOBS CONTAINER -->
             <div id="recommendedJobsContainer">
-                @if(Auth::check() && isset($recommendedJobs) && $recommendedJobs && $recommendedJobs->count() > 0)
+                @if(Auth::check())
+                @if(isset($aiRecommendations) && $aiRecommendations && $aiRecommendations->count() > 0)
+                @include('applicant.partials.ai-recommended-jobs', ['aiRecommendations' => $aiRecommendations])
+                @elseif(isset($recommendedJobs) && $recommendedJobs && $recommendedJobs->count() > 0)
                 @include('applicant.partials.recommended-jobs-grid', ['recommendedJobs' => $recommendedJobs])
+                @else
+                <div class="rec-empty-state" id="recEmptyState">
+                    <div class="empty-icon">
+                        <i class="bi bi-briefcase"></i>
+                    </div>
+                    <h4>Chưa có gợi ý việc làm</h4>
+                    <p>Nhấn nút bên dưới để hệ thống phân tích và gợi ý việc làm phù hợp nhất</p>
+                    <button type="button" class="btn-generate-ai" id="btnGenerateAI" onclick="generateAIRecommendations()">
+                        <i class="bi bi-lightning-charge-fill"></i>
+                        Tạo gợi ý việc làm
+                    </button>
+                </div>
+                @endif
                 @else
                 <div class="rec-empty-state">
                     <div class="empty-icon">
-                        <i class="bi bi-stars"></i>
+                        <i class="bi bi-person-lock"></i>
                     </div>
-                    <h4>Chưa có gợi ý</h4>
-                    <p>Hoàn thành hồ sơ của bạn để nhận những gợi ý công việc tốt nhất</p>
-                    <a href="{{ route('applicant.profile') }}" class="btn-complete-profile">
-                        <i class="bi bi-pencil-square"></i>
-                        Hoàn thành hồ sơ
+                    <h4>Đăng nhập để xem gợi ý</h4>
+                    <p>Đăng nhập để hệ thống phân tích hồ sơ và gợi ý việc làm phù hợp nhất cho bạn</p>
+                    <a href="{{ route('login') }}" class="btn-complete-profile">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        Đăng nhập ngay
                     </a>
                 </div>
                 @endif
@@ -6144,6 +6164,171 @@
             }
         });
     </script>
+
+    <!-- ========== AI RECOMMENDATION FUNCTIONS ========== -->
+    <script>
+        // Tạo AI recommendations
+        async function generateAIRecommendations() {
+            const btn = document.getElementById('btnGenerateAI');
+            const overlay = document.getElementById('recLoadingOverlay');
+            const container = document.getElementById('recommendedJobsContainer');
+
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="bi bi-hourglass-split"></i> AI đang phân tích...';
+            }
+
+            if (overlay) {
+                overlay.style.display = 'flex';
+            }
+
+            try {
+                const response = await fetch('/api/ai/recommendations/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        refresh: false,
+                        limit: 20
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast(`AI đã phân tích xong! Tìm thấy ${data.count} việc làm phù hợp`, 'success');
+                    // Reload trang để hiển thị kết quả
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showToast(data.error || 'Có lỗi xảy ra, vui lòng thử lại', 'error');
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="bi bi-lightning-charge-fill"></i> Tạo gợi ý bằng AI';
+                    }
+                }
+            } catch (error) {
+                console.error('AI Error:', error);
+                showToast('Không thể kết nối với AI. Vui lòng thử lại sau.', 'error');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-lightning-charge-fill"></i> Tạo gợi ý bằng AI';
+                }
+            } finally {
+                if (overlay) {
+                    overlay.style.display = 'none';
+                }
+            }
+        }
+
+        // Refresh AI recommendations  
+        async function refreshAIRecommendations() {
+            const overlay = document.getElementById('recLoadingOverlay');
+
+            if (overlay) {
+                overlay.style.display = 'flex';
+            }
+
+            try {
+                const response = await fetch('/api/ai/recommendations/refresh', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showToast(`Đã cập nhật! Tìm thấy ${data.count} việc làm phù hợp`, 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showToast(data.error || 'Có lỗi xảy ra', 'error');
+                }
+            } catch (error) {
+                console.error('Refresh Error:', error);
+                showToast('Không thể cập nhật. Vui lòng thử lại sau.', 'error');
+            } finally {
+                if (overlay) {
+                    overlay.style.display = 'none';
+                }
+            }
+        }
+
+        // Toast notification helper
+        function showToast(message, type = 'success') {
+            const oldToast = document.querySelector('.ai-toast');
+            if (oldToast) oldToast.remove();
+
+            const toast = document.createElement('div');
+            toast.className = 'ai-toast';
+            const bgColor = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#667eea';
+            const icon = type === 'success' ? 'check-circle-fill' : type === 'error' ? 'x-circle-fill' : 'info-circle-fill';
+
+            toast.innerHTML = `
+                <i class="bi bi-${icon}"></i>
+                <span>${message}</span>
+            `;
+
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 2rem;
+                right: 2rem;
+                background: ${bgColor};
+                color: white;
+                padding: 1rem 1.5rem;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                gap: 0.75rem;
+                font-weight: 500;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+                z-index: 9999;
+                animation: slideIn 0.3s ease;
+            `;
+
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+    </script>
+
+    <style>
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+    </style>
 </body>
 
 </html>
